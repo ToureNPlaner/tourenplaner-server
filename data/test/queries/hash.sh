@@ -4,7 +4,7 @@
 if [ $# -ne 2 ]
 then
    echo "Usage: hash.sh <file: jsonrequest> <secret>"
-   exit 0
+   exit 1
 fi
 
 
