@@ -4,12 +4,12 @@
 if [ $# -ne 2 ]
 then
    echo "Usage: hash.sh <file: jsonrequest> <secret>"
-   exit 1
+   exit 0
 fi
 
 
 BODYFILE="$1"
 SECRET="$2"
-BODYHASH=$(sha1sum "$BODYFILE" | egrep -o -e '[0123456789abcdef]*')
+BODYHASH=$(sha1sum "$BODYFILE" | egrep -o  '^[0123456789abcdef]*')
 
-echo "$BODYHASH:$SECRET" | sha1sum - | egrep -o -e '[0123456789abcdef]*'
+echo -n "$BODYHASH:$SECRET" | sha1sum - | egrep -o -e '^[0123456789abcdef]*'

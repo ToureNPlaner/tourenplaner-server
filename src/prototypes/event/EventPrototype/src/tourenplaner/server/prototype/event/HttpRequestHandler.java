@@ -13,12 +13,17 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.*;
 import static org.jboss.netty.handler.codec.http.HttpVersion.*;
 
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -34,6 +39,8 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 /**
  * @author Niklas Schnelle
@@ -44,6 +51,20 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     private HttpRequest request;
     /** Buffer that stores the response content */
     private final StringBuilder buf = new StringBuilder();
+    /** JSONParser we can reuse **/
+    private final JSONParser parser = new JSONParser();
+    /**MessageDigest object used to compute SHA1**/
+    private MessageDigest digester;
+    
+    public HttpRequestHandler(){
+    	super();
+    	try {
+			digester = MessageDigest.getInstance("SHA1");
+		} catch (NoSuchAlgorithmException e) {
+			System.err.println("Could not load SHA1 algorithm");
+			System.exit(1);
+		}
+    }
 
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
@@ -69,28 +90,88 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
         Map<String, List<String>> params = queryStringDecoder.getParameters();
-        if (!params.isEmpty()) {
-            for (Entry<String, List<String>> p: params.entrySet()) {
-                String key = p.getKey();
-                List<String> vals = p.getValue();
-                for (String val : vals) {
-                    buf.append("PARAM: " + key + " = " + val + "\r\n");
-                }
-            }
-            buf.append("\r\n");
-        }
+       
+       
 
     
         ChannelBuffer content = request.getContent();
-        if (content.readable()) {
-            buf.append("CONTENT: " + content.toString(CharsetUtil.UTF_8) + "\r\n");
+        if(!params.isEmpty() && auth(params, content)){
+	        
+	        InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
+	        /*if (content.readable()) {
+	            buf.append("CONTENT: " + content.toString(CharsetUtil.UTF_8) + "\r\n");
+	        }*/
+	        
+	        JSONObject requestJSON = (JSONObject) parser.parse(inReader);
+	        System.out.println(requestJSON);
+	        
+	        writeResponse(e);
+	        
+        } else {
+        	throw new Exception("Message not from authentic user");
         }
-        writeResponse(e);
-        
-       
     }
 
-    private void writeResponse(MessageEvent e) {
+    private boolean auth(Map<String, List<String>> params, ChannelBuffer content) {
+		boolean authentic = false;
+		if(!params.isEmpty()){
+			List<String> username;
+			List<String> signature;
+			String realSecret;
+			byte[] bodyhash, finalhash;
+			
+			
+			username = params.get("tp-user");
+			signature = params.get("tp-signature");
+			if(username != null && username.size() == 1 && signature != null && signature.size() == 1) {
+				System.out.println("User: "+username.get(0));
+				System.out.println("Signature: "+signature.get(0));
+				// TODO replace static test with database access
+				if(username.get(0).equals("FooUser")){
+					realSecret = "FooPassword";
+					// Hash the content
+					digester.reset();
+					digester.update(content.array());
+					bodyhash = digester.digest();
+					// Contenthash to String and then hash for SHA1(BODYHASH:SECRET)
+					StringBuilder sb = new StringBuilder();
+					/** @link http://www.spiration.co.uk/post/1199/Java-md5-example-with-MessageDigest **/
+					for (byte element : bodyhash) {
+						sb.append(Character.forDigit((element >> 4) & 0xf, 16));
+						sb.append(Character.forDigit(element & 0xf, 16));
+					}
+					// DEBUG
+					System.out.println("Bodyhash: "+sb.toString());
+					sb.append(':');
+					try {
+						sb.append(realSecret);
+						// Now sb is BODYHASH:SECRET do the final hashing and hex conversion
+						digester.reset();
+						digester.update(sb.toString().getBytes("UTF-8"));
+						finalhash = digester.digest();
+						// Reset the string builder so we can reuse it
+						System.out.println("Before Hashing: "+sb.toString());
+						sb.delete(0, sb.length());
+						for (byte element : finalhash) {
+							sb.append(Character.forDigit((element >> 4) & 0xf, 16));
+							sb.append(Character.forDigit(element & 0xf, 16));
+						}
+						System.out.println("MyHash: "+sb.toString());
+						authentic = (sb.toString().equals(signature.get(0)))? true: false;
+					} catch (UnsupportedEncodingException e) {
+						System.err.println("We can't fcking find UTF-8 Charset hell wtf?");
+					}
+					
+				}
+				
+				
+			}
+			
+		}
+		return authentic;
+	}
+
+	private void writeResponse(MessageEvent e) {
         // Decide whether to close the connection or not.
         boolean keepAlive = isKeepAlive(request);
 

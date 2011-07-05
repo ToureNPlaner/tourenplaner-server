@@ -1,2 +1,9 @@
 #!/bin/sh
-curl  -i -H 'Content-Type: application/json' --data-binary @$1 "http://localhost:8081/sp?tp-user=$2&tp-signature=$(./hash.sh $1 $3)"
+if [ $# -ne 4 ]
+then
+   echo "Usage: hash.sh <URL> <file: jsonrequest> <user> <secret>"
+   echo "Example: #/curl.sh komani.ath.cx:8081 simpleSP.json FooUser FooPassword"
+   exit 0
+fi
+
+curl  -i -H 'Content-Type: application/json' --data-binary @$2 "$1/sp?tp-user=$3&tp-signature=$(./hash.sh $2 $4)"
