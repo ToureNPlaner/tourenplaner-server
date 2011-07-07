@@ -51,12 +51,11 @@ public class HttpServer {
 		// Set up request handlers
 		HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
 		// TODO: docroot file servicing brauchen wir nicht
-		reqistry.register("*", new FileHandlerExample.HttpFileHandler("."));
+		// reqistry.register("*", new FileHandlerExample.HttpFileHandler("."));
 		// stattdessen ein eigener handler
 		// reqistry.register("regex for authentication", new
 		// AuthenticateHandler());
-		// reqistry.register("regex for tourenplaner request", new
-		// TourenPlanerRequestHandler());
+		reqistry.register("*", new TourenPlanerRequestHandler());
 
 		// Set up the HTTP service
 		httpService = new HttpService(httpproc,

@@ -43,6 +43,7 @@ public class HttpServerThread extends Thread {
 		HttpContext context = new BasicHttpContext(null);
 		try {
 			while (!Thread.interrupted() && this.conn.isOpen()) {
+				printdebug("Handle request for query");
 				this.httpservice.handleRequest(this.conn, context);
 			}
 		} catch (ConnectionClosedException ex) {
