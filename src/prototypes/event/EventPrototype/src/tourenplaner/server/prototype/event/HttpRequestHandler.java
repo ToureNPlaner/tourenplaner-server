@@ -183,7 +183,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
         response.setContent(ChannelBuffers.copiedBuffer(buf.toString(), CharsetUtil.UTF_8));
-        response.setHeader(CONTENT_TYPE, "text/plain; charset=UTF-8");
+        response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
