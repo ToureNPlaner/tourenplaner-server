@@ -1,65 +1,60 @@
-package tourenplaner.server.prototype.thread;
-
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.Socket;
+
+import org.apache.http.ConnectionClosedException;
+import org.apache.http.HttpException;
+import org.apache.http.HttpServerConnection;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
+import org.apache.http.protocol.HttpService;
 
 public class HttpServerThread extends Thread {
-	Socket socket;
+	private final HttpService httpservice;
+	private final HttpServerConnection conn;
 	PrintWriter out = null;
 	BufferedReader in = null;
 	String inputLine;
 	final int cnt;
 
 	void printdebug(String s) {
-		System.out.println(cnt + ": " + s);
+		System.out.println(cnt + ") Debug: " + s);
 	}
 
 	void errlog(String s) {
-		System.err.println(cnt + ": " + s);
+		System.err.println(cnt + ") Error: " + s);
 	}
 
-	public HttpServerThread(Socket s, int count) {
-		this.socket = s;
-		// DEBUG
+	public HttpServerThread(HttpServerConnection conn, int count,
+			HttpService httpService) {
+		super();
+
 		this.cnt = count;
-		printdebug("Client connected: " + s.getInetAddress());
+
+		this.httpservice = httpService;
+		this.conn = conn;
+
+		// DEBUG
+		printdebug("Client connected: " + conn.toString());
 	}
 
 	@Override
 	public void run() {
+		HttpContext context = new BasicHttpContext(null);
 		try {
-			out = new PrintWriter(socket.getOutputStream(), true);
-
-			in = new BufferedReader(new InputStreamReader(
-					socket.getInputStream()));
-		} catch (IOException e) {
-			// TODO: log
-			errlog("Stream initializiation error: " + e.getMessage());
-		}
-
-		try {
-			while ((inputLine = in.readLine()) != null) {
-				if (inputLine.trim().toLowerCase().equals("quit")) {
-					printdebug("Client " + socket.getInetAddress()
-							+ " wants to close the connection. We obey.");
-					socket.close();
-					Thread.currentThread().interrupt();
-					return;
-				}
-				printdebug("Client writes: " + inputLine);
-				// we write back:
-				out.println("Your input had length: " + inputLine.length());
-				out.flush();
+			while (!Thread.interrupted() && this.conn.isOpen()) {
+				this.httpservice.handleRequest(this.conn, context);
 			}
-		} catch (IOException e) {
+		} catch (ConnectionClosedException ex) {
+			errlog("Client closed connection");
+		} catch (IOException ex) {
+			errlog("I/O error: " + ex.getMessage());
+		} catch (HttpException ex) {
+			errlog("Unrecoverable HTTP protocol violation: " + ex.getMessage());
+		} finally {
 			try {
-				socket.close();
-			} catch (IOException e1) {
-				errlog("error while closing socket in error state: ("
-						+ e.getMessage() + "): " + e1.getMessage());
+				this.conn.shutdown();
+			} catch (IOException ignore) {
 			}
 		}
 	}
