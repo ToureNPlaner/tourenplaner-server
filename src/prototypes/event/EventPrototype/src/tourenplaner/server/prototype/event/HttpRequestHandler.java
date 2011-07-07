@@ -37,6 +37,7 @@ import org.jboss.netty.handler.codec.http.CookieEncoder;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONObject;
@@ -71,9 +72,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         
         HttpRequest request = this.request = (HttpRequest) e.getMessage();
 
-        if (is100ContinueExpected(request)) {
+        /*if (is100ContinueExpected(request)) {
             send100Continue(e);
-        }
+        }*/
 
         buf.setLength(0);
         buf.append("WELCOME TO THE WILD WILD WEB SERVER\r\n");
@@ -95,7 +96,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
     
         ChannelBuffer content = request.getContent();
-        if(!params.isEmpty() && auth(params, content)){
+        if(auth(params, content)){
 	        
 	        InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
 	        /*if (content.readable()) {
@@ -108,7 +109,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	        writeResponse(e);
 	        
         } else {
-        	throw new Exception("Message not from authentic user");
+        	// Respond with Unauthorized Access
+            HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
+            // Write the response.
+            ChannelFuture future = e.getChannel().write(response);
+            future.addListener(ChannelFutureListener.CLOSE);
         }
     }
 
@@ -183,21 +188,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
             response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
-        }
-
-        // Encode the cookie.
-        String cookieString = request.getHeader(COOKIE);
-        if (cookieString != null) {
-            CookieDecoder cookieDecoder = new CookieDecoder();
-            Set<Cookie> cookies = cookieDecoder.decode(cookieString);
-            if(!cookies.isEmpty()) {
-                // Reset the cookies if necessary.
-                CookieEncoder cookieEncoder = new CookieEncoder(true);
-                for (Cookie cookie : cookies) {
-                    cookieEncoder.addCookie(cookie);
-                }
-                response.addHeader(SET_COOKIE, cookieEncoder.encode());
-            }
         }
 
         // Write the response.
