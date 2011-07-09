@@ -13,6 +13,8 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.*;
 import static org.jboss.netty.handler.codec.http.HttpVersion.*;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -100,7 +102,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
        
     
         ChannelBuffer content = request.getContent();
-        //System.out.println(content.toString(CharsetUtil.UTF_8) );
+       
+
+        
         if(auth(params, content)){
 	        
 	        InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
@@ -109,7 +113,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	        }*/
 	        
 	        JSONObject requestJSON = (JSONObject) parser.parse(inReader);
-	        System.out.println(requestJSON);
+	        //System.out.println(requestJSON);
 	        Map<String, Object> objmap = requestJSON;
 	        String algName = queryStringDecoder.getPath().substring(1);
 	        ComputeRequest req = new ComputeRequest(e.getChannel(), isKeepAlive(request),algName,objmap);
@@ -143,14 +147,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			username = params.get("tp-user");
 			signature = params.get("tp-signature");
 			if(username != null && username.size() == 1 && signature != null && signature.size() == 1) {
-				System.out.println("User: "+username.get(0));
-				System.out.println("Signature: "+signature.get(0));
+				//System.out.println("User: "+username.get(0));
+				//System.out.println("Signature: "+signature.get(0));
 				// TODO replace static test with database access
 				if(username.get(0).equals("FooUser")){
 					realSecret = "FooPassword";
 					// Hash the content
 					digester.reset();
-					digester.update(content.array());
+					
+					digester.update(content.array(), 0, content.readableBytes());
+					
 					bodyhash = digester.digest();
 					// Contenthash to String and then hash for SHA1(BODYHASH:SECRET)
 					StringBuilder sb = new StringBuilder();
@@ -169,13 +175,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						digester.update(sb.toString().getBytes("UTF-8"));
 						finalhash = digester.digest();
 						// Reset the string builder so we can reuse it
-						System.out.println("Before Hashing: "+sb.toString());
+						//System.out.println("Before Hashing: "+sb.toString());
 						sb.delete(0, sb.length());
 						for (byte element : finalhash) {
 							sb.append(Character.forDigit((element >> 4) & 0xf, 16));
 							sb.append(Character.forDigit(element & 0xf, 16));
 						}
-						System.out.println("MyHash: "+sb.toString());
+						//System.out.println("MyHash: "+sb.toString());
 						authentic = (sb.toString().equals(signature.get(0)))? true: false;
 					} catch (UnsupportedEncodingException e) {
 						System.err.println("We can't fcking find UTF-8 Charset hell wtf?");

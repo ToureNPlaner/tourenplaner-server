@@ -36,7 +36,7 @@ public class HttpServer {
         reg.registerAlgorithm("ks", new KnapsackFactory());
         
         // Create our ComputeCore that manages all ComputeThreads
-        ComputeCore comCore = new ComputeCore(4, 20);
+        ComputeCore comCore = new ComputeCore(2, 20);
         
         // Set up the event pipeline factory.
         bootstrap.setPipelineFactory(new HttpServerPipelineFactory(comCore));
