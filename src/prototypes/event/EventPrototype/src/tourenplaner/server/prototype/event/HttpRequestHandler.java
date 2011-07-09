@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -31,17 +32,17 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.http.Cookie;
-import org.jboss.netty.handler.codec.http.CookieDecoder;
-import org.jboss.netty.handler.codec.http.CookieEncoder;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+
+import algorithms.ComputeRequest;
+
+import computecore.ComputeCore;
 
 /**
  * @author Niklas Schnelle
@@ -54,11 +55,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     private final StringBuilder buf = new StringBuilder();
     /** JSONParser we can reuse **/
     private final JSONParser parser = new JSONParser();
-    /**MessageDigest object used to compute SHA1**/
+    /** MessageDigest object used to compute SHA1**/
     private MessageDigest digester;
     
-    public HttpRequestHandler(){
+    /** The ComputeCore managing the threads**/
+    private ComputeCore computer;
+    
+    public HttpRequestHandler(ComputeCore cCore){
     	super();
+    	computer = cCore;
     	try {
 			digester = MessageDigest.getInstance("SHA1");
 		} catch (NoSuchAlgorithmException e) {
@@ -70,12 +75,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         
-        HttpRequest request = this.request = (HttpRequest) e.getMessage();
+        this.request = (HttpRequest) e.getMessage();
 
-        /*if (is100ContinueExpected(request)) {
-            send100Continue(e);
-        }*/
 
+        /*
         buf.setLength(0);
         buf.append("WELCOME TO THE WILD WILD WEB SERVER\r\n");
         buf.append("===================================\r\n");
@@ -88,14 +91,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             buf.append("HEADER: " + h.getKey() + " = " + h.getValue() + "\r\n");
         }
         buf.append("\r\n");
+        */
 
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
         Map<String, List<String>> params = queryStringDecoder.getParameters();
        
        
-
+       
     
         ChannelBuffer content = request.getContent();
+        //System.out.println(content.toString(CharsetUtil.UTF_8) );
         if(auth(params, content)){
 	        
 	        InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
@@ -105,9 +110,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	        
 	        JSONObject requestJSON = (JSONObject) parser.parse(inReader);
 	        System.out.println(requestJSON);
-	        
-	        writeResponse(e);
-	        
+	        Map<String, Object> objmap = requestJSON;
+	        String algName = queryStringDecoder.getPath().substring(1);
+	        ComputeRequest req = new ComputeRequest(e.getChannel(), isKeepAlive(request),algName,objmap);
+	        computer.submit(req);
         } else {
         	// Respond with Unauthorized Access
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
@@ -116,7 +122,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             future.addListener(ChannelFutureListener.CLOSE);
         }
     }
-
+    /**
+     * Authenticats the request in the ChannelBuffer content with the parameters given in params
+     * see: @link https://gerbera.informatik.uni-stuttgart.de/projects/server/wiki/Authentifizierung
+     * for a detailed explanation
+     * 
+     * @param params
+     * @param content
+     * @return
+     */
     private boolean auth(Map<String, List<String>> params, ChannelBuffer content) {
 		boolean authentic = false;
 		if(!params.isEmpty()){
@@ -173,7 +187,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			}
 			
 		}
-		return authentic;
+		return authentic; 
 	}
 
 	private void writeResponse(MessageEvent e) {
@@ -199,10 +213,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         }
     }
 
-    private void send100Continue(MessageEvent e) {
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, CONTINUE);
-        e.getChannel().write(response);
-    }
+
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)

@@ -17,12 +17,20 @@ import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
+import computecore.ComputeCore;
+
 /**
  * @author Niklas Schnelle
  * @version 0.1 Prototype
  */
 public class HttpServerPipelineFactory implements ChannelPipelineFactory {
-    public ChannelPipeline getPipeline() throws Exception {
+	ComputeCore cCore;
+	
+    public HttpServerPipelineFactory(ComputeCore comCore) {
+		cCore = comCore;
+	}
+
+	public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = pipeline();
 
@@ -37,7 +45,7 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
         pipeline.addLast("encoder", new HttpResponseEncoder());
         // We could add compression support bei uncommenting the following line
         //pipeline.addLast("deflater", new HttpContentCompressor());
-        pipeline.addLast("handler", new HttpRequestHandler());
+        pipeline.addLast("handler", new HttpRequestHandler(cCore));
         return pipeline;
     }
 }
