@@ -6,6 +6,7 @@ package tourenplaner.server.prototype.event;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.SERVICE_UNAVAILABLE;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -14,6 +15,7 @@ import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONValue;
 
@@ -37,9 +39,6 @@ public class ResultResponder {
 	}
 	
 	public void writeResponse(ComputeResult res) {
-        
-		
-		
 		String result = JSONValue.toJSONString(res);
 
         // Build the response object.
@@ -61,4 +60,13 @@ public class ResultResponder {
             future.addListener(ChannelFutureListener.CLOSE);
         }
     }
+	
+	public void writeServerOverloaded(){
+		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, SERVICE_UNAVAILABLE);
+        // Write the response.
+        ChannelFuture future =replyChannel.write(response);
+        // Close the connection
+        future.addListener(ChannelFutureListener.CLOSE);
+
+	}
 }

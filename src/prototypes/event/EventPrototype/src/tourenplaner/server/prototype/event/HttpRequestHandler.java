@@ -118,7 +118,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	        String algName = queryStringDecoder.getPath().substring(1);
 	        ResultResponder responder = new ResultResponder(e.getChannel(), isKeepAlive(request));
 	        ComputeRequest req = new ComputeRequest(responder, algName, objmap);
-	        computer.submit(req);
+	        boolean sucess = computer.submit(req);
+	        if(!sucess){
+	        	responder.writeServerOverloaded();
+	        }
         } else {
         	// Respond with Unauthorized Access
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
