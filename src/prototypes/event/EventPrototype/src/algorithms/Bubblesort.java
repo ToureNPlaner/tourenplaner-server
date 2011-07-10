@@ -17,14 +17,14 @@ public class Bubblesort implements Algorithm {
 
 	private ComputeResult res = null;
 
-	private List<Integer> sortArray;
+	private List<Long> sortArray;
 	private ComputeRequest request;
 
 	@Override
 	public void run() {
 
 		boolean unsorted = true;
-		int temp;
+		long temp;
 		while (unsorted) {
 			unsorted = false;
 			for (int i = 0; i < sortArray.size() - 1; i++)
@@ -53,9 +53,9 @@ public class Bubblesort implements Algorithm {
 	@Override
 	public void setComputeRequest(ComputeRequest req) {
 		request = req;
-		List<Integer> request = ((List<Integer>) req.get("Numbers"));
-		sortArray = new ArrayList<Integer>();
-		for (Integer numList : request) {
+		List<Long> request = ((List<Long>) req.get("Numbers"));
+		sortArray = new ArrayList<Long>();
+		for (Long numList : request) {
 			sortArray.add(numList);
 		}
 	}
