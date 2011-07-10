@@ -56,7 +56,7 @@ public class ShortestPathDummy implements Algorithm {
 			dummyCounter++;
 		}*/
 	
-		res = new ComputeResult(req);
+		res = req.getResultObject();
 		res.put("Route", route);
 	}
 

@@ -27,10 +27,18 @@ import computecore.ComputeResult;
  *
  */
 public class ResultResponder {
-	public static void writeResponse(ComputeResult res) {
+	
+	private Channel replyChannel;
+	private boolean keepAlive;
+	
+	public ResultResponder(Channel replyChan, boolean keepAlive){
+		this.replyChannel=replyChan;
+		this.keepAlive = keepAlive;
+	}
+	
+	public void writeResponse(ComputeResult res) {
         
-		Channel ch = res.getReplyChannel();
-		boolean keepAlive = res.isKeepAlive();
+		
 		
 		String result = JSONValue.toJSONString(res);
 
@@ -38,6 +46,7 @@ public class ResultResponder {
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
         response.setContent(ChannelBuffers.copiedBuffer(result, CharsetUtil.UTF_8));
         response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
+        
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
@@ -45,7 +54,7 @@ public class ResultResponder {
         }
 
         // Write the response.
-        ChannelFuture future =ch.write(response);
+        ChannelFuture future =replyChannel.write(response);
 
         // Close the non-keep-alive connection after the write operation is done.
         if (!keepAlive) {

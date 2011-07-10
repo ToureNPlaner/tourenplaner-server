@@ -121,7 +121,7 @@ public class Knapsack implements Algorithm {
 			sack = dyn[dyn.length-1][vals];
 		}
 		
-		res = new ComputeResult(request);
+		res = request.getResultObject();
 		res.put("BestWeight", new Integer(sack.weight));
 		res.put("BestValue", new Integer(vals));
 		

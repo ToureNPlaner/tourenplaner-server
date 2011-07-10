@@ -116,7 +116,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	        //System.out.println(requestJSON);
 	        Map<String, Object> objmap = requestJSON;
 	        String algName = queryStringDecoder.getPath().substring(1);
-	        ComputeRequest req = new ComputeRequest(e.getChannel(), isKeepAlive(request),algName,objmap);
+	        ResultResponder responder = new ResultResponder(e.getChannel(), isKeepAlive(request));
+	        ComputeRequest req = new ComputeRequest(responder, algName, objmap);
 	        computer.submit(req);
         } else {
         	// Respond with Unauthorized Access

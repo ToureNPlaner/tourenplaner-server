@@ -8,36 +8,39 @@ import java.util.Map;
 
 import org.jboss.netty.channel.Channel;
 
+import tourenplaner.server.prototype.event.ResultResponder;
+
 /**
  * @author Niklas Schnelle
  *
  */
 public class ComputeRequest {
 	
-	protected final Channel replyChannel;
 	protected Map<String, Object> request;
-	protected boolean keepAlive;
 	private String algName;
+	private ComputeResult result;
+	private ResultResponder responder;
 	
 
-	public ComputeRequest(Channel replyChannel, boolean keepAlive, String algName,Map<String, Object> request){
-		this.replyChannel = replyChannel;
+	public ComputeRequest(ResultResponder responder, String algName,Map<String, Object> request){		
 		this.algName = algName;
 		this.request = request;
-		this.keepAlive = keepAlive;
+		this.responder = responder;
+		this.result = new ComputeResult();
+	}
+	
+	public ComputeResult getResultObject(){
+		return result;
+	}
+	
+	public ResultResponder getResponder(){
+		return responder;
 	}
 	
 	public String getAlgorithmShort(){
 		return algName;		
 	}
 	
-	public Channel getReplyChannel(){
-		return replyChannel;
-	}
-	
-	public boolean isKeepAlive(){
-		return keepAlive;
-	}
 	
 	public Object get(String index){
 		return request.get(index);

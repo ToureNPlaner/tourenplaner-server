@@ -44,7 +44,7 @@ public class ComputeThread extends Thread {
 			    	alg.run();
 			    	res = alg.getComputeResult();
 				    if(res !=  null){
-				    	ResultResponder.writeResponse(res);
+				    	work.getResponder().writeResponse(res);
 				    } else {
 				    	System.err.println("Compute Thread couldn't process: "+work);
 				    }
@@ -58,6 +58,7 @@ public class ComputeThread extends Thread {
 				return;
 			} catch (Exception e){
 				System.err.println("Exception in ComputeThread: "+e.getMessage());
+				e.printStackTrace();
 			}
 		}
 	}
