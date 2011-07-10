@@ -4,6 +4,9 @@
  */
 package algorithms;
 
+import computecore.ComputeRequest;
+import computecore.ComputeResult;
+
 /**
  * @author Niklas Schnelle
  *

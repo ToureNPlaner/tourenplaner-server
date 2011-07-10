@@ -42,9 +42,9 @@ import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
-import algorithms.ComputeRequest;
 
 import computecore.ComputeCore;
+import computecore.ComputeRequest;
 
 /**
  * @author Niklas Schnelle

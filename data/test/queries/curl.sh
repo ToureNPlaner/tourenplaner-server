@@ -6,4 +6,4 @@ then
    exit 1
 fi
 
-curl -i  -H 'Content-Type: application/json' --data-binary @$2 "$1/ks?tp-user=$3&tp-signature=$(./hash.sh $2 $4)"
+curl -i  -s -H 'Content-Type: application/json' --data-binary @$2 "$1/sp?tp-user=$3&tp-signature=$(./hash.sh $2 $4)"

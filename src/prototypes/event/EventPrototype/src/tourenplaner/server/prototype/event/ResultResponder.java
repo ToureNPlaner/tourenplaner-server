@@ -17,7 +17,8 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONValue;
 
-import algorithms.ComputeResult;
+import computecore.ComputeResult;
+
 
 /**
  * This class encapsulates the translation from ComputeResult to the wire

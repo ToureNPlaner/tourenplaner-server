@@ -12,8 +12,10 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.channel.socket.oio.OioServerSocketChannelFactory;
 
+import algorithms.DummyFactory;
 import algorithms.KnapsackFactory;
 
 import computecore.AlgorithmRegistry;
@@ -27,13 +29,14 @@ public class HttpServer {
     public static void main(String[] args) {
         // Configure the server.
         ServerBootstrap bootstrap = new ServerBootstrap(
-                new OioServerSocketChannelFactory( // Change to Nio* if you want NIO
+                new NioServerSocketChannelFactory( // Change to Nio* if you want NIO
                         Executors.newCachedThreadPool(),
                         Executors.newCachedThreadPool()));
 
         // Register Algorithms
         AlgorithmRegistry reg = AlgorithmRegistry.getInstance();
         reg.registerAlgorithm("ks", new KnapsackFactory());
+        reg.registerAlgorithm("sp", new DummyFactory());
         
         // Create our ComputeCore that manages all ComputeThreads
         ComputeCore comCore = new ComputeCore(2, 20);
@@ -42,6 +45,6 @@ public class HttpServer {
         bootstrap.setPipelineFactory(new HttpServerPipelineFactory(comCore));
 
         // Bind and start to accept incoming connections.
-        bootstrap.bind(new InetSocketAddress(8080));
+        bootstrap.bind(new InetSocketAddress(8081));
     }
 }

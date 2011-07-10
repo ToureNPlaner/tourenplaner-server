@@ -9,6 +9,9 @@ package algorithms;
 import java.util.ArrayList;
 import java.util.List;
 
+import computecore.ComputeRequest;
+import computecore.ComputeResult;
+
 /**
  * @author Niklas Schnelle
  *

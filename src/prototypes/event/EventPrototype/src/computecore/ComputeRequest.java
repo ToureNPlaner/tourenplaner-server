@@ -2,7 +2,7 @@
  * ToureNPlaner
  * 
  */
-package algorithms;
+package computecore;
 
 import java.util.Map;
 
