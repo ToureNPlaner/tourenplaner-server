@@ -15,6 +15,7 @@ import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 import org.jboss.netty.channel.socket.oio.OioServerSocketChannelFactory;
 
+import algorithms.BubblesortFactory;
 import algorithms.DummyFactory;
 import algorithms.KnapsackFactory;
 
@@ -37,6 +38,7 @@ public class HttpServer {
         AlgorithmRegistry reg = AlgorithmRegistry.getInstance();
         reg.registerAlgorithm("ks", new KnapsackFactory());
         reg.registerAlgorithm("sp", new DummyFactory());
+        reg.registerAlgorithm("bsort", new BubblesortFactory());
         
         // Create our ComputeCore that manages all ComputeThreads
         ComputeCore comCore = new ComputeCore(2, 20);
