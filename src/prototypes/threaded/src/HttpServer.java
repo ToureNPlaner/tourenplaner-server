@@ -22,6 +22,15 @@ import org.apache.http.protocol.ResponseServer;
 
 public class HttpServer {
 
+	// TODO: better position for logging
+	static void errorLog(String msg) {
+		System.err.println("ERR: " + msg);
+	}
+
+	static void debugMsg(String msg) {
+		System.out.println("DEBUG: " + msg);
+	}
+
 	// main socket
 	private static ServerSocket s = null;
 	public static int threadCnt = 0;

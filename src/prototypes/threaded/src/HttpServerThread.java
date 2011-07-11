@@ -17,14 +17,6 @@ public class HttpServerThread extends Thread {
 	String inputLine;
 	final int cnt;
 
-	void printdebug(String s) {
-		System.out.println(cnt + ") Debug: " + s);
-	}
-
-	void errlog(String s) {
-		System.err.println(cnt + ") Error: " + s);
-	}
-
 	public HttpServerThread(HttpServerConnection conn, int count,
 			HttpService httpService) {
 		super();
@@ -35,7 +27,7 @@ public class HttpServerThread extends Thread {
 		this.conn = conn;
 
 		// DEBUG
-		printdebug("Client connected: " + conn.toString());
+		HttpServer.debugMsg(cnt + ": Client connected: " + conn.toString());
 	}
 
 	@Override
@@ -43,15 +35,17 @@ public class HttpServerThread extends Thread {
 		HttpContext context = new BasicHttpContext(null);
 		try {
 			while (!Thread.interrupted() && this.conn.isOpen()) {
-				printdebug("Handle request for query");
+				HttpServer.debugMsg(cnt + ": Handle request for query");
 				this.httpservice.handleRequest(this.conn, context);
 			}
 		} catch (ConnectionClosedException ex) {
-			errlog("Client closed connection");
+			HttpServer.errorLog(cnt + ": Client closed connection");
 		} catch (IOException ex) {
-			errlog("I/O error: " + ex.getMessage());
+			HttpServer.errorLog(cnt + ": I/O error: " + ex.getMessage());
 		} catch (HttpException ex) {
-			errlog("Unrecoverable HTTP protocol violation: " + ex.getMessage());
+			HttpServer.errorLog(cnt
+					+ ": Unrecoverable HTTP protocol violation: "
+					+ ex.getMessage());
 		} finally {
 			try {
 				this.conn.shutdown();
