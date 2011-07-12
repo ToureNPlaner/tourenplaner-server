@@ -96,9 +96,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
         	response.addHeader("Access-Control-Allow-Origin", "*");
     		response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    		response.addHeader("Access-Control-Max-Age","1728000");
-    		response.addHeader("Content-Type","plain/text");
-    		response.addHeader("Content-Length","0");
         	response.addHeader("Access-Control-Allow-Headers","CONTENT-TYPE");
     		
     		ChannelFuture future = e.getChannel().write(response);
@@ -116,7 +113,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
        
 
         
-        if(auth(params, content)){
+        if(true){//auth(params, content)){
 	        
 	        InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
 
@@ -132,13 +129,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	        if(!sucess){
 	        	responder.writeServerOverloaded();
 	        }
-        } else {
+        }/* else {
         	// Respond with Unauthorized Access
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
             // Write the response.
             ChannelFuture future = e.getChannel().write(response);
             future.addListener(ChannelFutureListener.CLOSE);
-        }
+        }*/
     }
     /**
      * Authenticats the request in the ChannelBuffer content with the parameters given in params
