@@ -43,9 +43,11 @@ public class ResultResponder {
 
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-        response.setContent(ChannelBuffers.copiedBuffer(result, CharsetUtil.UTF_8));
+
+		response.addHeader("Access-Control-Allow-Origin", "*");
         response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
         
+        response.setContent(ChannelBuffers.copiedBuffer(result, CharsetUtil.UTF_8));
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.

@@ -13,17 +13,13 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.*;
 import static org.jboss.netty.handler.codec.http.HttpVersion.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
+
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
@@ -35,8 +31,11 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
+import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.handler.codec.http.HttpVersion;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONObject;
@@ -77,30 +76,42 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         
-        this.request = (HttpRequest) e.getMessage();
+        request = (HttpRequest) e.getMessage();
+        //System.out.print(request.toString());
+        // Handle preflighted requests so wee need to work with OPTION Requests
+        if(request.getMethod().equals(HttpMethod.OPTIONS)){
+        	boolean keepAlive = isKeepAlive(request);
+        	HttpResponse response;
+        	
+        	// We only allow POST methods so only allow request when Method is Post
+        	String  methodType = request.getHeader("Access-Control-Request-Method");
+        	if(methodType != null  && methodType.trim().equals("POST")){
+        		response = new DefaultHttpResponse(HTTP_1_1, OK);
+        		response.addHeader("Connection", "Keep-Alive");        		
+        	} else {
+        		response = new DefaultHttpResponse(HTTP_1_1,FORBIDDEN);
+        		// We don't want to keep the connection now
+                keepAlive = false;
+        	}
 
-
-        /*
-        buf.setLength(0);
-        buf.append("WELCOME TO THE WILD WILD WEB SERVER\r\n");
-        buf.append("===================================\r\n");
-
-        buf.append("VERSION: " + request.getProtocolVersion() + "\r\n");
-        buf.append("HOSTNAME: " + getHost(request, "unknown") + "\r\n");
-        buf.append("REQUEST_URI: " + request.getUri() + "\r\n\r\n");
-
-        for (Map.Entry<String, String> h: request.getHeaders()) {
-            buf.append("HEADER: " + h.getKey() + " = " + h.getValue() + "\r\n");
+        	response.addHeader("Access-Control-Allow-Origin", "*");
+    		response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    		response.addHeader("Access-Control-Max-Age","1728000");
+    		response.addHeader("Content-Type","plain/text");
+    		response.addHeader("Content-Length","0");
+        	response.addHeader("Access-Control-Allow-Headers","CONTENT-TYPE");
+    		
+    		ChannelFuture future = e.getChannel().write(response);
+            if(!keepAlive){
+            	future.addListener(ChannelFutureListener.CLOSE);
+            }
+            return;
         }
-        buf.append("\r\n");
-        */
-
+        
         QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
         Map<String, List<String>> params = queryStringDecoder.getParameters();
        
        
-       
-    
         ChannelBuffer content = request.getContent();
        
 
@@ -108,13 +119,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
         if(auth(params, content)){
 	        
 	        InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
-	        /*if (content.readable()) {
-	            buf.append("CONTENT: " + content.toString(CharsetUtil.UTF_8) + "\r\n");
-	        }*/
+
 	        
 	        JSONObject requestJSON = (JSONObject) parser.parse(inReader);
 	        //System.out.println(requestJSON);
-	        Map<String, Object> objmap = requestJSON;
+	        @SuppressWarnings("unchecked")
+			Map<String, Object> objmap = requestJSON;
 	        String algName = queryStringDecoder.getPath().substring(1);
 	        ResultResponder responder = new ResultResponder(e.getChannel(), isKeepAlive(request));
 	        ComputeRequest req = new ComputeRequest(responder, algName, objmap);
