@@ -96,10 +96,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
         	response.addHeader("Access-Control-Allow-Origin", "*");
     		response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    		response.addHeader("Access-Control-Max-Age","1728000");
     		response.addHeader("Content-Type","plain/text");
     		response.addHeader("Content-Length","0");
-        	response.addHeader("Access-Control-Allow-Headers","CONTENT-TYPE");
+        	response.addHeader("Access-Control-Allow-Headers","Content-Type");
     		
     		ChannelFuture future = e.getChannel().write(response);
             if(!keepAlive){
