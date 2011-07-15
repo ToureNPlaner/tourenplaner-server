@@ -34,6 +34,7 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -78,7 +79,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			ChannelBuffer content = request.getContent();
 			if(content.readableBytes() != 0){
 				handleContent(request, channel, content);
-			} 
+			} else {
+				// Respond with No Content
+	            HttpResponse response = new DefaultHttpResponse(HTTP_1_1, NO_CONTENT);
+	            // Send the client the realm so it knows we want Basic Access Auth.
+	            response.setHeader("WWW-Authenticate", "Basic realm=\"ToureNPlaner\"");
+	            // Write the response.
+	            ChannelFuture future = e.getChannel().write(response);
+	            future.addListener(ChannelFutureListener.CLOSE);
+			}
         } else {
         	// Respond with Unauthorized Access
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
