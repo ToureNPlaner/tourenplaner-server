@@ -17,6 +17,8 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.*;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -34,7 +36,6 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -120,11 +121,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             keepAlive = false;
     	}
 
+    	ArrayList<String> allowHeaders = new ArrayList<String>(2);
+    	allowHeaders.add("Content-Type");
+    	allowHeaders.add("Authorization");
+
     	response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
 		response.setHeader(CONTENT_TYPE, "plain/text");
 		response.setHeader("Content-Length","0");
-    	response.setHeader("Access-Control-Allow-Headers","Content-Type");
+		
+    	response.setHeader("Access-Control-Allow-Headers", allowHeaders);
 		
 		ChannelFuture future = channel.write(response);
         if(!keepAlive){

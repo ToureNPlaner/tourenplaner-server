@@ -52,9 +52,6 @@ public class ShortestPathDummy implements Algorithm {
 		/*for(int i=0; i < Integer.MAX_VALUE; i++){
 			dummyCounter++;
 		}*/
-		for(int i=0; i < Integer.MAX_VALUE/2; i++){
-			dummyCounter++;
-		}
 	
 		res = req.getResultObject();
 		res.put("Route", route);
