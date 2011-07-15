@@ -14,6 +14,7 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.*;
 import static org.jboss.netty.handler.codec.http.HttpVersion.*;
 
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
@@ -21,6 +22,7 @@ import java.util.Map;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
+import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.channel.ChannelHandlerContext;
@@ -35,6 +37,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 
 import computecore.ComputeCore;
@@ -46,7 +49,7 @@ import computecore.ComputeRequest;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-    private HttpRequest request;
+    
     /** JSONParser we can reuse **/
     private final JSONParser parser = new JSONParser();
     
@@ -61,62 +64,21 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     @Override
     public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
         
-        request = (HttpRequest) e.getMessage();
+        HttpRequest request = (HttpRequest) e.getMessage();
+        Channel channel = e.getChannel();
         //System.out.print(request.toString());
         // Handle preflighted requests so wee need to work with OPTION Requests
         if(request.getMethod().equals(HttpMethod.OPTIONS)){
-        	boolean keepAlive = isKeepAlive(request);
-        	HttpResponse response;
-        	
-        	// We only allow POST methods so only allow request when Method is Post
-        	String  methodType = request.getHeader("Access-Control-Request-Method");
-        	if(methodType != null  && methodType.trim().equals("POST")){
-        		response = new DefaultHttpResponse(HTTP_1_1, OK);
-        		response.addHeader("Connection", "Keep-Alive");        		
-        	} else {
-        		response = new DefaultHttpResponse(HTTP_1_1,FORBIDDEN);
-        		// We don't want to keep the connection now
-                keepAlive = false;
-        	}
-
-        	response.setHeader("Access-Control-Allow-Origin", "*");
-    		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    		response.setHeader(CONTENT_TYPE, "plain/text");
-    		response.setHeader("Content-Length","0");
-        	response.setHeader("Access-Control-Allow-Headers","Content-Type");
-    		
-    		ChannelFuture future = e.getChannel().write(response);
-            if(!keepAlive){
-            	future.addListener(ChannelFutureListener.CLOSE);
-            }
-            return;
-        }
+	        handlePreflights(request, channel);
+	        return;
+	    }
         
         if(auth(request)){
-        
-			        
-			QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
-			//Map<String, List<String>> params = queryStringDecoder.getParameters();
-			   
 			   
 			ChannelBuffer content = request.getContent();
-			InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
-			
-			
-			JSONObject requestJSON = (JSONObject) parser.parse(inReader);
-			//System.out.println(requestJSON);
-			@SuppressWarnings("unchecked")
-			Map<String, Object> objmap = requestJSON;
-			String algName = queryStringDecoder.getPath().substring(1);
-			ResultResponder responder = new ResultResponder(e.getChannel(), isKeepAlive(request));
-			
-			// Create ComputeRequest and commit to workqueue
-			ComputeRequest req = new ComputeRequest(responder, algName, objmap);
-			boolean sucess = computer.submit(req);
-			
-			if(!sucess){
-				responder.writeServerOverloaded();
-	        }
+			if(content.readableBytes() != 0){
+				handleContent(request, channel, content);
+			} 
         } else {
         	// Respond with Unauthorized Access
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
@@ -127,6 +89,72 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             future.addListener(ChannelFutureListener.CLOSE);
         }
     }
+
+	/**
+	 * Handles preflighted OPTION Headers
+	 * 
+	 * @param request
+	 * @param channel
+	 */
+	private void handlePreflights(HttpRequest request, Channel channel) {		
+    	boolean keepAlive = isKeepAlive(request);
+    	HttpResponse response;
+    	
+    	// We only allow POST methods so only allow request when Method is Post
+    	String  methodType = request.getHeader("Access-Control-Request-Method");
+    	if(methodType != null  && methodType.trim().equals("POST")){
+    		response = new DefaultHttpResponse(HTTP_1_1, OK);
+    		response.addHeader("Connection", "Keep-Alive");        		
+    	} else {
+    		response = new DefaultHttpResponse(HTTP_1_1,FORBIDDEN);
+    		// We don't want to keep the connection now
+            keepAlive = false;
+    	}
+
+    	response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+		response.setHeader(CONTENT_TYPE, "plain/text");
+		response.setHeader("Content-Length","0");
+    	response.setHeader("Access-Control-Allow-Headers","Content-Type");
+		
+		ChannelFuture future = channel.write(response);
+        if(!keepAlive){
+        	future.addListener(ChannelFutureListener.CLOSE);
+        }
+
+	}
+
+	/**
+	 * Deals with handling the Content (json) and adds requests to the queue
+	 * 
+	 * @param request
+	 * @param channel
+	 * @param content
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	private void handleContent(HttpRequest request ,Channel channel, ChannelBuffer content)
+			throws IOException, ParseException {
+		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+		//Map<String, List<String>> params = queryStringDecoder.getParameters();
+		
+		InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
+		
+		JSONObject requestJSON = (JSONObject) parser.parse(inReader);
+		//System.out.println(requestJSON);
+		@SuppressWarnings("unchecked")
+		Map<String, Object> objmap = requestJSON;
+		String algName = queryStringDecoder.getPath().substring(1);
+		ResultResponder responder = new ResultResponder(channel, isKeepAlive(request));
+		
+		// Create ComputeRequest and commit to workqueue
+		ComputeRequest req = new ComputeRequest(responder, algName, objmap);
+		boolean sucess = computer.submit(req);
+		
+		if(!sucess){
+			responder.writeServerOverloaded();
+		}
+	}
     
 /**
  * Authenticates a Request using HTTP Basic Authentication returns true if authorized false otherwise
