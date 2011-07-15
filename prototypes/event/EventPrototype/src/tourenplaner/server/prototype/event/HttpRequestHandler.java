@@ -30,6 +30,8 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.handler.codec.base64.Base64;
+import org.jboss.netty.handler.codec.base64.Base64Decoder;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
@@ -56,8 +58,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     private final StringBuilder buf = new StringBuilder();
     /** JSONParser we can reuse **/
     private final JSONParser parser = new JSONParser();
-    /** MessageDigest object used to compute SHA1**/
-    private MessageDigest digester;
     
     /** The ComputeCore managing the threads**/
     private ComputeCore computer;
@@ -65,12 +65,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
     public HttpRequestHandler(ComputeCore cCore){
     	super();
     	computer = cCore;
-    	try {
-			digester = MessageDigest.getInstance("SHA1");
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println("Could not load SHA1 algorithm");
-			System.exit(1);
-		}
     }
 
     @Override
@@ -94,11 +88,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
                 keepAlive = false;
         	}
 
-        	response.addHeader("Access-Control-Allow-Origin", "*");
-    		response.addHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-    		response.addHeader("Content-Type","plain/text");
-    		response.addHeader("Content-Length","0");
-        	response.addHeader("Access-Control-Allow-Headers","Content-Type");
+        	response.setHeader("Access-Control-Allow-Origin", "*");
+    		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    		response.setHeader(CONTENT_TYPE, "plain/text");
+    		response.setHeader("Content-Length","0");
+        	response.setHeader("Access-Control-Allow-Headers","Content-Type");
     		
     		ChannelFuture future = e.getChannel().write(response);
             if(!keepAlive){
@@ -107,39 +101,78 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
             return;
         }
         
-        QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
-        Map<String, List<String>> params = queryStringDecoder.getParameters();
-       
-       
-        ChannelBuffer content = request.getContent();
-       
-
+        if(auth(request)){
         
-        if(auth(params, content)){
-	        
-	        InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
-
-	        
-	        JSONObject requestJSON = (JSONObject) parser.parse(inReader);
-	        //System.out.println(requestJSON);
-	        @SuppressWarnings("unchecked")
+			        
+			QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+			//Map<String, List<String>> params = queryStringDecoder.getParameters();
+			   
+			   
+			ChannelBuffer content = request.getContent();
+			InputStreamReader inReader = new InputStreamReader(new ChannelBufferInputStream(content));
+			
+			
+			JSONObject requestJSON = (JSONObject) parser.parse(inReader);
+			//System.out.println(requestJSON);
+			@SuppressWarnings("unchecked")
 			Map<String, Object> objmap = requestJSON;
-	        String algName = queryStringDecoder.getPath().substring(1);
-	        ResultResponder responder = new ResultResponder(e.getChannel(), isKeepAlive(request));
-	        ComputeRequest req = new ComputeRequest(responder, algName, objmap);
-	        boolean sucess = computer.submit(req);
-	        if(!sucess){
-	        	responder.writeServerOverloaded();
+			String algName = queryStringDecoder.getPath().substring(1);
+			ResultResponder responder = new ResultResponder(e.getChannel(), isKeepAlive(request));
+			
+			// Create ComputeRequest and commit to workqueue
+			ComputeRequest req = new ComputeRequest(responder, algName, objmap);
+			boolean sucess = computer.submit(req);
+			
+			if(!sucess){
+				responder.writeServerOverloaded();
 	        }
         } else {
         	// Respond with Unauthorized Access
             HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
+            // Send the client the realm so it knows we want Basic Access Auth.
+            response.setHeader("WWW-Authenticate", "Basic realm=\"ToureNPlaner\"");
             // Write the response.
             ChannelFuture future = e.getChannel().write(response);
             future.addListener(ChannelFutureListener.CLOSE);
         }
     }
-    /**
+    
+/**
+ * Authenticates a Request using HTTP Basic Authentication returns true if authorized false otherwise
+ * 
+ * @param request2
+ * @return
+ */
+private boolean auth(HttpRequest myReq) {
+		// Why between heaven and earth does Java have AES Encryption in
+		// the standard library but not Base64 though it has it inetrnally several times
+		String userandpw = myReq.getHeader("Authorization");
+		if(userandpw == null){
+			return false;
+		}
+				
+		ChannelBuffer encodeddata;
+		ChannelBuffer data;
+		boolean result = false;
+		try {
+			// Base64 is always ASCII
+			encodeddata = ChannelBuffers.wrappedBuffer(userandpw.substring(userandpw.lastIndexOf(' ')).getBytes("US-ASCII"));
+
+			data = Base64.decode(encodeddata);
+			// The string itself is utf-8 
+			userandpw = new String(data.array(), "UTF-8");
+			if(userandpw.trim().equals("FooUser:FooPassword")){
+				result = true;
+			};
+			
+		} catch (UnsupportedEncodingException e) {
+			System.err.println("We can't fcking convert to ASCII this box is really broken");
+		}
+		
+		return result;
+	}
+
+/*    *//**
      * Authenticats the request in the ChannelBuffer content with the parameters given in params
      * see: @link https://gerbera.informatik.uni-stuttgart.de/projects/server/wiki/Authentifizierung
      * for a detailed explanation
@@ -147,7 +180,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
      * @param params
      * @param content
      * @return
-     */
+     *//*
     private boolean auth(Map<String, List<String>> params, ChannelBuffer content) {
 		boolean authentic = false;
 		if(!params.isEmpty()){
@@ -173,7 +206,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					bodyhash = digester.digest();
 					// Contenthash to String and then hash for SHA1(BODYHASH:SECRET)
 					StringBuilder sb = new StringBuilder();
-					/** @link http://www.spiration.co.uk/post/1199/Java-md5-example-with-MessageDigest **/
+					*//** @link http://www.spiration.co.uk/post/1199/Java-md5-example-with-MessageDigest **//*
 					for (byte element : bodyhash) {
 						sb.append(Character.forDigit((element >> 4) & 0xf, 16));
 						sb.append(Character.forDigit(element & 0xf, 16));
@@ -207,7 +240,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			
 		}
 		return authentic; 
-	}
+	}*/
 
 	private void writeResponse(MessageEvent e) {
         // Decide whether to close the connection or not.
