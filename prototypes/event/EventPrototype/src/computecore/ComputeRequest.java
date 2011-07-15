@@ -6,8 +6,6 @@ package computecore;
 
 import java.util.Map;
 
-import org.jboss.netty.channel.Channel;
-
 import tourenplaner.server.prototype.event.ResultResponder;
 
 /**

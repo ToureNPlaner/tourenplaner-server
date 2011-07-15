@@ -8,8 +8,6 @@ import java.util.concurrent.BlockingQueue;
 
 
 
-import tourenplaner.server.prototype.event.ResultResponder;
-
 import algorithms.Algorithm;
 
 /**
