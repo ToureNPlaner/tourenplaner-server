@@ -6,16 +6,29 @@
 	<property name="jar.dir" value="jar"/>
 	<property name="jar.temp.dir" value="${jar.dir}/temp"/>
 	<property name="main-class" value="tourenplaner.server.prototype.event.HttpServer"/>
+	<property name="classpath" value="."/>
 	
-	<target name="compile">
-		<javac srcdir="${src.dir}" destdir="${bin.dir}"/>
-	</target>
-	
-	<target name="clean-jar-temp">
-		<delete dir="${jar.temp.dir}"/>
+	<target name="clean">
+		<delete dir="${bin.dir}"/>
+		<delete dir="${jar.dir}"/>
 	</target>
 
-    <target name="jar" depends="compile,clean-jar-temp">
+	<target name="compile">
+		<mkdir dir="${bin.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
+			<compilerarg value="-Xlint"/>
+			<classpath>
+				<pathelement path="${classpath}"/>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar"/>
+				</fileset>
+				<pathelement location="${bin.dir}"/>
+			</classpath>
+		</javac>
+	</target>
+
+    <target name="jar" depends="compile">
+    	<delete dir="${jar.temp.dir}"/>
     	<mkdir dir="${jar.temp.dir}"/>
         <jar destfile="${jar.temp.dir}/temp_${ant.project.name}.jar" basedir="${bin.dir}">
             <manifest>
@@ -37,5 +50,5 @@
 		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
 	</target>
 	
-    <target name="main" depends="run"/>
+    <target name="main" depends="clean,run"/>
 </project>
