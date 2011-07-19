@@ -1,3 +1,7 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
+
 package server.threaded;
 
 import java.io.IOException;
@@ -26,6 +30,10 @@ import org.json.simple.parser.ParseException;
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
 
+/**
+ * @author Christoph Haag, Peter Vollmer
+ *
+ */
 public class TourenPlanerRequestHandler implements HttpRequestHandler {
 
 	private String username = null;

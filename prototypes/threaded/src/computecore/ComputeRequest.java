@@ -1,6 +1,5 @@
 /**
- * ToureNPlaner
- * 
+ * $$\\ToureNPlaner\\$$
  */
 package computecore;
 
@@ -8,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.Semaphore;
 
 /**
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  * 
  */
 public class ComputeRequest {

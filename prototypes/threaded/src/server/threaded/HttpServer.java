@@ -1,3 +1,7 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
+
 package server.threaded;
 
 import java.io.IOException;
@@ -29,6 +33,10 @@ import algorithms.KnapsackFactory;
 import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 
+/**
+ * @author Christoph Haag, Peter Vollmer
+ *
+ */
 public class HttpServer {
 
 	// TODO: better position for logging

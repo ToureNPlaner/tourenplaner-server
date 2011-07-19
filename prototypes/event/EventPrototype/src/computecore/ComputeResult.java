@@ -1,12 +1,13 @@
 /**
- * ToureNPlaner
+ * $$\\ToureNPlaner\\$$
  */
+
 package computecore;
 
 import java.util.HashMap;
 
 /**
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public class ComputeResult extends HashMap<String, Object>{

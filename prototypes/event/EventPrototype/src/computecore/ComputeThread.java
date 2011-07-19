@@ -1,5 +1,5 @@
 /**
- * ToureNPlaner
+ * $$\\ToureNPlaner\\$$
  */
 package computecore;
 
@@ -11,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import algorithms.Algorithm;
 
 /**
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public class ComputeThread extends Thread {

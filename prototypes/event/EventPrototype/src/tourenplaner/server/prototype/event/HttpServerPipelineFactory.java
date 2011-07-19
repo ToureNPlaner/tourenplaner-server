@@ -1,12 +1,6 @@
 /**
- * ToureNPlaner Event Based Prototype
- * 
- * @author Niklas Schnelle
- * 
- * Initially based on: 
- * 	http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
+ * $$\\ToureNPlaner\\$$
  */
-
 package tourenplaner.server.prototype.event;
 
 import static org.jboss.netty.channel.Channels.*;
@@ -20,8 +14,13 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import computecore.ComputeCore;
 
 /**
- * @author Niklas Schnelle
+ * ToureNPlaner Event Based Prototype
+ * 
+ * @author Niklas Schnelle, Peter Vollmer
  * @version 0.1 Prototype
+ * 
+ * Initially based on: 
+ * 	http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
  */
 public class HttpServerPipelineFactory implements ChannelPipelineFactory {
 	ComputeCore cCore;

@@ -1,6 +1,5 @@
 /**
- * ToureNPlaner
- * 
+ * $$\\ToureNPlaner\\$$
  */
 package algorithms;
 
@@ -8,7 +7,7 @@ import computecore.ComputeRequest;
 import computecore.ComputeResult;
 
 /**
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public interface Algorithm extends Runnable {

@@ -1,12 +1,19 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
+
 package algorithms;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 
 import computecore.ComputeRequest;
 import computecore.ComputeResult;
 
+/**
+ * @author Niklas Schnelle, Peter Vollmer
+ *
+ */
 public class ShortestPathDummy implements Algorithm {
 
 	private ComputeRequest req;

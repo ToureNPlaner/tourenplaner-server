@@ -1,3 +1,7 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
+
 package server.threaded;
 import java.io.File;
 import java.io.IOException;
@@ -20,6 +24,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import org.apache.http.util.EntityUtils;
 
+/**
+ * @author Christoph Haag, Peter Vollmer
+ *
+ */
 public class FileHandlerExample {
 
 	static class HttpFileHandler implements HttpRequestHandler {

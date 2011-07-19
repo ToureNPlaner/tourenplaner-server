@@ -1,6 +1,7 @@
 /**
- * ToureNPlaner
+ * $$\\ToureNPlaner\\$$
  */
+
 package computecore;
 
 import java.util.Map;
@@ -11,7 +12,7 @@ import algorithms.AlgorithmFactory;
 /**
  * Singelton Pattern used
  * 
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public class AlgorithmRegistry {

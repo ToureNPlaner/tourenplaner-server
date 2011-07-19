@@ -1,5 +1,5 @@
 /**
- * ToureNPlaner
+ * $$\\ToureNPlaner\\$$
  */
 package computecore;
 
@@ -9,7 +9,7 @@ import java.util.Map;
 import algorithms.Algorithm;
 
 /**
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public class AlgorithmManager {

@@ -1,0 +1,41 @@
+<?xml version="1.0" ?>
+<project name="ThreadedPrototype" basedir="." default="main">
+	<property name="bin.dir" value="bin"/>
+	<property name="src.dir" value="src"/>
+	<property name="lib.dir" value="./../../lib"/>
+	<property name="jar.dir" value="jar"/>
+	<property name="jar.temp.dir" value="${jar.dir}/temp"/>
+	<property name="main-class" value="server.threaded.HttpServer"/>
+	
+	<target name="compile">
+		<javac srcdir="${src.dir}" destdir="${bin.dir}"/>
+	</target>
+	
+	<target name="clean-jar-temp">
+		<delete dir="${jar.temp.dir}"/>
+	</target>
+
+    <target name="jar" depends="compile,clean-jar-temp">
+    	<mkdir dir="${jar.temp.dir}"/>
+        <jar destfile="${jar.temp.dir}/temp_${ant.project.name}.jar" basedir="${bin.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    	
+    	<copy todir="${jar.temp.dir}">
+    	    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    	</copy>
+    	
+    	<zip destfile="${jar.dir}/${ant.project.name}.jar">
+    		<zipgroupfileset dir="${jar.temp.dir}" includes="*.jar"/>
+    	</zip>
+    </target>
+	
+
+	<target name="run" depends="jar">
+		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
+	</target>
+	
+    <target name="main" depends="run"/>
+</project>
