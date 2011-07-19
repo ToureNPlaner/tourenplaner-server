@@ -1,3 +1,5 @@
+package server.threaded;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -21,15 +23,17 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import computecore.ComputeCore;
+import computecore.ComputeRequest;
+
 public class TourenPlanerRequestHandler implements HttpRequestHandler {
 
 	private String username = null;
 	private String password = null;
 
 	private String algName;
+	private final ComputeCore comCore;
 
-	/** JSONParser we can reuse **/
-	private final JSONParser parser = new JSONParser();
 	/** MessageDigest object used to compute SHA1 **/
 	private HttpResponse response;
 
@@ -68,6 +72,8 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 								+ username + "; Password: " + password);
 
 				JSONObject requestJSON = null;
+				/** JSONParser in here for threading **/
+				final JSONParser parser = new JSONParser();
 				try {
 					// TODO: avoid useless casting
 					requestJSON = (JSONObject) parser.parse(new String(
@@ -79,16 +85,40 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 				HttpServer.debugMsg("requested JSON: "
 						+ requestJSON.toJSONString());
 				Map<String, Object> objmap = requestJSON;
-
 				HttpServer.debugMsg("Algname: " + algName);
 
-				// TODO: start computation here
-				boolean sucess = false; // did the calculation of the problemm
-										// succeed?
+				// Create ComputeRequest and commit to workqueue
+				final ComputeRequest req = new ComputeRequest(algName, objmap);
+				// TODO: Something with comCore
+				boolean sucess = comCore.submit(req);
+
 				if (!sucess) {
 					// TODO: server overload
 					reply(generalError);
+					return;
 				}
+
+				try {
+					req.getWaitComputation().acquire();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
+				System.out.println(req.getResultObject().toString());
+
+				EntityTemplate body = new EntityTemplate(new ContentProducer() {
+					@Override
+					public void writeTo(OutputStream outstream)
+							throws IOException {
+						OutputStreamWriter writer = new OutputStreamWriter(
+								outstream, "UTF-8");
+						writer.write(req.getResultObject().toString());
+						writer.flush();
+					}
+				});
+				body.setContentType("text/html; charset=UTF-8");
+				response.setEntity(body);
 
 				// EntityTemplate body = new EntityTemplate(defaultPage);
 				// body.setContentType("text/html; charset=UTF-8");
@@ -110,9 +140,10 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 
 	}
 
-	public TourenPlanerRequestHandler() {
+	public TourenPlanerRequestHandler(ComputeCore comCore) {
 		// no idea why Object's constructor is called
 		super();
+		this.comCore = comCore;
 	}
 
 	/**
@@ -135,7 +166,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		}
 
 		try {
-			// headers are supposed to be ascii
+			// http headers are supposed to be ascii
 			decoded = userandpw.substring(userandpw.lastIndexOf(' ')).trim()
 					.getBytes("US-ASCII");
 		} catch (UnsupportedEncodingException e) {
@@ -189,7 +220,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 			OutputStreamWriter writer = new OutputStreamWriter(outstream,
 					"UTF-8");
 			writer.write("HTTP/1.1 401 Access Denied\n");
-			writer.write("WWW-Authenticate: Basic realm=\"gerbera.informatik.uni-stutgart.de\"\n");
+			writer.write("WWW-Authenticate: Basic realm=\"ToureNPlaner\"\n");
 			writer.write("Content-Length: 0\n");
 			writer.flush();
 		}

@@ -1,3 +1,5 @@
+package server.threaded;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
@@ -20,6 +22,13 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
+import algorithms.BubblesortFactory;
+import algorithms.DummyFactory;
+import algorithms.KnapsackFactory;
+
+import computecore.AlgorithmRegistry;
+import computecore.ComputeCore;
+
 public class HttpServer {
 
 	// TODO: better position for logging
@@ -39,41 +48,16 @@ public class HttpServer {
 	private static HttpService httpService;
 
 	public static void main(String[] args) {
+		// Register Algorithms
+		AlgorithmRegistry reg = AlgorithmRegistry.getInstance();
+		reg.registerAlgorithm("ks", new KnapsackFactory());
+		reg.registerAlgorithm("sp", new DummyFactory());
+		reg.registerAlgorithm("bsort", new BubblesortFactory());
 
-		// ---------------------------------------------------------------------
-		// http setup part
-		// ---------------------------------------------------------------------
-		params = new SyncBasicHttpParams();
-		params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
-				.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE,
-						8 * 1024)
-				.setBooleanParameter(
-						CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
-				.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
-				.setParameter(CoreProtocolPNames.ORIGIN_SERVER,
-						"HttpComponents/1.1");
-		// Set up the HTTP protocol processor
-		HttpProcessor httpproc = new ImmutableHttpProcessor(
-				new HttpResponseInterceptor[] { new ResponseDate(),
-						new ResponseServer(), new ResponseContent(),
-						new ResponseConnControl() });
-		// Set up request handlers
-		HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-		// TODO: docroot file servicing brauchen wir nicht
-		// reqistry.register("*", new FileHandlerExample.HttpFileHandler("."));
-		// stattdessen ein eigener handler
-		// reqistry.register("regex for authentication", new
-		// AuthenticateHandler());
-		reqistry.register("*", new TourenPlanerRequestHandler());
+		// Create our ComputeCore that manages all ComputeThreads
+		ComputeCore comCore = new ComputeCore(4, 20);
+		setuphttp(comCore);
 
-		// Set up the HTTP service
-		httpService = new HttpService(httpproc,
-				new DefaultConnectionReuseStrategy(),
-				new DefaultHttpResponseFactory(), reqistry, params);
-
-		// ---------------------------------------------------------------------
-		// server part
-		// ---------------------------------------------------------------------
 		try {
 			s = new ServerSocket(8081);
 		} catch (IOException e) {
@@ -106,5 +90,36 @@ public class HttpServer {
 			System.err.println("Client connection initialization error: "
 					+ e.getMessage());
 		}
+
+	}
+
+	static void setuphttp(ComputeCore comCore) {
+		params = new SyncBasicHttpParams();
+		params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
+				.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE,
+						8 * 1024)
+				.setBooleanParameter(
+						CoreConnectionPNames.STALE_CONNECTION_CHECK, false)
+				.setBooleanParameter(CoreConnectionPNames.TCP_NODELAY, true)
+				.setParameter(CoreProtocolPNames.ORIGIN_SERVER,
+						"HttpComponents/1.1");
+		// Set up the HTTP protocol processor
+		HttpProcessor httpproc = new ImmutableHttpProcessor(
+				new HttpResponseInterceptor[] { new ResponseDate(),
+						new ResponseServer(), new ResponseContent(),
+						new ResponseConnControl() });
+		// Set up request handlers
+		HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
+		// TODO: docroot file servicing brauchen wir nicht
+		// reqistry.register("*", new FileHandlerExample.HttpFileHandler("."));
+		// stattdessen ein eigener handler
+		// reqistry.register("regex for authentication", new
+		// AuthenticateHandler());
+		reqistry.register("*", new TourenPlanerRequestHandler(comCore));
+
+		// Set up the HTTP service
+		httpService = new HttpService(httpproc,
+				new DefaultConnectionReuseStrategy(),
+				new DefaultHttpResponseFactory(), reqistry, params);
 	}
 }
