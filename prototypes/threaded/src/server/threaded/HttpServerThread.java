@@ -1,3 +1,7 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
+
 package server.threaded;
 
 import java.io.BufferedReader;
@@ -11,6 +15,10 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpService;
 
+/**
+ * @author Christoph Haag, Peter Vollmer
+ *
+ */
 public class HttpServerThread extends Thread {
 	private final HttpService httpservice;
 	private final HttpServerConnection conn;

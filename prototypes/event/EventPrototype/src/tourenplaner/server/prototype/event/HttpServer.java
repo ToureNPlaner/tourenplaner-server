@@ -1,10 +1,5 @@
 /**
- * ToureNPlaner Event Based Prototype
- * 
- * @author Niklas Schnelle
- * 
- * Initially based on: 
- * 	http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
+ * $$\\ToureNPlaner\\$$
  */
 package tourenplaner.server.prototype.event;
 
@@ -22,8 +17,13 @@ import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 
 /**
+ * ToureNPlaner Event Based Prototype
+ * 
  * @author Niklas Schnelle
  * @version 0.1 Prototype
+ * 
+ *  Initially based on: 
+ * 	http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
  */
 public class HttpServer {
     public static void main(String[] args) {

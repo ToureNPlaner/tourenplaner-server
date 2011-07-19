@@ -1,10 +1,10 @@
 /**
- * ToureNPlaner
+ * $$\\ToureNPlaner\\$$
  */
 package algorithms;
 
 /**
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public abstract class AlgorithmFactory {

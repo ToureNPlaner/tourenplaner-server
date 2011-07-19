@@ -1,5 +1,5 @@
 /**
- * ToureNPlaner
+ * $$\\ToureNPlaner\\$$
  */
 package computecore;
 
@@ -10,8 +10,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
- * 
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public class ComputeCore {

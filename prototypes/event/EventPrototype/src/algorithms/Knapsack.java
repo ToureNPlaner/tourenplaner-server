@@ -1,8 +1,5 @@
 /**
- * ToureNPlaner
- * 
- * Knapsack Test Algorithm
- * 
+ * $$\\ToureNPlaner\\$$
  */
 package algorithms;
 
@@ -13,7 +10,7 @@ import computecore.ComputeRequest;
 import computecore.ComputeResult;
 
 /**
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public class Knapsack implements Algorithm {

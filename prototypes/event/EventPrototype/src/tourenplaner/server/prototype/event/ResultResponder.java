@@ -1,5 +1,5 @@
 /**
- * ToureNPlaner
+ * $$\\ToureNPlaner\\$$
  */
 package tourenplaner.server.prototype.event;
 
@@ -24,7 +24,7 @@ import computecore.ComputeResult;
 /**
  * This class encapsulates the translation from ComputeResult to the wire
  * 
- * @author Niklas Schnelle
+ * @author Niklas Schnelle, Peter Vollmer
  *
  */
 public class ResultResponder {
