@@ -2,14 +2,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
@@ -28,15 +24,13 @@ import org.json.simple.parser.ParseException;
 public class TourenPlanerRequestHandler implements HttpRequestHandler {
 
 	private String username = null;
-	private String signature = null;
-	private String query = null;
+	private String password = null;
+
 	private String algName;
-	private Map<String, String> map = null;
 
 	/** JSONParser we can reuse **/
 	private final JSONParser parser = new JSONParser();
 	/** MessageDigest object used to compute SHA1 **/
-	private MessageDigest digester;
 	private HttpResponse response;
 
 	@Override
@@ -66,35 +60,12 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 					+ entityContent.length + " of type "
 					+ entity.getContentType());
 
-			try {
-				query = (new URI(URI)).getQuery();
-			} catch (URISyntaxException e) {
-				System.err.println("Failed to parse URI " + URI);
-				return;
-			}
-
-			map = getQueryMap(query);
 			algName = URI.split("\\?")[0].substring(1);
 
-			HttpServer.debugMsg(" RH: query: " + query);
-			for (String key : map.keySet()) {
-				if (key.equalsIgnoreCase("tp-user")) {
-					username = map.get(key);
-					HttpServer.debugMsg(" RH: username: " + username);
-				} else if (key.equalsIgnoreCase("tp-signature")) {
-					signature = map.get(key);
-					HttpServer.debugMsg(" RH: signature: " + signature);
-				}
-			}
-
-			if (username == null || signature == null) {
-				reply(generalError);
-				return;
-			}
-
-			if (auth(username, signature, entityContent)) {
-				HttpServer.debugMsg(" RH: User " + username
-						+ " Successfully Authenticated");
+			if (auth((HttpEntityEnclosingRequest) request)) {
+				HttpServer
+						.debugMsg(" RH: User Successfully Authenticated; Username: "
+								+ username + "; Password: " + password);
 
 				JSONObject requestJSON = null;
 				try {
@@ -125,8 +96,9 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 			} else {
 				// TODO
 				reply(accessDenied);
-				HttpServer.debugMsg(" RH: User " + username
-						+ " authentication FAILED");
+				HttpServer
+						.debugMsg(" RH: User authentication FAILED; Username: "
+								+ username + "; Password: " + password);
 				return;
 			}
 		}
@@ -153,77 +125,41 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 	 * @param content
 	 * @return
 	 */
-	private boolean auth(String username, String signature, byte[] content) {
+	private boolean auth(HttpEntityEnclosingRequest request) {
+		boolean authentic = false;
+
+		String userandpw = request.getFirstHeader("Authorization").getValue();
+		byte[] decoded = null;
+		if (userandpw == null) {
+			return false;
+		}
 
 		try {
-			digester = MessageDigest.getInstance("SHA1");
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println("Could not load SHA1 algorithm");
-			System.exit(1);
+			// headers are supposed to be ascii
+			decoded = userandpw.substring(userandpw.lastIndexOf(' ')).trim()
+					.getBytes("US-ASCII");
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		decoded = Base64.decodeBase64(decoded);
+		// The string itself is utf-8
+		try {
+			userandpw = new String(decoded, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		boolean authentic = false;
-		if (true) {
-			String realSecret;
-			byte[] bodyhash, finalhash;
-			// HttpServer.debugMsg(" RH: User: "+username.get(0));
-			// HttpServer.debugMsg(" RH: Signature: "+signature.get(0));
-			// TODO replace static test with database access
-			if (username.equals("FooUser")) {
-				realSecret = "FooPassword";
-				// Hash the content
-				digester.reset();
-				digester.update(content, 0, content.length);
-				bodyhash = digester.digest();
-				// Contenthash to String and then hash for SHA1(BODYHASH:SECRET)
-				StringBuilder sb = new StringBuilder();
-				/**
-				 * @link 
-				 *       http://www.spiration.co.uk/post/1199/Java-md5-example-with
-				 *       -MessageDigest
-				 **/
-				for (byte element : bodyhash) {
-					sb.append(Character.forDigit((element >> 4) & 0xf, 16));
-					sb.append(Character.forDigit(element & 0xf, 16));
-				}
-				// DEBUG
-				HttpServer.debugMsg(" RH: Bodyhash: " + sb.toString());
-				sb.append(':');
-				try {
-					sb.append(realSecret);
-					// Now sb is BODYHASH:SECRET do the final hashing and hex
-					// conversion
-					digester.reset();
-					digester.update(sb.toString().getBytes("UTF-8"));
-					finalhash = digester.digest();
-					// Reset the string builder so we can reuse it
-					// HttpServer.debugMsg(" RH: Before Hashing: "+sb.toString());
-					sb.delete(0, sb.length());
-					for (byte element : finalhash) {
-						sb.append(Character.forDigit((element >> 4) & 0xf, 16));
-						sb.append(Character.forDigit(element & 0xf, 16));
-					}
-					// HttpServer.debugMsg(" RH: MyHash: "+sb.toString());
-					authentic = (sb.toString().equals(signature)) ? true
-							: false;
-				} catch (UnsupportedEncodingException e) {
-					System.err
-							.println("We can't fcking find UTF-8 Charset hell wtf?");
-				}
-			}
+		userandpw = userandpw.trim();
+		username = userandpw.split(":")[0];
+		password = userandpw.split(":")[1];
+
+		// TODO: real user and password
+		if (userandpw.equals("FooUser:FooPassword")) {
+			authentic = true;
 		}
+		System.out.println("Decoded String: " + userandpw);
 		return authentic;
-	}
-
-	public static Map<String, String> getQueryMap(String query) {
-		String[] params = query.split("&");
-		Map<String, String> map = new HashMap<String, String>();
-		for (String param : params) {
-			String name = param.split("=")[0];
-			String value = param.split("=")[1];
-			map.put(name, value);
-		}
-		return map;
 	}
 
 	private void reply(ContentProducer cp) {
