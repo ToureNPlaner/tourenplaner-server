@@ -37,7 +37,7 @@ public class HttpServerThread extends Thread {
 		this.conn = conn;
 
 		// DEBUG
-		HttpServer.debugMsg(cnt + ": Client connected: " + conn.toString());
+		LoggerStub.debugMsg(cnt + ": Client connected: " + conn.toString());
 	}
 
 	@Override
@@ -45,15 +45,15 @@ public class HttpServerThread extends Thread {
 		HttpContext context = new BasicHttpContext(null);
 		try {
 			while (!Thread.interrupted() && this.conn.isOpen()) {
-				HttpServer.debugMsg(cnt + ": Handle request for query");
+				LoggerStub.debugMsg(cnt + ": Handle request for query");
 				this.httpservice.handleRequest(this.conn, context);
 			}
 		} catch (ConnectionClosedException ex) {
-			HttpServer.errorLog(cnt + ": Client closed connection");
+			LoggerStub.errorLog(cnt + ": Client closed connection");
 		} catch (IOException ex) {
-			HttpServer.errorLog(cnt + ": I/O error: " + ex.getMessage());
+			LoggerStub.errorLog(cnt + ": I/O error: " + ex.getMessage());
 		} catch (HttpException ex) {
-			HttpServer.errorLog(cnt
+			LoggerStub.errorLog(cnt
 					+ ": Unrecoverable HTTP protocol violation: "
 					+ ex.getMessage());
 		} finally {

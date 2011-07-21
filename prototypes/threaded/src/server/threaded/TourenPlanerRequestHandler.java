@@ -32,119 +32,128 @@ import computecore.ComputeRequest;
 
 /**
  * @author Christoph Haag, Peter Vollmer
- *
+ * 
  */
 public class TourenPlanerRequestHandler implements HttpRequestHandler {
 
+	// TODO: may be useful
 	private String username = null;
 	private String password = null;
-
-	private String algName;
-	private final ComputeCore comCore;
-
-	/** MessageDigest object used to compute SHA1 **/
-	private HttpResponse response;
 
 	@Override
 	public void handle(final HttpRequest request, final HttpResponse response,
 			final HttpContext context) throws HttpException, IOException {
 		this.response = response;
-		HttpServer.debugMsg(" RH: RH: TourenPlaner Requesthandler called");
+		this.request = request;
+		LoggerStub.debugMsg(" RH: TourenPlaner Requesthandler called");
 
 		String method = request.getRequestLine().getMethod()
 				.toUpperCase(Locale.ENGLISH);
-		if (!method.equals("GET") && !method.equals("HEAD")
-				&& !method.equals("POST")) {
+
+		if (method.equals("HEAD")) {
+			handleHEAD();
+		} else if (method.equals("POST")) {
+			// direct connections not from java script XSS client
+			if (auth((HttpEntityEnclosingRequest) request)) {
+				LoggerStub
+						.debugMsg(" RH: User Successfully Authenticated; Username: "
+								+ username + "; Password: " + password);
+				handlePOST();
+			} else {
+				reply(accessDenied);
+				LoggerStub
+						.debugMsg(" RH: User authentication FAILED; Username: "
+								+ username + "; Password: " + password);
+			}
+		} else {
+			// TODO: reply method not supported. Does apache http do this
+			// automatically?
+			reply(generalError);
 			throw new MethodNotSupportedException(method
 					+ " method not supported");
 		}
+	}
 
-		request.getAllHeaders()[0].getValue();
+	private void handlePOST() {
+		// TODO Auto-generated method stub
 		String URI = request.getRequestLine().getUri();
-		HttpServer.debugMsg(" RH: Received request with URI: " + URI);
+		LoggerStub.debugMsg(" RH: Received request with URI: " + URI);
 
 		// no idea what this does
 		if (request instanceof HttpEntityEnclosingRequest) {
 			HttpEntity entity = ((HttpEntityEnclosingRequest) request)
 					.getEntity();
-			byte[] entityContent = EntityUtils.toByteArray(entity);
-			HttpServer.debugMsg(" RH: Incoming entity content (bytes): "
-					+ entityContent.length + " of type "
-					+ entity.getContentType());
 
 			algName = URI.split("\\?")[0].substring(1);
+			// parse the json that is hopefully in the input stream
+			JSONObject requestJSON = null;
+			/** JSONParser in here for threading **/
+			final JSONParser parser = new JSONParser();
+			try {
+				byte[] entityContent = null;
+				entityContent = EntityUtils.toByteArray(entity);
+				// TODO: avoid useless casting of entitycontent
+				requestJSON = (JSONObject) parser.parse(new String(
+						entityContent));
+			} catch (ParseException e) {
+				LoggerStub.errorLog("JSON Parse error: " + e.getMessage());
+				e.printStackTrace();
+			} catch (IOException e) {
+				LoggerStub
+						.errorLog(" RH: Something happened while converting the input stream to byte[]");
+				e.printStackTrace();
+			}
 
-			if (auth((HttpEntityEnclosingRequest) request)) {
-				HttpServer
-						.debugMsg(" RH: User Successfully Authenticated; Username: "
-								+ username + "; Password: " + password);
+			LoggerStub.debugMsg(" RH: requested JSON: "
+					+ requestJSON.toJSONString());
 
-				JSONObject requestJSON = null;
-				/** JSONParser in here for threading **/
-				final JSONParser parser = new JSONParser();
-				try {
-					// TODO: avoid useless casting
-					requestJSON = (JSONObject) parser.parse(new String(
-							entityContent));
-				} catch (ParseException e) {
-					HttpServer.errorLog("JSON Parse error: " + e.getMessage());
-					e.printStackTrace();
-				}
-				HttpServer.debugMsg("requested JSON: "
-						+ requestJSON.toJSONString());
-				Map<String, Object> objmap = requestJSON;
-				HttpServer.debugMsg("Algname: " + algName);
+			// with valid Json this should be safe I guess and is valid
+			// because the parser would have failed otherwise
+			@SuppressWarnings("unchecked")
+			Map<String, Object> objmap = requestJSON;
 
-				// Create ComputeRequest and commit to workqueue
-				final ComputeRequest req = new ComputeRequest(algName, objmap);
-				// TODO: Something with comCore
-				boolean sucess = comCore.submit(req);
+			LoggerStub.debugMsg(" RH: Algname: " + algName);
 
-				if (!sucess) {
-					// TODO: server overload
-					reply(generalError);
-					return;
-				}
-
-				try {
-					req.getWaitComputation().acquire();
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-
-				System.out.println(req.getResultObject().toString());
-
-				EntityTemplate body = new EntityTemplate(new ContentProducer() {
-					@Override
-					public void writeTo(OutputStream outstream)
-							throws IOException {
-						OutputStreamWriter writer = new OutputStreamWriter(
-								outstream, "UTF-8");
-						writer.write(req.getResultObject().toString());
-						writer.flush();
-					}
-				});
-				body.setContentType("text/html; charset=UTF-8");
-				response.setEntity(body);
-
-				// EntityTemplate body = new EntityTemplate(defaultPage);
-				// body.setContentType("text/html; charset=UTF-8");
-				// response.setEntity(body);
-			} else {
-				// TODO
-				reply(accessDenied);
-				HttpServer
-						.debugMsg(" RH: User authentication FAILED; Username: "
-								+ username + "; Password: " + password);
+			// Create ComputeRequest and commit to workqueue
+			final ComputeRequest req = new ComputeRequest(algName, objmap);
+			boolean sucess = comCore.submit(req);
+			if (!sucess) {
+				// TODO: send server overload message
+				reply(generalError);
 				return;
 			}
-		}
 
-		// a strange way to send a http response
-		// EntityTemplate body = new EntityTemplate(defaultPage);
-		// body.setContentType("text/html; charset=UTF-8");
-		// response.setEntity(body);
+			try {
+				// semaphore is signaled when computation is complete
+				req.getWaitComputation().acquire();
+			} catch (InterruptedException e) {
+				// TODO if server is interrupted, shut down everything here
+				LoggerStub
+						.debugMsg("Interruption of Requesthandler. Shutting down...");
+				return;
+			}
+
+			final String result = req.getResultObject().toString();
+			LoggerStub
+					.debugMsg(" RH: computation complete, sending this result to the client: "
+							+ result);
+
+			EntityTemplate body = new EntityTemplate(new ContentProducer() {
+				@Override
+				public void writeTo(OutputStream outstream) throws IOException {
+					OutputStreamWriter writer = new OutputStreamWriter(
+							outstream, "UTF-8");
+					writer.write(result);
+					writer.flush();
+				}
+			});
+			body.setContentType("text/html; charset=UTF-8");
+			response.setEntity(body);
+		}
+	}
+
+	private void handleHEAD() {
+		// TODO Auto-generated method stub
 
 	}
 
@@ -167,37 +176,35 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 	private boolean auth(HttpEntityEnclosingRequest request) {
 		boolean authentic = false;
 
-		String userandpw = request.getFirstHeader("Authorization").getValue();
-		byte[] decoded = null;
-		if (userandpw == null) {
-			return false;
-		}
+		String userandpwdecoded = null;
 
+		// decode userandpw
 		try {
+			String userandpwencoded = request.getFirstHeader("Authorization")
+					.getValue();
+			if (userandpwencoded == null) {
+				return false;
+			}
 			// http headers are supposed to be ascii
-			decoded = userandpw.substring(userandpw.lastIndexOf(' ')).trim()
-					.getBytes("US-ASCII");
+			byte[] decoded = null;
+			decoded = Base64.decodeBase64(userandpwencoded
+					.substring(userandpwencoded.lastIndexOf(' ')).trim()
+					.getBytes("US-ASCII"));
+			userandpwdecoded = new String(decoded, "UTF-8").trim();
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		decoded = Base64.decodeBase64(decoded);
-		// The string itself is utf-8
-		try {
-			userandpw = new String(decoded, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
+			// would be strange
 			e.printStackTrace();
 		}
 
-		userandpw = userandpw.trim();
-		username = userandpw.split(":")[0];
-		password = userandpw.split(":")[1];
+		// TODO: may be useful
+		username = userandpwdecoded.split(":")[0];
+		password = userandpwdecoded.split(":")[1];
 
 		// TODO: real user and password
-		if (userandpw.equals("FooUser:FooPassword")) {
+		if (userandpwdecoded.equals("FooUser:FooPassword")) {
 			authentic = true;
 		}
-		System.out.println("Decoded String: " + userandpw);
+		LoggerStub.debugMsg("Decoded String: " + userandpwdecoded);
 		return authentic;
 	}
 
@@ -246,4 +253,10 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		}
 	};
 
+	private String algName;
+	private final ComputeCore comCore;
+	private HttpRequest request;
+	// this object will send the HTTP response when the handle() method is
+	// finished
+	private HttpResponse response;
 }

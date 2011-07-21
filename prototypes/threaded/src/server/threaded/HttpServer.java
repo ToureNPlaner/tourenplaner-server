@@ -7,7 +7,6 @@ package server.threaded;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.DefaultConnectionReuseStrategy;
@@ -35,27 +34,17 @@ import computecore.ComputeCore;
 
 /**
  * @author Christoph Haag, Peter Vollmer
- *
+ * 
  */
 public class HttpServer {
 
-	// TODO: better position for logging
-	static void errorLog(String msg) {
-		System.err.println("ERR: " + msg);
-	}
-
-	static void debugMsg(String msg) {
-		System.out.println("DEBUG: " + msg);
-	}
-
 	// main socket
 	private static ServerSocket s = null;
-	public static int threadCnt = 0;
-
-	private static HttpParams params;
-	private static HttpService httpService;
+	private static ComputeCore comCore = null;
 
 	public static void main(String[] args) {
+		LoggerStub.debugmsg = true;
+		LoggerStub.errmsg = true;
 		// Register Algorithms
 		AlgorithmRegistry reg = AlgorithmRegistry.getInstance();
 		reg.registerAlgorithm("ks", new KnapsackFactory());
@@ -63,15 +52,16 @@ public class HttpServer {
 		reg.registerAlgorithm("bsort", new BubblesortFactory());
 
 		// Create our ComputeCore that manages all ComputeThreads
-		ComputeCore comCore = new ComputeCore(4, 20);
-		setuphttp(comCore);
+		// must be after algorithms have been registered
+		comCore = new ComputeCore(4, 20);
+		setuphttp();
 
 		try {
 			s = new ServerSocket(8081);
 		} catch (IOException e) {
-			// TODO: log
-			System.err.println("ServerSocket initialization error: "
+			LoggerStub.errorLog("ServerSocket initialization error: "
 					+ e.getMessage());
+			e.printStackTrace();
 			// server cannot start
 			System.exit(1);
 		}
@@ -79,11 +69,10 @@ public class HttpServer {
 		try {
 			while (!Thread.currentThread().isInterrupted()) {
 
-				Socket newSocket = s.accept();
 				DefaultHttpServerConnection conn = new DefaultHttpServerConnection();
-				System.out.println("Incoming connection from "
+				LoggerStub.debugMsg("Incoming connection from "
 						+ s.getInetAddress());
-				conn.bind(newSocket, params);
+				conn.bind(s.accept(), params);
 
 				Thread clientThread = new HttpServerThread(conn, threadCnt,
 						httpService);
@@ -95,13 +84,14 @@ public class HttpServer {
 		} catch (InterruptedIOException ex) {
 			System.out.println("Shutting down...");
 		} catch (IOException e) {
-			System.err.println("Client connection initialization error: "
+			LoggerStub.errorLog("Client connection initialization error: "
 					+ e.getMessage());
+			e.printStackTrace();
 		}
 
 	}
 
-	static void setuphttp(ComputeCore comCore) {
+	static void setuphttp() {
 		params = new SyncBasicHttpParams();
 		params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, 5000)
 				.setIntParameter(CoreConnectionPNames.SOCKET_BUFFER_SIZE,
@@ -118,11 +108,7 @@ public class HttpServer {
 						new ResponseConnControl() });
 		// Set up request handlers
 		HttpRequestHandlerRegistry reqistry = new HttpRequestHandlerRegistry();
-		// TODO: docroot file servicing brauchen wir nicht
-		// reqistry.register("*", new FileHandlerExample.HttpFileHandler("."));
-		// stattdessen ein eigener handler
-		// reqistry.register("regex for authentication", new
-		// AuthenticateHandler());
+		// TODO: do we need other handlers?
 		reqistry.register("*", new TourenPlanerRequestHandler(comCore));
 
 		// Set up the HTTP service
@@ -130,4 +116,10 @@ public class HttpServer {
 				new DefaultConnectionReuseStrategy(),
 				new DefaultHttpResponseFactory(), reqistry, params);
 	}
+
+	// TODO: only debugging to see nicely what thread sends what message
+	public static int threadCnt = 0;
+
+	private static HttpParams params;
+	private static HttpService httpService;
 }
