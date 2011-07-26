@@ -17,6 +17,7 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.http.entity.ContentProducer;
 import org.apache.http.entity.EntityTemplate;
@@ -50,8 +51,10 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		String method = request.getRequestLine().getMethod()
 				.toUpperCase(Locale.ENGLISH);
 
-		if (method.equals("HEAD")) {
-			handleHEAD();
+		if (method.equals("OPTIONS")) {
+			LoggerStub
+					.debugMsg(" RH: Options Header means: Client is javascript XSS");
+			handleOPTIONS();
 		} else if (method.equals("POST")) {
 			// direct connections not from java script XSS client
 			if (auth((HttpEntityEnclosingRequest) request)) {
@@ -152,9 +155,47 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		}
 	}
 
-	private void handleHEAD() {
-		// TODO Auto-generated method stub
+	private void handleOPTIONS() {
 
+		// TODO: probably throws some expection if not
+		boolean keepAlive = request.getFirstHeader("Connection").getValue()
+				.equals("keep-alive");
+
+		// We only allow POST methods so only allow request when Method is Post
+		String methodType = request.getFirstHeader(
+				"Access-Control-Request-Method").getValue();
+		if (methodType != null && methodType.trim().equals("POST")) {
+			// HTTP_1_1, OK
+			response.setStatusCode(HttpStatus.SC_OK);
+			response.setHeader("Connection", "Keep-Alive");
+			LoggerStub.debugMsg("Sending 1.1 OK");
+
+		} else {
+			// HTTP_1_1, FORBIDDEN
+			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
+			// We don't want to keep the connection now
+			keepAlive = false;
+			LoggerStub.debugMsg("Sending 1.1 forbidden");
+		}
+
+		LoggerStub.debugMsg("setting headers...");
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+		// TODO: content type?
+		response.setHeader("CONTENT_TYPE", "plain/text");
+		// TODO: apache http doesn't like this. should be automatically, but is
+		// it?
+		// response.setHeader("Content-Length", "0");
+
+		// TODO: are there more headers to be deleted?
+		response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+		response.addHeader("Access-Control-Allow-Headers", "Authorization");
+
+		if (!keepAlive) {
+			// what are we doing here?
+			LoggerStub.debugMsg("not keeping alive");
+			return;
+		}
 	}
 
 	public TourenPlanerRequestHandler(ComputeCore comCore) {
