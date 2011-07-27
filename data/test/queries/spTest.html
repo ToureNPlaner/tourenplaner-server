@@ -46,8 +46,10 @@
                     //var invocationHistory = response.getElementsByTagName('invocationHistory').item(0).firstChild.data;
                     invocationHistoryText = document.createTextNode(response);
                     var textDiv = document.getElementById("textDiv");
+                    textDiv.appendChild(document.createTextNode(body));
+                    textDiv.appendChild(document.createElement('br'));
                     textDiv.appendChild(invocationHistoryText);
-
+                    textDiv.appendChild(document.createElement('br'));
                 }
                 else
                 {
