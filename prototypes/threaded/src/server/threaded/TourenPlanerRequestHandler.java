@@ -102,7 +102,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 				requestJSON = (JSONObject) parser.parse(new String(
 						entityContent));
 			} catch (ParseException e) {
-				LoggerStub.errorLog("JSON Parse error: " + e.getMessage());
+				LoggerStub.errorLog(" RH: JSON Parse error: " + e.getMessage());
 				e.printStackTrace();
 			} catch (IOException e) {
 				LoggerStub
@@ -135,7 +135,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 			} catch (InterruptedException e) {
 				// TODO if server is interrupted, shut down everything here
 				LoggerStub
-						.debugMsg("Interruption of Requesthandler. Shutting down...");
+						.debugMsg(" RH: Interruption of Requesthandler. Shutting down...");
 				return;
 			}
 
@@ -169,7 +169,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		// TODO: probably throws some expection if not
 		boolean keepAlive = request.getFirstHeader("Connection").getValue()
 				.equals("keep-alive");
-		LoggerStub.debugMsg("connection is keep-alive:" + keepAlive);
+		LoggerStub.debugMsg(" RH: connection is keep-alive:" + keepAlive);
 
 		// We only allow POST methods so only allow request when Method is Post
 		String methodType = request.getFirstHeader(
@@ -178,17 +178,14 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 			// HTTP_1_1, OK
 			response.setStatusCode(HttpStatus.SC_OK);
 			response.setHeader("Connection", "Keep-Alive");
-			LoggerStub.debugMsg("Sending 1.1 OK");
-
 		} else {
 			// HTTP_1_1, FORBIDDEN
 			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
 			// We don't want to keep the connection now
 			keepAlive = false;
-			LoggerStub.debugMsg("Sending 1.1 forbidden");
+			LoggerStub.debugMsg(" RH: Sending 1.1 forbidden");
 		}
 
-		LoggerStub.debugMsg("setting headers...");
 		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
 		// TODO: content type?
 		response.setHeader("CONTENT_TYPE", "application/json");
@@ -202,7 +199,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 
 		if (!keepAlive) {
 			// what are we doing here?
-			LoggerStub.debugMsg("not keeping alive");
+			LoggerStub.debugMsg(" RH: not keeping alive");
 			return;
 		}
 	}
