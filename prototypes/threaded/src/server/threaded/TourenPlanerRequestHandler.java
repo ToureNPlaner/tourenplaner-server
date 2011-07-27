@@ -44,6 +44,9 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 	@Override
 	public void handle(final HttpRequest request, final HttpResponse response,
 			final HttpContext context) throws HttpException, IOException {
+		// always needed for javascript cross site request
+		response.setHeader("Access-Control-Allow-Origin", "*");
+
 		this.response = response;
 		this.request = request;
 		LoggerStub.debugMsg(" RH: TourenPlaner Requesthandler called");
@@ -150,8 +153,14 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 					writer.flush();
 				}
 			});
-			body.setContentType("text/html; charset=UTF-8");
+			body.setContentType("application/json; charset=UTF-8");
+
+			// TODO: make apache keep this header instead of replacing it with
+			// "Connection: Close"
+			response.setHeader("Connection", "Keep-Alive");
+
 			response.setEntity(body);
+
 		}
 	}
 
@@ -160,6 +169,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		// TODO: probably throws some expection if not
 		boolean keepAlive = request.getFirstHeader("Connection").getValue()
 				.equals("keep-alive");
+		LoggerStub.debugMsg("connection is keep-alive:" + keepAlive);
 
 		// We only allow POST methods so only allow request when Method is Post
 		String methodType = request.getFirstHeader(
@@ -179,10 +189,9 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		}
 
 		LoggerStub.debugMsg("setting headers...");
-		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
 		// TODO: content type?
-		response.setHeader("CONTENT_TYPE", "plain/text");
+		response.setHeader("CONTENT_TYPE", "application/json");
 		// TODO: apache http doesn't like this. should be automatically, but is
 		// it?
 		// response.setHeader("Content-Length", "0");
