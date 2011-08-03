@@ -5,12 +5,12 @@
     <title>Simple use of Cross-Site XMLHttpRequest (Using Access Control)</title>
     <script type="text/javascript">
     //<![CDATA[
-    
+
     var invocation = new XMLHttpRequest();
-  
+
     var invocationHistoryText;
     var body = '{"Request" : [[48.781667, 9.1752781], [52.518056, 13.393333]]}';
-    
+
     function callOtherDomain(){
         var hostname = document.getElementById("hostField").value;
         var url = 'http://'+hostname+'/sp';
@@ -20,7 +20,7 @@
             invocation.setRequestHeader('Content-Type', 'application/json');
             invocation.setRequestHeader('Authorization','Basic Rm9vVXNlcjpGb29QYXNzd29yZA==');
             invocation.onreadystatechange = handler;
-            invocation.send(body); 
+            invocation.send(body);
         } else if (invocation.readyState == 2 ||  invocation.readyState == 3) {
            invocationHistoryText = "Operation in Progress\r\n";
             var textNode = document.createTextNode(invocationHistoryText);
@@ -32,48 +32,51 @@
             var textDiv = document.getElementById("textDiv");
             textDiv.appendChild(textNode);
         }
-        
+        //used for not submitting
+        return false;
     }
     function handler(evtXHR)
     {
         if (invocation.readyState == 4)
         {
-        			
+
                 if (invocation.status == 200)
                 {
                     var response = invocation.responseText;
                     //var invocationHistory = response.getElementsByTagName('invocationHistory').item(0).firstChild.data;
                     invocationHistoryText = document.createTextNode(response);
                     var textDiv = document.getElementById("textDiv");
+                    textDiv.appendChild(document.createTextNode(body));
+                    textDiv.appendChild(document.createElement('br'));
                     textDiv.appendChild(invocationHistoryText);
-                    
+                    textDiv.appendChild(document.createElement('br'));
                 }
                 else
                 {
-                    
+
                 }
         }
         else
         {
-            
+
         }
     }
     //]]>
-    
-    
+
+
     </script>
 </head>
 <body>
-    <form id="controlsToInvoke" action="">
+    <form id="controlsToInvoke" action="#" onsubmit="return callOtherDomain()">
         <p>
-        <input value="Click to Invoke Another Site" onclick="callOtherDomain()" type="button">
-        <input id="hostField" value="localhost:8081" type="textfield">
-        </p>    
+        <input type="button" id="callOD" value="Click to Invoke Another Site" onclick="callOtherDomain()" >
+        <input type="text" id="hostField" value="localhost:8081">
+        </p>
     </form>
     <p id="intro">
-    This page POSTs XML data to another domain using cross-site 
-XMLHttpRequest mitigated by Access Control.  This is the preflight 
-scenario and the invocation to a resource on another domain takes place 
+    This page POSTs XML data to another domain using cross-site
+XMLHttpRequest mitigated by Access Control.  This is the preflight
+scenario and the invocation to a resource on another domain takes place
 using first an OPTIONS request, then an actual POST request.
     </p>
     <div id="textDiv">

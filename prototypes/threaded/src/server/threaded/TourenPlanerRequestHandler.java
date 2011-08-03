@@ -17,6 +17,7 @@ import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.MethodNotSupportedException;
 import org.apache.http.entity.ContentProducer;
 import org.apache.http.entity.EntityTemplate;
@@ -43,6 +44,9 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 	@Override
 	public void handle(final HttpRequest request, final HttpResponse response,
 			final HttpContext context) throws HttpException, IOException {
+		// always needed for javascript cross site request
+		response.setHeader("Access-Control-Allow-Origin", "*");
+
 		this.response = response;
 		this.request = request;
 		LoggerStub.debugMsg(" RH: TourenPlaner Requesthandler called");
@@ -50,8 +54,10 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 		String method = request.getRequestLine().getMethod()
 				.toUpperCase(Locale.ENGLISH);
 
-		if (method.equals("HEAD")) {
-			handleHEAD();
+		if (method.equals("OPTIONS")) {
+			LoggerStub
+					.debugMsg(" RH: Options Header means: Client is javascript XSS");
+			handleOPTIONS();
 		} else if (method.equals("POST")) {
 			// direct connections not from java script XSS client
 			if (auth((HttpEntityEnclosingRequest) request)) {
@@ -96,7 +102,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 				requestJSON = (JSONObject) parser.parse(new String(
 						entityContent));
 			} catch (ParseException e) {
-				LoggerStub.errorLog("JSON Parse error: " + e.getMessage());
+				LoggerStub.errorLog(" RH: JSON Parse error: " + e.getMessage());
 				e.printStackTrace();
 			} catch (IOException e) {
 				LoggerStub
@@ -129,7 +135,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 			} catch (InterruptedException e) {
 				// TODO if server is interrupted, shut down everything here
 				LoggerStub
-						.debugMsg("Interruption of Requesthandler. Shutting down...");
+						.debugMsg(" RH: Interruption of Requesthandler. Shutting down...");
 				return;
 			}
 
@@ -147,14 +153,55 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 					writer.flush();
 				}
 			});
-			body.setContentType("text/html; charset=UTF-8");
+			body.setContentType("application/json; charset=UTF-8");
+
+			// TODO: make apache keep this header instead of replacing it with
+			// "Connection: Close"
+			response.setHeader("Connection", "Keep-Alive");
+
 			response.setEntity(body);
+
 		}
 	}
 
-	private void handleHEAD() {
-		// TODO Auto-generated method stub
+	private void handleOPTIONS() {
 
+		// TODO: probably throws some expection if not
+		boolean keepAlive = request.getFirstHeader("Connection").getValue()
+				.equals("keep-alive");
+		LoggerStub.debugMsg(" RH: connection is keep-alive:" + keepAlive);
+
+		// We only allow POST methods so only allow request when Method is Post
+		String methodType = request.getFirstHeader(
+				"Access-Control-Request-Method").getValue();
+		if (methodType != null && methodType.trim().equals("POST")) {
+			// HTTP_1_1, OK
+			response.setStatusCode(HttpStatus.SC_OK);
+			response.setHeader("Connection", "Keep-Alive");
+		} else {
+			// HTTP_1_1, FORBIDDEN
+			response.setStatusCode(HttpStatus.SC_FORBIDDEN);
+			// We don't want to keep the connection now
+			keepAlive = false;
+			LoggerStub.debugMsg(" RH: Sending 1.1 forbidden");
+		}
+
+		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+		// TODO: content type?
+		response.setHeader("CONTENT_TYPE", "application/json");
+		// TODO: apache http doesn't like this. should be automatically, but is
+		// it?
+		// response.setHeader("Content-Length", "0");
+
+		// TODO: are there more headers to be deleted?
+		response.setHeader("Access-Control-Allow-Headers", "Content-Type");
+		response.addHeader("Access-Control-Allow-Headers", "Authorization");
+
+		if (!keepAlive) {
+			// what are we doing here?
+			LoggerStub.debugMsg(" RH: not keeping alive");
+			return;
+		}
 	}
 
 	public TourenPlanerRequestHandler(ComputeCore comCore) {

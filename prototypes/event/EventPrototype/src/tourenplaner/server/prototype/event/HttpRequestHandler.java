@@ -4,10 +4,13 @@
 
 package tourenplaner.server.prototype.event;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.*;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.*;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.*;
-import static org.jboss.netty.handler.codec.http.HttpVersion.*;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
+import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -41,7 +44,7 @@ import computecore.ComputeRequest;
 /**
  * *ToureNPlaner Event Based Prototype
  * 
- *
+ * 
  * @author Niklas Schnelle, Peter Vollmer
  * @version 0.1 Prototype
  * 
@@ -54,7 +57,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	private final JSONParser parser = new JSONParser();
 
 	/** The ComputeCore managing the threads **/
-	private ComputeCore computer;
+	private final ComputeCore computer;
 
 	public HttpRequestHandler(ComputeCore cCore) {
 		super();
@@ -131,7 +134,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-		response.setHeader(CONTENT_TYPE, "plain/text");
+		response.setHeader(CONTENT_TYPE, "application/json");
 		response.setHeader("Content-Length", "0");
 
 		response.setHeader("Access-Control-Allow-Headers", allowHeaders);
