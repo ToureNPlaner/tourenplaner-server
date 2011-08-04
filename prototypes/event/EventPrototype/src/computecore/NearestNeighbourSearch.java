@@ -6,6 +6,7 @@ package computecore;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
+import java.util.BitSet;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
@@ -219,19 +220,23 @@ public class NearestNeighbourSearch {
 		int anotherPos = 0;
 		float anotherDistance = 0.0F;
 		boolean moveDownward = true;
-		boolean[] otherChildVisited = new boolean[this.kdTreeHeight];
+		//BitSet otherChildVisited = new BitSet(this.kdTreeHeight);
+		//We have at most MAX_INT elements so fits into int
+		int otherChildVisited = 0;
 		boolean lastChildIsRightChild = false;
 		
 		while (pos > 0 || moveDownward) {
 		
 			if (moveDownward) {
-				otherChildVisited[depth] = true;
+				//otherChildVisited.set(depth);
+				otherChildVisited |= 1 << depth;
 				anotherFlag = false;
 				//left child
 				child = 2*(pos + 1) - 1;
 				
 				while (child < kdTree.length) {
-					otherChildVisited[depth] = false;
+					//otherChildVisited.clear(depth);
+					otherChildVisited ^= 1 << depth;
 					boolean coordLesserEqual;
 					
 					if (depth % 2 == 0) {
@@ -302,9 +307,11 @@ public class NearestNeighbourSearch {
 			if (axisAlignedSquareDistance <= currentBestDistance) {
 				if (!lastChildIsRightChild) {
 					//go right
-					child = 2*(pos + 1);
-					if (child < kdTree.length && otherChildVisited[depth] == false) {
-						otherChildVisited[depth] = true;
+					child = 2*(pos + 1);         
+					// otherChildVisited.bit[depth] = 0
+					if (child < kdTree.length && (otherChildVisited & (1 << depth)) == 0) {
+						//otherChildVisited.set(depth);
+						otherChildVisited |= 1 << depth;
 						pos = child;
 						moveDownward = true;
 						depth++;
@@ -312,8 +319,10 @@ public class NearestNeighbourSearch {
 				} else {
 					//go left
 					child = 2*(pos + 1) - 1;
-					if (child < kdTree.length && otherChildVisited[depth] == false) {
-						otherChildVisited[depth] = true;
+					// otherChildVisited.bit[depth] = 0
+					if (child < kdTree.length && (otherChildVisited & (1 << depth)) == 0) {
+						//otherChildVisited.set(depth);
+						otherChildVisited |= 1 << depth;
 						pos = child;
 						moveDownward = true;
 						depth++;
@@ -367,11 +376,11 @@ public class NearestNeighbourSearch {
 		}
 		System.out.println(numberOfNodes);
 		NearestNeighbourSearch nns = new NearestNeighbourSearch(numberOfNodes);
-		long time = System.currentTimeMillis();
+		long time = System.nanoTime();
 		float y = 42.1337F;
 		float x = 3.1415F;
 		int id = nns.searchNN(y, x);
-		System.out.println("Time KD: " + (System.currentTimeMillis() - time));
+		System.out.println("Time KD: " + (System.nanoTime() - time));
 		System.out.println("ID: " + id);
 		System.out.println("Dist: " + ((y-nns.yCoords[id])*(y-nns.yCoords[id]) 
 				+ (x-nns.xCoords[id])*(x-nns.xCoords[id])));
@@ -379,9 +388,9 @@ public class NearestNeighbourSearch {
 		System.out.println("y: " + nns.yCoords[id]);
 		
 		
-		time = System.currentTimeMillis();
+		time = System.nanoTime();
 		id = nns.dumbSearchNN(y, x);
-		System.out.println("Time Dumb: " + (System.currentTimeMillis() - time));
+		System.out.println("Time Dumb: " + (System.nanoTime() - time));
 		System.out.println("ID: " + id);
 		System.out.println("Dist: " + ((y-nns.yCoords[id])*(y-nns.yCoords[id]) + (x-nns.xCoords[id])*(x-nns.xCoords[id])));
 		System.out.println("x: " + nns.xCoords[id]);
