@@ -7,18 +7,20 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
 
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+
 /**
  * @author Sascha Meusel
  *
  */
 public class NearestNeighbourSearch {
 	
-	private int numberOfNodes = (int) (1 << 5);
+	private int numberOfNodes = 0;
 	
-	private float[] xCoords = new float[numberOfNodes];
-	private float[] yCoords = new float[numberOfNodes];
+	private float[] xCoords = null;
+	private float[] yCoords = null;
 	
-	private int[] kdTree = new int[numberOfNodes];
+	private int[] kdTree = null;
 	// with root and leafs
 	private int kdTreeHeight = 0;
 	
@@ -37,8 +39,42 @@ public class NearestNeighbourSearch {
 		}
 	}
 	
+	/**
+	 * Test constructor, generates pseudo random float coordinates,
+	 * depends on how much nodes you want.
+	 * With the coordinates a test k-d-tree will be constructed, 
+	 * so you can try the nearest neighbour search on it.
+	 * 
+	 * @param numberOfNodes number of nodes the test graph should have
+	 */
+	public NearestNeighbourSearch(int numberOfNodes) {
+		this.numberOfNodes = numberOfNodes;
+		System.out.println("Start k-d-Tree test initialization");
+		long time = System.currentTimeMillis();
+		this.initCoords();
+		System.out.println("Initialization time: " + (System.currentTimeMillis()- time) + " ms");
+		System.out.println("Start k-d-Tree test construction");
+		time = System.currentTimeMillis();
+		this.constructKDTree();
+		System.out.println("Construction time: " + (System.currentTimeMillis() - time) + " ms");
+	}
+	
+	/**
+	 * 
+	 */
+	public NearestNeighbourSearch(float[] latCoords, float[] lonCoords) {
+		this.numberOfNodes = latCoords.length;
+		xCoords = lonCoords;
+		yCoords = latCoords;
+		System.out.println("Start k-d-Tree construction");
+		long time = System.currentTimeMillis();
+		this.constructKDTree();
+		System.out.println("Construction time: " + (System.currentTimeMillis() - time) + " ms");
+	}
 	
 	private void initCoords() {
+		xCoords = new float[numberOfNodes];
+		yCoords = new float[numberOfNodes];
 		Random rand = new Random(10421337L);
 		for (int i=0; i < xCoords.length; i++) {
 			xCoords[i] = rand.nextFloat() * 100.0F;
@@ -67,6 +103,7 @@ public class NearestNeighbourSearch {
 	 * Nodes left of root: S + (S_L - L >= 0)? L : S_L
 	 */
 	private void constructKDTree() {
+		this.kdTree = new int[numberOfNodes];
 		Integer[] coordsSortedIDs = new Integer[numberOfNodes];
 		
 		Comparator<Integer> xComp = new XComparator();
@@ -80,8 +117,10 @@ public class NearestNeighbourSearch {
 		int currentHeightPos = 0;
 		
 		
-		// http://en.wikipedia.org/Binary_logarithm
-		int height = (int) Math.floor(Math.log(numberOfNodes) / Math.log(2));
+		// see comment of "Integer.numberOfLeadingZeros()"
+		// or http://en.wikipedia.org/Binary_logarithm
+		int height = 31 - Integer.numberOfLeadingZeros(numberOfNodes);
+		//int height = (int) Math.floor(Math.log(numberOfNodes) / Math.log(2));
 		
 		int leafs = (numberOfNodes + 1) - (1 << height);
 		this.kdTreeHeight = height + ((leafs == 0)? 0 : 1);
@@ -159,6 +198,14 @@ public class NearestNeighbourSearch {
 	}
 	
 	public int searchNN(float lat, float lon) {
+		
+		if (kdTree.length == 0) {
+			return -1;
+		}
+		if (kdTree.length == 1) {
+			return kdTree[0];
+		}
+		
 		float y = lat;
 		float x = lon;
 		
@@ -166,7 +213,7 @@ public class NearestNeighbourSearch {
 		int child = 0;
 		int depth = 0;
 		int currentBestPos = 0;
-		float currentBestDistance = 0.0F;
+		float currentBestDistance = squareDistance(0, x, y);
 		boolean anotherFlag = false;
 		
 		int anotherPos = 0;
@@ -216,8 +263,13 @@ public class NearestNeighbourSearch {
 					
 					child = 2*(pos + 1) - 1;
 				}
-				currentBestPos = pos;
-				currentBestDistance = squareDistance(currentBestPos, x, y);
+
+				float tmpDistance = squareDistance(pos, x, y);
+				if (tmpDistance < currentBestDistance) {
+					currentBestPos = pos;
+					currentBestDistance = tmpDistance;
+				}
+				
 				
 				//comparison with left child, if pos is no leaf
 				if (anotherFlag && currentBestDistance > anotherDistance) {
@@ -225,9 +277,6 @@ public class NearestNeighbourSearch {
 					currentBestDistance = anotherDistance;
 				}
 				
-				if (pos == 0) {
-					break;
-				}
 			}
 			moveDownward = false;
 			//end of downward move
@@ -307,17 +356,18 @@ public class NearestNeighbourSearch {
 		}
 	}
 	
-	
 	public static void main(String[] args) {
-		NearestNeighbourSearch nns = new NearestNeighbourSearch();
+		int numberOfNodes = (1 << 20);
+		if (args != null && args.length >= 1) {
+			try {
+				numberOfNodes = Integer.parseInt(args[0]);
+			} catch (NumberFormatException e) {
+				numberOfNodes = (1 << 20);
+			}
+		}
+		System.out.println(numberOfNodes);
+		NearestNeighbourSearch nns = new NearestNeighbourSearch(numberOfNodes);
 		long time = System.currentTimeMillis();
-		System.out.println("start");
-		nns.initCoords();
-		System.out.println("Init-Time: " + (System.currentTimeMillis()- time));
-		time = System.currentTimeMillis();
-		nns.constructKDTree();
-		System.out.println("Construct: " + (System.currentTimeMillis() - time));
-		time = System.currentTimeMillis();
 		float y = 42.1337F;
 		float x = 3.1415F;
 		int id = nns.searchNN(y, x);
@@ -337,7 +387,7 @@ public class NearestNeighbourSearch {
 		System.out.println("x: " + nns.xCoords[id]);
 		System.out.println("y: " + nns.yCoords[id]);
 		//dumb
-		nns.putKDTree();
+		//nns.putKDTree();
 	}
 	
 	
