@@ -40,7 +40,7 @@ public class HttpServer {
         reg.registerAlgorithm("bsort", new BubblesortFactory());
         
         // Create our ComputeCore that manages all ComputeThreads
-        ComputeCore comCore = new ComputeCore(2, 20);
+        ComputeCore comCore = new ComputeCore(16, 32);
         
         // Set up the event pipeline factory.
         bootstrap.setPipelineFactory(new HttpServerPipelineFactory(comCore));
