@@ -14,6 +14,7 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.ssl.SslHandler;
 
+import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 
 /**
@@ -25,34 +26,26 @@ import computecore.ComputeCore;
  * Initially based on: 
  * 	http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
  */
-public class HttpServerPipelineFactory implements ChannelPipelineFactory {
-	private ComputeCore cCore;
-	private boolean useSsl;
+public class ServerInfoOnlyPipelineFactory implements ChannelPipelineFactory {
+	private AlgorithmRegistry registry;
 	
 	
-    public HttpServerPipelineFactory(ComputeCore comCore, boolean useSsl) {
-		cCore = comCore;
-		this.useSsl = useSsl;
+    public ServerInfoOnlyPipelineFactory(AlgorithmRegistry algRegistry) {
+		registry = algRegistry;
 	}
 
 	public ChannelPipeline getPipeline() throws Exception {
         // Create a default pipeline implementation.
         ChannelPipeline pipeline = pipeline();
 
-        // TODO Implement SSL SSLEngine
-        if(useSsl){
-        	//SSLEngine engine = TPSslContextFactory.getServerContext().createSSLEngine();
-        	//engine.setUseClientMode(false);
-        	//pipeline.addLast("ssl", new SslHandler(engine));
-        }
+
 
         pipeline.addLast("decoder", new HttpRequestDecoder());
-        //  TODO Might change to handling HttpChunks on our own here we have 10 MB request size limit
-        pipeline.addLast("aggregator", new HttpChunkAggregator(10485760));
+
         pipeline.addLast("encoder", new HttpResponseEncoder());
         // We could add compression support by uncommenting the following line
         //pipeline.addLast("deflater", new HttpContentCompressor());
-        pipeline.addLast("handler", new HttpRequestHandler(cCore));
+        pipeline.addLast("handler", new ServerInfoHandler(registry));
         return pipeline;
     }
 }

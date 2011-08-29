@@ -30,6 +30,11 @@ public class HttpServer {
                         Executors.newCachedThreadPool(),
                         Executors.newCachedThreadPool()));
 
+        ServerBootstrap infoBootstrap = new ServerBootstrap(
+                new NioServerSocketChannelFactory( // Change to Nio* if you want NIO
+                        Executors.newCachedThreadPool(),
+                        Executors.newCachedThreadPool()));
+        
         // Register Algorithms
         AlgorithmRegistry reg = new AlgorithmRegistry();
         reg.registerAlgorithm(new DummyFactory());
@@ -38,9 +43,11 @@ public class HttpServer {
         ComputeCore comCore = new ComputeCore(reg, 16, 32);
         
         // Set up the event pipeline factory.
-        bootstrap.setPipelineFactory(new HttpServerPipelineFactory(comCore));
-
+        bootstrap.setPipelineFactory(new HttpServerPipelineFactory(comCore, false));
+        infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(reg));
+        
         // Bind and start to accept incoming connections.
         bootstrap.bind(new InetSocketAddress(8081));
+        infoBootstrap.bind(new InetSocketAddress(8080));
     }
 }

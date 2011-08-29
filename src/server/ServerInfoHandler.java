@@ -33,11 +33,14 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
 
@@ -51,17 +54,16 @@ import computecore.ComputeRequest;
  *          Initially based on: http://docs.jboss.org/netty/3.2/xref
  *          /org/jboss/netty/example/http/snoop/package-summary.html
  */
-public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
+public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 
 	/** JSONParser we can reuse **/
 	private final JSONParser parser = new JSONParser();
 
-	/** The ComputeCore managing the threads **/
-	private final ComputeCore computer;
+	private AlgorithmRegistry registry;
 
-	public HttpRequestHandler(ComputeCore cCore) {
+	public ServerInfoHandler(AlgorithmRegistry algRegistry) {
 		super();
-		computer = cCore;
+		registry = algRegistry;
 	}
 
 	@Override
@@ -76,35 +78,22 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			handlePreflights(request, channel);
 			return;
 		}
-
-		if (auth(request)) {
-
-			ChannelBuffer content = request.getContent();
-			if (content.readableBytes() != 0) {
-				handleContent(request, channel, content);
-			} else {
-				// Respond with No Content
-				HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
-						NO_CONTENT);
-				// Send the client the realm so it knows we want Basic Access
-				// Auth.
-				response.setHeader("WWW-Authenticate",
-						"Basic realm=\"ToureNPlaner\"");
-				// Write the response.
-				ChannelFuture future = e.getChannel().write(response);
-				future.addListener(ChannelFutureListener.CLOSE);
-			}
-		} else {
-			// Respond with Unauthorized Access
-			HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
-					UNAUTHORIZED);
-			// Send the client the realm so it knows we want Basic Access Auth.
-			response.setHeader("WWW-Authenticate",
-					"Basic realm=\"ToureNPlaner\"");
+		
+		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
+				request.getUri());
+		
+		if(queryStringDecoder.getPath().equals("/info")){
+	
+	
+			HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
+			response.setContent(ChannelBuffers.copiedBuffer("Info comes here", CharsetUtil.UTF_8));
 			// Write the response.
 			ChannelFuture future = e.getChannel().write(response);
 			future.addListener(ChannelFutureListener.CLOSE);
+		} else {
+			channel.close();
 		}
+
 	}
 
 	/**
@@ -117,9 +106,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		boolean keepAlive = isKeepAlive(request);
 		HttpResponse response;
 
-		// We only allow POST methods so only allow request when Method is Post
+		// We only allow GET methods so only allow request when Method is Post
 		String methodType = request.getHeader("Access-Control-Request-Method");
-		if (methodType != null && (methodType.trim().equals("POST") || methodType.trim().equals("GET"))) {
+		if (methodType != null && methodType.trim().equals("GET")) {
 			response = new DefaultHttpResponse(HTTP_1_1, OK);
 			response.addHeader("Connection", "Keep-Alive");
 		} else {
@@ -133,7 +122,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		allowHeaders.add("Authorization");
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
-		response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+		response.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
 		response.setHeader(CONTENT_TYPE, "application/json");
 		response.setHeader("Content-Length", "0");
 
@@ -146,81 +135,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	/**
-	 * Deals with handling the Content (json) and adds requests to the queue
-	 * 
-	 * @param request
-	 * @param channel
-	 * @param content
-	 * @throws IOException
-	 * @throws ParseException
-	 */
-	private void handleContent(HttpRequest request, Channel channel,
-			ChannelBuffer content) throws IOException, ParseException {
-		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
-				request.getUri());
-		// Map<String, List<String>> params =
-		// queryStringDecoder.getParameters();
 
-		InputStreamReader inReader = new InputStreamReader(
-				new ChannelBufferInputStream(content));
 
-		JSONObject requestJSON = (JSONObject) parser.parse(inReader);
-		// System.out.println(requestJSON);
-		@SuppressWarnings("unchecked")
-		Map<String, Object> objmap = requestJSON;
-		String algName = queryStringDecoder.getPath().substring(1);
-		ResultResponder responder = new ResultResponder(channel,
-				isKeepAlive(request));
 
-		// Create ComputeRequest and commit to workqueue
-		ComputeRequest req = new ComputeRequest(responder, algName, objmap);
-		boolean sucess = computer.submit(req);
-
-		if (!sucess) {
-			responder.writeServerOverloaded();
-		}
-	}
-
-	/**
-	 * Authenticates a Request using HTTP Basic Authentication returns true if
-	 * authorized false otherwise
-	 * 
-	 * @param request2
-	 * @return
-	 */
-	private boolean auth(HttpRequest myReq) {
-		// Why between heaven and earth does Java have AES Encryption in
-		// the standard library but not Base64 though it has it inetrnally
-		// several times
-		String userandpw = myReq.getHeader("Authorization");
-		if (userandpw == null) {
-			return false;
-		}
-
-		ChannelBuffer encodeddata;
-		ChannelBuffer data;
-		boolean result = false;
-		try {
-			// Base64 is always ASCII
-			encodeddata = ChannelBuffers.wrappedBuffer(userandpw.substring(
-					userandpw.lastIndexOf(' ')).getBytes("US-ASCII"));
-
-			data = Base64.decode(encodeddata);
-			// The string itself is utf-8
-			userandpw = new String(data.array(), "UTF-8");
-			if (userandpw.trim().equals("FooUser:FooPassword")) {
-				result = true;
-			}
-			;
-
-		} catch (UnsupportedEncodingException e) {
-			System.err
-					.println("We can't fcking convert to ASCII this box is really broken");
-		}
-
-		return result;
-	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
