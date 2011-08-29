@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<project name="tourenplaner-server" basedir="." default="main">
+	<property name="bin.dir" value="bin"/>
+	<property name="src.dir" value="src"/>
+	<property name="lib.dir" value="lib"/>
+	<property name="jar.dir" value="jar"/>
+	<property name="jar.temp.dir" value="${jar.dir}/temp"/>
+	<property name="main-class" value="server.HttpServer"/>
+	<property name="classpath" value="."/>
+	
+	<target name="clean">
+		<delete dir="${bin.dir}"/>
+		<delete dir="${jar.dir}"/>
+	</target>
+
+	<target name="compile">
+		<mkdir dir="${bin.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
+			<compilerarg value="-Xlint"/>
+			<classpath>
+				<pathelement path="${classpath}"/>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar"/>
+				</fileset>
+				<pathelement location="${bin.dir}"/>
+			</classpath>
+		</javac>
+	</target>
+
+    <target name="jar" depends="compile">
+    	<delete dir="${jar.temp.dir}"/>
+    	<mkdir dir="${jar.temp.dir}"/>
+        <jar destfile="${jar.temp.dir}/temp_${ant.project.name}.jar" basedir="${bin.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+            </manifest>
+        </jar>
+    	
+    	<copy todir="${jar.temp.dir}">
+    	    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    	</copy>
+    	
+    	<zip destfile="${jar.dir}/${ant.project.name}.jar">
+    		<zipgroupfileset dir="${jar.temp.dir}" includes="*.jar"/>
+    	</zip>
+    </target>
+	
+
+	<target name="run" depends="jar">
+		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
+	</target>
+	
+    <target name="main" depends="clean,run"/>
+</project>
