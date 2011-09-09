@@ -33,6 +33,7 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -59,9 +60,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	/** The ComputeCore managing the threads **/
 	private final ComputeCore computer;
 
-	public HttpRequestHandler(ComputeCore cCore) {
+	private Map<String, Object> serverInfo;
+
+	public HttpRequestHandler(ComputeCore cCore, Map<String, Object> serverInfo) {
 		super();
 		computer = cCore;
+		this.serverInfo = serverInfo;
 	}
 
 	@Override
@@ -190,8 +194,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	private void handleInfo(HttpRequest request, Responder responder) {
-		// TODO Auto-generated method stub
-		
+		responder.writeJSON(serverInfo, HttpResponseStatus.OK);	
 	}
 
 	/**
