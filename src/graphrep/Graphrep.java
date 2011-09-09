@@ -34,9 +34,9 @@ public class Graphrep {
 	// edges
 	private final int[] source;
 	private final int[] dest;
-	// private final int[] mult;
+	private final float[] mult;
 	private final float[] dist;
-	private final float[] elev;
+	// private final float[] elev;
 
 	final int[] offsetOut;
 
@@ -89,8 +89,8 @@ public class Graphrep {
 
 		source = new int[edgeCount];
 		dest = new int[edgeCount];
-		// TODO mult = new int[edgeCount];
-		elev = new float[edgeCount];
+		mult = new float[edgeCount];
+		// TODO elev = new float[edgeCount];
 		dist = new float[edgeCount];
 
 		// used for splitted lines in 1. nodes 2. edges
@@ -113,8 +113,8 @@ public class Graphrep {
 			currentSource = Integer.parseInt(splittedLine[0]);
 			source[i] = currentSource;
 			dest[i] = Integer.parseInt(splittedLine[1]);
-			elev[i] = Integer.parseInt(splittedLine[2]);
-			dist[i] = Float.parseFloat(splittedLine[3]);
+			dist[i] = Integer.parseInt(splittedLine[2]);
+			mult[i] = Float.parseFloat(splittedLine[3]);
 			// TODO mult[i] = Integer.parseInt(splittedLine[4]);
 
 			if (currentSource != prevSource) {
@@ -218,7 +218,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final float getOutMult(int nodeId, int edgeNum) {
-		return nodeId;// mult[offsetOut[nodeId + edgeNum]];
+		return mult[offsetOut[nodeId + edgeNum]];
 	}
 
 	/**
@@ -226,7 +226,8 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final float getOutEleDelta(int nodeId, int edgeNum) {
-		return elev[offsetOut[nodeId + edgeNum]];
+		// TODO
+		return nodeId;
 	}
 
 	/**
