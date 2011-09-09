@@ -76,35 +76,122 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			handlePreflights(request, channel);
 			return;
 		}
+		
+		
+		Responder responder = new Responder(channel, isKeepAlive(request));
 
-		if (auth(request)) {
-
-			ChannelBuffer content = request.getContent();
-			if (content.readableBytes() != 0) {
-				handleContent(request, channel, content);
+		// Get the Requeststring e.g. /info
+		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
+				request.getUri());
+		
+		String path = queryStringDecoder.getPath();
+		
+		if(path.equals("/info")){
+			
+			handleInfo(request, responder);
+			
+		} else if (path.equals("/registeruser")){
+			
+			handleRegisterUser(request, responder);
+			
+		} else if (path.equals("/authuser")){
+			
+			handleAuthUser(request, responder);
+			
+		} else if (path.equals("/getuser")){
+			
+			handleGetUser(request, responder);
+			
+		} else if (path.equals("/updateuser")){
+			
+			handleUpdateUser(request, responder);
+			
+		} else if (path.equals("/listrequests")){
+			
+			handleListRequests(request, responder);
+			
+		} else if (path.equals("/listusers")){
+			
+			handleListUsers(request, responder);
+			
+		} else if (path.startsWith("/alg")){
+			
+			if (auth(request)) {
+				String algName = queryStringDecoder.getPath().substring(4);
+				handleAlg(request, responder, algName);
 			} else {
-				// Respond with No Content
-				HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
-						NO_CONTENT);
-				// Send the client the realm so it knows we want Basic Access
-				// Auth.
-				response.setHeader("WWW-Authenticate",
-						"Basic realm=\"ToureNPlaner\"");
-				// Write the response.
-				ChannelFuture future = e.getChannel().write(response);
-				future.addListener(ChannelFutureListener.CLOSE);
+				responder.writeUnauthorizedClose();
+			}
+		}
+		
+		
+
+	}
+
+	private void handleAlg(HttpRequest request, Responder responder, String algName) throws Exception {
+	
+		ChannelBuffer content = request.getContent();
+		if (content.readableBytes() != 0) {
+			InputStreamReader inReader = new InputStreamReader(
+					new ChannelBufferInputStream(content));
+
+			JSONObject requestJSON = (JSONObject) parser.parse(inReader);
+			// System.out.println(requestJSON);
+			@SuppressWarnings("unchecked")
+			Map<String, Object> objmap = requestJSON;
+
+			// Create ComputeRequest and commit to workqueue
+			ComputeRequest req = new ComputeRequest(responder, algName, objmap);
+			boolean sucess = computer.submit(req);
+
+			if (!sucess) {
+				responder.writeServerOverloaded();
 			}
 		} else {
-			// Respond with Unauthorized Access
+			// Respond with No Content
 			HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
-					UNAUTHORIZED);
-			// Send the client the realm so it knows we want Basic Access Auth.
-			response.setHeader("WWW-Authenticate",
-					"Basic realm=\"ToureNPlaner\"");
+					NO_CONTENT);
 			// Write the response.
-			ChannelFuture future = e.getChannel().write(response);
+			ChannelFuture future = responder.getChannel().write(response);
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
+		
+		
+	}
+
+	private void handleListUsers(HttpRequest request, Responder responder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleListRequests(HttpRequest request, Responder responder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleUpdateUser(HttpRequest request, Responder responder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleGetUser(HttpRequest request, Responder responder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleAuthUser(HttpRequest request, Responder responder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleRegisterUser(HttpRequest request, Responder responder) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void handleInfo(HttpRequest request, Responder responder) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	/**
@@ -146,41 +233,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	/**
-	 * Deals with handling the Content (json) and adds requests to the queue
-	 * 
-	 * @param request
-	 * @param channel
-	 * @param content
-	 * @throws IOException
-	 * @throws ParseException
-	 */
-	private void handleContent(HttpRequest request, Channel channel,
-			ChannelBuffer content) throws IOException, ParseException {
-		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
-				request.getUri());
-		// Map<String, List<String>> params =
-		// queryStringDecoder.getParameters();
-
-		InputStreamReader inReader = new InputStreamReader(
-				new ChannelBufferInputStream(content));
-
-		JSONObject requestJSON = (JSONObject) parser.parse(inReader);
-		// System.out.println(requestJSON);
-		@SuppressWarnings("unchecked")
-		Map<String, Object> objmap = requestJSON;
-		String algName = queryStringDecoder.getPath().substring(1);
-		ResultResponder responder = new ResultResponder(channel,
-				isKeepAlive(request));
-
-		// Create ComputeRequest and commit to workqueue
-		ComputeRequest req = new ComputeRequest(responder, algName, objmap);
-		boolean sucess = computer.submit(req);
-
-		if (!sucess) {
-			responder.writeServerOverloaded();
-		}
-	}
 
 	/**
 	 * Authenticates a Request using HTTP Basic Authentication returns true if

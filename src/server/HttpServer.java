@@ -14,7 +14,7 @@ import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 
 /**
- * ToureNPlaner Event Based Prototype
+ * ToureNPlaner Event Based Server
  * 
  * @author Niklas Schnelle
  * @version 0.1 Prototype
@@ -26,12 +26,12 @@ public class HttpServer {
     public static void main(String[] args) {
         // Configure the server.
         ServerBootstrap bootstrap = new ServerBootstrap(
-                new NioServerSocketChannelFactory( // Change to Nio* if you want NIO
+                new NioServerSocketChannelFactory( // Change to Oio* if you want OIO
                         Executors.newCachedThreadPool(),
                         Executors.newCachedThreadPool()));
 
         ServerBootstrap infoBootstrap = new ServerBootstrap(
-                new NioServerSocketChannelFactory( // Change to Nio* if you want NIO
+                new NioServerSocketChannelFactory( // Change to Oio* if you want OIO
                         Executors.newCachedThreadPool(),
                         Executors.newCachedThreadPool()));
         
@@ -43,7 +43,7 @@ public class HttpServer {
         ComputeCore comCore = new ComputeCore(reg, 16, 32);
         
         // Set up the event pipeline factory.
-        bootstrap.setPipelineFactory(new HttpServerPipelineFactory(comCore, false));
+        bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore, false));
         infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(reg));
         
         // Bind and start to accept incoming connections.

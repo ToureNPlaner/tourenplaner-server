@@ -7,4 +7,4 @@ then
    exit 1
 fi
 
-./curl.sh $1 simpleSP.json sp FooUser FooPassword
+./curl.sh $1 simpleSP.json algsp FooUser FooPassword
