@@ -13,7 +13,12 @@ public class Graphrep {
 	private int nodeCount;
 	private int edgeCount;
 
-	// #File Format:
+	// note: edgeNum often refers to the relative number of an outgoing edge
+	// from a node:
+	// (first outgoing edge = 0, second outgoing edge = 1, ...)
+
+	// (deprecated) File Format:
+	// TODO: Ask Frederic for updated description
 	// #N -> Number of Nodes
 	// #X -> Number of Edges:
 	// #N * (ID oldOsmID lat lon height)
@@ -30,7 +35,10 @@ public class Graphrep {
 	int[] source;
 	int[] dest;
 	int[] mult;
+	float[] dist;
 	float[] elev;
+
+	int[] offsetOut;
 
 	/**
 	 * Constructor loads graph from disk
@@ -68,37 +76,53 @@ public class Graphrep {
 				edgeCount = Integer.parseInt(line);
 			}
 
-			// osmIDs = new int[nodeCount];
+			// TODO osmIDs = new int[nodeCount];
 			lat = new float[nodeCount];
 			lon = new float[nodeCount];
 			height = new int[nodeCount];
 
+			offsetOut = new int[nodeCount + 1];
+
 			source = new int[edgeCount];
 			dest = new int[edgeCount];
-			mult = new int[edgeCount];
+			// TODO mult = new int[edgeCount];
 			elev = new float[edgeCount];
+			dist = new float[edgeCount];
 
 			// used for splitted lines in 1. nodes 2. edges
-			String[] linesplitted;
+			String[] splittedLine;
 			System.out.println("Reading " + nodeCount + " nodes and "
 					+ edgeCount + " edges...");
 			for (int i = 0; i < nodeCount; i++) {
-				linesplitted = in.readLine().split(" ");
-				// 0 is consecutive IDs
-				// osmIDs[i] = Integer.parseInt(linesplitted[1]);
-				lat[i] = Float.parseFloat(linesplitted[1]);
-				lon[i] = Float.parseFloat(linesplitted[2]);
-				height[i] = Integer.parseInt(linesplitted[3]);
+				splittedLine = in.readLine().split(" ");
+				// TODO osmIDs[i] = Integer.parseInt(linesplitted[1]);
+				lat[i] = Float.parseFloat(splittedLine[1]);
+				lon[i] = Float.parseFloat(splittedLine[2]);
+				height[i] = Integer.parseInt(splittedLine[3]);
 			}
+
 			System.out.println("successfully read nodes");
+			int currentSource;
+			int prevSource = -1;
 			for (int i = 0; i < edgeCount; i++) {
-				linesplitted = in.readLine().split(" ");
-				source[i] = Integer.parseInt(linesplitted[0]);
-				dest[i] = Integer.parseInt(linesplitted[1]);
-				mult[i] = Integer.parseInt(linesplitted[2]);
-				elev[i] = Float.parseFloat(linesplitted[3]);
+				splittedLine = in.readLine().split(" ");
+				currentSource = Integer.parseInt(splittedLine[0]);
+				source[i] = currentSource;
+				dest[i] = Integer.parseInt(splittedLine[1]);
+				elev[i] = Integer.parseInt(splittedLine[2]);
+				dist[i] = Float.parseFloat(splittedLine[3]);
+				// TODO mult[i] = Integer.parseInt(splittedLine[4]);
+
+				if (currentSource != prevSource) {
+					offsetOut[currentSource] = i;
+					prevSource = currentSource;
+				}
 			}
 			System.out.println("successfully read edges");
+
+			for (int i = 0; i < edgeCount; i++) {
+
+			}
 		} catch (IOException e) {
 			// TODO error while reading graph file
 			e.printStackTrace();
@@ -108,24 +132,12 @@ public class Graphrep {
 		}
 	};
 
-	//
-	// Methods
-	//
-
-	//
-	// Accessor methods
-	//
-
-	//
-	// Other methods
-	//
-
 	/**
 	 * @return float
 	 * @param nodeId
 	 */
 	public float getNodeLat(int nodeId) {
-		return nodeId;
+		return lat[nodeId];
 	}
 
 	/**
@@ -133,7 +145,7 @@ public class Graphrep {
 	 * @param nodeId
 	 */
 	public float getNodeLon(int nodeId) {
-		return nodeId;
+		return lon[nodeId];
 	}
 
 	/**
@@ -141,7 +153,8 @@ public class Graphrep {
 	 * @param nodeId
 	 */
 	public long getNodeOsmId(int nodeId) {
-		return nodeId;
+		// TODO: is not in the graph txt
+		return -1;
 	}
 
 	/**
@@ -149,13 +162,14 @@ public class Graphrep {
 	 * @param nodeId
 	 */
 	public float getNodeHeight(int nodeId) {
-		return nodeId;
+		return height[nodeId];
 	}
 
 	/**
 	 * @param nodeId
 	 */
-	public void getOutEdgeCount(int nodeId) {
+	public int getOutEdgeCount(int nodeId) {
+		return (offsetOut[nodeId + 1] - offsetOut[nodeId]);
 	}
 
 	/**
@@ -163,7 +177,14 @@ public class Graphrep {
 	 * @param nodeId
 	 */
 	public int getInEdgeCount(int nodeId) {
-		return nodeId;
+		// TODO: this is bad
+		int result = 0;
+		for (int i = 0; i < edgeCount; i++) {
+			if (dest[i] == nodeId) {
+				result += 1;
+			}
+		}
+		return result;
 	}
 
 	/**
@@ -172,7 +193,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public int getOutTarget(int nodeId, int edgeNum) {
-		return edgeNum;
+		return dest[offsetOut[nodeId + edgeNum]];
 	}
 
 	/**
@@ -181,6 +202,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public int getInSource(int nodeId, int edgeNum) {
+		// TODO
 		return edgeNum;
 	}
 
@@ -190,7 +212,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public float getOutDist(int nodeId, int edgeNum) {
-		return edgeNum;
+		return dist[offsetOut[nodeId + edgeNum]];
 	}
 
 	/**
@@ -199,14 +221,15 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public float getOutMult(int nodeId, int edgeNum) {
-		return edgeNum;
+		return mult[offsetOut[nodeId + edgeNum]];
 	}
 
 	/**
 	 * @param nodeId
 	 * @param edgeNum
 	 */
-	public void getOutEleDelta(int nodeId, int edgeNum) {
+	public float getOutEleDelta(int nodeId, int edgeNum) {
+		return elev[offsetOut[nodeId + edgeNum]];
 	}
 
 	/**
@@ -215,6 +238,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public float getInDist(int nodeId, int edgeNum) {
+		// TODO
 		return edgeNum;
 	}
 
@@ -224,6 +248,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public float getInMult(int nodeId, int edgeNum) {
+		// TODO
 		return edgeNum;
 	}
 
@@ -232,20 +257,21 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public void getInEleDelta(int nodeId, int edgeNum) {
+		// TODO
 	}
 
 	/**
 	 * @return int
 	 */
 	public int getNodeCount() {
-		return 0;
+		return nodeCount;
 	}
 
 	/**
 	 * @return int
 	 */
 	public int getEdgeCount() {
-		return 0;
+		return edgeCount;
 	}
 
 }
