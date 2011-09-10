@@ -5,6 +5,8 @@ package server;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
+import java.util.Map;
+
 import javax.net.ssl.SSLEngine;
 
 import org.jboss.netty.channel.ChannelPipeline;
@@ -25,13 +27,15 @@ import computecore.ComputeCore;
  * Initially based on: 
  * 	http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
  */
-public class HttpServerPipelineFactory implements ChannelPipelineFactory {
+public class ServerPipelineFactory implements ChannelPipelineFactory {
 	private ComputeCore cCore;
 	private boolean useSsl;
+	private Map<String, Object> serverInfo;
 	
 	
-    public HttpServerPipelineFactory(ComputeCore comCore, boolean useSsl) {
+    public ServerPipelineFactory(ComputeCore comCore, boolean useSsl, Map<String, Object> serverInfo) {
 		cCore = comCore;
+		this.serverInfo = serverInfo;
 		this.useSsl = useSsl;
 	}
 
@@ -52,7 +56,8 @@ public class HttpServerPipelineFactory implements ChannelPipelineFactory {
         pipeline.addLast("encoder", new HttpResponseEncoder());
         // We could add compression support by uncommenting the following line
         //pipeline.addLast("deflater", new HttpContentCompressor());
-        pipeline.addLast("handler", new HttpRequestHandler(cCore));
+           
+        pipeline.addLast("handler", new HttpRequestHandler(cCore, serverInfo));
         return pipeline;
     }
 }

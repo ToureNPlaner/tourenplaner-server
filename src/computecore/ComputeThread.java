@@ -6,6 +6,8 @@ package computecore;
 
 import java.util.concurrent.BlockingQueue;
 
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
 import algorithms.Algorithm;
 
 /**
@@ -40,7 +42,7 @@ public class ComputeThread extends Thread {
 			    	alg.run();
 			    	res = alg.getResult();
 				    if(res !=  null){
-				    	work.getResponder().writeResponse(res);
+				    	work.getResponder().writeJSON(res, HttpResponseStatus.OK);
 				    } else {
 				    	System.err.println("Compute Thread couldn't process: "+work);
 				    }
