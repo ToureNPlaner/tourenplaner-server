@@ -18,11 +18,30 @@ public class Graphrep {
 	// (first outgoing edge = 0, second outgoing edge = 1, ...)
 
 	// (deprecated) File Format:
-	// TODO: Ask Frederic for updated description
+	// TODO: Ask Frederic for updated description (Ticket #7)
 	// #N -> Number of Nodes
 	// #X -> Number of Edges:
 	// #N * (ID oldOsmID lat lon height)
 	// #M * (source destination multiplier distance elevationDelta)
+
+	// new fileformat is probably:
+	// nodecount
+	// edgecount
+	// (nodecount *) ID lat lon height
+	// (edgecount *) source dest dist mult
+
+	// TODO: at the moment a simplistic solution for the inedges: create the
+	// file with inedges with this script (assuming it is in new file format and
+	// has no leading and no trailing newline):
+	//
+	// #!/bin/bash
+	// INFILE="$1"
+	// [[ -z $INFILE ]] && echo -e
+	// "USAGE:\n\t$0 FILENAME\n\twill create FILENAME_inedges.txt" && exit 1
+	// OUTFILE="$1_inedges.txt"
+	// EDGENUM=$(head -2 ${INFILE} | tail -1)
+	// tail -$EDGENUM ${INFILE} | sort -b -k2n,2 > ${OUTFILE}
+	// exit 0
 
 	// nodes
 	// why no osm id??
@@ -32,13 +51,20 @@ public class Graphrep {
 	private final int[] height;
 
 	// edges
-	private final int[] source;
-	private final int[] dest;
-	private final float[] mult;
-	private final float[] dist;
+	private final int[] source_out;
+	private final int[] dest_out;
+	private final float[] mult_out;
+	private final float[] dist_out;
 	// private final float[] elev;
 
 	final int[] offsetOut;
+
+	private final int[] source_in;
+	private final int[] dest_in;
+	private final float[] mult_in;
+	private final float[] dist_in;
+
+	final int[] offsetIn;
 
 	/**
 	 * Constructor loads graph from disk
@@ -87,11 +113,11 @@ public class Graphrep {
 
 		offsetOut = new int[nodeCount + 1];
 
-		source = new int[edgeCount];
-		dest = new int[edgeCount];
-		mult = new float[edgeCount];
+		source_out = new int[edgeCount];
+		dest_out = new int[edgeCount];
+		mult_out = new float[edgeCount];
 		// TODO elev = new float[edgeCount];
-		dist = new float[edgeCount];
+		dist_out = new float[edgeCount];
 
 		// used for splitted lines in 1. nodes 2. edges
 		String[] splittedLine;
@@ -111,10 +137,10 @@ public class Graphrep {
 		for (int i = 0; i < edgeCount; i++) {
 			splittedLine = in.readLine().split(" ");
 			currentSource = Integer.parseInt(splittedLine[0]);
-			source[i] = currentSource;
-			dest[i] = Integer.parseInt(splittedLine[1]);
-			dist[i] = Integer.parseInt(splittedLine[2]);
-			mult[i] = Float.parseFloat(splittedLine[3]);
+			source_out[i] = currentSource;
+			dest_out[i] = Integer.parseInt(splittedLine[1]);
+			dist_out[i] = Integer.parseInt(splittedLine[2]);
+			mult_out[i] = Float.parseFloat(splittedLine[3]);
 			// TODO mult[i] = Integer.parseInt(splittedLine[4]);
 
 			if (currentSource != prevSource) {
@@ -122,11 +148,45 @@ public class Graphrep {
 				prevSource = currentSource;
 			}
 		}
-		System.out.println("successfully read edges");
+		in.close();
+		offsetOut[nodeCount] = edgeCount;
+		System.out.println("successfully read outedges");
 
-		for (int i = 0; i < edgeCount; i++) {
+		// //// inedges
+		filename = System.getProperty("user.home") + "/germany.txt_inedges.txt";
+		try {
+			in = new BufferedReader(new FileReader(filename));
 
+		} catch (FileNotFoundException e) {
+			// TODO: what happens here?
+			e.printStackTrace();
 		}
+		offsetIn = new int[nodeCount + 1];
+
+		source_in = new int[edgeCount];
+		dest_in = new int[edgeCount];
+		mult_in = new float[edgeCount];
+		// TODO elev = new float[edgeCount];
+		dist_in = new float[edgeCount];
+		// shamelessly reuse variables
+		int prevDest = -1;
+		int currentDest;
+		for (int i = 0; i < edgeCount; i++) {
+			splittedLine = in.readLine().split(" ");
+			currentDest = Integer.parseInt(splittedLine[0]);
+			source_in[i] = currentDest;
+			dest_in[i] = Integer.parseInt(splittedLine[1]);
+			dist_in[i] = Integer.parseInt(splittedLine[2]);
+			mult_in[i] = Float.parseFloat(splittedLine[3]);
+			// TODO mult[i] = Integer.parseInt(splittedLine[4]);
+			if (currentDest != prevDest) {
+				offsetIn[currentDest] = i;
+				prevSource = currentDest;
+			}
+		}
+		in.close();
+		offsetIn[nodeCount] = edgeCount;
+		System.out.println("successfully read inedges");
 	};
 
 	/**
@@ -174,14 +234,7 @@ public class Graphrep {
 	 * @param nodeId
 	 */
 	public final int getInEdgeCount(int nodeId) {
-		// TODO: this is bad
-		int result = 0;
-		for (int i = 0; i < edgeCount; i++) {
-			if (dest[i] == nodeId) {
-				result += 1;
-			}
-		}
-		return result;
+		return offsetIn[nodeId + 1] - offsetIn[nodeId];
 	}
 
 	/**
@@ -190,7 +243,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final int getOutTarget(int nodeId, int edgeNum) {
-		return dest[offsetOut[nodeId + edgeNum]];
+		return dest_out[offsetOut[nodeId] + edgeNum];
 	}
 
 	/**
@@ -199,8 +252,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final int getInSource(int nodeId, int edgeNum) {
-		// TODO
-		return edgeNum;
+		return source_in[offsetIn[nodeId] + edgeNum];
 	}
 
 	/**
@@ -209,7 +261,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final float getOutDist(int nodeId, int edgeNum) {
-		return dist[offsetOut[nodeId + edgeNum]];
+		return dist_out[offsetOut[nodeId] + edgeNum];
 	}
 
 	/**
@@ -218,7 +270,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final float getOutMult(int nodeId, int edgeNum) {
-		return mult[offsetOut[nodeId + edgeNum]];
+		return mult_out[offsetOut[nodeId] + edgeNum];
 	}
 
 	/**
@@ -227,7 +279,7 @@ public class Graphrep {
 	 */
 	public final float getOutEleDelta(int nodeId, int edgeNum) {
 		// TODO
-		return nodeId;
+		return -1;
 	}
 
 	/**
@@ -236,8 +288,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final float getInDist(int nodeId, int edgeNum) {
-		// TODO
-		return edgeNum;
+		return dist_in[offsetIn[nodeId] + edgeNum];
 	}
 
 	/**
@@ -246,8 +297,7 @@ public class Graphrep {
 	 * @param edgeNum
 	 */
 	public final float getInMult(int nodeId, int edgeNum) {
-		// TODO
-		return edgeNum;
+		return mult_in[offsetIn[nodeId] + edgeNum];
 	}
 
 	/**
@@ -256,7 +306,7 @@ public class Graphrep {
 	 */
 	public final int getInEleDelta(int nodeId, int edgeNum) {
 		// TODO
-		return edgeNum;
+		return -1;
 	}
 
 	/**
