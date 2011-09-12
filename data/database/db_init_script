@@ -1,0 +1,36 @@
+create database tourenplaner;
+use tourenplaner;
+
+CREATE TABLE Request (
+  id INT NOT NULL AUTO_INCREMENT,
+  UserID INT NOT NULL REFERENCES user (id),
+  JSONRequest LONGBLOB,
+  JSONResponse LONGBLOB,
+  PendingFlag BOOL NOT NULL DEFAULT 1,
+  Costs INT DEFAULT 0,
+  PaidFlag BOOL NOT NULL DEFAULT 0,
+  RequestDate DATETIME NOT NULL ,
+  FinishedDate DATETIME,
+  CPUTime BIGINT,
+  FailedFlag BOOL NOT NULL DEFAULT 0,
+  FailDescription VARCHAR(5000),
+  PRIMARY KEY (ID),
+  FOREIGN KEY (UserID) REFERENCES user (id)
+);
+
+CREATE TABLE User (
+  id INT NOT NULL AUTO_INCREMENT,
+  Email VARCHAR(500) NOT NULL,
+  Passwordhash VARCHAR(500) NOT NULL,
+  Salt VARCHAR(100) NOT NULL,
+  AdminFlag BOOL NOT NULL DEFAULT 0,
+  Status ENUM('Unverified', 'Verified', 'Deleted') NOT NULL DEFAULT 'Unverified',
+  FirstName VARCHAR(100) NOT NULL,
+  LastName VARCHAR(100) NOT NULL,
+  Address VARCHAR(1000) NOT NULL,
+  RegistrationDate DATETIME NOT NULL,
+  VerifiedDate DATETIME,
+  DeletedDate DATETIME,
+  PRIMARY KEY (ID),
+  UNIQUE KEY (Email)
+);
