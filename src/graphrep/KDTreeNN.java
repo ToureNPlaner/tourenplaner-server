@@ -340,26 +340,6 @@ public class KDTreeNN implements NNSearcher {
 
 	}
 
-	public int dumbSearchNN(float y, float x) {
-		int pos = 0;
-		float squareDistance = 0;
-		float bestDistance = 0;
-		if (numberOfNodes <= 0) {
-			return -1;
-		}
-		bestDistance = (y - yCoords[pos]) * (y - yCoords[pos])
-				+ (x - xCoords[pos]) * (x - xCoords[pos]);
-		for (int i = 1; i < numberOfNodes; i++) {
-			squareDistance = (y - yCoords[i]) * (y - yCoords[i])
-					+ (x - xCoords[i]) * (x - xCoords[i]);
-			if (squareDistance < bestDistance) {
-				bestDistance = squareDistance;
-				pos = i;
-			}
-		}
-		return pos;
-	}
-
 	public void putKDTree() {
 		for (int i = 0; i < kdTree.length; i++) {
 			System.out.println(xCoords[kdTree[i]] + "," + yCoords[kdTree[i]]);
