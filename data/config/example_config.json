@@ -1,0 +1,11 @@
+{
+	"threads" : 4
+	"queuelength" : 20
+	"graphfilepath" : "/home/user/germany.txt"	
+	"private" : true
+	"dburi" : "URItodatabase"
+	"dbuser" : "databaseuser"
+	"dbpw" : "databasepassword"
+	"sslport" : 8081
+	"httpport" : 8080
+}
