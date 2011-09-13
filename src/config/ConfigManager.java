@@ -75,7 +75,7 @@ public class ConfigManager {
 	public String getEntry(String key, String defaultValue){
 		String value = null;
 		if (confMap.containsKey(key)){
-			value = (String)confMap.get(key);
+			value = confMap.get(key).toString();
 		} else {
 			value = defaultValue;
 		}

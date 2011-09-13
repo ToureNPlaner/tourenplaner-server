@@ -3,6 +3,7 @@
  */
 package computecore;
 
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,7 +48,7 @@ public class AlgorithmRegistry {
 	}
 	
 	
-	public Enumeration<AlgorithmFactory> getAlgorithms(){
-		return registry.elements();
+	public Collection<AlgorithmFactory> getAlgorithms(){
+		return registry.values();
 	}
 }
