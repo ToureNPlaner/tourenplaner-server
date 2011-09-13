@@ -207,7 +207,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		boolean keepAlive = isKeepAlive(request);
 		HttpResponse response;
 
-		// We only allow POST methods so only allow request when Method is Post
+		// We only allow POST and GET methods so only allow request when Method is Post or Get
 		String methodType = request.getHeader("Access-Control-Request-Method");
 		if (methodType != null && (methodType.trim().equals("POST") || methodType.trim().equals("GET"))) {
 			response = new DefaultHttpResponse(HTTP_1_1, OK);
@@ -264,6 +264,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			data = Base64.decode(encodeddata);
 			// The string itself is utf-8
 			userandpw = new String(data.array(), "UTF-8");
+			//TODO Database
 			if (userandpw.trim().equals("FooUser:FooPassword")) {
 				result = true;
 			}
