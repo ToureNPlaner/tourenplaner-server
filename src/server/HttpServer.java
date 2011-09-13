@@ -5,6 +5,7 @@ package server;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -38,12 +39,10 @@ public class HttpServer {
 		info.put("servertype", "public");
 		info.put("port", new Integer(8080));
 		// Enumerate Algorithms
-		Enumeration<AlgorithmFactory> algs = reg.getAlgorithms();
-		AlgorithmFactory alg;
+		Collection<AlgorithmFactory> algs = reg.getAlgorithms();
 		Map<String, Object> algInfo;
 		List<Map<String, Object>> algList= new ArrayList<Map<String,Object>>();
-		while(algs.hasMoreElements()){
-			alg = algs.nextElement();
+		for(AlgorithmFactory alg: algs){
 			algInfo = new HashMap<String, Object>(5);
 			algInfo.put("version", alg.getVersion());
 			algInfo.put("name", alg.getAlgName());
