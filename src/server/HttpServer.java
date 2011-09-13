@@ -82,7 +82,7 @@ public class HttpServer {
         
         // Set up the event pipeline factory.
         bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore, false, serverInfo));
-        infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(reg));
+        infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(serverInfo));
         
         // Bind and start to accept incoming connections.
         bootstrap.bind(new InetSocketAddress(8081));

@@ -23,7 +23,10 @@ public class ComputeRequest {
 		this.algName = algName;
 		this.request = request;
 		this.responder = responder;
+		
+		//TODO Make sure the Result object holds all additional data 
 		this.result = new ComputeResult();
+		result.putAll(request);
 	}
 	
 	public ComputeResult getResultObject(){

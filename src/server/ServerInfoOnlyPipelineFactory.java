@@ -5,6 +5,8 @@ package server;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
+import java.util.Map;
+
 import javax.net.ssl.SSLEngine;
 
 import org.jboss.netty.channel.ChannelPipeline;
@@ -27,11 +29,11 @@ import computecore.ComputeCore;
  * 	http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
  */
 public class ServerInfoOnlyPipelineFactory implements ChannelPipelineFactory {
-	private AlgorithmRegistry registry;
+	private Map<String, Object> info;
 	
 	
-    public ServerInfoOnlyPipelineFactory(AlgorithmRegistry algRegistry) {
-		registry = algRegistry;
+    public ServerInfoOnlyPipelineFactory(Map<String, Object> sInfo) {
+		info = sInfo;
 	}
 
 	public ChannelPipeline getPipeline() throws Exception {
@@ -45,7 +47,7 @@ public class ServerInfoOnlyPipelineFactory implements ChannelPipelineFactory {
         pipeline.addLast("encoder", new HttpResponseEncoder());
         // We could add compression support by uncommenting the following line
         //pipeline.addLast("deflater", new HttpContentCompressor());
-        pipeline.addLast("handler", new ServerInfoHandler(registry));
+        pipeline.addLast("handler", new ServerInfoHandler(info));
         return pipeline;
     }
 }

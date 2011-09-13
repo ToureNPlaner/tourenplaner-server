@@ -59,11 +59,11 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 	/** JSONParser we can reuse **/
 	private final JSONParser parser = new JSONParser();
 
-	private AlgorithmRegistry registry;
+	private Map<String, Object> info;
 
-	public ServerInfoHandler(AlgorithmRegistry algRegistry) {
+	public ServerInfoHandler(Map<String, Object> sInfo) {
 		super();
-		registry = algRegistry;
+		info = sInfo;
 	}
 
 	@Override
@@ -79,21 +79,19 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 			return;
 		}
 		
+		
+		Responder responder = new Responder(channel, false);
+
+		// Get the Requeststring e.g. /info
 		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
 				request.getUri());
 		
-		if(queryStringDecoder.getPath().equals("/info")){
-	
-	
-			HttpResponse response = new DefaultHttpResponse(HTTP_1_1, OK);
-			response.setContent(ChannelBuffers.copiedBuffer("Info comes here", CharsetUtil.UTF_8));
-			// Write the response.
-			ChannelFuture future = e.getChannel().write(response);
-			future.addListener(ChannelFutureListener.CLOSE);
-		} else {
-			channel.close();
+		String path = queryStringDecoder.getPath();
+		
+		if(path.equals("/info")){
+			
+			responder.writeJSON(info, HttpResponseStatus.OK);
 		}
-
 	}
 
 	/**
