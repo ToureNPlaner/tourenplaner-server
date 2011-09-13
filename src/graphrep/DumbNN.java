@@ -6,7 +6,7 @@ package graphrep;
  * @author Christoph Haag
  */
 public class DumbNN implements NNSearcher {
-
+	private static final long serialVersionUID = 1L;
 	Graphrep graphrep;
 
 	public DumbNN(Graphrep graphrep) {

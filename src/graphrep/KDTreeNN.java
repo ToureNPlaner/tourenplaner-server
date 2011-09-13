@@ -12,6 +12,7 @@ import java.util.Random;
  * 
  */
 public class KDTreeNN implements NNSearcher {
+	private static final long serialVersionUID = 1L;
 
 	private int numberOfNodes = 0;
 

@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 
 /**
  * Class Graphrep
  */
-public class Graphrep {
+public class Graphrep implements Serializable {
+	private static final long serialVersionUID = 1L;
 
 	private final NNSearcher searcher;
 
@@ -56,7 +58,7 @@ public class Graphrep {
 	private final int[] source_out;
 	private final int[] dest_out;
 	private final float[] mult_out;
-	private final float[] dist_out;
+	private final int[] dist_out;
 	// private final float[] elev;
 
 	final int[] offsetOut;
@@ -64,7 +66,7 @@ public class Graphrep {
 	private final int[] source_in;
 	private final int[] dest_in;
 	private final float[] mult_in;
-	private final float[] dist_in;
+	private final int[] dist_in;
 
 	final int[] offsetIn;
 
@@ -120,7 +122,7 @@ public class Graphrep {
 		dest_out = new int[edgeCount];
 		mult_out = new float[edgeCount];
 		// TODO elev = new float[edgeCount];
-		dist_out = new float[edgeCount];
+		dist_out = new int[edgeCount];
 
 		// used for splitted lines in 1. nodes 2. edges
 		String[] splittedLine;
@@ -170,7 +172,7 @@ public class Graphrep {
 		dest_in = new int[edgeCount];
 		mult_in = new float[edgeCount];
 		// TODO elev = new float[edgeCount];
-		dist_in = new float[edgeCount];
+		dist_in = new int[edgeCount];
 		// shamelessly reuse variables
 		int prevDest = -1;
 		int currentDest;
@@ -277,7 +279,7 @@ public class Graphrep {
 	 * @param nodeId
 	 * @param edgeNum
 	 */
-	public final float getOutDist(int nodeId, int edgeNum) {
+	public final int getOutDist(int nodeId, int edgeNum) {
 		return dist_out[offsetOut[nodeId] + edgeNum];
 	}
 
@@ -304,7 +306,7 @@ public class Graphrep {
 	 * @param nodeId
 	 * @param edgeNum
 	 */
-	public final float getInDist(int nodeId, int edgeNum) {
+	public final int getInDist(int nodeId, int edgeNum) {
 		return dist_in[offsetIn[nodeId] + edgeNum];
 	}
 
