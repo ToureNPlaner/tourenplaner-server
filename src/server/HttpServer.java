@@ -20,6 +20,7 @@ import algorithms.DummyFactory;
 import algorithms.GraphAlgorithmFactory;
 import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
+import config.ConfigManager;
 
 /**
  * ToureNPlaner Event Based Server
@@ -37,7 +38,7 @@ public class HttpServer {
 		Map<String, Object> info = new HashMap<String,Object>(4);
 		info.put("version", new Float(0.1));
 		info.put("servertype", "public");
-		info.put("port", new Integer(8080));
+		info.put("sslport", ConfigManager.getInstance().getEntryLong("sslport", 8081));
 		// Enumerate Algorithms
 		Collection<AlgorithmFactory> algs = reg.getAlgorithms();
 		Map<String, Object> algInfo;
@@ -70,12 +71,25 @@ public class HttpServer {
                         Executors.newCachedThreadPool(),
                         Executors.newCachedThreadPool()));
         
+        // Load Config
+        if(args.length == 1){
+        	try {
+				ConfigManager.Init(args[0]);
+			} catch (Exception e) {
+				System.err.println("Couldn't load configuration File: "+e.getMessage());
+				return;
+			}
+        } else {
+        	System.err.println("Missing config path parameter");
+        	return;
+        }
         // Register Algorithms
         AlgorithmRegistry reg = new AlgorithmRegistry();
         reg.registerAlgorithm(new DummyFactory());
         
+        ConfigManager cm = ConfigManager.getInstance();
         // Create our ComputeCore that manages all ComputeThreads
-        ComputeCore comCore = new ComputeCore(reg, 16, 32);
+        ComputeCore comCore = new ComputeCore(reg, (int)cm.getEntryLong("threads",2),(int)cm.getEntryLong("queuelength", 32));
         
         // Create ServerInfo object
         Map<String, Object> serverInfo = getServerInfo(reg);
@@ -85,7 +99,7 @@ public class HttpServer {
         infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(serverInfo));
         
         // Bind and start to accept incoming connections.
-        bootstrap.bind(new InetSocketAddress(8081));
-        infoBootstrap.bind(new InetSocketAddress(8080));
+        bootstrap.bind(new InetSocketAddress((int)cm.getEntryLong("sslport", 8081)));
+        infoBootstrap.bind(new InetSocketAddress((int)cm.getEntryLong("httpport", 8080)));
     }
 }
