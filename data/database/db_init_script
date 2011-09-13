@@ -21,16 +21,16 @@ CREATE TABLE Request (
 CREATE TABLE User (
   id INT NOT NULL AUTO_INCREMENT,
   Email VARCHAR(500) NOT NULL,
-  Passwordhash VARCHAR(500) NOT NULL,
-  Salt VARCHAR(100) NOT NULL,
+  Passwordhash VARCHAR(64) NOT NULL,
+  Salt VARCHAR(64) NOT NULL,
   AdminFlag BOOL NOT NULL DEFAULT 0,
-  Status ENUM('Unverified', 'Verified', 'Deleted') NOT NULL DEFAULT 'Unverified',
+  Status ENUM('NeedsVerification', 'VerificationFailed', 'Verified', 'Delete') NOT NULL DEFAULT 'NeedsVerification',
   FirstName VARCHAR(100) NOT NULL,
   LastName VARCHAR(100) NOT NULL,
   Address VARCHAR(1000) NOT NULL,
   RegistrationDate DATETIME NOT NULL,
   VerifiedDate DATETIME,
-  DeletedDate DATETIME,
+  DeleteRequestDate DATETIME,
   PRIMARY KEY (ID),
   UNIQUE KEY (Email)
 );
