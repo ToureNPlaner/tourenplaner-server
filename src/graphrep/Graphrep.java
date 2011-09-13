@@ -10,6 +10,8 @@ import java.io.IOException;
  */
 public class Graphrep {
 
+	private final NNSearcher searcher;
+
 	private final int nodeCount;
 	private final int edgeCount;
 
@@ -18,7 +20,7 @@ public class Graphrep {
 	// (first outgoing edge = 0, second outgoing edge = 1, ...)
 
 	// (deprecated) File Format:
-	// TODO: Ask Frederic for updated description (Ticket #7)
+	// TODO: Ask Frederic for updated description (#7)
 	// #N -> Number of Nodes
 	// #X -> Number of Edges:
 	// #N * (ID oldOsmID lat lon height)
@@ -46,8 +48,8 @@ public class Graphrep {
 	// nodes
 	// why no osm id??
 	// private final int[] osmIDs;
-	private final float[] lat;
-	private final float[] lon;
+	protected final float[] lat;
+	protected final float[] lon;
 	private final int[] height;
 
 	// edges
@@ -73,6 +75,7 @@ public class Graphrep {
 	 * 
 	 */
 	public Graphrep() throws IOException {
+
 		// TODO: get filename from config and replace the following
 		String filename = System.getProperty("user.home") + "/germany.txt";
 
@@ -187,7 +190,21 @@ public class Graphrep {
 		in.close();
 		offsetIn[nodeCount] = edgeCount;
 		System.out.println("successfully read inedges");
-	};
+
+		// choose the NNSearcher here
+		// DumbNN uses linear search and is slow.
+		// KDTreeNN should be faster
+		searcher = new DumbNN(this);
+	}
+
+	/**
+	 * @param lat
+	 * @param lon
+	 * @return
+	 */
+	public final int getIDForCoordinates(float lat, float lon) {
+		return searcher.getIDForCoordinates(lat, lon);
+	}
 
 	/**
 	 * @return float
