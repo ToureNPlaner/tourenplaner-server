@@ -1,10 +1,10 @@
 #!/bin/sh
 
-if [ $# -ne 1 ] 
+if [ $# -ne 2 ] 
 then
-   echo "Usage: hash.sh <URL> "
-   echo "Example: #/curl.sh komani.ath.cx:8081"
+   echo "Usage: $0 <file.json> <URL> "
+   echo "Example: #/curl.sh simpleSP.json komani.ath.cx:8081"
    exit 1
 fi
 
-./curl.sh $1 simpleSP.json algsp FooUser FooPassword
+./curl.sh "$2" "$1" algsp FooUser FooPassword

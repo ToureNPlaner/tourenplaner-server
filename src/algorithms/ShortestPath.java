@@ -12,10 +12,10 @@ public class ShortestPath extends GraphAlgorithm {
 	private ComputeRequest req = null;
 	private ComputeResult res = null;
 
-	double srclat;
-	double srclon;
-	double destlat;
-	double destlon;
+	float srclat;
+	float srclon;
+	float destlat;
+	float destlon;
 
 	int srcid;
 	int destid;
@@ -36,8 +36,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 	@Override
 	public ComputeResult getResult() {
-		// TODO Auto-generated method stub
-		return null;
+		return res;
 	}
 
 	private final int[] dist;
@@ -51,23 +50,22 @@ public class ShortestPath extends GraphAlgorithm {
 		}
 		res = req.getResultObject();
 
-		// TODO: is this the right type? Validation!
-		ArrayList<ArrayList<Float>> points = (ArrayList<ArrayList<Float>>) req
-				.get("points");
-		srclat = points.get(0).get(0);
-		srclon = points.get(0).get(1);
-		destlat = points.get(1).get(0);
-		destlon = points.get(1).get(1);
+		// TODO: Validation!
+		ArrayList<ArrayList<Double>> points = (ArrayList<ArrayList<Double>>) req
+				.get("Request");
 
-		srcid = graph.getIDForCoordinates((float) srclat, (float) srclon);
-		destid = graph.getIDForCoordinates((float) destlat, (float) destlon);
+		srclat = points.get(0).get(0).floatValue();
+		srclon = points.get(0).get(1).floatValue();
+		destlat = points.get(1).get(0).floatValue();
+		destlon = points.get(1).get(1).floatValue();
+
+		srcid = graph.getIDForCoordinates(srclat, srclon);
+		destid = graph.getIDForCoordinates(destlat, destlon);
 
 		dist[srcid] = 0;
 		graphrep.Heap h = new graphrep.Heap();
 
 		h.insert(srcid, dist[srcid]);
-
-		int inheap = 0;
 
 		int nodeID;
 		int nodeDist;
@@ -78,7 +76,6 @@ public class ShortestPath extends GraphAlgorithm {
 				nodeID = h.peekMinId();
 				nodeDist = h.peekMinDist();
 				h.removeMin();
-				inheap -= 1;
 				if (nodeID == destid) {
 					break DIJKSTRA;
 				} else if (nodeDist > dist[nodeID]) {
@@ -92,7 +89,6 @@ public class ShortestPath extends GraphAlgorithm {
 								+ graph.getOutDist(nodeID, i);
 						prev[outTarget] = nodeID;
 						h.insert(outTarget, dist[outTarget]);
-						inheap += 1;
 					}
 				}
 			} else {
