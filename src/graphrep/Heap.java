@@ -120,7 +120,7 @@ public class Heap {
 
 	private void checkHeapArray() {
 		if (heaplength * 2 + 1 >= heaparr.length) {
-			System.out.println("Increased Heap size");
+			System.err.println("Increased Heap size");
 			heaparr = Arrays.copyOf(heaparr, heaparr.length + arrayGrowthSum);
 		}
 	}

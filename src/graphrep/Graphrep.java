@@ -149,12 +149,19 @@ public class Graphrep implements Serializable {
 			// TODO mult[i] = Integer.parseInt(splittedLine[4]);
 
 			if (currentSource != prevSource) {
-				offsetOut[currentSource] = i;
+				for (int j = currentSource; j > prevSource; j--) {
+					offsetOut[j] = i;
+				}
 				prevSource = currentSource;
 			}
 		}
 		in.close();
 		offsetOut[nodeCount] = edgeCount;
+		// assuming we have at least one edge
+		for (int cnt = nodeCount - 1; offsetOut[cnt] == 0; cnt--) {
+			offsetOut[cnt] = offsetOut[cnt + 1];
+		}
+
 		System.out.println("successfully read outedges");
 
 		// //// inedges
@@ -185,12 +192,18 @@ public class Graphrep implements Serializable {
 			mult_in[i] = Float.parseFloat(splittedLine[3]);
 			// TODO mult[i] = Integer.parseInt(splittedLine[4]);
 			if (currentDest != prevDest) {
-				offsetIn[currentDest] = i;
+				for (int j = currentDest; j > prevSource; j--) {
+					offsetIn[j] = i;
+				}
 				prevSource = currentDest;
 			}
 		}
 		in.close();
 		offsetIn[nodeCount] = edgeCount;
+		// assuming we have at least one edge
+		for (int cnt = nodeCount - 1; offsetIn[cnt] == 0; cnt--) {
+			offsetIn[cnt] = offsetIn[cnt + 1];
+		}
 		System.out.println("successfully read inedges");
 
 		// choose the NNSearcher here

@@ -64,6 +64,10 @@ public class ShortestPath extends GraphAlgorithm {
 		destlat = 53.565278;
 		destlon = 10.001389;
 
+		// Mannheim
+		// srclat = 49.488889;
+		// srclon = 8.469167;
+
 		srcid = graph.getIDForCoordinates((float) srclat, (float) srclon);
 		destid = graph.getIDForCoordinates((float) destlat, (float) destlon);
 
@@ -71,6 +75,8 @@ public class ShortestPath extends GraphAlgorithm {
 		graphrep.Heap h = new graphrep.Heap();
 
 		h.insert(srcid, dist[srcid]);
+
+		int inheap = 0;
 
 		int nodeID;
 		int nodeDist;
@@ -81,6 +87,7 @@ public class ShortestPath extends GraphAlgorithm {
 				nodeID = h.peekMinId();
 				nodeDist = h.peekMinDist();
 				h.removeMin();
+				inheap -= 1;
 				if (nodeID == destid) {
 					break DIJKSTRA;
 				} else if (nodeDist > dist[nodeID]) {
@@ -94,6 +101,7 @@ public class ShortestPath extends GraphAlgorithm {
 								+ graph.getOutDist(nodeID, i);
 						prev[outTarget] = nodeID;
 						h.insert(outTarget, dist[outTarget]);
+						inheap += 1;
 					}
 				}
 			} else {
@@ -104,7 +112,9 @@ public class ShortestPath extends GraphAlgorithm {
 		}
 		System.err.println("found sp with dist = " + dist[outTarget] / 1000
 				+ " km");
-		int currNode = outTarget;
+
+		int currNode = nodeID;
+
 		ArrayList<ArrayList<Float>> list = new ArrayList<ArrayList<Float>>(
 				dist[outTarget] / 50);
 		do {
