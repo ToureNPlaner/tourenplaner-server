@@ -1,37 +1,37 @@
 create database tourenplaner;
 use tourenplaner;
 
-CREATE TABLE Request (
+CREATE TABLE Requests (
   id              INT           NOT NULL AUTO_INCREMENT,
   UserID          INT           NOT NULL REFERENCES user (id),
   JSONRequest     LONGBLOB,
   JSONResponse    LONGBLOB               DEFAULT NULL,
   PendingFlag     BOOL          NOT NULL DEFAULT 1,
-  Costs           INT                    DEFAULT NULL,
+  Costs           INT           NOT NULL DEFAULT 0,
   PaidFlag        BOOL          NOT NULL DEFAULT 0,
   RequestDate     DATETIME      NOT NULL,
   FinishedDate    DATETIME               DEFAULT NULL,
-  CPUTime         BIGINT                 DEFAULT NULL,
+  CPUTime         BIGINT        NOT NULL DEFAULT 0,
   FailedFlag      BOOL          NOT NULL DEFAULT 0,
-  FailDescription VARCHAR(5000)          DEFAULT NULL,
+  FailDescription TEXT                   DEFAULT NULL,
   PRIMARY KEY (ID),
   FOREIGN KEY (UserID) REFERENCES user (id)
 );
 
-CREATE TABLE User (
+CREATE TABLE Users (
   id                INT           NOT NULL AUTO_INCREMENT,
-  Email             VARCHAR(500)  NOT NULL,
-  Passwordhash      VARCHAR(64)   NOT NULL,
-  Salt              VARCHAR(64)   NOT NULL,
+  Email             TEXT          NOT NULL,
+  Passwordhash      TEXT          NOT NULL,
+  Salt              TEXT          NOT NULL,
   AdminFlag         BOOL          NOT NULL DEFAULT 0,
   Status            ENUM ('NeedsVerification', 
                           'VerificationFailed', 
                           'Verified', 
                           'Delete') 
                                   NOT NULL DEFAULT 'NeedsVerification',
-  FirstName         VARCHAR(100)  NOT NULL,
-  LastName          VARCHAR(100)  NOT NULL,
-  Address           VARCHAR(1000) NOT NULL,
+  FirstName         TEXT          NOT NULL,
+  LastName          TEXT          NOT NULL,
+  Address           TEXT          NOT NULL,
   RegistrationDate  DATETIME      NOT NULL,
   VerifiedDate      DATETIME               DEFAULT NULL,
   DeleteRequestDate DATETIME               DEFAULT NULL,

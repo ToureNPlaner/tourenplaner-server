@@ -6,8 +6,10 @@ package database;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 
 /**
@@ -17,6 +19,27 @@ import java.util.Date;
 public class DatabaseManager {
 		
 	private Connection con = null;
+	
+	private final PreparedStatement pstAddNewRequest;
+	private final PreparedStatement pstAddNewUser;
+	private final PreparedStatement pstGetAllRequests;
+	private final PreparedStatement pstGetAllUsers;
+	
+	private final String addNewRequestString = "INSERT INTO Requests" +
+			" (UserID, JSONRequest, RequestDate) VALUES(?)";
+	
+	private final String addNewUserString = "INSERT INTO Users" +
+			" (Email, Passwordhash, Salt, FirstName, LastName, Address," +
+			" AdminFlag, RegistrationDate) VALUES(?)";
+	
+	private final String getAllRequestsString = "SELECT id, UserID," +
+			" JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag," +
+			" RequestDate, FinishedDate, CPUTime, FailedFlag," +
+			" FailedDescription FROM Requests";
+	
+	private final String getAllUsersString = "SELECT id, Email, Passwordhash," +
+			" Salt, AdminFlag, Status, FirstName, LastName, Adress," +
+			" RegistrationDate, VerifiedDate, DeleteRequestDate FROM Users";
 	
 	/**
 	 * 
@@ -37,48 +60,88 @@ public class DatabaseManager {
 		
 		con = DriverManager.getConnection(url + dbName, userName, password);
 		
+		pstAddNewRequest = con.prepareStatement(addNewRequestString);
+		pstAddNewUser = con.prepareStatement(addNewUserString);
+		pstGetAllRequests = con.prepareStatement(getAllRequestsString);
+		pstGetAllUsers = con.prepareStatement(getAllUsersString);
+		
 	}
 	
 	
 	public void addNewRequest(int userID, byte[] jsonRequest) 
 			throws SQLException  {
+		pstAddNewRequest.setInt(1, userID);
+		pstAddNewRequest.setBytes(2, jsonRequest);
+		pstAddNewRequest.setTimestamp(3, 
+				new Timestamp(System.currentTimeMillis()));
 		
-		String statement = "INSERT INTO Request" +
-				" (UserID, JSONRequest, RequestDate) VALUES(?)";
-
-		PreparedStatement pst;
-		pst = con.prepareStatement(statement);
-		pst.setInt(1, userID);
-		pst.setBytes(2, jsonRequest);
-		pst.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-		
-		pst.executeUpdate();
-        pst.close();
+		pstAddNewRequest.executeUpdate();
 		
 	}
 	
 	public void addNewUser(String email, String passwordhash, String salt, 
 			String firstName, String lastName, String address, boolean isAdmin) 
 			throws SQLException  {
-		String statement = "INSERT INTO User" +
-				" (Email, Passwordhash, Salt, FirstName, LastName, Address, " +
-				"AdminFlag, RegistrationDate) VALUES(?)";
+		pstAddNewUser.setString(1, email);
+		pstAddNewUser.setString(2, passwordhash);
+		pstAddNewUser.setString(3, salt);
+		pstAddNewUser.setString(4, firstName);
+		pstAddNewUser.setString(5, lastName);
+		pstAddNewUser.setString(6, address);
+		pstAddNewUser.setBoolean(7, isAdmin);
+		pstAddNewUser.setTimestamp(8, 
+				new Timestamp(System.currentTimeMillis()));
 		
-		PreparedStatement pst;
-		pst = con.prepareStatement(statement);
-		pst.setString(1, email);
-		pst.setString(2, passwordhash);
-		pst.setString(3, salt);
-		pst.setString(4, firstName);
-		pst.setString(5, lastName);
-		pst.setString(6, address);
-		pst.setBoolean(7, isAdmin);
-		pst.setTimestamp(8, new Timestamp(System.currentTimeMillis()));
+		pstAddNewUser.executeUpdate();
+	}
+	
+	public RequestsDBRow[] getAllRequests() throws SQLException {
+		ResultSet resultSet = pstGetAllRequests.executeQuery();
+		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
 		
-		pst.executeUpdate();
-        pst.close();
+		while(resultSet.next()) {
+			list.add(new RequestsDBRow(
+					resultSet.getInt(1), 
+					resultSet.getInt(2), 
+					resultSet.getBytes(3), 
+					resultSet.getBytes(4),
+					resultSet.getBoolean(5), 
+					resultSet.getInt(6), 
+					resultSet.getBoolean(7), 
+					new Date(resultSet.getTimestamp(8).getTime()), 
+					new Date(resultSet.getTimestamp(9).getTime()), 
+					resultSet.getLong(10), 
+					resultSet.getBoolean(11), 
+					resultSet.getString(12)
+					));
+		}
+		
+		return list.toArray(new RequestsDBRow[0]);
 	}
 	
 	
+	public UsersDBRow[] getAllUsers() throws SQLException {
+		ResultSet resultSet = pstGetAllUsers.executeQuery();
+		ArrayList<UsersDBRow> list = new ArrayList<UsersDBRow>();
+		
+		while(resultSet.next()) {
+			list.add(new UsersDBRow(
+					resultSet.getInt(1), 
+					resultSet.getString(2), 
+					resultSet.getString(3), 
+					resultSet.getString(4),
+					resultSet.getBoolean(5), 
+					UserStatusEnum.valueOf(resultSet.getString(6)), 
+					resultSet.getString(7), 
+					resultSet.getString(8), 
+					resultSet.getString(9), 
+					new Date(resultSet.getTimestamp(10).getTime()), 
+					new Date(resultSet.getTimestamp(11).getTime()), 
+					new Date(resultSet.getTimestamp(12).getTime())
+					));
+		}
+		
+		return list.toArray(new UsersDBRow[0]);
+	}
 
 }
