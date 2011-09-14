@@ -185,17 +185,17 @@ public class Graphrep implements Serializable {
 		int currentDest;
 		for (int i = 0; i < edgeCount; i++) {
 			splittedLine = in.readLine().split(" ");
-			currentDest = Integer.parseInt(splittedLine[0]);
-			source_in[i] = currentDest;
-			dest_in[i] = Integer.parseInt(splittedLine[1]);
+			currentDest = Integer.parseInt(splittedLine[1]);
+			source_in[i] = Integer.parseInt(splittedLine[0]);
+			dest_in[i] = currentDest;
 			dist_in[i] = Integer.parseInt(splittedLine[2]);
 			mult_in[i] = Float.parseFloat(splittedLine[3]);
 			// TODO mult[i] = Integer.parseInt(splittedLine[4]);
 			if (currentDest != prevDest) {
-				for (int j = currentDest; j > prevSource; j--) {
+				for (int j = currentDest; j > prevDest; j--) {
 					offsetIn[j] = i;
 				}
-				prevSource = currentDest;
+				prevDest = currentDest;
 			}
 		}
 		in.close();
