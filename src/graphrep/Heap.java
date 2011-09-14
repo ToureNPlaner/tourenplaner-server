@@ -5,10 +5,10 @@ import java.util.Arrays;
 public class Heap {
 
 	// make this consistent:
+
 	// 1) the heaplength is the number of elements in the
 	// heap, not the real number of ints in the array
 	// 2) the pos parameter is the real position in the array
-
 	// trinary is supposed to be a little bit faster
 
 	/**
@@ -18,27 +18,24 @@ public class Heap {
 	private int heaplength;
 
 	// TODO: determine good value
-	private final int arrayGrowthSum = 20000;
+	// with 5000 no growing from stuttgart-> hamburg
+	private final int arrayGrowthSum = 5000;
 
-	public Heap(int src, int dist) {
-		heaparr = new int[20000];
-
-		// source node
-		heaparr[0] = src;
-		heaparr[1] = dist;
-		heaplength = 1;
-	}
-
-	private void heapify(int pos) {
-
+	public Heap() {
+		heaparr = new int[5000];
+		heaplength = 0;
 	}
 
 	public void insert(int id, int dist) {
-		checkHeapArray();
 		heaplength += 1;
-		heaparr[heaplength * 2] = id;
-		heaparr[heaplength * 2] = dist;
-		bubbleUp(heaplength * 2);
+		checkHeapArray();
+		heaparr[(heaplength - 1) * 2] = id;
+		heaparr[(heaplength - 1) * 2 + 1] = dist;
+		bubbleUp((heaplength - 1) * 2);
+	}
+
+	public boolean isEmpty() {
+		return heaplength <= 0;
 	}
 
 	public int peekMinId() {
@@ -50,8 +47,8 @@ public class Heap {
 	}
 
 	public void removeMin() {
-		heaparr[0] = heaparr[heaplength * 2];
-		heaparr[1] = heaparr[heaplength * 2 + 1];
+		heaparr[0] = heaparr[(heaplength - 1) * 2];
+		heaparr[1] = heaparr[(heaplength - 1) * 2 + 1];
 		heaplength -= 1;
 		siftDown(0);
 	}
@@ -60,9 +57,9 @@ public class Heap {
 		int parent;
 		int tempid;
 		int tempdist;
-		for (;;) {
+		while (true) {
 			// TODO: improve
-			parent = (((pos / 2) - 1) / 3) * 2;
+			parent = ((((pos) / 2) - 1) / 3) * 2;
 			if (parent >= 0 && heaparr[parent + 1] > heaparr[pos + 1]) {
 				tempid = heaparr[parent];
 				tempdist = heaparr[parent + 1];
@@ -87,20 +84,23 @@ public class Heap {
 		int child3;
 		int minChild;
 
-		for (;;) {
+		while (true) {
 			// TODO: improve
 			child1 = ((pos / 2) * 3 + 1) * 2;
 			child2 = child1 + 2;
-			child3 = child2 + 2;
+			child3 = child1 + 4;
 
 			minChild = -1;
-			if (child1 < heaplength) {
+
+			if (child1 <= heaplength * 2 - 2) {
 				minChild = child1;
 			}
-			if (child2 < heaplength && heaparr[child2] < minChild) {
+			if (child2 <= heaplength * 2 - 2
+					&& heaparr[child2 + 1] < heaparr[minChild + 1]) {
 				minChild = child2;
 			}
-			if (child3 < heaplength && heaparr[child3] < minChild) {
+			if (child3 <= heaplength * 2 - 2
+					&& heaparr[child3 + 1] < heaparr[minChild + 1]) {
 				minChild = child3;
 			}
 
@@ -120,6 +120,7 @@ public class Heap {
 
 	private void checkHeapArray() {
 		if (heaplength * 2 + 1 >= heaparr.length) {
+			System.out.println("Increased Heap size");
 			heaparr = Arrays.copyOf(heaparr, heaparr.length + arrayGrowthSum);
 		}
 	}
