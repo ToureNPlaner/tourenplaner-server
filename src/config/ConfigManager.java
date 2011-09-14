@@ -5,6 +5,7 @@ package config;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -46,17 +47,30 @@ public class ConfigManager {
 		this.confMap = requestJSON;
 
 	}
+	
+	/** 
+	 * Used to construct an empty config Manager that only returns defaults
+	 */
+	private ConfigManager(){}
+
 
 	/**
 	 * Initialize the config management and construct the configManager. To do
-	 * before getInstance
+	 * before getInstance. If Init fails the ConfigManager can be used
+	 * as an empty Config that only returns the deault
 	 * 
 	 * @param configPath
 	 * 
 	 * @throws Exception
 	 */
 	public static void Init(String configPath) throws Exception {
-		instance = new ConfigManager(configPath);
+		try {
+			instance = new ConfigManager(configPath);
+		} catch (IOException e){
+			// initialize with empty ConfigManager if we can't load
+			instance = new ConfigManager();
+			throw e;
+		}
 	}
 
 	/**
@@ -71,7 +85,7 @@ public class ConfigManager {
 	 */
 	public double getEntryDouble(String key, double defaultValue) {
 		Double value = null;
-		if (confMap.containsKey(key)) {
+		if (confMap != null && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (Double) confMap.get(key);
@@ -100,7 +114,7 @@ public class ConfigManager {
 
 	public boolean getEntryBool(String key, boolean defaultValue) {
 		Boolean value = null;
-		if (confMap.containsKey(key)) {
+		if (confMap != null && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (Boolean) confMap.get(key);
@@ -129,7 +143,7 @@ public class ConfigManager {
 	 */
 	public long getEntryLong(String key, long defaultValue) {
 		Long value = null;
-		if (confMap.containsKey(key)) {
+		if (confMap != null && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (Long) confMap.get(key);
@@ -158,7 +172,7 @@ public class ConfigManager {
 	 */
 	public String getEntryString(String key, String defaultValue) {
 		String value = null;
-		if (confMap.containsKey(key)) {
+		if (confMap != null && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (String) confMap.get(key);
@@ -176,12 +190,18 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Return an instance of a constructed ConfigManager. Need Init before.
+	 * Return an instance of a constructed ConfigManager. 
+	 * If there was no Init before an empty ConfigManager will be
+	 * created that always returns the default
 	 * 
 	 * 
 	 * @return instance of ConfigManager
 	 */
 	public static ConfigManager getInstance() {
+		if(instance == null){
+			instance = new ConfigManager();
+		}
+		
 		return instance;
 	}
 

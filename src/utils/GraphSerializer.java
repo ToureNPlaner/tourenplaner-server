@@ -13,7 +13,7 @@ public class GraphSerializer {
 			String filename = (args.length == 1 && args[0] != null) ? args[0]
 					: System.getProperty("user.home")
 							+ "/serializedGraphrep.dat";
-			g = new Graphrep();
+			g = new Graphrep(System.getProperty("user.home")+"germany.txt");
 			FileOutputStream fout = new FileOutputStream(filename);
 			ObjectOutputStream oos = new ObjectOutputStream(fout);
 			oos.writeObject(g);

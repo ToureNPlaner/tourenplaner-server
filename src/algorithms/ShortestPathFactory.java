@@ -3,6 +3,8 @@
  */
 package algorithms;
 
+import graphrep.Graphrep;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +19,10 @@ import utils.Graphloader;
  */
 public class ShortestPathFactory extends GraphAlgorithmFactory {
 
+	public ShortestPathFactory(Graphrep graph) {
+		super(graph);
+	}
+
 	static ShortestPath sp = null;
 
 	/*
@@ -26,21 +32,7 @@ public class ShortestPathFactory extends GraphAlgorithmFactory {
 	 */
 	@Override
 	public Algorithm createAlgorithm() {
-		// TODO: move storage of graphrep to approrpriate place instead of
-		// loading every time
-		synchronized (this) {
-			if (sp == null) {
-				try {
-					sp = new ShortestPath(Graphloader.loadGraph(System
-							.getProperty("user.home")
-							+ "/serializedGraphrep.dat"));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}
-		return sp;
+		return new ShortestPath(graph);
 	}
 
 	@Override
@@ -60,14 +52,7 @@ public class ShortestPathFactory extends GraphAlgorithmFactory {
 
 	@Override
 	public List<Map<String, Object>> getPointConstraints() {
-		List<Map<String, Object>> ret = new ArrayList<Map<String, Object>>(1);
-		Map<String, Object> map = new HashMap<String, Object>(4);
-		map.put("name", "height");
-		map.put("type", "meter");
-		map.put("min", new Float(-20.0));
-		map.put("max", new Float(9000.0));
-		ret.add(map);
-		return ret;
+		return null;
 	}
 
 	@Override

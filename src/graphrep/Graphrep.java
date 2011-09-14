@@ -76,10 +76,7 @@ public class Graphrep implements Serializable {
 	 * @throws IOException
 	 * 
 	 */
-	public Graphrep() throws IOException {
-
-		// TODO: get filename from config and replace the following
-		String filename = System.getProperty("user.home") + "/germany.txt";
+	public Graphrep(String filename) throws IOException {
 
 		BufferedReader in = null;
 		try {

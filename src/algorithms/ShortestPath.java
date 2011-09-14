@@ -24,13 +24,15 @@ public class ShortestPath extends GraphAlgorithm {
 		super(graph);
 		dist = new int[graph.getNodeCount()];
 		prev = new int[graph.getNodeCount()];
-		for (int i = 0; i < dist.length; i++) {
-			dist[i] = Integer.MAX_VALUE;
-		}
+
 	}
 
 	@Override
 	public void setRequest(ComputeRequest req) {
+		// reset dists
+		for (int i = 0; i < dist.length; i++) {
+			dist[i] = Integer.MAX_VALUE;
+		}
 		this.req = req;
 	}
 

@@ -3,6 +3,8 @@
  */
 package algorithms;
 
+import graphrep.Graphrep;
+
 import java.util.List;
 import java.util.Map;
 /**
@@ -14,6 +16,12 @@ import java.util.Map;
  */
 public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
 	
+	protected Graphrep graph;
+	
+	
+	public GraphAlgorithmFactory(Graphrep graph){
+		this.graph = graph;
+	}
 	
 	/**
 	 * Gets the List of PointConstraints in a jsonserializable Map format
