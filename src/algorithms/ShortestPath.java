@@ -9,7 +9,8 @@ import computecore.ComputeResult;
 
 public class ShortestPath extends GraphAlgorithm {
 
-	private ComputeRequest r = null;
+	private ComputeRequest req = null;
+	private ComputeResult res = null;
 
 	double srclat;
 	double srclon;
@@ -30,7 +31,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 	@Override
 	public void setRequest(ComputeRequest req) {
-		r = req;
+		this.req = req;
 	}
 
 	@Override
@@ -44,29 +45,19 @@ public class ShortestPath extends GraphAlgorithm {
 
 	@Override
 	public void run() {
-
-		if (r == null) {
+		if (req == null) {
 			// TODO: some problem here
 			// return;
 		}
+		res = req.getResultObject();
 
-		// TODO: somehow get the coordinates
-		// srclat = r.
-		// srclon = r.
-		// destlat = r.
-		// destlon = r.
-
-		// Stuttgart
-		srclat = 48.778611;
-		srclon = 9.179444;
-
-		// Hamburg
-		destlat = 53.565278;
-		destlon = 10.001389;
-
-		// Mannheim
-		// srclat = 49.488889;
-		// srclon = 8.469167;
+		// TODO: is this the right type? Validation!
+		ArrayList<ArrayList<Float>> points = (ArrayList<ArrayList<Float>>) req
+				.get("points");
+		srclat = points.get(0).get(0);
+		srclon = points.get(0).get(1);
+		destlat = points.get(1).get(0);
+		destlon = points.get(1).get(1);
 
 		srcid = graph.getIDForCoordinates((float) srclat, (float) srclon);
 		destid = graph.getIDForCoordinates((float) destlat, (float) destlon);
@@ -115,26 +106,27 @@ public class ShortestPath extends GraphAlgorithm {
 
 		int currNode = nodeID;
 
-		ArrayList<ArrayList<Float>> list = new ArrayList<ArrayList<Float>>(
+		ArrayList<ArrayList<Float>> route = new ArrayList<ArrayList<Float>>(
 				dist[outTarget] / 50);
 		do {
-			list.add(0, new ArrayList<Float>(2));
-			list.get(0).add(graph.getNodeLat(currNode));
-			list.get(0).add(graph.getNodeLon(currNode));
+			route.add(0, new ArrayList<Float>(2));
+			route.get(0).add(graph.getNodeLat(currNode));
+			route.get(0).add(graph.getNodeLon(currNode));
 			currNode = prev[currNode];
 		} while (currNode != srcid);
 
-		System.out
-				.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
-		System.out
-				.println("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\" xmlns:gpxtpx=\"http://www.garmin.com/xmlschemas/TrackPointExtension/v1\" creator=\"Oregon 400t\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd\">");
-		System.out.println("  <trk>\n"
-				+ "    <name>Example GPX Document</name>");
-		System.out.println("<trkseg>");
-		for (ArrayList<Float> l : list) {
-			System.out.println("<trkpt lat=\"" + l.get(0) + "\" lon=\""
-					+ l.get(1) + "\"></trkpt>");
-		}
-		System.out.println("</trkseg>\n</trk>\n</gpx>");
+		// System.out
+		// .println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
+		// System.out
+		// .println("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\" xmlns:gpxtpx=\"http://www.garmin.com/xmlschemas/TrackPointExtension/v1\" creator=\"Oregon 400t\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd\">");
+		// System.out.println("  <trk>\n"
+		// + "    <name>Example GPX Document</name>");
+		// System.out.println("<trkseg>");
+		// for (ArrayList<Float> l : list) {
+		// System.out.println("<trkpt lat=\"" + l.get(0) + "\" lon=\""
+		// + l.get(1) + "\"></trkpt>");
+		// }
+		// System.out.println("</trkseg>\n</trk>\n</gpx>");
+		res.put("Route", route);
 	}
 }
