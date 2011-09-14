@@ -43,11 +43,10 @@ import computecore.ComputeCore;
 import computecore.ComputeRequest;
 
 /**
- * *ToureNPlaner Event Based Prototype
- * 
- * 
+ * This handler handles HTTP Requests on the normal operation socket including
+ *  * 
  * @author Niklas Schnelle, Peter Vollmer
- * @version 0.1 Prototype
+ * @version 0.1
  * 
  *          Initially based on: http://docs.jboss.org/netty/3.2/xref
  *          /org/jboss/netty/example/http/snoop/package-summary.html
@@ -62,12 +61,21 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private Map<String, Object> serverInfo;
 
+	/**
+	 * Constructs a new RequestHandler using the given ComputeCore and ServerInfo
+	 * 
+	 * @param cCore
+	 * @param serverInfo
+	 */
 	public HttpRequestHandler(ComputeCore cCore, Map<String, Object> serverInfo) {
 		super();
 		computer = cCore;
 		this.serverInfo = serverInfo;
 	}
 
+	/**
+	 * Called when a message is received
+	 */
 	@Override
 	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
 			throws Exception {
@@ -277,7 +285,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		return result;
 	}
-
+	/**
+	 * Called when an uncaught exception occurs
+	 */
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
 			throws Exception {

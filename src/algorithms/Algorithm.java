@@ -8,6 +8,9 @@ import computecore.ComputeResult;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer
+ * 
+ * A class implementing this interface can be used by the ComputeCore
+ * to do Computations
  *
  */
 public interface Algorithm extends Runnable {

@@ -10,6 +10,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 /**
+ * The ComputeCore keeps a thread pool of ComputeThreads and allows new
+ * computations to be scheduled for execution by adding them to it's queue
+ * 
  * @author Niklas Schnelle, Peter Vollmer
  *
  */
@@ -19,6 +22,14 @@ public class ComputeCore {
 	private BlockingQueue<ComputeRequest> reqQueue;
 	private AlgorithmRegistry registry;
 	
+	
+	/**
+	 * Constructs a new ComputeCore which uses numThreads threads in it's pool
+	 * and has a waiting queue of length queueLength
+	 * @param algRegistry
+	 * @param numThreads
+	 * @param queueLength
+	 */
 	public ComputeCore(AlgorithmRegistry algRegistry , int numThreads, int queueLength){
 		threads = new ArrayList<Thread>(numThreads);
 		reqQueue = new LinkedBlockingQueue<ComputeRequest>(queueLength);

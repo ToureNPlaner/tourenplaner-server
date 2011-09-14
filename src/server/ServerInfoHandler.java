@@ -45,7 +45,7 @@ import computecore.ComputeCore;
 import computecore.ComputeRequest;
 
 /**
- * *ToureNPlaner Event Based Prototype
+ * This handler is used when a socket must only handle "/info" requests
  * 
  * 
  * @author Niklas Schnelle, Peter Vollmer

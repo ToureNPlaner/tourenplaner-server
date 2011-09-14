@@ -1,12 +1,15 @@
 /**
- * 
+ * $$\\ToureNPlaner\\$$
  */
 package algorithms;
 
 import java.util.List;
 import java.util.Map;
 /**
- * @author niklas
+ * This class is used to construct Graphalgorithms
+ * and provides additional information only used by Graphalgorithms
+ * 
+ * @author Niklas Schnelle
  *
  */
 public abstract class GraphAlgorithmFactory extends AlgorithmFactory {

@@ -10,6 +10,8 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.SERVICE_UNAV
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.util.Map;
+
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -24,7 +26,9 @@ import computecore.ComputeResult;
 
 
 /**
- * This class encapsulates the translation from ComputeResult to the wire
+ * This class encapsulates the translation from Map<String, Object> to
+ * JSON and then to the wire.
+ * As well as providing utility methods for sending answers to clients 
  * 
  * @author Niklas Schnelle, Peter Vollmer
  *
@@ -34,15 +38,30 @@ public class Responder {
 	private Channel replyChannel;
 	private boolean keepAlive;
 	
+	/**
+	 * Constructs a new Responder from the given Channel that either uses
+	 * keepAlive HTTP connections or not based on the corresponding flag
+	 * 
+	 * @param replyChan
+	 * @param keepAlive
+	 */
 	public Responder(Channel replyChan, boolean keepAlive){
 		this.replyChannel=replyChan;
 		this.keepAlive = keepAlive;
 	}
 	
+	/**
+	 * Gets the Channel associated with this Responder
+	 * @return
+	 */
 	public Channel getChannel(){
 		return replyChannel;
 	}
 	
+	/**
+	 * Writes a HTTP Unauthorized answer to the wire and closes the connection
+	 * 
+	 */
 	public void writeUnauthorizedClose(){
 		// Respond with Unauthorized Access
 		HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
@@ -55,7 +74,14 @@ public class Responder {
 		future.addListener(ChannelFutureListener.CLOSE);
 	}
 	
-	public void writeJSON(Object toWrite, HttpResponseStatus status){
+	/**
+	 * Translates a given Map<String, Object> (must be json compatible see simple_json)
+	 * to JSON and writes it onto the wire
+	 * 
+	 * @param toWrite
+	 * @param status
+	 */
+	public void writeJSON(Map<String, Object> toWrite, HttpResponseStatus status){
 		String result = JSONValue.toJSONString(toWrite);
 
         // Build the response object.
@@ -80,6 +106,9 @@ public class Responder {
         }
 	}
 	
+	/**
+	 * Writes a server overloaded response and closes the connection
+	 */
 	public void writeServerOverloaded(){
 		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, SERVICE_UNAVAILABLE);
         // Write the response.

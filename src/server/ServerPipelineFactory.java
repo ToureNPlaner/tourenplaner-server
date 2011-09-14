@@ -19,7 +19,7 @@ import org.jboss.netty.handler.ssl.SslHandler;
 import computecore.ComputeCore;
 
 /**
- * ToureNPlaner Event Based Prototype
+ * This class is used to create the ServerPipeline
  * 
  * @author Niklas Schnelle, Peter Vollmer
  * @version 0.1 Prototype

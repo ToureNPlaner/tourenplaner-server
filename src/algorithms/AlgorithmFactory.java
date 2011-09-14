@@ -12,11 +12,34 @@ package algorithms;
  *
  */
 public abstract class AlgorithmFactory {
+	/**
+	 * Creates a new instance of the Algorithm class(s) associated with
+	 * this factory
+	 * 
+	 * @return a new Algorithm instance
+	 */
 	public abstract Algorithm createAlgorithm();
 
+	/**
+	 * Used to get the URLSuffix for the constructed Algorithms
+	 * e.. "sp" will make the Algorithm available under /algsp
+	 * 
+	 * @return
+	 */
 	public abstract String getURLSuffix();
 	
+	/**
+	 * Returns the human readable name of the constructed Algorithms e.g. 
+	 * "Shortest Path"
+	 * 
+	 * @return
+	 */
 	public abstract String getAlgName();
 	
+	/**
+	 * Returns the version of the constructed Algorithms
+	 * 
+	 * @return
+	 */
 	public abstract int getVersion();
 }

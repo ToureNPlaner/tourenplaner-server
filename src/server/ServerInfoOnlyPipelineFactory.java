@@ -20,7 +20,9 @@ import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 
 /**
- * ToureNPlaner Event Based Prototype
+ * This class is used to construct a Pipeline that only
+ * handles "/info" requests as required for handling these requests on
+ * a non SSL Socket even for private servers
  * 
  * @author Niklas Schnelle, Peter Vollmer
  * @version 0.1 Prototype

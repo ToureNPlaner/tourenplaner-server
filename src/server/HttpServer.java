@@ -25,6 +25,9 @@ import config.ConfigManager;
 /**
  * ToureNPlaner Event Based Server
  * 
+ * This is the main class used to start the server and construct 
+ * utility objects like the Graphrep. and ConfigManager and ComputeCore
+ * 
  * @author Niklas Schnelle
  * @version 0.1 Prototype
  * 
@@ -34,7 +37,7 @@ import config.ConfigManager;
 public class HttpServer {
 	
 	
-	public static Map<String, Object> getServerInfo(AlgorithmRegistry reg){
+	private static Map<String, Object> getServerInfo(AlgorithmRegistry reg){
 		Map<String, Object> info = new HashMap<String,Object>(4);
 		info.put("version", new Float(0.1));
 		info.put("servertype", "public");
@@ -58,7 +61,10 @@ public class HttpServer {
 		
 		return info;
 	}
-	
+	/**
+	 * Main method for the ToureNPlaner Server
+	 * @param args
+	 */
     public static void main(String[] args) {
         // Configure the server.
         ServerBootstrap bootstrap = new ServerBootstrap(
