@@ -4,7 +4,7 @@
 package server;
 
 import graphrep.GraphRep;
-import graphrep.GraphRepDumpReader;
+import graphrep.GraphRepTextReader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -47,7 +47,7 @@ public class HttpServer {
 		info.put("version", new Float(0.1));
 		info.put(
 				"servertype",
-				ConfigManager.getInstance().getEntryBool("private", true) ? "private"
+				ConfigManager.getInstance().getEntryBool("private", false) ? "private"
 						: "public");
 		info.put("sslport",
 				ConfigManager.getInstance().getEntryLong("sslport", 8081));
@@ -108,9 +108,9 @@ public class HttpServer {
 				System.getProperty("user.home") + "/germany.txt");
 		try {
 			// choose the reader here
-			// graph = new GraphRepTextReader().createGraphRep(graphfilename);
-			graph = new GraphRepDumpReader().createGraphRep(graphfilename
-					+ ".dat");
+			graph = new GraphRepTextReader().createGraphRep(graphfilename);
+			//graph = new GraphRepDumpReader().createGraphRep(graphfilename
+			//		+ ".dat");
 		} catch (IOException e) {
 			e.printStackTrace();
 			// TODO: server won't calculate graph algorithms without a graph,
