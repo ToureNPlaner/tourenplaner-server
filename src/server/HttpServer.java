@@ -4,7 +4,7 @@
 package server;
 
 import graphrep.GraphRep;
-import graphrep.GraphRepTextReader;
+import graphrep.GraphRepDumpReader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -103,14 +103,18 @@ public class HttpServer {
 		ConfigManager cm = ConfigManager.getInstance();
 
 		// Load the Graph
-		GraphRep graph;
+		GraphRep graph = null;
+		String graphfilename = cm.getEntryString("graphfilepath",
+				System.getProperty("user.home") + "/germany.txt");
 		try {
-			graph = new GraphRepTextReader().createGraphRep(cm.getEntryString(
-					"graphfilepath", System.getProperty("user.home")
-							+ "/germany.txt"));
+			// choose the reader here
+			// graph = new GraphRepTextReader().createGraphRep(graphfilename);
+			graph = new GraphRepDumpReader().createGraphRep(graphfilename
+					+ ".dat");
 		} catch (IOException e) {
-			System.err.println("Could not load Graph: " + e.getMessage());
-			return;
+			e.printStackTrace();
+			// TODO: server won't calculate graph algorithms without a graph,
+			// but maybe it will provide some other functionality?
 		}
 
 		// Register Algorithms

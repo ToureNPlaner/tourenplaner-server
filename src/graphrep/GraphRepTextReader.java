@@ -7,17 +7,20 @@ import java.io.IOException;
 
 public class GraphRepTextReader extends GraphRepFactory {
 
+	// new fileformat is probably:
+	// nodecount
+	// edgecount
+	// (nodecount *) ID lat lon height
+	// (edgecount *) source dest dist mult
+
 	private static class Sorter {
 		private static void Sort(GraphRep graphRep) {
 
 			Heapify(graphRep);
 			int endI = graphRep.dest_in.length - 1;
 			while (endI > 0) {
-				// System.out.println(graphRep.dest_in[0]);
 				swap(graphRep, endI, 0);
-
 				siftDown(graphRep, 0, endI - 1);
-
 				endI--;
 			}
 		}
@@ -141,16 +144,15 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		// used for splitted lines in 1. nodes 2. edges
 		String[] splittedLine;
+
 		System.out.println("Reading " + graphRep.nodeCount + " nodes and "
-				+ graphRep.edgeCount + " edges...");
+				+ graphRep.edgeCount + " edges ...");
 		for (int i = 0; i < graphRep.nodeCount; i++) {
 			splittedLine = in.readLine().split(" ");
 			graphRep.lat[i] = Float.parseFloat(splittedLine[1]);
 			graphRep.lon[i] = Float.parseFloat(splittedLine[2]);
 			graphRep.height[i] = Integer.parseInt(splittedLine[3]);
 		}
-
-		System.out.println("successfully read nodes");
 
 		int currentSource;
 		int prevSource = -1;
@@ -180,18 +182,14 @@ public class GraphRepTextReader extends GraphRepFactory {
 			}
 		}
 		in.close();
+
 		graphRep.offsetOut[graphRep.nodeCount] = graphRep.edgeCount;
 		// assuming we have at least one edge
 		for (int cnt = graphRep.nodeCount - 1; graphRep.offsetOut[cnt] == 0; cnt--) {
 			graphRep.offsetOut[cnt] = graphRep.offsetOut[cnt + 1];
 		}
 
-		System.out
-				.println("Succesfully created offset of OutEdges and copied outedges");
-
 		Sorter.Sort(graphRep);
-
-		System.out.println("successfully sorted outedges");
 
 		int currentDest;
 		int prevDest = -1;
@@ -205,8 +203,6 @@ public class GraphRepTextReader extends GraphRepFactory {
 			}
 		}
 
-		System.out.println("offset2");
-
 		graphRep.offsetIn[graphRep.nodeCount] = graphRep.edgeCount;
 		// assuming we have at least one edge
 		for (int cnt = graphRep.nodeCount - 1; graphRep.offsetIn[cnt] == 0; cnt--) {
@@ -218,8 +214,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// DumbNN uses linear search and is slow.
 		// KDTreeNN should be faster
 		graphRep.searcher = new DumbNN(graphRep);
-
+		System.out.println("... success!");
 		return graphRep;
 	}
-
 }

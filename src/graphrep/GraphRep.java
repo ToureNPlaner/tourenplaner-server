@@ -17,28 +17,7 @@ public class GraphRep implements Serializable {
 	// from a node:
 	// (first outgoing edge = 0, second outgoing edge = 1, ...)
 
-	// new fileformat is probably:
-	// nodecount
-	// edgecount
-	// (nodecount *) ID lat lon height
-	// (edgecount *) source dest dist mult
-
-	// TODO: at the moment a simplistic solution for the inedges: create the
-	// file with inedges with this script (assuming it is in new file format and
-	// has no leading and no trailing newline):
-	//
-	// #!/bin/bash
-	// INFILE="$1"
-	// [[ -z $INFILE ]] && echo -e
-	// "USAGE:\n\t$0 FILENAME\n\twill create FILENAME_inedges.txt" && exit 1
-	// OUTFILE="$1_inedges.txt"
-	// EDGENUM=$(head -2 ${INFILE} | tail -1)
-	// tail -$EDGENUM ${INFILE} | sort -b -k2n,2 > ${OUTFILE}
-	// exit 0
-
 	// nodes
-	// why no osm id??
-	// private final int[] osmIDs;
 	protected float[] lat;
 	protected float[] lon;
 	protected int[] height;
