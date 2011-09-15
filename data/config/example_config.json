@@ -3,9 +3,10 @@
 	"queuelength" : 20,
 	"graphfilepath" : "/home/user/germany.txt",
 	"private" : true,
-	"dburi" : "URItodatabase",
-	"dbuser" : "databaseuser",
-	"dbpw" : "databasepassword",
+	"dburi" : "jdbc:mysql://localhost:3306/",
+	"dbuser" : "tnpuser",
+	"dbname" : "tourenplaner",
+	"dbpw" : "toureNPlaner",
 	"sslport" : 8081
 	"httpport" : 8080
 }
