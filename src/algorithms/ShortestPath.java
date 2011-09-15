@@ -3,13 +3,37 @@ package algorithms;
 import graphrep.GraphRep;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
+
+import org.json.simple.JSONAware;
 
 import computecore.ComputeRequest;
 import computecore.ComputeResult;
 
 public class ShortestPath extends GraphAlgorithm {
+
+	private class Points implements JSONAware {
+		private final float[] lats;
+		private final float[] lons;
+		StringBuilder sb;
+
+		public Points(float[] lats, float[] lons) {
+			this.lats = lats;
+			this.lons = lons;
+			sb = new StringBuilder();
+		}
+
+		@Override
+		public String toJSONString() {
+			sb.append("[");
+			for (int i = 0; i < lats.length; i++) {
+				sb.append("{\"lt\":" + lats[i] + ",\"ln\":" + lons[i] + "}");
+			}
+			sb.append("]");
+			return sb.toString();
+		}
+	}
 
 	private ComputeRequest req = null;
 	private ComputeResult res = null;
@@ -104,20 +128,28 @@ public class ShortestPath extends GraphAlgorithm {
 		System.err.println("found sp with dist = " + (dist[outTarget] / 1000)
 				+ " km");
 
+		// Find out how much space to allocate
 		int currNode = nodeID;
+		int routeElements = 0;
 
-		ArrayList<ArrayList<Map<String, Float>>> route = new ArrayList<ArrayList<Map<String, Float>>>(
-				dist[outTarget] / 50);
 		do {
-			route.add(0,
-					new ArrayList<Map<String, Float>>(dist[outTarget] / 50));
-			route.get(0).add(0, new TreeMap<String, Float>());
-			route.get(0).get(0).put("lt", graph.getNodeLat(currNode));
-			route.get(0).get(0).put("ln", graph.getNodeLon(currNode));
+			routeElements++;
 			currNode = prev[currNode];
 		} while (currNode != srcid);
 
-		Map<String, Float> misc = new TreeMap<String, Float>();
+		currNode = nodeID;
+
+		float[] lats = new float[routeElements];
+		float[] lons = new float[routeElements];
+		float distance = dist[outTarget];
+		do {
+			routeElements--;
+			lats[routeElements] = graph.getNodeLat(currNode);
+			lons[routeElements] = graph.getNodeLon(currNode);
+			currNode = prev[currNode];
+		} while (currNode != srcid);
+
+		Map<String, Float> misc = new HashMap<String, Float>(2);
 		misc.put("distance", (float) dist[outTarget]);
 
 		// System.out
@@ -132,7 +164,7 @@ public class ShortestPath extends GraphAlgorithm {
 		// + l.get(1) + "\"></trkpt>");
 		// }
 		// System.out.println("</trkseg>\n</trk>\n</gpx>");
-		res.put("points", route);
+		res.put("points", new Points(lats, lons));
 		res.put("misc", misc);
 	}
 }
