@@ -139,30 +139,25 @@ public class KDTreeNN implements NNSearcher {
 					leafDiff = subtreeLeafs;
 				}
 
-				int middlePos = subtreeLeafs
-						- 1
+				int middlePos = (subtreeLeafs - 1)
 						+ ((leafDiff > 0) ? (subtreeLeafs - leafDiff)
 								: subtreeLeafs);
 
 				// add leafs of right subtree
 				sumOfSubtreeLeafs += subtreeLeafs;
 				leafDiff = sumOfSubtreeLeafs - leafs;
-				if (leafDiff > 2 * subtreeLeafs) {
+				if (leafDiff > (2 * subtreeLeafs)) {
 					leafDiff = 2 * subtreeLeafs;
 				}
 
-				sortToIndex = sortFromIndex
-						+ 1
-						+ 2
-						* subtreeLeafs
-						- 2
-						+ ((leafDiff > 0) ? (2 * subtreeLeafs - leafDiff)
+				sortToIndex = ((sortFromIndex + 1 + (2 * subtreeLeafs)) - 2)
+						+ ((leafDiff > 0) ? ((2 * subtreeLeafs) - leafDiff)
 								: 2 * subtreeLeafs);
 				if (sortToIndex > coordsSortedIDs.length) {
 					sortToIndex = coordsSortedIDs.length;
 				}
 
-				if (currentHeightPos % 2 == 0) {
+				if ((currentHeightPos % 2) == 0) {
 					Arrays.sort(coordsSortedIDs, sortFromIndex, sortToIndex,
 							xComp);
 				} else {
@@ -194,10 +189,8 @@ public class KDTreeNN implements NNSearcher {
 	}
 
 	private float squareDistance(int kdTreePos, float x, float y) {
-		return (x - xCoords[kdTree[kdTreePos]])
-				* (x - xCoords[kdTree[kdTreePos]])
-				+ (y - yCoords[kdTree[kdTreePos]])
-				* (y - yCoords[kdTree[kdTreePos]]);
+		return ((x - xCoords[kdTree[kdTreePos]]) * (x - xCoords[kdTree[kdTreePos]]))
+				+ ((y - yCoords[kdTree[kdTreePos]]) * (y - yCoords[kdTree[kdTreePos]]));
 	}
 
 	public int searchNN(float lat, float lon) {
@@ -227,21 +220,21 @@ public class KDTreeNN implements NNSearcher {
 		int otherChildVisited = 0;
 		boolean lastChildIsRightChild = false;
 
-		while (pos > 0 || moveDownward) {
+		while ((pos > 0) || moveDownward) {
 
 			if (moveDownward) {
 				// otherChildVisited.set(depth);
 				otherChildVisited |= 1 << depth;
 				anotherFlag = false;
 				// left child
-				child = 2 * (pos + 1) - 1;
+				child = (2 * (pos + 1)) - 1;
 
 				while (child < kdTree.length) {
 					// otherChildVisited.clear(depth);
 					otherChildVisited ^= 1 << depth;
 					boolean coordLesserEqual;
 
-					if (depth % 2 == 0) {
+					if ((depth % 2) == 0) {
 						coordLesserEqual = (x <= xCoords[kdTree[pos]]);
 					} else {
 						coordLesserEqual = (y <= yCoords[kdTree[pos]]);
@@ -253,7 +246,7 @@ public class KDTreeNN implements NNSearcher {
 						// currentIsLeftChild = true;
 						depth++;
 					} else {
-						if (child + 1 < kdTree.length) {
+						if ((child + 1) < kdTree.length) {
 							// go right
 							pos = child + 1;
 							// currentIsLeftChild = false;
@@ -268,7 +261,7 @@ public class KDTreeNN implements NNSearcher {
 						}
 					}
 
-					child = 2 * (pos + 1) - 1;
+					child = (2 * (pos + 1)) - 1;
 				}
 
 				float tmpDistance = squareDistance(pos, x, y);
@@ -278,7 +271,7 @@ public class KDTreeNN implements NNSearcher {
 				}
 
 				// comparison with left child, if pos is no leaf
-				if (anotherFlag && currentBestDistance > anotherDistance) {
+				if (anotherFlag && (currentBestDistance > anotherDistance)) {
 					currentBestPos = anotherPos;
 					currentBestDistance = anotherDistance;
 				}
@@ -287,7 +280,7 @@ public class KDTreeNN implements NNSearcher {
 			moveDownward = false;
 			// end of downward move
 
-			lastChildIsRightChild = (pos % 2 == 0);
+			lastChildIsRightChild = ((pos % 2) == 0);
 			// get parent
 			pos = ((pos + 1) / 2) - 1;
 			// pos = (int) (Math.ceil(pos/2) - 1);
@@ -300,7 +293,7 @@ public class KDTreeNN implements NNSearcher {
 			}
 
 			float axisAlignedSquareDistance = 0;
-			if (depth % 2 == 0) {
+			if ((depth % 2) == 0) {
 				axisAlignedSquareDistance = (x - xCoords[kdTree[pos]])
 						* (x - xCoords[kdTree[pos]]);
 			} else {
@@ -312,8 +305,8 @@ public class KDTreeNN implements NNSearcher {
 					// go right
 					child = 2 * (pos + 1);
 					// otherChildVisited.bit[depth] = 0
-					if (child < kdTree.length
-							&& (otherChildVisited & (1 << depth)) == 0) {
+					if ((child < kdTree.length)
+							&& ((otherChildVisited & (1 << depth)) == 0)) {
 						// otherChildVisited.set(depth);
 						otherChildVisited |= 1 << depth;
 						pos = child;
@@ -322,10 +315,10 @@ public class KDTreeNN implements NNSearcher {
 					}
 				} else {
 					// go left
-					child = 2 * (pos + 1) - 1;
+					child = (2 * (pos + 1)) - 1;
 					// otherChildVisited.bit[depth] = 0
-					if (child < kdTree.length
-							&& (otherChildVisited & (1 << depth)) == 0) {
+					if ((child < kdTree.length)
+							&& ((otherChildVisited & (1 << depth)) == 0)) {
 						// otherChildVisited.set(depth);
 						otherChildVisited |= 1 << depth;
 						pos = child;
@@ -342,8 +335,8 @@ public class KDTreeNN implements NNSearcher {
 	}
 
 	public void putKDTree() {
-		for (int i = 0; i < kdTree.length; i++) {
-			System.out.println(xCoords[kdTree[i]] + "," + yCoords[kdTree[i]]);
+		for (int element : kdTree) {
+			System.out.println(xCoords[element] + "," + yCoords[element]);
 		}
 		System.out.println("--");
 		for (int i = 0; i < kdTree.length; i++) {
