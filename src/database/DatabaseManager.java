@@ -24,6 +24,8 @@ public class DatabaseManager {
 	private final PreparedStatement pstAddNewUser;
 	private final PreparedStatement pstGetAllRequests;
 	private final PreparedStatement pstGetAllUsers;
+	private final PreparedStatement pstGetUserWithEmail;
+	private final PreparedStatement pstGetUserWithId;
 	
 	private final String addNewRequestString = "INSERT INTO Requests" +
 			" (UserID, JSONRequest, RequestDate) VALUES(?)";
@@ -40,6 +42,16 @@ public class DatabaseManager {
 	private final String getAllUsersString = "SELECT id, Email, Passwordhash," +
 			" Salt, AdminFlag, Status, FirstName, LastName, Adress," +
 			" RegistrationDate, VerifiedDate, DeleteRequestDate FROM Users";
+	
+	private final String getUserStringWithEmail = "SELECT id, Email, Passwordhash," +
+			" Salt, AdminFlag, Status, FirstName, LastName, Adress," +
+			" RegistrationDate, VerifiedDate, DeleteRequestDate FROM Users" +
+			" WHERE Email = ?";
+
+	private final String getUserStringWithId = "SELECT id, Email, Passwordhash," +
+			" Salt, AdminFlag, Status, FirstName, LastName, Adress," +
+			" RegistrationDate, VerifiedDate, DeleteRequestDate FROM Users" +
+			" WHERE id = ?";
 	
 	/**
 	 * 
@@ -64,6 +76,8 @@ public class DatabaseManager {
 		pstAddNewUser = con.prepareStatement(addNewUserString);
 		pstGetAllRequests = con.prepareStatement(getAllRequestsString);
 		pstGetAllUsers = con.prepareStatement(getAllUsersString);
+		pstGetUserWithEmail = con.prepareStatement(getUserStringWithEmail);
+		pstGetUserWithId = con.prepareStatement(getUserStringWithId);
 		
 	}
 	
@@ -95,6 +109,30 @@ public class DatabaseManager {
 		pstAddNewUser.executeUpdate();
 	}
 	
+	public void modifyRequest(RequestsDBRow request) throws SQLException {
+		//TODO
+	}
+	
+	public void modifyUser(UsersDBRow request) throws SQLException {
+		//TODO
+	}
+	
+	public void deleteRequest(int id) throws SQLException {
+		//TODO
+	}
+	
+	public void deleteRequestsFromUser(int userId) throws SQLException {
+		//TODO
+	}
+	
+	public void deleteUser(int id) throws SQLException {
+		//TODO
+	}
+	
+	public void deleteUser(String email) throws SQLException {
+		//TODO
+	}
+	
 	public RequestsDBRow[] getAllRequests() throws SQLException {
 		ResultSet resultSet = pstGetAllRequests.executeQuery();
 		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
@@ -119,6 +157,29 @@ public class DatabaseManager {
 		return list.toArray(new RequestsDBRow[0]);
 	}
 	
+	public RequestsDBRow[] getAllRequests(int limit, int offset) 
+			throws SQLException {
+		//TODO
+		return null;
+	}
+	
+	public RequestsDBRow getRequest(int id) throws SQLException {
+		//TODO
+		return null;
+	}
+	
+	public RequestsDBRow[] getRequests(int userId) throws SQLException {
+		//TODO
+		return null;
+	}
+	
+	public RequestsDBRow[] getRequests(int userId, int limit, int offset) 
+			throws SQLException {
+		//TODO
+		return null;
+	}
+	
+	
 	
 	public UsersDBRow[] getAllUsers() throws SQLException {
 		ResultSet resultSet = pstGetAllUsers.executeQuery();
@@ -142,6 +203,62 @@ public class DatabaseManager {
 		}
 		
 		return list.toArray(new UsersDBRow[0]);
+	}
+	
+	public UsersDBRow[] getAllUsers(int limit, int offset) 
+			throws SQLException {
+		//TODO
+		return null;
+	}
+	
+	public UsersDBRow getUser(String email) throws SQLException {
+		pstGetUserWithEmail.setString(1, email);
+		ResultSet resultSet = pstGetUserWithEmail.executeQuery();
+		UsersDBRow user = null;
+		
+		while(resultSet.next()) {
+			user = new UsersDBRow(
+					resultSet.getInt(1), 
+					resultSet.getString(2), 
+					resultSet.getString(3), 
+					resultSet.getString(4),
+					resultSet.getBoolean(5), 
+					UserStatusEnum.valueOf(resultSet.getString(6)), 
+					resultSet.getString(7), 
+					resultSet.getString(8), 
+					resultSet.getString(9), 
+					new Date(resultSet.getTimestamp(10).getTime()), 
+					new Date(resultSet.getTimestamp(11).getTime()), 
+					new Date(resultSet.getTimestamp(12).getTime())
+					);
+		}
+		
+		return user;
+	}
+	
+	public UsersDBRow getUser(int id) throws SQLException {
+		pstGetUserWithId.setInt(1, id);
+		ResultSet resultSet = pstGetUserWithId.executeQuery();
+		UsersDBRow user = null;
+		
+		while(resultSet.next()) {
+			user = new UsersDBRow(
+					resultSet.getInt(1), 
+					resultSet.getString(2), 
+					resultSet.getString(3), 
+					resultSet.getString(4),
+					resultSet.getBoolean(5), 
+					UserStatusEnum.valueOf(resultSet.getString(6)), 
+					resultSet.getString(7), 
+					resultSet.getString(8), 
+					resultSet.getString(9), 
+					new Date(resultSet.getTimestamp(10).getTime()), 
+					new Date(resultSet.getTimestamp(11).getTime()), 
+					new Date(resultSet.getTimestamp(12).getTime())
+					);
+		}
+		
+		return user;
 	}
 
 }
