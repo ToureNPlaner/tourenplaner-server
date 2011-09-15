@@ -36,10 +36,10 @@ CREATE TABLE Users (
   VerifiedDate      DATETIME               DEFAULT NULL,
   DeleteRequestDate DATETIME               DEFAULT NULL,
   PRIMARY KEY (ID),
-  UNIQUE KEY (Email)
+  UNIQUE (Email(500))
 );
 
-INSERT INTO User (Email, Passwordhash, Salt, AdminFlag, Status, 
+INSERT INTO Users (Email, Passwordhash, Salt, AdminFlag, Status, 
   FirstName, LastName, Address, RegistrationDate, VerifiedDate) 
   VALUES('root@tourenplaner', 'rootpwhash', 'rootsalt', '1', 'Verified', 
     'ro', 'ot', 'localhost', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
