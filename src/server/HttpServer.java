@@ -45,8 +45,10 @@ public class HttpServer {
 	private static Map<String, Object> getServerInfo(AlgorithmRegistry reg) {
 		Map<String, Object> info = new HashMap<String, Object>(4);
 		info.put("version", new Float(0.1));
-		info.put("servertype",
-				ConfigManager.getInstance().getEntryBool("private", true));
+		info.put(
+				"servertype",
+				ConfigManager.getInstance().getEntryBool("private", true) ? "private"
+						: "public");
 		info.put("sslport",
 				ConfigManager.getInstance().getEntryLong("sslport", 8081));
 		// Enumerate Algorithms
@@ -122,7 +124,7 @@ public class HttpServer {
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);
 
-		if ((Boolean) serverInfo.get("private")) {
+		if (serverInfo.get("private").equals("private")) {
 			// The Bootstrap handling info only
 			ServerBootstrap infoBootstrap = new ServerBootstrap(
 					new NioServerSocketChannelFactory( // Change to Oio* if you

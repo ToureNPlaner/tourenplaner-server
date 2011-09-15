@@ -13,6 +13,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -39,6 +40,9 @@ import org.json.simple.parser.JSONParser;
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
 
+import config.ConfigManager;
+import database.DatabaseManager;
+
 /**
  * This handler handles HTTP Requests on the normal operation socket including *
  * 
@@ -60,6 +64,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private final boolean isPrivate;
 
+	private DatabaseManager dbm;
+
 	/**
 	 * Constructs a new RequestHandler using the given ComputeCore and
 	 * ServerInfo
@@ -70,9 +76,23 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	public HttpRequestHandler(ComputeCore cCore,
 			Map<String, Object> serverInfo, boolean isPrivate) {
 		super();
+		ConfigManager cm = ConfigManager.getInstance();
 		computer = cCore;
 		this.serverInfo = serverInfo;
 		this.isPrivate = isPrivate;
+		if (isPrivate) {
+			try {
+
+				this.dbm = new DatabaseManager(cm.getEntryString("dburi",
+						"jdbc:mysql://localhost:3306/"), cm.getEntryString(
+						"dbname", "tourenplaner"), cm.getEntryString("dbuser",
+						"toureNPlaner"), cm.getEntryString("dbpw",
+						"toureNPlaner"));
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/**
