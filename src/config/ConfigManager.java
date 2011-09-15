@@ -5,7 +5,6 @@ package config;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Map;
@@ -16,7 +15,8 @@ import org.json.simple.parser.JSONParser;
 /**
  * @author Peter Vollmer
  * 
- * This config manager loads configurations from a config file which is formated in JSON. 
+ *         This config manager loads configurations from a config file which is
+ *         formated in JSON.
  */
 public class ConfigManager {
 
@@ -33,11 +33,14 @@ public class ConfigManager {
 	private Map<String, Object> confMap = null;
 
 	/**
-	 * Construct the ConfigManager and loads the config from JSON file with the given file path.
+	 * Construct the ConfigManager and loads the config from JSON file with the
+	 * given file path.
 	 * 
 	 * @param configPath
 	 * @throws Exception
 	 */
+
+	@SuppressWarnings("unchecked")
 	private ConfigManager(String configPath) throws Exception {
 		BufferedReader reader = null;
 		reader = new BufferedReader(new InputStreamReader(new FileInputStream(
@@ -47,30 +50,24 @@ public class ConfigManager {
 		this.confMap = requestJSON;
 
 	}
-	
-	/** 
+
+	/**
 	 * Used to construct an empty config Manager that only returns defaults
 	 */
-	private ConfigManager(){}
-
+	private ConfigManager() {
+	}
 
 	/**
 	 * Initialize the config management and construct the configManager. To do
-	 * before getInstance. If Init fails the ConfigManager can be used
-	 * as an empty Config that only returns the deault
+	 * before getInstance. If Init fails the ConfigManager can be used as an
+	 * empty Config that only returns the default
 	 * 
 	 * @param configPath
 	 * 
 	 * @throws Exception
 	 */
 	public static void Init(String configPath) throws Exception {
-		try {
-			instance = new ConfigManager(configPath);
-		} catch (IOException e){
-			// initialize with empty ConfigManager if we can't load
-			instance = new ConfigManager();
-			throw e;
-		}
+		instance = new ConfigManager(configPath);
 	}
 
 	/**
@@ -190,18 +187,18 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Return an instance of a constructed ConfigManager. 
-	 * If there was no Init before an empty ConfigManager will be
-	 * created that always returns the default
+	 * Return an instance of a constructed ConfigManager. If there was no Init
+	 * before an empty ConfigManager will be created that always returns the
+	 * default
 	 * 
 	 * 
 	 * @return instance of ConfigManager
 	 */
 	public static ConfigManager getInstance() {
-		if(instance == null){
+		if (instance == null) {
 			instance = new ConfigManager();
 		}
-		
+
 		return instance;
 	}
 
