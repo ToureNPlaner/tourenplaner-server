@@ -60,8 +60,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int cRI;
 			int cMaxI;
 
-			while (topI * 3 + 1 <= endI) {
-				cLI = topI * 3 + 1;
+			while (((topI * 3) + 1) <= endI) {
+				cLI = (topI * 3) + 1;
 				cMI = cLI + 1;
 				cRI = cLI + 2;
 				cMaxI = topI;
@@ -69,10 +69,10 @@ public class GraphRepTextReader extends GraphRepFactory {
 				if (less(graphRep, cMaxI, cLI)) {
 					cMaxI = cLI;
 				}
-				if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
+				if ((cMI <= endI) && less(graphRep, cMaxI, cMI)) {
 					cMaxI = cMI;
 				}
-				if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
+				if ((cRI <= endI) && less(graphRep, cMaxI, cRI)) {
 					cMaxI = cRI;
 				}
 				if (cMaxI != topI) {
@@ -103,7 +103,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// exception should happen when file format is wrong
 		line = in.readLine();
 
-		while (line != null && line.trim().startsWith("#")) {
+		while ((line != null) && line.trim().startsWith("#")) {
 			line = in.readLine();
 		}
 		if (line != null) {
@@ -130,6 +130,12 @@ public class GraphRepTextReader extends GraphRepFactory {
 		graphRep.mult_out = new float[graphRep.edgeCount];
 		// TODO graphRep.elev_out = new float[edgeCount];
 		graphRep.dist_out = new int[graphRep.edgeCount];
+
+		graphRep.source_in = new int[graphRep.edgeCount];
+		graphRep.dest_in = new int[graphRep.edgeCount];
+		graphRep.mult_in = new float[graphRep.edgeCount];
+		// TODO graphRep.elev_in = new float[edgeCount];
+		graphRep.dist_in = new int[graphRep.edgeCount];
 
 		graphRep.offsetIn = new int[graphRep.nodeCount + 1];
 
