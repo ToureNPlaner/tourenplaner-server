@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 
 public class GraphRepTextReader extends GraphRepFactory {
 
@@ -26,21 +25,21 @@ public class GraphRepTextReader extends GraphRepFactory {
 		private static void swap(GraphRep graphRep, int i, int j) {
 			// save to temp
 			int tempDest = graphRep.dest_in[i];
-			// int tempDist = graphRep.dist_in[i];
-			// int tempSrc = graphRep.source_in[i];
-			// float tempMult = graphRep.mult_in[i];
+			int tempDist = graphRep.dist_in[i];
+			int tempSrc = graphRep.source_in[i];
+			float tempMult = graphRep.mult_in[i];
 
 			// change place
 			graphRep.dest_in[i] = graphRep.dest_in[j];
-			// graphRep.dist_in[i] = graphRep.dist_in[j];
-			// graphRep.source_in[i] = graphRep.source_in[j];
-			// graphRep.mult_in[i] = graphRep.mult_in[j];
+			graphRep.dist_in[i] = graphRep.dist_in[j];
+			graphRep.source_in[i] = graphRep.source_in[j];
+			graphRep.mult_in[i] = graphRep.mult_in[j];
 
 			// write back to the new place
 			graphRep.dest_in[j] = tempDest;
-			// graphRep.dist_in[j] = tempDist;
-			// graphRep.source_in[j] = tempSrc;
-			// graphRep.mult_in[j] = tempMult;
+			graphRep.dist_in[j] = tempDist;
+			graphRep.source_in[j] = tempSrc;
+			graphRep.mult_in[j] = tempMult;
 		}
 
 		private static boolean less(GraphRep graphRep, int i, int j) {
@@ -61,8 +60,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int cRI;
 			int cMaxI;
 
-			while (((topI * 3) + 1) <= endI) {
-				cLI = (topI * 3) + 1;
+			while (topI * 3 + 1 <= endI) {
+				cLI = topI * 3 + 1;
 				cMI = cLI + 1;
 				cRI = cLI + 2;
 				cMaxI = topI;
@@ -70,10 +69,10 @@ public class GraphRepTextReader extends GraphRepFactory {
 				if (less(graphRep, cMaxI, cLI)) {
 					cMaxI = cLI;
 				}
-				if ((cMI <= endI) && less(graphRep, cMaxI, cMI)) {
+				if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
 					cMaxI = cMI;
 				}
-				if ((cRI <= endI) && less(graphRep, cMaxI, cRI)) {
+				if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
 					cMaxI = cRI;
 				}
 				if (cMaxI != topI) {
@@ -104,7 +103,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// exception should happen when file format is wrong
 		line = in.readLine();
 
-		while ((line != null) && line.trim().startsWith("#")) {
+		while (line != null && line.trim().startsWith("#")) {
 			line = in.readLine();
 		}
 		if (line != null) {
@@ -153,10 +152,19 @@ public class GraphRepTextReader extends GraphRepFactory {
 			splittedLine = in.readLine().split(" ");
 			currentSource = Integer.parseInt(splittedLine[0]);
 			graphRep.source_out[i] = currentSource;
+			graphRep.source_in[i] = currentSource;
+
 			graphRep.dest_out[i] = Integer.parseInt(splittedLine[1]);
+			graphRep.dest_in[i] = graphRep.dest_out[i];
+
 			graphRep.dist_out[i] = Integer.parseInt(splittedLine[2]);
+			graphRep.dist_in[i] = graphRep.dist_out[i];
+
 			graphRep.mult_out[i] = Float.parseFloat(splittedLine[3]);
+			graphRep.mult_in[i] = graphRep.mult_out[i];
+
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);
+			// TODO graphRep.elev_in[i] = graphRep.elev_out[i];
 
 			if (currentSource != prevSource) {
 				for (int j = currentSource; j > prevSource; j--) {
@@ -172,22 +180,13 @@ public class GraphRepTextReader extends GraphRepFactory {
 			graphRep.offsetOut[cnt] = graphRep.offsetOut[cnt + 1];
 		}
 
-		System.out.println("Succesfully created offset of OutEdges");
-
-		graphRep.source_in = Arrays.copyOf(graphRep.source_out,
-				graphRep.source_out.length);
-		graphRep.dest_in = Arrays.copyOf(graphRep.dest_out,
-				graphRep.dest_out.length);
-		graphRep.dist_in = Arrays.copyOf(graphRep.dist_out,
-				graphRep.dist_out.length);
-		graphRep.mult_in = Arrays.copyOf(graphRep.mult_out,
-				graphRep.mult_out.length);
-		// TODO graphRep.elev_in =
-		// Arrays.copyOf(graphRep.elev_in,graphRep.mult_out.elev_in);
+		System.out
+				.println("Succesfully created offset of OutEdges and copied outedges");
 
 		Sorter.Sort(graphRep);
 
-		System.out.println("successfully copied outedges and sorted");
+		System.out.println("successfully sorted outedges");
+
 		int currentDest;
 		int prevDest = -1;
 		for (int i = 0; i < graphRep.edgeCount; i++) {
@@ -201,27 +200,6 @@ public class GraphRepTextReader extends GraphRepFactory {
 		}
 
 		System.out.println("offset2");
-		// //// inedges
-		// filename = System.getProperty("user.home") +
-		// "/germany.txt_inedges.txt";
-		/*
-		 * try { in = new BufferedReader(new FileReader(filename));
-		 * 
-		 * } catch (FileNotFoundException e) { // TODO: what happens here?
-		 * e.printStackTrace(); } graphRep.offsetIn = new int[graphRep.nodeCount
-		 * + 1];
-		 * 
-		 * // shamelessly reuse variables int prevDest = -1; int currentDest;
-		 * for (int i = 0; i < graphRep.edgeCount; i++) { splittedLine =
-		 * in.readLine().split(" "); currentDest =
-		 * Integer.parseInt(splittedLine[1]); graphRep.source_in[i] =
-		 * Integer.parseInt(splittedLine[0]); graphRep.dest_in[i] = currentDest;
-		 * graphRep.dist_in[i] = Integer.parseInt(splittedLine[2]);
-		 * graphRep.mult_in[i] = Float.parseFloat(splittedLine[3]); // TODO
-		 * mult[i] = Integer.parseInt(splittedLine[4]); if (currentDest !=
-		 * prevDest) { for (int j = currentDest; j > prevDest; j--) {
-		 * graphRep.offsetIn[j] = i; } prevDest = currentDest; } } in.close();
-		 */
 
 		graphRep.offsetIn[graphRep.nodeCount] = graphRep.edgeCount;
 		// assuming we have at least one edge
