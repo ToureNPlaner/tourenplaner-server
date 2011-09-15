@@ -3,7 +3,7 @@ use tourenplaner;
 
 CREATE TABLE Requests (
   id              INT           NOT NULL AUTO_INCREMENT,
-  UserID          INT           NOT NULL REFERENCES user (id),
+  UserID          INT           NOT NULL REFERENCES Users (id),
   JSONRequest     LONGBLOB,
   JSONResponse    LONGBLOB               DEFAULT NULL,
   PendingFlag     BOOL          NOT NULL DEFAULT 1,
@@ -15,7 +15,7 @@ CREATE TABLE Requests (
   FailedFlag      BOOL          NOT NULL DEFAULT 0,
   FailDescription TEXT                   DEFAULT NULL,
   PRIMARY KEY (ID),
-  FOREIGN KEY (UserID) REFERENCES user (id)
+  FOREIGN KEY (UserID) REFERENCES Users (id)
 );
 
 CREATE TABLE Users (
@@ -36,7 +36,7 @@ CREATE TABLE Users (
   VerifiedDate      DATETIME               DEFAULT NULL,
   DeleteRequestDate DATETIME               DEFAULT NULL,
   PRIMARY KEY (ID),
-  UNIQUE (Email(500))
+  UNIQUE (Email(256))
 );
 
 INSERT INTO Users (Email, Passwordhash, Salt, AdminFlag, Status, 
