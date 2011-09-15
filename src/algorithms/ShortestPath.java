@@ -3,6 +3,8 @@ package algorithms;
 import graphrep.Graphrep;
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.TreeMap;
 
 import computecore.ComputeRequest;
 import computecore.ComputeResult;
@@ -53,13 +55,13 @@ public class ShortestPath extends GraphAlgorithm {
 		res = req.getResultObject();
 
 		// TODO: Validation!
-		ArrayList<ArrayList<Double>> points = (ArrayList<ArrayList<Double>>) req
-				.get("Request");
+		ArrayList<Map<String, Double>> points = (ArrayList<Map<String, Double>>) req
+				.get("points");
 
-		srclat = points.get(0).get(0).floatValue();
-		srclon = points.get(0).get(1).floatValue();
-		destlat = points.get(1).get(0).floatValue();
-		destlon = points.get(1).get(1).floatValue();
+		srclat = points.get(0).get("lt").floatValue();
+		srclon = points.get(0).get("ln").floatValue();
+		destlat = points.get(1).get("lt").floatValue();
+		destlon = points.get(1).get("ln").floatValue();
 
 		srcid = graph.getIDForCoordinates(srclat, srclon);
 		destid = graph.getIDForCoordinates(destlat, destlon);
@@ -104,14 +106,19 @@ public class ShortestPath extends GraphAlgorithm {
 
 		int currNode = nodeID;
 
-		ArrayList<ArrayList<Float>> route = new ArrayList<ArrayList<Float>>(
+		ArrayList<ArrayList<Map<String, Float>>> route = new ArrayList<ArrayList<Map<String, Float>>>(
 				dist[outTarget] / 50);
 		do {
-			route.add(0, new ArrayList<Float>(2));
-			route.get(0).add(graph.getNodeLat(currNode));
-			route.get(0).add(graph.getNodeLon(currNode));
+			route.add(0,
+					new ArrayList<Map<String, Float>>(dist[outTarget] / 50));
+			route.get(0).add(0, new TreeMap<String, Float>());
+			route.get(0).get(0).put("lt", graph.getNodeLat(currNode));
+			route.get(0).get(0).put("ln", graph.getNodeLat(currNode));
 			currNode = prev[currNode];
 		} while (currNode != srcid);
+
+		Map<String, Float> misc = new TreeMap<String, Float>();
+		misc.put("distance", (float) dist[outTarget]);
 
 		// System.out
 		// .println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
@@ -125,6 +132,7 @@ public class ShortestPath extends GraphAlgorithm {
 		// + l.get(1) + "\"></trkpt>");
 		// }
 		// System.out.println("</trkseg>\n</trk>\n</gpx>");
-		res.put("Route", route);
+		res.put("points", route);
+		res.put("misc", misc);
 	}
 }

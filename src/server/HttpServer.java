@@ -102,22 +102,21 @@ public class HttpServer {
 			System.err.println("User server PATH to load the config at PATH");
 		}
 		ConfigManager cm = ConfigManager.getInstance();
-		
+
 		// Load the Graph
 		Graphrep graph;
 		try {
-			graph = new Graphrep(cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany.txt"));
+			graph = new Graphrep(cm.getEntryString("graphfilepath",
+					System.getProperty("user.home") + "/germany.txt"));
 		} catch (IOException e) {
-			System.err.println("Could not load Graph: "+e.getMessage());
+			System.err.println("Could not load Graph: " + e.getMessage());
 			return;
 		}
-		
-		
+
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();
 		reg.registerAlgorithm(new ShortestPathFactory(graph));
 
-		
 		// Create our ComputeCore that manages all ComputeThreads
 		ComputeCore comCore = new ComputeCore(reg, (int) cm.getEntryLong(
 				"threads", 16), (int) cm.getEntryLong("queuelength", 32));
