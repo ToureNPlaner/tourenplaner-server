@@ -5,6 +5,7 @@ package server;
 
 import graphrep.GraphRep;
 import graphrep.GraphRepDumpReader;
+import graphrep.GraphRepTextReader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -79,6 +80,32 @@ public class HttpServer {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		/**
+		 * inits config manager if config file is provided; also prints usage
+		 * information if necessary
+		 */
+		CLIHandler handler = new CLIHandler(args);
+
+		// if serialize, then ignore whether to read text or dump and read
+		// text graph since it wouldn't make sense to read a serialized
+		// graph just to serialize it. Also do this before anything server
+		// related gets actually started
+		if (handler.serializegraph()) {
+			System.out.println("Serializing Graph");
+			GraphRep graph = null;
+			String graphfilename = ConfigManager.getInstance().getEntryString(
+					"graphfilepath",
+					System.getProperty("user.home") + "/germany.txt");
+			try {
+				graph = new GraphRepTextReader().createGraphRep(graphfilename);
+				utils.GraphSerializer.serialize(graphfilename, graph);
+				System.exit(0);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
 		// Configure the server.
 		ServerBootstrap bootstrap = new ServerBootstrap(
 				new NioServerSocketChannelFactory( // Change to Oio* if you want
@@ -86,20 +113,7 @@ public class HttpServer {
 						Executors.newCachedThreadPool(), Executors
 								.newCachedThreadPool()));
 
-		// Load Config
-		if (args.length == 1) {
-			try {
-				ConfigManager.Init(args[0]);
-			} catch (Exception e) {
-				System.err.println("Couldn't load configuration File: "
-						+ e.getMessage());
-				return;
-			}
-		} else {
-			System.err.println("Missing config path parameter, using defaults");
-			System.err
-					.println("Use \"#server PATH\" to load the config at PATH");
-		}
+		// uses defaults if it was not initialized by the CLIHandler
 		ConfigManager cm = ConfigManager.getInstance();
 
 		// Load the Graph
@@ -107,10 +121,12 @@ public class HttpServer {
 		String graphfilename = cm.getEntryString("graphfilepath",
 				System.getProperty("user.home") + "/germany.txt");
 		try {
-			// choose the reader here
-			// graph = new GraphRepTextReader().createGraphRep(graphfilename);
-			graph = new GraphRepDumpReader().createGraphRep(graphfilename
-					+ ".dat");
+			if (handler.loadTextGraph()) {
+				graph = new GraphRepTextReader().createGraphRep(graphfilename);
+			} else {
+				graph = new GraphRepDumpReader().createGraphRep(graphfilename
+						+ ".dat");
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			// TODO: server won't calculate graph algorithms without a graph,
@@ -156,6 +172,5 @@ public class HttpServer {
 			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
 					"httpport", 8080)));
 		}
-
 	}
 }
