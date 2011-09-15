@@ -28,11 +28,11 @@ public class DatabaseManager {
 	private final PreparedStatement pstGetUserWithId;
 	
 	private final String addNewRequestString = "INSERT INTO Requests" +
-			" (UserID, JSONRequest, RequestDate) VALUES(?)";
+			" (UserID, JSONRequest, RequestDate) VALUES(?, ?, ?)";
 	
 	private final String addNewUserString = "INSERT INTO Users" +
 			" (Email, Passwordhash, Salt, FirstName, LastName, Address," +
-			" AdminFlag, RegistrationDate) VALUES(?)";
+			" AdminFlag, RegistrationDate) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 	
 	private final String getAllRequestsString = "SELECT id, UserID," +
 			" JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag," +
@@ -40,16 +40,16 @@ public class DatabaseManager {
 			" FailedDescription FROM Requests";
 	
 	private final String getAllUsersString = "SELECT id, Email, Passwordhash," +
-			" Salt, AdminFlag, Status, FirstName, LastName, Adress," +
+			" Salt, AdminFlag, Status, FirstName, LastName, Address," +
 			" RegistrationDate, VerifiedDate, DeleteRequestDate FROM Users";
 	
 	private final String getUserStringWithEmail = "SELECT id, Email, Passwordhash," +
-			" Salt, AdminFlag, Status, FirstName, LastName, Adress," +
+			" Salt, AdminFlag, Status, FirstName, LastName, Address," +
 			" RegistrationDate, VerifiedDate, DeleteRequestDate FROM Users" +
 			" WHERE Email = ?";
 
 	private final String getUserStringWithId = "SELECT id, Email, Passwordhash," +
-			" Salt, AdminFlag, Status, FirstName, LastName, Adress," +
+			" Salt, AdminFlag, Status, FirstName, LastName, Address," +
 			" RegistrationDate, VerifiedDate, DeleteRequestDate FROM Users" +
 			" WHERE id = ?";
 	
@@ -63,12 +63,6 @@ public class DatabaseManager {
 	 */
 	public DatabaseManager(String url, String dbName, String userName, 
 			String password) throws SQLException {
-		
-		//TODO use config package
-		//url = "jdbc:mysql://localhost:3306/";
-		//dbName = "tourenplaner";
-		//userName = "tnpuser";
-		//password = "H4milt0n";
 		
 		con = DriverManager.getConnection(url + dbName, userName, password);
 		
@@ -138,6 +132,13 @@ public class DatabaseManager {
 		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
 		
 		while(resultSet.next()) {
+			
+			Timestamp p8 = resultSet.getTimestamp(10);
+			Timestamp p9 = resultSet.getTimestamp(11);
+			
+			Date d8 = (p8 != null) ? new Date(p8.getTime()) : null;
+			Date d9 = (p9 != null) ? new Date(p9.getTime()) : null;
+			
 			list.add(new RequestsDBRow(
 					resultSet.getInt(1), 
 					resultSet.getInt(2), 
@@ -146,8 +147,8 @@ public class DatabaseManager {
 					resultSet.getBoolean(5), 
 					resultSet.getInt(6), 
 					resultSet.getBoolean(7), 
-					new Date(resultSet.getTimestamp(8).getTime()), 
-					new Date(resultSet.getTimestamp(9).getTime()), 
+					d8, 
+					d9, 
 					resultSet.getLong(10), 
 					resultSet.getBoolean(11), 
 					resultSet.getString(12)
@@ -186,6 +187,15 @@ public class DatabaseManager {
 		ArrayList<UsersDBRow> list = new ArrayList<UsersDBRow>();
 		
 		while(resultSet.next()) {
+			
+			Timestamp p10 = resultSet.getTimestamp(10);
+			Timestamp p11 = resultSet.getTimestamp(11);
+			Timestamp p12 = resultSet.getTimestamp(11);
+			
+			Date d10 = (p10 != null) ? new Date(p10.getTime()) : null;
+			Date d11 = (p11 != null) ? new Date(p11.getTime()) : null;
+			Date d12 = (p12 != null) ? new Date(p12.getTime()) : null;
+			
 			list.add(new UsersDBRow(
 					resultSet.getInt(1), 
 					resultSet.getString(2), 
@@ -196,9 +206,9 @@ public class DatabaseManager {
 					resultSet.getString(7), 
 					resultSet.getString(8), 
 					resultSet.getString(9), 
-					new Date(resultSet.getTimestamp(10).getTime()), 
-					new Date(resultSet.getTimestamp(11).getTime()), 
-					new Date(resultSet.getTimestamp(12).getTime())
+					d10, 
+					d11, 
+					d12
 					));
 		}
 		
@@ -217,6 +227,15 @@ public class DatabaseManager {
 		UsersDBRow user = null;
 		
 		while(resultSet.next()) {
+			
+			Timestamp p10 = resultSet.getTimestamp(10);
+			Timestamp p11 = resultSet.getTimestamp(11);
+			Timestamp p12 = resultSet.getTimestamp(11);
+			
+			Date d10 = (p10 != null) ? new Date(p10.getTime()) : null;
+			Date d11 = (p11 != null) ? new Date(p11.getTime()) : null;
+			Date d12 = (p12 != null) ? new Date(p12.getTime()) : null;
+			
 			user = new UsersDBRow(
 					resultSet.getInt(1), 
 					resultSet.getString(2), 
@@ -227,9 +246,9 @@ public class DatabaseManager {
 					resultSet.getString(7), 
 					resultSet.getString(8), 
 					resultSet.getString(9), 
-					new Date(resultSet.getTimestamp(10).getTime()), 
-					new Date(resultSet.getTimestamp(11).getTime()), 
-					new Date(resultSet.getTimestamp(12).getTime())
+					d10, 
+					d11, 
+					d12
 					);
 		}
 		
@@ -242,6 +261,15 @@ public class DatabaseManager {
 		UsersDBRow user = null;
 		
 		while(resultSet.next()) {
+			
+			Timestamp p10 = resultSet.getTimestamp(10);
+			Timestamp p11 = resultSet.getTimestamp(11);
+			Timestamp p12 = resultSet.getTimestamp(11);
+			
+			Date d10 = (p10 != null) ? new Date(p10.getTime()) : null;
+			Date d11 = (p11 != null) ? new Date(p11.getTime()) : null;
+			Date d12 = (p12 != null) ? new Date(p12.getTime()) : null;
+			
 			user = new UsersDBRow(
 					resultSet.getInt(1), 
 					resultSet.getString(2), 
@@ -252,9 +280,9 @@ public class DatabaseManager {
 					resultSet.getString(7), 
 					resultSet.getString(8), 
 					resultSet.getString(9), 
-					new Date(resultSet.getTimestamp(10).getTime()), 
-					new Date(resultSet.getTimestamp(11).getTime()), 
-					new Date(resultSet.getTimestamp(12).getTime())
+					d10, 
+					d11, 
+					d12
 					);
 		}
 		
