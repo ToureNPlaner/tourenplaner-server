@@ -27,9 +27,11 @@ public class ShortestPath extends GraphAlgorithm {
 		@Override
 		public String toJSONString() {
 			sb.append("[");
-			for (int i = 0; i < lats.length; i++) {
-				sb.append("{\"lt\":" + lats[i] + ",\"ln\":" + lons[i] + "}");
+			for (int i = 0; i < lats.length - 1; i++) {
+				sb.append("{\"lt\":" + lats[i] + ",\"ln\":" + lons[i] + "},");
 			}
+			sb.append("{\"lt\":" + lats[lats.length - 1] + ",\"ln\":"
+					+ lons[lats.length - 1] + "}");
 			sb.append("]");
 			return sb.toString();
 		}

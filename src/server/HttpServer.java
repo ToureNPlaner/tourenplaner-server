@@ -4,7 +4,7 @@
 package server;
 
 import graphrep.GraphRep;
-import graphrep.GraphRepDumpReader;
+import graphrep.GraphRepTextReader;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -105,9 +105,9 @@ public class HttpServer {
 		// Load the Graph
 		GraphRep graph;
 		try {
-			graph = new GraphRepDumpReader().createGraphRep(cm.getEntryString(
+			graph = new GraphRepTextReader().createGraphRep(cm.getEntryString(
 					"graphfilepath", System.getProperty("user.home")
-							+ "/germany.txt.dat"));
+							+ "/germany.txt"));
 		} catch (IOException e) {
 			System.err.println("Could not load Graph: " + e.getMessage());
 			return;
