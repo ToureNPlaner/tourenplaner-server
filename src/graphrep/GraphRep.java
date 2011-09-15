@@ -7,9 +7,9 @@ import java.io.IOException;
 import java.io.Serializable;
 
 /**
- * Class Graphrep
+ * Class GraphRep
  */
-public class Graphrep implements Serializable {
+public class GraphRep implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private final NNSearcher searcher;
@@ -76,7 +76,7 @@ public class Graphrep implements Serializable {
 	 * @throws IOException
 	 * 
 	 */
-	public Graphrep(String filename) throws IOException {
+	public GraphRep(String filename) throws IOException {
 
 		BufferedReader in = null;
 		try {

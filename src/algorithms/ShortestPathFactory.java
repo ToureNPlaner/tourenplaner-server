@@ -3,7 +3,7 @@
  */
 package algorithms;
 
-import graphrep.Graphrep;
+import graphrep.GraphRep;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import utils.Graphloader;
  */
 public class ShortestPathFactory extends GraphAlgorithmFactory {
 
-	public ShortestPathFactory(Graphrep graph) {
+	public ShortestPathFactory(GraphRep graph) {
 		super(graph);
 	}
 

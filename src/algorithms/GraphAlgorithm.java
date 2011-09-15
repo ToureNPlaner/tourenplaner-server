@@ -3,11 +3,11 @@
  */
 package algorithms;
 
-import graphrep.Graphrep;
+import graphrep.GraphRep;
 /**
  * This abstract class is the basis for Algorithms using a Graphrepresentation
  * and will be constructed with a reference to the
- * Graphrep. used by the server
+ * GraphRep. used by the server
  * 
  * @author Niklas Schnelle
  *
@@ -16,9 +16,9 @@ public abstract class GraphAlgorithm implements Algorithm {
 	private GraphAlgorithm() {
 	}
 
-	Graphrep graph;
+	GraphRep graph;
 
-	public GraphAlgorithm(Graphrep graph) {
+	public GraphAlgorithm(GraphRep graph) {
 		this.graph = graph;
 	}
 

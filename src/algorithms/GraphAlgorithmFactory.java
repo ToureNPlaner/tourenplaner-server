@@ -3,7 +3,7 @@
  */
 package algorithms;
 
-import graphrep.Graphrep;
+import graphrep.GraphRep;
 
 import java.util.List;
 import java.util.Map;
@@ -16,10 +16,10 @@ import java.util.Map;
  */
 public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
 	
-	protected Graphrep graph;
+	protected GraphRep graph;
 	
 	
-	public GraphAlgorithmFactory(Graphrep graph){
+	public GraphAlgorithmFactory(GraphRep graph){
 		this.graph = graph;
 	}
 	

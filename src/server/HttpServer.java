@@ -3,7 +3,7 @@
  */
 package server;
 
-import graphrep.Graphrep;
+import graphrep.GraphRep;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -30,7 +30,7 @@ import config.ConfigManager;
  * ToureNPlaner Event Based Server
  * 
  * This is the main class used to start the server and construct utility objects
- * like the Graphrep. and ConfigManager and ComputeCore
+ * like the GraphRep. and ConfigManager and ComputeCore
  * 
  * @author Niklas Schnelle
  * @version 0.1 Prototype
@@ -100,9 +100,9 @@ public class HttpServer {
 		ConfigManager cm = ConfigManager.getInstance();
 
 		// Load the Graph
-		Graphrep graph;
+		GraphRep graph;
 		try {
-			graph = new Graphrep(cm.getEntryString("graphfilepath",
+			graph = new GraphRep(cm.getEntryString("graphfilepath",
 					System.getProperty("user.home") + "/germany.txt"));
 		} catch (IOException e) {
 			System.err.println("Could not load Graph: " + e.getMessage());
