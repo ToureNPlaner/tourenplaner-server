@@ -1,6 +1,26 @@
 create database tourenplaner;
 use tourenplaner;
 
+CREATE TABLE Users (
+  id                INT           NOT NULL AUTO_INCREMENT,
+  Email             VARCHAR(255)  NOT NULL UNIQUE,
+  Passwordhash      TEXT          NOT NULL,
+  Salt              TEXT          NOT NULL,
+  AdminFlag         BOOL          NOT NULL DEFAULT 0,
+  Status            ENUM ('NeedsVerification', 
+                          'VerificationFailed', 
+                          'Verified', 
+                          'Delete') 
+                                  NOT NULL DEFAULT 'NeedsVerification',
+  FirstName         TEXT          NOT NULL,
+  LastName          TEXT          NOT NULL,
+  Address           TEXT          NOT NULL,
+  RegistrationDate  DATETIME      NOT NULL,
+  VerifiedDate      DATETIME               DEFAULT NULL,
+  DeleteRequestDate DATETIME               DEFAULT NULL,
+  PRIMARY KEY (ID)
+);
+
 CREATE TABLE Requests (
   id              INT           NOT NULL AUTO_INCREMENT,
   UserID          INT           NOT NULL REFERENCES Users (id),
@@ -16,27 +36,6 @@ CREATE TABLE Requests (
   FailDescription TEXT                   DEFAULT NULL,
   PRIMARY KEY (ID),
   FOREIGN KEY (UserID) REFERENCES Users (id)
-);
-
-CREATE TABLE Users (
-  id                INT           NOT NULL AUTO_INCREMENT,
-  Email             TEXT          NOT NULL,
-  Passwordhash      TEXT          NOT NULL,
-  Salt              TEXT          NOT NULL,
-  AdminFlag         BOOL          NOT NULL DEFAULT 0,
-  Status            ENUM ('NeedsVerification', 
-                          'VerificationFailed', 
-                          'Verified', 
-                          'Delete') 
-                                  NOT NULL DEFAULT 'NeedsVerification',
-  FirstName         TEXT          NOT NULL,
-  LastName          TEXT          NOT NULL,
-  Address           TEXT          NOT NULL,
-  RegistrationDate  DATETIME      NOT NULL,
-  VerifiedDate      DATETIME               DEFAULT NULL,
-  DeleteRequestDate DATETIME               DEFAULT NULL,
-  PRIMARY KEY (ID),
-  UNIQUE (Email(256))
 );
 
 INSERT INTO Users (Email, Passwordhash, Salt, AdminFlag, Status, 
