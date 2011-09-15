@@ -4,7 +4,10 @@
 package server;
 
 import graphrep.GraphRep;
+<<<<<<< HEAD
 import graphrep.GraphRepDumpReader;
+=======
+>>>>>>> b8043d2f235e49f1aad7cc14b03ab9b32946cd20
 import graphrep.GraphRepTextReader;
 
 import java.io.IOException;
@@ -48,7 +51,7 @@ public class HttpServer {
 		info.put("version", new Float(0.1));
 		info.put(
 				"servertype",
-				ConfigManager.getInstance().getEntryBool("private", true) ? "private"
+				ConfigManager.getInstance().getEntryBool("private", false) ? "private"
 						: "public");
 		info.put("sslport",
 				ConfigManager.getInstance().getEntryLong("sslport", 8081));
@@ -121,12 +124,19 @@ public class HttpServer {
 		String graphfilename = cm.getEntryString("graphfilepath",
 				System.getProperty("user.home") + "/germany.txt");
 		try {
+<<<<<<< HEAD
 			if (handler.loadTextGraph()) {
 				graph = new GraphRepTextReader().createGraphRep(graphfilename);
 			} else {
 				graph = new GraphRepDumpReader().createGraphRep(graphfilename
 						+ ".dat");
 			}
+=======
+			// choose the reader here
+			graph = new GraphRepTextReader().createGraphRep(graphfilename);
+			//graph = new GraphRepDumpReader().createGraphRep(graphfilename
+			//		+ ".dat");
+>>>>>>> b8043d2f235e49f1aad7cc14b03ab9b32946cd20
 		} catch (IOException e) {
 			e.printStackTrace();
 			// TODO: server won't calculate graph algorithms without a graph,
