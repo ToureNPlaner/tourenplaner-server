@@ -1,6 +1,6 @@
 package algorithms;
 
-import graphrep.Graphrep;
+import graphrep.GraphRep;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -22,7 +22,7 @@ public class ShortestPath extends GraphAlgorithm {
 	int srcid;
 	int destid;
 
-	public ShortestPath(Graphrep graph) {
+	public ShortestPath(GraphRep graph) {
 		super(graph);
 		dist = new int[graph.getNodeCount()];
 		prev = new int[graph.getNodeCount()];

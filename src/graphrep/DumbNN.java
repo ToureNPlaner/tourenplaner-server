@@ -7,16 +7,16 @@ package graphrep;
  */
 public class DumbNN implements NNSearcher {
 	private static final long serialVersionUID = 1L;
-	Graphrep graphrep;
+	GraphRep graphRep;
 
-	public DumbNN(Graphrep graphrep) {
-		this.graphrep = graphrep;
+	public DumbNN(GraphRep graphRep) {
+		this.graphRep = graphRep;
 	}
 
 	@Override
 	public int getIDForCoordinates(float lat, float lon) {
 
-		int numberOfNodes = graphrep.getNodeCount();
+		int numberOfNodes = graphRep.getNodeCount();
 
 		int pos = 0;
 		float squareDistance = 0;
@@ -25,11 +25,11 @@ public class DumbNN implements NNSearcher {
 			return -1;
 		}
 
-		bestDistance = (lon - graphrep.lon[pos]) * (lon - graphrep.lon[pos])
-				+ (lat - graphrep.lat[pos]) * (lat - graphrep.lat[pos]);
+		bestDistance = (lon - graphRep.lon[pos]) * (lon - graphRep.lon[pos])
+				+ (lat - graphRep.lat[pos]) * (lat - graphRep.lat[pos]);
 		for (int i = 1; i < numberOfNodes; i++) {
-			squareDistance = (lon - graphrep.lon[i]) * (lon - graphrep.lon[i])
-					+ (lat - graphrep.lat[i]) * (lat - graphrep.lat[i]);
+			squareDistance = (lon - graphRep.lon[i]) * (lon - graphRep.lon[i])
+					+ (lat - graphRep.lat[i]) * (lat - graphRep.lat[i]);
 			if (squareDistance < bestDistance) {
 				bestDistance = squareDistance;
 				pos = i;

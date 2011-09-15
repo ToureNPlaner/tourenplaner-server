@@ -3,7 +3,7 @@
  */
 package algorithms;
 
-import graphrep.Graphrep;
+import graphrep.GraphRep;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +16,7 @@ import java.util.Map;
  */
 public class DummyFactory extends GraphAlgorithmFactory {
 
-	public DummyFactory(Graphrep graph) {
+	public DummyFactory(GraphRep graph) {
 		super(graph);
 	}
 
