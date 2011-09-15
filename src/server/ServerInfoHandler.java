@@ -7,20 +7,12 @@ package server;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -28,21 +20,12 @@ import org.jboss.netty.channel.ChannelHandlerContext;
 import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
-import org.jboss.netty.handler.codec.base64.Base64;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpMethod;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
-import org.jboss.netty.util.CharsetUtil;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
-
-import computecore.AlgorithmRegistry;
-import computecore.ComputeCore;
-import computecore.ComputeRequest;
 
 /**
  * This handler is used when a socket must only handle "/info" requests
@@ -56,10 +39,7 @@ import computecore.ComputeRequest;
  */
 public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 
-	/** JSONParser we can reuse **/
-	private final JSONParser parser = new JSONParser();
-
-	private Map<String, Object> info;
+	private final Map<String, Object> info;
 
 	public ServerInfoHandler(Map<String, Object> sInfo) {
 		super();
@@ -78,18 +58,17 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 			handlePreflights(request, channel);
 			return;
 		}
-		
-		
+
 		Responder responder = new Responder(channel, false);
 
 		// Get the Requeststring e.g. /info
 		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
 				request.getUri());
-		
+
 		String path = queryStringDecoder.getPath();
-		
-		if(path.equals("/info")){
-			
+
+		if (path.equals("/info")) {
+
 			responder.writeJSON(info, HttpResponseStatus.OK);
 		}
 	}
@@ -132,10 +111,6 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 		}
 
 	}
-
-
-
-
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)

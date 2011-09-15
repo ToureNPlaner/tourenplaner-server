@@ -45,7 +45,8 @@ public class HttpServer {
 	private static Map<String, Object> getServerInfo(AlgorithmRegistry reg) {
 		Map<String, Object> info = new HashMap<String, Object>(4);
 		info.put("version", new Float(0.1));
-		info.put("servertype", "public");
+		info.put("servertype",
+				ConfigManager.getInstance().getEntryBool("private", true));
 		info.put("sslport",
 				ConfigManager.getInstance().getEntryLong("sslport", 8081));
 		// Enumerate Algorithms
@@ -83,12 +84,6 @@ public class HttpServer {
 						Executors.newCachedThreadPool(), Executors
 								.newCachedThreadPool()));
 
-		ServerBootstrap infoBootstrap = new ServerBootstrap(
-				new NioServerSocketChannelFactory( // Change to Oio* if you want
-													// OIO
-						Executors.newCachedThreadPool(), Executors
-								.newCachedThreadPool()));
-
 		// Load Config
 		if (args.length == 1) {
 			try {
@@ -99,8 +94,9 @@ public class HttpServer {
 				return;
 			}
 		} else {
-			System.err.println("Missing config path parameter using defaults");
-			System.err.println("User server PATH to load the config at PATH");
+			System.err.println("Missing config path parameter, using defaults");
+			System.err
+					.println("Use \"#server PATH\" to load the config at PATH");
 		}
 		ConfigManager cm = ConfigManager.getInstance();
 
@@ -126,16 +122,34 @@ public class HttpServer {
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);
 
-		// Set up the event pipeline factory.
-		bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore, false,
-				serverInfo));
-		infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(
-				serverInfo));
+		if ((Boolean) serverInfo.get("private")) {
+			// The Bootstrap handling info only
+			ServerBootstrap infoBootstrap = new ServerBootstrap(
+					new NioServerSocketChannelFactory( // Change to Oio* if you
+														// want
+														// OIO
+							Executors.newCachedThreadPool(), Executors
+									.newCachedThreadPool()));
 
-		// Bind and start to accept incoming connections.
-		bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong("sslport",
-				8081)));
-		infoBootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
-				"httpport", 8080)));
+			// Set up the event pipeline factory with ssl
+			bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore,
+					true, serverInfo));
+
+			infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(
+					serverInfo));
+			// Bind and start to accept incoming connections.
+			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
+					"sslport", 8081)));
+			infoBootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
+					"httpport", 8080)));
+		} else {
+			// Set up the event pipeline factory without ssl
+			bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore,
+					false, serverInfo));
+			// Bind and start to accept incoming connections.
+			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
+					"httpport", 8080)));
+		}
+
 	}
 }

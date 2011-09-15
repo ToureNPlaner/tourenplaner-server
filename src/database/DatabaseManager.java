@@ -53,10 +53,10 @@ public class DatabaseManager {
 			String password) throws SQLException {
 		
 		//TODO use config package
-		url = "jdbc:mysql://localhost:3306/";
-		dbName = "tourenplaner";
-		userName = "tnpuser";
-		password = "H4milt0n";
+		//url = "jdbc:mysql://localhost:3306/";
+		//dbName = "tourenplaner";
+		//userName = "tnpuser";
+		//password = "H4milt0n";
 		
 		con = DriverManager.getConnection(url + dbName, userName, password);
 		

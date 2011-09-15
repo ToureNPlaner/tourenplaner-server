@@ -9,10 +9,8 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -37,14 +35,13 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
 
 /**
- * This handler handles HTTP Requests on the normal operation socket including
- *  * 
+ * This handler handles HTTP Requests on the normal operation socket including *
+ * 
  * @author Niklas Schnelle, Peter Vollmer
  * @version 0.1
  * 
@@ -59,18 +56,23 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	/** The ComputeCore managing the threads **/
 	private final ComputeCore computer;
 
-	private Map<String, Object> serverInfo;
+	private final Map<String, Object> serverInfo;
+
+	private final boolean isPrivate;
 
 	/**
-	 * Constructs a new RequestHandler using the given ComputeCore and ServerInfo
+	 * Constructs a new RequestHandler using the given ComputeCore and
+	 * ServerInfo
 	 * 
 	 * @param cCore
 	 * @param serverInfo
 	 */
-	public HttpRequestHandler(ComputeCore cCore, Map<String, Object> serverInfo) {
+	public HttpRequestHandler(ComputeCore cCore,
+			Map<String, Object> serverInfo, boolean isPrivate) {
 		super();
 		computer = cCore;
 		this.serverInfo = serverInfo;
+		this.isPrivate = isPrivate;
 	}
 
 	/**
@@ -88,46 +90,45 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			handlePreflights(request, channel);
 			return;
 		}
-		
-		
+
 		Responder responder = new Responder(channel, isKeepAlive(request));
 
 		// Get the Requeststring e.g. /info
 		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
 				request.getUri());
-		
+
 		String path = queryStringDecoder.getPath();
-		
-		if(path.equals("/info")){
-			
+
+		if (path.equals("/info")) {
+
 			handleInfo(request, responder);
-			
-		} else if (path.equals("/registeruser")){
-			
+
+		} else if (isPrivate && path.equals("/registeruser")) {
+
 			handleRegisterUser(request, responder);
-			
-		} else if (path.equals("/authuser")){
-			
+
+		} else if (isPrivate && path.equals("/authuser")) {
+
 			handleAuthUser(request, responder);
-			
-		} else if (path.equals("/getuser")){
-			
+
+		} else if (isPrivate && path.equals("/getuser")) {
+
 			handleGetUser(request, responder);
-			
-		} else if (path.equals("/updateuser")){
-			
+
+		} else if (isPrivate && path.equals("/updateuser")) {
+
 			handleUpdateUser(request, responder);
-			
-		} else if (path.equals("/listrequests")){
-			
+
+		} else if (isPrivate && path.equals("/listrequests")) {
+
 			handleListRequests(request, responder);
-			
-		} else if (path.equals("/listusers")){
-			
+
+		} else if (isPrivate && path.equals("/listusers")) {
+
 			handleListUsers(request, responder);
-			
-		} else if (path.startsWith("/alg")){
-			
+
+		} else if (path.startsWith("/alg")) {
+
 			if (auth(request)) {
 				String algName = queryStringDecoder.getPath().substring(4);
 				handleAlg(request, responder, algName);
@@ -135,13 +136,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				responder.writeUnauthorizedClose();
 			}
 		}
-		
-		
 
 	}
 
-	private void handleAlg(HttpRequest request, Responder responder, String algName) throws Exception {
-	
+	private void handleAlg(HttpRequest request, Responder responder,
+			String algName) throws Exception {
+
 		ChannelBuffer content = request.getContent();
 		if (content.readableBytes() != 0) {
 			InputStreamReader inReader = new InputStreamReader(
@@ -167,42 +167,41 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			ChannelFuture future = responder.getChannel().write(response);
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
-		
-		
+
 	}
 
 	private void handleListUsers(HttpRequest request, Responder responder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void handleListRequests(HttpRequest request, Responder responder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void handleUpdateUser(HttpRequest request, Responder responder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void handleGetUser(HttpRequest request, Responder responder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void handleAuthUser(HttpRequest request, Responder responder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void handleRegisterUser(HttpRequest request, Responder responder) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	private void handleInfo(HttpRequest request, Responder responder) {
-		responder.writeJSON(serverInfo, HttpResponseStatus.OK);	
+		responder.writeJSON(serverInfo, HttpResponseStatus.OK);
 	}
 
 	/**
@@ -215,9 +214,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		boolean keepAlive = isKeepAlive(request);
 		HttpResponse response;
 
-		// We only allow POST and GET methods so only allow request when Method is Post or Get
+		// We only allow POST and GET methods so only allow request when Method
+		// is Post or Get
 		String methodType = request.getHeader("Access-Control-Request-Method");
-		if (methodType != null && (methodType.trim().equals("POST") || methodType.trim().equals("GET"))) {
+		if (methodType != null
+				&& (methodType.trim().equals("POST") || methodType.trim()
+						.equals("GET"))) {
 			response = new DefaultHttpResponse(HTTP_1_1, OK);
 			response.addHeader("Connection", "Keep-Alive");
 		} else {
@@ -243,7 +245,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 
 	}
-
 
 	/**
 	 * Authenticates a Request using HTTP Basic Authentication returns true if
@@ -272,7 +273,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			data = Base64.decode(encodeddata);
 			// The string itself is utf-8
 			userandpw = new String(data.array(), "UTF-8");
-			//TODO Database
+			// TODO Database
 			if (userandpw.trim().equals("FooUser:FooPassword")) {
 				result = true;
 			}
@@ -285,6 +286,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		return result;
 	}
+
 	/**
 	 * Called when an uncaught exception occurs
 	 */

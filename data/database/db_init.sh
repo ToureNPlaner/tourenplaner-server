@@ -5,7 +5,10 @@
 ## because of that the script will continue without error if database exists
 ## to see all errors you should read the output carefully
 
-mysql -u root -p --verbose --force < db_init_script
+## you must maybe change host and port parameter if you use a remote DB
+
+mysql -u root -p --verbose --force \
+  --host=localhost --port=3306 < db_init_script
 
 ## use following commands in your mysql client to create a new user with
 ## rights on your previously created tables
