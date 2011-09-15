@@ -14,7 +14,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 			Heapify(graphRep);
 			int endI = graphRep.dest_in.length - 1;
 			while (endI > 0) {
-				System.out.println(graphRep.dest_in[0]);
+				// System.out.println(graphRep.dest_in[0]);
 				swap(graphRep, endI, 0);
 
 				siftDown(graphRep, 0, endI - 1);
@@ -25,23 +25,22 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		private static void swap(GraphRep graphRep, int i, int j) {
 			// save to temp
-			int tempDist = graphRep.dist_in[i];
 			int tempDest = graphRep.dest_in[i];
-			int tempSrc = graphRep.source_in[i];
-			float tempMult = graphRep.mult_in[i];
+			// int tempDist = graphRep.dist_in[i];
+			// int tempSrc = graphRep.source_in[i];
+			// float tempMult = graphRep.mult_in[i];
 
 			// change place
-			graphRep.dist_in[i] = graphRep.dist_in[j];
 			graphRep.dest_in[i] = graphRep.dest_in[j];
-			graphRep.source_in[i] = graphRep.source_in[j];
-			graphRep.mult_in[i] = graphRep.mult_in[j];
+			// graphRep.dist_in[i] = graphRep.dist_in[j];
+			// graphRep.source_in[i] = graphRep.source_in[j];
+			// graphRep.mult_in[i] = graphRep.mult_in[j];
 
 			// write back to the new place
-			graphRep.dist_in[j] = tempDist;
 			graphRep.dest_in[j] = tempDest;
-			graphRep.source_in[j] = tempSrc;
-			graphRep.mult_in[j] = tempMult;
-
+			// graphRep.dist_in[j] = tempDist;
+			// graphRep.source_in[j] = tempSrc;
+			// graphRep.mult_in[j] = tempMult;
 		}
 
 		private static boolean less(GraphRep graphRep, int i, int j) {
@@ -50,7 +49,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		private static void Heapify(GraphRep graphRep) {
 			int pos = graphRep.dest_in.length - 1;
-			while (pos <= 0) {
+			while (pos >= 0) {
 				siftDown(graphRep, pos, graphRep.dest_in.length - 1);
 				pos--;
 			}
@@ -62,8 +61,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int cRI;
 			int cMaxI;
 
-			while (topI * 3 + 1 <= endI) {
-				cLI = topI * 3 + 1;
+			while (((topI * 3) + 1) <= endI) {
+				cLI = (topI * 3) + 1;
 				cMI = cLI + 1;
 				cRI = cLI + 2;
 				cMaxI = topI;
@@ -71,10 +70,10 @@ public class GraphRepTextReader extends GraphRepFactory {
 				if (less(graphRep, cMaxI, cLI)) {
 					cMaxI = cLI;
 				}
-				if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
+				if ((cMI <= endI) && less(graphRep, cMaxI, cMI)) {
 					cMaxI = cMI;
 				}
-				if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
+				if ((cRI <= endI) && less(graphRep, cMaxI, cRI)) {
 					cMaxI = cRI;
 				}
 				if (cMaxI != topI) {
@@ -105,7 +104,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// exception should happen when file format is wrong
 		line = in.readLine();
 
-		while (line != null && line.trim().startsWith("#")) {
+		while ((line != null) && line.trim().startsWith("#")) {
 			line = in.readLine();
 		}
 		if (line != null) {
@@ -189,27 +188,19 @@ public class GraphRepTextReader extends GraphRepFactory {
 		Sorter.Sort(graphRep);
 
 		System.out.println("successfully copied outedges and sorted");
-
-		for (int i = 0; i < graphRep.dest_in.length; i++) {
-			System.out.println(graphRep.dest_in[i] + " - "
-					+ graphRep.dest_out[i]);
-		}
-
 		int currentDest;
 		int prevDest = -1;
 		for (int i = 0; i < graphRep.edgeCount; i++) {
 			currentDest = graphRep.dest_in[i];
-			System.out.println("11");
 			if (currentDest != prevDest) {
 				for (int j = currentDest; j > prevDest; j--) {
 					graphRep.offsetIn[j] = i;
-					System.out.println("ggg");
 				}
 				prevDest = currentDest;
 			}
 		}
 
-		System.out.println("blaaaa");
+		System.out.println("offset2");
 		// //// inedges
 		// filename = System.getProperty("user.home") +
 		// "/germany.txt_inedges.txt";

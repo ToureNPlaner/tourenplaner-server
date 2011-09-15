@@ -88,7 +88,7 @@ public class ShortestPath extends GraphAlgorithm {
 				for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
 					outTarget = graph.getOutTarget(nodeID, i);
 
-					if (dist[nodeID] + graph.getOutDist(nodeID, i) < dist[outTarget]) {
+					if ((dist[nodeID] + graph.getOutDist(nodeID, i)) < dist[outTarget]) {
 						dist[outTarget] = dist[nodeID]
 								+ graph.getOutDist(nodeID, i);
 						prev[outTarget] = nodeID;
@@ -101,7 +101,7 @@ public class ShortestPath extends GraphAlgorithm {
 				return;
 			}
 		}
-		System.err.println("found sp with dist = " + dist[outTarget] / 1000
+		System.err.println("found sp with dist = " + (dist[outTarget] / 1000)
 				+ " km");
 
 		int currNode = nodeID;
@@ -113,7 +113,7 @@ public class ShortestPath extends GraphAlgorithm {
 					new ArrayList<Map<String, Float>>(dist[outTarget] / 50));
 			route.get(0).add(0, new TreeMap<String, Float>());
 			route.get(0).get(0).put("lt", graph.getNodeLat(currNode));
-			route.get(0).get(0).put("ln", graph.getNodeLat(currNode));
+			route.get(0).get(0).put("ln", graph.getNodeLon(currNode));
 			currNode = prev[currNode];
 		} while (currNode != srcid);
 

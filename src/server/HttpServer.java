@@ -124,7 +124,7 @@ public class HttpServer {
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);
 
-		if (serverInfo.get("private").equals("private")) {
+		if (serverInfo.get("servertype").equals("private")) {
 			// The Bootstrap handling info only
 			ServerBootstrap infoBootstrap = new ServerBootstrap(
 					new NioServerSocketChannelFactory( // Change to Oio* if you
