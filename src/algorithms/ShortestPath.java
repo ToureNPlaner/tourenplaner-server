@@ -189,8 +189,8 @@ public class ShortestPath extends GraphAlgorithm {
 
 		// backtracking here
 		// Don't read distance from dist[], because there are distances with
-		// regard to the multiplier (TODO)
-		float distance = 0;
+		// regard to the multiplier
+		int distance = 0;
 		currNode = nodeID;
 		// don't declare new integer all the time
 		int tempEdge;

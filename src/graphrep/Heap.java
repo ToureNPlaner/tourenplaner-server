@@ -6,7 +6,7 @@ public class Heap {
 
 	// a trinary heap is supposed to be a little bit faster
 
-	// use one float array for dists and one for node ids
+	// use one float array for dists and one int array for node ids
 
 	/**
 	 * uses two fields per node: ... id_35, dist[id_35], id=2, [dist[2], ...
@@ -16,12 +16,11 @@ public class Heap {
 	private int heaplength;
 
 	// TODO: determine good value
-	// with 5000 no growing from stuttgart-> hamburg
 	private final int arrayGrowthSum = 10000;
 
 	public Heap() {
-		heaparr = new int[10000];
-		heaparr_dist = new float[10000];
+		heaparr = new int[15000];
+		heaparr_dist = new float[15000];
 		heaplength = 0;
 	}
 
@@ -57,10 +56,10 @@ public class Heap {
 		int tempid;
 		float tempdist;
 		while (true) {
-			// TODO: improve
 			parent = (pos - 1) / 3;
 			if ((parent >= 0)
-					&& (GraphRep.gt_Float(heaparr_dist[parent], heaparr_dist[pos]))) {
+					&& (GraphRep.gt_Float(heaparr_dist[parent],
+							heaparr_dist[pos]))) {
 				tempid = heaparr[parent];
 				tempdist = heaparr_dist[parent];
 				heaparr[parent] = heaparr[pos];
@@ -85,22 +84,21 @@ public class Heap {
 		int minChild;
 
 		while (true) {
-			// TODO: improve
-			child1 = (((pos / 2) * 3) + 1) * 2;
-			child2 = child1 + 2;
-			child3 = child1 + 4;
+			child1 = (pos * 3) + 1;
+			child2 = child1 + 1;
+			child3 = child1 + 2;
 
 			minChild = -1;
 
-			if (child1 <= ((heaplength) - 1)) {
+			if (child1 <= (heaplength - 1)) {
 				minChild = child1;
 			}
-			if ((child2 <= ((heaplength) - 1))
+			if ((child2 <= (heaplength - 1))
 					&& (GraphRep.lt_Float(heaparr_dist[child2],
 							heaparr_dist[minChild]))) {
 				minChild = child2;
 			}
-			if ((child3 <= ((heaplength) - 1))
+			if ((child3 <= (heaplength - 1))
 					&& (GraphRep.lt_Float(heaparr_dist[child3],
 							heaparr_dist[minChild]))) {
 				minChild = child3;
