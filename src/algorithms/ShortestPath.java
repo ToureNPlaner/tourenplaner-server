@@ -27,7 +27,7 @@ public class ShortestPath extends GraphAlgorithm {
 		@Override
 		public String toJSONString() {
 			sb.append("[");
-			for (int i = 0; i < lats.length - 1; i++) {
+			for (int i = 0; i < (lats.length - 1); i++) {
 				sb.append("{\"lt\":" + lats[i] + ",\"ln\":" + lons[i] + "},");
 			}
 			sb.append("{\"lt\":" + lats[lats.length - 1] + ",\"ln\":"
@@ -50,7 +50,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 	public ShortestPath(GraphRep graph) {
 		super(graph);
-		dist = new int[graph.getNodeCount()];
+		dist = new float[graph.getNodeCount()];
 		prev = new int[graph.getNodeCount()];
 
 	}
@@ -59,7 +59,7 @@ public class ShortestPath extends GraphAlgorithm {
 	public void setRequest(ComputeRequest req) {
 		// reset dists
 		for (int i = 0; i < dist.length; i++) {
-			dist[i] = Integer.MAX_VALUE;
+			dist[i] = Float.MAX_VALUE;
 		}
 		this.req = req;
 	}
@@ -69,14 +69,47 @@ public class ShortestPath extends GraphAlgorithm {
 		return res;
 	}
 
-	private final int[] dist;
+	// we will store dists with multiplier applied in here, and since
+	// multipliers are 0.0 < mult < 1.3 (?), we need float
+	private final float[] dist;
 	private final int[] prev;
+
+	// in meters
+	private float directDistance;
+
+	/**
+	 * @return Whether the given point is near enaugh at the direct connection
+	 *         to add it to U
+	 */
+	private boolean nearEnaugh(float lt, float ln) {
+		// TODO: find good values
+		// at the moment derivation from direct way is 50 km + 10% of total
+		// length of the direct way
+		return true;
+	}
+
+	// maybe use http://code.google.com/p/simplelatlng/ instead
+	private final float distFrom(double lat1, double lng1, double lat2,
+			double lng2) {
+		double earthRadius = 6370.97327862;
+		double dLat = Math.toRadians(lat2 - lat1);
+		double dLng = Math.toRadians(lng2 - lng1);
+		double a = (Math.sin(dLat / 2) * Math.sin(dLat / 2))
+				+ (Math.cos(Math.toRadians(lat1))
+						* Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2) * Math
+							.sin(dLng / 2));
+		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+		double dist = earthRadius * c;
+		return (float) (dist * 1000);
+	}
 
 	@Override
 	public void run() {
 		if (req == null) {
 			// TODO: some problem here
-			// return;
+			System.err
+					.println("We don't have a request object, how did we even get called without one??");
+			return;
 		}
 		res = req.getResultObject();
 
@@ -92,14 +125,17 @@ public class ShortestPath extends GraphAlgorithm {
 		srcid = graph.getIDForCoordinates(srclat, srclon);
 		destid = graph.getIDForCoordinates(destlat, destlon);
 
-		dist[srcid] = 0;
+		directDistance = distFrom(srclat, srclon, destlat, destlon);
+
+		dist[srcid] = 0.0F;
 		graphrep.Heap h = new graphrep.Heap();
 
 		h.insert(srcid, dist[srcid]);
 
 		int nodeID;
-		int nodeDist;
+		float nodeDist;
 		int outTarget = 0;
+		float tempDist;
 
 		DIJKSTRA: for (;;) {
 			if (!h.isEmpty()) {
@@ -114,9 +150,20 @@ public class ShortestPath extends GraphAlgorithm {
 				for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
 					outTarget = graph.getOutTarget(nodeID, i);
 
-					if ((dist[nodeID] + graph.getOutDist(nodeID, i)) < dist[outTarget]) {
-						dist[outTarget] = dist[nodeID]
-								+ graph.getOutDist(nodeID, i);
+					// without multiplier
+					// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
+					// if (tempDist < dist[outTarget]) {
+					// dist[outTarget] = tempDist;
+					// prev[outTarget] = nodeID;
+					// h.insert(outTarget, dist[outTarget]);
+					// }
+
+					// with multiplier
+					// TODO: check if this usage of mult is right
+					tempDist = (dist[nodeID] + (graph.getOutDist(nodeID, i) / graph
+							.getOutMult(nodeID, i)));
+					if (graphrep.GraphRep.lt_Float(tempDist, dist[outTarget])) {
+						dist[outTarget] = tempDist;
 						prev[outTarget] = nodeID;
 						h.insert(outTarget, dist[outTarget]);
 					}
@@ -127,8 +174,6 @@ public class ShortestPath extends GraphAlgorithm {
 				return;
 			}
 		}
-		System.err.println("found sp with dist = " + (dist[outTarget] / 1000)
-				+ " km");
 
 		// Find out how much space to allocate
 		int currNode = nodeID;
@@ -139,12 +184,24 @@ public class ShortestPath extends GraphAlgorithm {
 			currNode = prev[currNode];
 		} while (currNode != srcid);
 
-		currNode = nodeID;
-
 		float[] lats = new float[routeElements];
 		float[] lons = new float[routeElements];
-		float distance = dist[outTarget];
+
+		// backtracking here
+		// Don't read distance from dist[], because there are distances with
+		// regard to the multiplier (TODO)
+		float distance = 0;
+		currNode = nodeID;
+		// don't declare new integer all the time
+		int tempEdge;
 		do {
+			for (tempEdge = 0; tempEdge < graph.getOutEdgeCount(prev[currNode]); tempEdge++) {
+				if (graph.getOutTarget(prev[currNode], tempEdge) == currNode) {
+					// we found our edge, now get the dist and add it
+					distance += graph.getOutDist(prev[currNode], tempEdge);
+					break;
+				}
+			}
 			routeElements--;
 			lats[routeElements] = graph.getNodeLat(currNode);
 			lons[routeElements] = graph.getNodeLon(currNode);
@@ -152,7 +209,12 @@ public class ShortestPath extends GraphAlgorithm {
 		} while (currNode != srcid);
 
 		Map<String, Float> misc = new HashMap<String, Float>(2);
-		misc.put("distance", (float) dist[outTarget]);
+		misc.put("distance", dist[outTarget]);
+
+		System.err
+				.println("found sp with dist = " + (distance / 1000.0)
+						+ " km (direct distance: " + (directDistance / 1000.0)
+						+ " km)");
 
 		// System.out
 		// .println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");

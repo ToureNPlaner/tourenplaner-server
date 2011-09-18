@@ -4,10 +4,7 @@
 package server;
 
 import graphrep.GraphRep;
-import graphrep.GraphRepDumpReader;
-import graphrep.GraphRepTextReader;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +24,8 @@ import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 
 import config.ConfigManager;
+
+// TODO: maybe move more of this to the main TourenPlaner
 
 /**
  * ToureNPlaner Event Based Server
@@ -74,64 +73,13 @@ public class HttpServer {
 		return info;
 	}
 
-	/**
-	 * Main method for the ToureNPlaner Server
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		/**
-		 * inits config manager if config file is provided; also prints usage
-		 * information if necessary
-		 */
-		CLIHandler handler = new CLIHandler(args);
-
-		// if serialize, then ignore whether to read text or dump and read
-		// text graph since it wouldn't make sense to read a serialized
-		// graph just to serialize it. Also do this before anything server
-		// related gets actually started
-		if (handler.serializegraph()) {
-			System.out.println("Serializing Graph");
-			GraphRep graph = null;
-			String graphfilename = ConfigManager.getInstance().getEntryString(
-					"graphfilepath",
-					System.getProperty("user.home") + "/germany.txt");
-			try {
-				graph = new GraphRepTextReader().createGraphRep(graphfilename);
-				utils.GraphSerializer.serialize(graphfilename, graph);
-				System.exit(0);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-
+	public HttpServer(GraphRep graph, ConfigManager cm) {
 		// Configure the server.
 		ServerBootstrap bootstrap = new ServerBootstrap(
 				new NioServerSocketChannelFactory( // Change to Oio* if you want
 													// OIO
 						Executors.newCachedThreadPool(), Executors
 								.newCachedThreadPool()));
-
-		// uses defaults if it was not initialized by the CLIHandler
-		ConfigManager cm = ConfigManager.getInstance();
-
-		// Load the Graph
-		GraphRep graph = null;
-		String graphfilename = cm.getEntryString("graphfilepath",
-				System.getProperty("user.home") + "/germany.txt");
-		try {
-			if (handler.loadTextGraph()) {
-				graph = new GraphRepTextReader().createGraphRep(graphfilename);
-			} else {
-				graph = new GraphRepDumpReader().createGraphRep(graphfilename
-						+ ".dat");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-			// TODO: server won't calculate graph algorithms without a graph,
-			// but maybe it will provide some other functionality?
-		}
 
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();

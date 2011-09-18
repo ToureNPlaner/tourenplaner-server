@@ -4,34 +4,33 @@ import java.util.Arrays;
 
 public class Heap {
 
-	// make this consistent:
+	// a trinary heap is supposed to be a little bit faster
 
-	// 1) the heaplength is the number of elements in the
-	// heap, not the real number of ints in the array
-	// 2) the pos parameter is the real position in the array
-	// trinary is supposed to be a little bit faster
+	// use one float array for dists and one for node ids
 
 	/**
 	 * uses two fields per node: ... id_35, dist[id_35], id=2, [dist[2], ...
 	 */
 	private int[] heaparr;
+	private float[] heaparr_dist;
 	private int heaplength;
 
 	// TODO: determine good value
 	// with 5000 no growing from stuttgart-> hamburg
-	private final int arrayGrowthSum = 5000;
+	private final int arrayGrowthSum = 10000;
 
 	public Heap() {
-		heaparr = new int[5000];
+		heaparr = new int[10000];
+		heaparr_dist = new float[10000];
 		heaplength = 0;
 	}
 
-	public void insert(int id, int dist) {
-		heaplength += 1;
+	public void insert(int id, float dist) {
 		checkHeapArray();
-		heaparr[(heaplength - 1) * 2] = id;
-		heaparr[(heaplength - 1) * 2 + 1] = dist;
-		bubbleUp((heaplength - 1) * 2);
+		heaparr[heaplength] = id;
+		heaparr_dist[heaplength] = dist;
+		heaplength += 1;
+		bubbleUp(heaplength - 1);
 	}
 
 	public boolean isEmpty() {
@@ -42,13 +41,13 @@ public class Heap {
 		return heaparr[0];
 	}
 
-	public int peekMinDist() {
-		return heaparr[1];
+	public float peekMinDist() {
+		return heaparr_dist[0];
 	}
 
 	public void removeMin() {
-		heaparr[0] = heaparr[(heaplength - 1) * 2];
-		heaparr[1] = heaparr[(heaplength - 1) * 2 + 1];
+		heaparr[0] = heaparr[heaplength - 1];
+		heaparr_dist[0] = heaparr_dist[heaplength - 1];
 		heaplength -= 1;
 		siftDown(0);
 	}
@@ -56,17 +55,18 @@ public class Heap {
 	private void bubbleUp(int pos) {
 		int parent;
 		int tempid;
-		int tempdist;
+		float tempdist;
 		while (true) {
 			// TODO: improve
-			parent = ((((pos) / 2) - 1) / 3) * 2;
-			if (parent >= 0 && heaparr[parent + 1] > heaparr[pos + 1]) {
+			parent = (pos - 1) / 3;
+			if ((parent >= 0)
+					&& (GraphRep.gt_Float(heaparr_dist[parent], heaparr_dist[pos]))) {
 				tempid = heaparr[parent];
-				tempdist = heaparr[parent + 1];
+				tempdist = heaparr_dist[parent];
 				heaparr[parent] = heaparr[pos];
-				heaparr[parent + 1] = heaparr[pos + 1];
+				heaparr_dist[parent] = heaparr_dist[pos];
 				heaparr[pos] = tempid;
-				heaparr[pos + 1] = tempdist;
+				heaparr_dist[pos] = tempdist;
 				pos = parent;
 			} else {
 				break;
@@ -77,7 +77,7 @@ public class Heap {
 
 	private void siftDown(int pos) {
 		int tempid;
-		int tempdist;
+		float tempdist;
 
 		int child1;
 		int child2;
@@ -86,31 +86,35 @@ public class Heap {
 
 		while (true) {
 			// TODO: improve
-			child1 = ((pos / 2) * 3 + 1) * 2;
+			child1 = (((pos / 2) * 3) + 1) * 2;
 			child2 = child1 + 2;
 			child3 = child1 + 4;
 
 			minChild = -1;
 
-			if (child1 <= heaplength * 2 - 2) {
+			if (child1 <= ((heaplength) - 1)) {
 				minChild = child1;
 			}
-			if (child2 <= heaplength * 2 - 2
-					&& heaparr[child2 + 1] < heaparr[minChild + 1]) {
+			if ((child2 <= ((heaplength) - 1))
+					&& (GraphRep.lt_Float(heaparr_dist[child2],
+							heaparr_dist[minChild]))) {
 				minChild = child2;
 			}
-			if (child3 <= heaplength * 2 - 2
-					&& heaparr[child3 + 1] < heaparr[minChild + 1]) {
+			if ((child3 <= ((heaplength) - 1))
+					&& (GraphRep.lt_Float(heaparr_dist[child3],
+							heaparr_dist[minChild]))) {
 				minChild = child3;
 			}
 
-			if (minChild != -1 && heaparr[minChild + 1] < heaparr[pos + 1]) {
+			if ((minChild != -1)
+					&& (GraphRep.lt_Float(heaparr_dist[minChild],
+							heaparr_dist[pos]))) {
 				tempid = heaparr[pos];
-				tempdist = heaparr[pos + 1];
+				tempdist = heaparr_dist[pos];
 				heaparr[pos] = heaparr[minChild];
-				heaparr[pos + 1] = heaparr[minChild + 1];
+				heaparr_dist[pos] = heaparr_dist[minChild];
 				heaparr[minChild] = tempid;
-				heaparr[minChild + 1] = tempdist;
+				heaparr_dist[minChild] = tempdist;
 				pos = minChild;
 			} else {
 				break;
@@ -119,9 +123,11 @@ public class Heap {
 	}
 
 	private void checkHeapArray() {
-		if (heaplength * 2 + 1 >= heaparr.length) {
-			System.err.println("Increased Heap size");
+		if (((heaplength) + 2) >= heaparr.length) {
+			System.err.println("Increase Heap size");
 			heaparr = Arrays.copyOf(heaparr, heaparr.length + arrayGrowthSum);
+			heaparr_dist = Arrays.copyOf(heaparr_dist, heaparr_dist.length
+					+ arrayGrowthSum);
 		}
 	}
 }
