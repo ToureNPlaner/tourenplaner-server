@@ -81,16 +81,6 @@ public class ShortestPath extends GraphAlgorithm {
 	// in meters
 	private float directDistance;
 
-	/**
-	 * @return Whether the given point is near enaugh at the direct connection
-	 *         to add it to U
-	 */
-	private boolean nearEnaugh(float lt, float ln) {
-		// TODO: find good values
-		// at the moment derivation from direct way is 50 km + 10% of total
-		// length of the direct way
-		return true;
-	}
 
 	// maybe use http://code.google.com/p/simplelatlng/ instead
 	private final float calcDirectDistance(double lat1, double lng1,
@@ -117,6 +107,7 @@ public class ShortestPath extends GraphAlgorithm {
 		}
 		res = req.getResultObject();
 
+		@SuppressWarnings("unchecked")
 		ArrayList<Map<String, Double>> points = (ArrayList<Map<String, Double>>) req
 				.get("points");
 
