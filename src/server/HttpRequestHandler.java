@@ -13,6 +13,9 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -63,9 +66,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private final Map<String, Object> serverInfo;
 
-	private final boolean isPrivate;
+	private boolean isPrivate;
 
 	private DatabaseManager dbm;
+
+	private MessageDigest digester;
 
 	/**
 	 * Constructs a new RequestHandler using the given ComputeCore and
@@ -90,8 +95,20 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						"toureNPlaner"), cm.getEntryString("dbpw",
 						"toureNPlaner"));
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				System.err
+						.println("Can't connect to database (switching to public mode) "
+								+ e.getMessage());
+				this.isPrivate = false;
+			}
+		}
+
+		if (isPrivate) {
+			try {
+				digester = MessageDigest.getInstance("SHA-1");
+			} catch (NoSuchAlgorithmException e) {
+				System.err
+						.println("Can't load SHA-1 Digester. Will now switch to public mode");
+				this.isPrivate = false;
 			}
 		}
 	}
@@ -273,14 +290,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * 
 	 * @param request2
 	 * @return
-	 * @throws SQLException 
+	 * @throws SQLException
 	 */
 	private boolean auth(HttpRequest myReq) throws SQLException {
+		String email, emailandpw, pw;
+		int index = 0;
 		// Why between heaven and earth does Java have AES Encryption in
-		// the standard library but not Base64 though it has it inetrnally
+		// the standard library but not Base64 though it has it internally
 		// several times
-		String userandpw = myReq.getHeader("Authorization");
-		if (userandpw == null) {
+		emailandpw = myReq.getHeader("Authorization");
+		if (emailandpw == null) {
 			return false;
 		}
 
@@ -288,24 +307,41 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		ChannelBuffer data;
 		boolean result = false;
 		try {
+
 			// Base64 is always ASCII
-			encodeddata = ChannelBuffers.wrappedBuffer(userandpw.substring(
-					userandpw.lastIndexOf(' ')).getBytes("US-ASCII"));
+			encodeddata = ChannelBuffers.wrappedBuffer(emailandpw.substring(
+					emailandpw.lastIndexOf(' ')).getBytes("US-ASCII"));
 
 			data = Base64.decode(encodeddata);
 			// The string itself is utf-8
-			userandpw = new String(data.array(), "UTF-8");
+			emailandpw = data.toString(Charset.forName("UTF-8"));
+			index = emailandpw.indexOf(':');
+			if (index <= 0) {
+				return false;
+			}
+			email = emailandpw.substring(0, index);
+			pw = emailandpw.substring(index + 1);
 			// TODO Database
-			
-			UsersDBRow user = dbm.getUser(userandpw.substring(0, userandpw.indexOf(':')));
-			
-			if (userandpw.trim().equals("FooUser:FooPassword")) {
+
+			UsersDBRow user = dbm.getUser(email);
+			// Compute SHA1 of PW:SALT
+			String toHash = pw + user.salt;
+
+			byte[] bindigest = digester.digest(toHash.getBytes("UTF-8"));
+			// Convert to Hex String
+			StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
+			for (byte b : bindigest) {
+				hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
+				hexbuilder.append(Integer.toHexString(b & 0x0F));
+			}
+			System.out.println(toHash + " : " + hexbuilder.toString());
+			if (user.passwordhash.equals(hexbuilder.toString())) {
 				result = true;
 			}
-			
+
 		} catch (UnsupportedEncodingException e) {
 			System.err
-					.println("We can't fcking convert to ASCII this box is really broken");
+					.println("We can't fcking convert to the specified charset this box is really broken");
 		}
 
 		return result;
