@@ -70,6 +70,8 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 		if (path.equals("/info")) {
 
 			responder.writeJSON(info, HttpResponseStatus.OK);
+		} else {
+			channel.close();
 		}
 	}
 

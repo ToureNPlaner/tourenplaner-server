@@ -7,17 +7,20 @@ import java.io.IOException;
 
 public class GraphRepTextReader extends GraphRepFactory {
 
+	// new fileformat is probably:
+	// nodecount
+	// edgecount
+	// (nodecount *) ID lat lon height
+	// (edgecount *) source dest dist mult
+
 	private static class Sorter {
 		private static void Sort(GraphRep graphRep) {
 
 			Heapify(graphRep);
 			int endI = graphRep.dest_in.length - 1;
 			while (endI > 0) {
-				// System.out.println(graphRep.dest_in[0]);
 				swap(graphRep, endI, 0);
-
 				siftDown(graphRep, 0, endI - 1);
-
 				endI--;
 			}
 		}
@@ -27,7 +30,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int tempDest = graphRep.dest_in[i];
 			int tempDist = graphRep.dist_in[i];
 			int tempSrc = graphRep.source_in[i];
-			float tempMult = graphRep.mult_in[i];
+			int tempMult = graphRep.mult_in[i];
 
 			// change place
 			graphRep.dest_in[i] = graphRep.dest_in[j];
@@ -127,13 +130,13 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		graphRep.source_out = new int[graphRep.edgeCount];
 		graphRep.dest_out = new int[graphRep.edgeCount];
-		graphRep.mult_out = new float[graphRep.edgeCount];
+		graphRep.mult_out = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_out = new float[edgeCount];
 		graphRep.dist_out = new int[graphRep.edgeCount];
 
 		graphRep.source_in = new int[graphRep.edgeCount];
 		graphRep.dest_in = new int[graphRep.edgeCount];
-		graphRep.mult_in = new float[graphRep.edgeCount];
+		graphRep.mult_in = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_in = new float[edgeCount];
 		graphRep.dist_in = new int[graphRep.edgeCount];
 
@@ -141,16 +144,15 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		// used for splitted lines in 1. nodes 2. edges
 		String[] splittedLine;
+
 		System.out.println("Reading " + graphRep.nodeCount + " nodes and "
-				+ graphRep.edgeCount + " edges...");
+				+ graphRep.edgeCount + " edges ...");
 		for (int i = 0; i < graphRep.nodeCount; i++) {
 			splittedLine = in.readLine().split(" ");
 			graphRep.lat[i] = Float.parseFloat(splittedLine[1]);
 			graphRep.lon[i] = Float.parseFloat(splittedLine[2]);
 			graphRep.height[i] = Integer.parseInt(splittedLine[3]);
 		}
-
-		System.out.println("successfully read nodes");
 
 		int currentSource;
 		int prevSource = -1;
@@ -166,7 +168,10 @@ public class GraphRepTextReader extends GraphRepFactory {
 			graphRep.dist_out[i] = Integer.parseInt(splittedLine[2]);
 			graphRep.dist_in[i] = graphRep.dist_out[i];
 
-			graphRep.mult_out[i] = Float.parseFloat(splittedLine[3]);
+			// make mult better usable for us: save the distances with
+			// multipliers applied directly
+			graphRep.mult_out[i] = Math.round((1.3F / Float
+					.parseFloat(splittedLine[3])) * graphRep.dist_out[i]);
 			graphRep.mult_in[i] = graphRep.mult_out[i];
 
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);
@@ -180,18 +185,14 @@ public class GraphRepTextReader extends GraphRepFactory {
 			}
 		}
 		in.close();
+
 		graphRep.offsetOut[graphRep.nodeCount] = graphRep.edgeCount;
 		// assuming we have at least one edge
 		for (int cnt = graphRep.nodeCount - 1; graphRep.offsetOut[cnt] == 0; cnt--) {
 			graphRep.offsetOut[cnt] = graphRep.offsetOut[cnt + 1];
 		}
 
-		System.out
-				.println("Succesfully created offset of OutEdges and copied outedges");
-
 		Sorter.Sort(graphRep);
-
-		System.out.println("successfully sorted outedges");
 
 		int currentDest;
 		int prevDest = -1;
@@ -205,8 +206,6 @@ public class GraphRepTextReader extends GraphRepFactory {
 			}
 		}
 
-		System.out.println("offset2");
-
 		graphRep.offsetIn[graphRep.nodeCount] = graphRep.edgeCount;
 		// assuming we have at least one edge
 		for (int cnt = graphRep.nodeCount - 1; graphRep.offsetIn[cnt] == 0; cnt--) {
@@ -218,8 +217,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// DumbNN uses linear search and is slow.
 		// KDTreeNN should be faster
 		graphRep.searcher = new DumbNN(graphRep);
-
+		System.out.println("... success!");
 		return graphRep;
 	}
-
 }

@@ -4,9 +4,7 @@
 package server;
 
 import graphrep.GraphRep;
-import graphrep.GraphRepTextReader;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,6 +24,8 @@ import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 
 import config.ConfigManager;
+
+// TODO: maybe move more of this to the main TourenPlaner
 
 /**
  * ToureNPlaner Event Based Server
@@ -47,7 +47,7 @@ public class HttpServer {
 		info.put("version", new Float(0.1));
 		info.put(
 				"servertype",
-				ConfigManager.getInstance().getEntryBool("private", true) ? "private"
+				ConfigManager.getInstance().getEntryBool("private", false) ? "private"
 						: "public");
 		info.put("sslport",
 				ConfigManager.getInstance().getEntryLong("sslport", 8081));
@@ -73,45 +73,13 @@ public class HttpServer {
 		return info;
 	}
 
-	/**
-	 * Main method for the ToureNPlaner Server
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
+	public HttpServer(GraphRep graph, ConfigManager cm) {
 		// Configure the server.
 		ServerBootstrap bootstrap = new ServerBootstrap(
 				new NioServerSocketChannelFactory( // Change to Oio* if you want
 													// OIO
 						Executors.newCachedThreadPool(), Executors
 								.newCachedThreadPool()));
-
-		// Load Config
-		if (args.length == 1) {
-			try {
-				ConfigManager.Init(args[0]);
-			} catch (Exception e) {
-				System.err.println("Couldn't load configuration File: "
-						+ e.getMessage());
-				return;
-			}
-		} else {
-			System.err.println("Missing config path parameter, using defaults");
-			System.err
-					.println("Use \"#server PATH\" to load the config at PATH");
-		}
-		ConfigManager cm = ConfigManager.getInstance();
-
-		// Load the Graph
-		GraphRep graph;
-		try {
-			graph = new GraphRepTextReader().createGraphRep(cm.getEntryString(
-					"graphfilepath", System.getProperty("user.home")
-							+ "/germany.txt"));
-		} catch (IOException e) {
-			System.err.println("Could not load Graph: " + e.getMessage());
-			return;
-		}
 
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();
@@ -152,6 +120,5 @@ public class HttpServer {
 			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
 					"httpport", 8080)));
 		}
-
 	}
 }
