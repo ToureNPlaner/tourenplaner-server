@@ -25,7 +25,7 @@ public class GraphRep implements Serializable {
 	// edges
 	protected int[] source_out;
 	protected int[] dest_out;
-	protected float[] mult_out;
+	protected int[] mult_out;
 	protected int[] dist_out;
 	protected float[] elev_out;
 
@@ -33,7 +33,7 @@ public class GraphRep implements Serializable {
 
 	protected int[] source_in;
 	protected int[] dest_in;
-	protected float[] mult_in;
+	protected int[] mult_in;
 	protected int[] dist_in;
 	protected float[] elev_in;
 
@@ -136,7 +136,7 @@ public class GraphRep implements Serializable {
 	 * @param nodeId
 	 * @param edgeNum
 	 */
-	public final float getOutMult(int nodeId, int edgeNum) {
+	public final int getOutMult(int nodeId, int edgeNum) {
 		return mult_out[offsetOut[nodeId] + edgeNum];
 	}
 
@@ -163,7 +163,7 @@ public class GraphRep implements Serializable {
 	 * @param nodeId
 	 * @param edgeNum
 	 */
-	public final float getInMult(int nodeId, int edgeNum) {
+	public final int getInMult(int nodeId, int edgeNum) {
 		return mult_in[offsetIn[nodeId] + edgeNum];
 	}
 

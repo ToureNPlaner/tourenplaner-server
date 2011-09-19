@@ -30,7 +30,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int tempDest = graphRep.dest_in[i];
 			int tempDist = graphRep.dist_in[i];
 			int tempSrc = graphRep.source_in[i];
-			float tempMult = graphRep.mult_in[i];
+			int tempMult = graphRep.mult_in[i];
 
 			// change place
 			graphRep.dest_in[i] = graphRep.dest_in[j];
@@ -130,13 +130,13 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		graphRep.source_out = new int[graphRep.edgeCount];
 		graphRep.dest_out = new int[graphRep.edgeCount];
-		graphRep.mult_out = new float[graphRep.edgeCount];
+		graphRep.mult_out = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_out = new float[edgeCount];
 		graphRep.dist_out = new int[graphRep.edgeCount];
 
 		graphRep.source_in = new int[graphRep.edgeCount];
 		graphRep.dest_in = new int[graphRep.edgeCount];
-		graphRep.mult_in = new float[graphRep.edgeCount];
+		graphRep.mult_in = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_in = new float[edgeCount];
 		graphRep.dist_in = new int[graphRep.edgeCount];
 
@@ -168,7 +168,10 @@ public class GraphRepTextReader extends GraphRepFactory {
 			graphRep.dist_out[i] = Integer.parseInt(splittedLine[2]);
 			graphRep.dist_in[i] = graphRep.dist_out[i];
 
-			graphRep.mult_out[i] = Float.parseFloat(splittedLine[3]);
+			// make mult better usable for us: save the distances with
+			// multipliers applied directly
+			graphRep.mult_out[i] = Math.round((1.3F / Float
+					.parseFloat(splittedLine[3])) * graphRep.dist_out[i]);
 			graphRep.mult_in[i] = graphRep.mult_out[i];
 
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);

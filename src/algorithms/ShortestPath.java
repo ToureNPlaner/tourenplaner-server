@@ -1,6 +1,7 @@
 package algorithms;
 
 import graphrep.GraphRep;
+import graphrep.Heap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,9 +49,12 @@ public class ShortestPath extends GraphAlgorithm {
 	int srcid;
 	int destid;
 
+	private final Heap heap;
+
 	public ShortestPath(GraphRep graph) {
 		super(graph);
-		dist = new float[graph.getNodeCount()];
+		heap = new graphrep.Heap();
+		dist = new int[graph.getNodeCount()];
 		prev = new int[graph.getNodeCount()];
 	}
 
@@ -58,8 +62,9 @@ public class ShortestPath extends GraphAlgorithm {
 	public void setRequest(ComputeRequest req) {
 		// reset dists
 		for (int i = 0; i < dist.length; i++) {
-			dist[i] = Float.MAX_VALUE;
+			dist[i] = Integer.MAX_VALUE;
 		}
+		heap.resetHeap();
 		this.req = req;
 	}
 
@@ -70,7 +75,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 	// we will store dists with multiplier applied in here, and since
 	// multipliers are 0.0 < mult < 1.3 (?), we need float
-	private final float[] dist;
+	private final int[] dist;
 	private final int[] prev;
 
 	// in meters
@@ -126,26 +131,25 @@ public class ShortestPath extends GraphAlgorithm {
 
 		directDistance = distFrom(srclat, srclon, destlat, destlon);
 
-		dist[srcid] = 0.0F;
-		graphrep.Heap h = new graphrep.Heap();
+		dist[srcid] = 0;
 
-		h.insert(srcid, dist[srcid]);
+		heap.insert(srcid, dist[srcid]);
 
 		int nodeID = -1;
 		float nodeDist;
 		int outTarget = 0;
-		float tempDist;
+		int tempDist;
 
 		long start = System.nanoTime();
 		long end1;
 		long end2;
-		DIJKSTRA: while (!h.isEmpty()) {
-			nodeID = h.peekMinId();
-			nodeDist = h.peekMinDist();
-			h.removeMin();
+		DIJKSTRA: while (!heap.isEmpty()) {
+			nodeID = heap.peekMinId();
+			nodeDist = heap.peekMinDist();
+			heap.removeMin();
 			if (nodeID == destid) {
 				break DIJKSTRA;
-			} else if (graphrep.GraphRep.gt_Float(nodeDist, dist[nodeID])) {
+			} else if (nodeDist > dist[nodeID]) {
 				continue;
 			}
 			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
@@ -161,12 +165,14 @@ public class ShortestPath extends GraphAlgorithm {
 
 				// with multiplier
 				// TODO: check if this usage of mult is right
-				tempDist = (dist[nodeID] + (graph.getOutDist(nodeID, i) / graph
-						.getOutMult(nodeID, i)));
-				if (graphrep.GraphRep.lt_Float(tempDist, dist[outTarget])) {
+				tempDist = (dist[nodeID] + graph.getOutMult(nodeID, i)); // *(1.3F
+				// /
+				// graph
+				// .getOutMult(nodeID, i)))));
+				if (tempDist < dist[outTarget]) {
 					dist[outTarget] = tempDist;
 					prev[outTarget] = nodeID;
-					h.insert(outTarget, dist[outTarget]);
+					heap.insert(outTarget, dist[outTarget]);
 				}
 			}
 		}
@@ -209,7 +215,7 @@ public class ShortestPath extends GraphAlgorithm {
 			currNode = prev[currNode];
 		} while (currNode != srcid);
 		end2 = System.nanoTime();
-		Map<String, Float> misc = new HashMap<String, Float>(2);
+		Map<String, Integer> misc = new HashMap<String, Integer>(2);
 		misc.put("distance", dist[outTarget]);
 
 		System.err.println("found sp with dist = " + (distance / 1000.0)
