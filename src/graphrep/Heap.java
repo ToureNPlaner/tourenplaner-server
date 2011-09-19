@@ -5,15 +5,18 @@ import java.util.Arrays;
 public class Heap {
 
 	// 1) the heaplength is the number of elements in the
-	// heap, not the real number of ints in the array
+	// heap, not the real number of ints in the array. For example heaplength =
+	// 3 means that the array containing the heap contains 6*integers. So for
+	// heaplength = 3 the index of the last element is (3-1)/2 and the index for
+	// the dist of the last element is ((3-1)/2)+1
 	// 2) the pos parameter is the real position in the array
-	// trinary is supposed to be a little bit faster
+	// 3) a trinary heap is supposed to be a little bit faster
 
 	private int[] heaparr;
 	private int heaplength;
 
 	// TODO: determine good value
-	// with 5000 elements in the heap there is no growing from stuttgart->
+	// with max 5000 elements in the heap there is no growing from stuttgart->
 	// hamburg
 	private final int arrayGrowthSum = 10000;
 

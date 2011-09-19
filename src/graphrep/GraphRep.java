@@ -13,7 +13,7 @@ public class GraphRep implements Serializable {
 	protected int nodeCount;
 	protected int edgeCount;
 
-	// note: edgeNum often refers to the relative number of an outgoing edge
+	// note: edgeNum refers to the relative number of an outgoing edge
 	// from a node:
 	// (first outgoing edge = 0, second outgoing edge = 1, ...)
 
@@ -40,11 +40,11 @@ public class GraphRep implements Serializable {
 	protected int[] offsetIn;
 
 	/**
-	 * 
-	 * 
+	 * A graphrep is the representation of a graph used to perform several
+	 * algorithms on. All its protected fields must be be set from the outside
+	 * (which is not nice)
 	 */
 	public GraphRep() {
-
 	}
 
 	/**
@@ -188,23 +188,6 @@ public class GraphRep implements Serializable {
 	 */
 	public final int getEdgeCount() {
 		return edgeCount;
-	}
-
-	private static final float accuracy = 0.000001F;
-
-	public static final boolean eq_Float(float l, float r) {
-		// TODO: accuracy tuning
-		return (Math.abs(l - r)) < accuracy;
-	}
-
-	public static final boolean gt_Float(float l, float r) {
-		// TODO: accuracy tuning
-		return (l > r) && (!(Math.abs(l - r) < accuracy));
-	}
-
-	public static final boolean lt_Float(float l, float r) {
-		// TODO: accuracy tuning
-		return (l < r) && (!(Math.abs(l - r) < accuracy));
 	}
 
 }

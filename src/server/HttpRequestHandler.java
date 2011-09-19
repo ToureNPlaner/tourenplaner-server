@@ -42,6 +42,7 @@ import computecore.ComputeRequest;
 
 import config.ConfigManager;
 import database.DatabaseManager;
+import database.UsersDBRow;
 
 /**
  * This handler handles HTTP Requests on the normal operation socket including *
@@ -149,7 +150,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		} else if (path.startsWith("/alg")) {
 
-			if (auth(request)) {
+			if (!isPrivate || auth(request)) {
 				String algName = queryStringDecoder.getPath().substring(4);
 				handleAlg(request, responder, algName);
 			} else {
@@ -272,8 +273,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * 
 	 * @param request2
 	 * @return
+	 * @throws SQLException 
 	 */
-	private boolean auth(HttpRequest myReq) {
+	private boolean auth(HttpRequest myReq) throws SQLException {
 		// Why between heaven and earth does Java have AES Encryption in
 		// the standard library but not Base64 though it has it inetrnally
 		// several times
@@ -294,11 +296,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			// The string itself is utf-8
 			userandpw = new String(data.array(), "UTF-8");
 			// TODO Database
+			
+			UsersDBRow user = dbm.getUser(userandpw.substring(0, userandpw.indexOf(':')));
+			
 			if (userandpw.trim().equals("FooUser:FooPassword")) {
 				result = true;
 			}
-			;
-
+			
 		} catch (UnsupportedEncodingException e) {
 			System.err
 					.println("We can't fcking convert to ASCII this box is really broken");

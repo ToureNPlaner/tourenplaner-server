@@ -73,8 +73,8 @@ public class ShortestPath extends GraphAlgorithm {
 		return res;
 	}
 
-	// we will store dists with multiplier applied in here, and since
-	// multipliers are 0.0 < mult < 1.3 (?), we need float
+	// dists in this array are stored with the multiplier applied. They also are
+	// rounded and are stored as integers
 	private final int[] dist;
 	private final int[] prev;
 
@@ -97,6 +97,7 @@ public class ShortestPath extends GraphAlgorithm {
 		return (float) (dist * 1000);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		if (req == null) {
@@ -107,9 +108,22 @@ public class ShortestPath extends GraphAlgorithm {
 		}
 		res = req.getResultObject();
 
-		@SuppressWarnings("unchecked")
-		ArrayList<Map<String, Double>> points = (ArrayList<Map<String, Double>>) req
-				.get("points");
+		ArrayList<Map<String, Double>> points = null;
+		// TODO: send error messages to client
+		try {
+			points = (ArrayList<Map<String, Double>>) req.get("points");
+		} catch (ClassCastException e) {
+			System.err.println("The request's contents are invalid\n"
+					+ e.getMessage());
+			e.printStackTrace();
+			return;
+		} catch (NullPointerException e) {
+			System.err
+					.println("The request doesn't contain the information required for this algorithm\n"
+							+ e.getMessage());
+			e.printStackTrace();
+			return;
+		}
 
 		srclat = points.get(0).get("lt").floatValue();
 		srclon = points.get(0).get("ln").floatValue();
@@ -143,10 +157,10 @@ public class ShortestPath extends GraphAlgorithm {
 			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
 				outTarget = graph.getOutTarget(nodeID, i);
 
-				// without multiplier
+				// without multiplier = shortest path
 				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
 
-				// with multiplier
+				// with multiplier = fastest path
 				tempDist = dist[nodeID] + graph.getOutMult(nodeID, i);
 
 				if (tempDist < dist[outTarget]) {
