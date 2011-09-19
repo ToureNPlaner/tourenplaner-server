@@ -190,19 +190,21 @@ public class GraphRep implements Serializable {
 		return edgeCount;
 	}
 
+	private static final float accuracy = 0.000001F;
+
 	public static final boolean eq_Float(float l, float r) {
 		// TODO: accuracy tuning
-		return (l - r) < 0.0001;
+		return (Math.abs(l - r)) < accuracy;
 	}
 
 	public static final boolean gt_Float(float l, float r) {
 		// TODO: accuracy tuning
-		return (l < r) && (!(Math.abs(l - r) < 0.0001));
+		return (l > r) && (!(Math.abs(l - r) < accuracy));
 	}
 
 	public static final boolean lt_Float(float l, float r) {
 		// TODO: accuracy tuning
-		return (l < r) && (!(Math.abs(l - r) < 0.0001));
+		return (l < r) && (!(Math.abs(l - r) < accuracy));
 	}
 
 }

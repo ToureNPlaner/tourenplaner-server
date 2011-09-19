@@ -52,7 +52,6 @@ public class ShortestPath extends GraphAlgorithm {
 		super(graph);
 		dist = new float[graph.getNodeCount()];
 		prev = new int[graph.getNodeCount()];
-
 	}
 
 	@Override
@@ -132,47 +131,49 @@ public class ShortestPath extends GraphAlgorithm {
 
 		h.insert(srcid, dist[srcid]);
 
-		int nodeID;
+		int nodeID = -1;
 		float nodeDist;
 		int outTarget = 0;
 		float tempDist;
 
-		DIJKSTRA: for (;;) {
-			if (!h.isEmpty()) {
-				nodeID = h.peekMinId();
-				nodeDist = h.peekMinDist();
-				h.removeMin();
-				if (nodeID == destid) {
-					break DIJKSTRA;
-				} else if (nodeDist > dist[nodeID]) {
-					continue;
-				}
-				for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
-					outTarget = graph.getOutTarget(nodeID, i);
-
-					// without multiplier
-					// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
-					// if (tempDist < dist[outTarget]) {
-					// dist[outTarget] = tempDist;
-					// prev[outTarget] = nodeID;
-					// h.insert(outTarget, dist[outTarget]);
-					// }
-
-					// with multiplier
-					// TODO: check if this usage of mult is right
-					tempDist = (dist[nodeID] + (graph.getOutDist(nodeID, i) / graph
-							.getOutMult(nodeID, i)));
-					if (graphrep.GraphRep.lt_Float(tempDist, dist[outTarget])) {
-						dist[outTarget] = tempDist;
-						prev[outTarget] = nodeID;
-						h.insert(outTarget, dist[outTarget]);
-					}
-				}
-			} else {
-				System.err.println("heap empty");
-				// TODO: do something useful
-				return;
+		long start = System.nanoTime();
+		long end1;
+		long end2;
+		DIJKSTRA: while (!h.isEmpty()) {
+			nodeID = h.peekMinId();
+			nodeDist = h.peekMinDist();
+			h.removeMin();
+			if (nodeID == destid) {
+				break DIJKSTRA;
+			} else if (graphrep.GraphRep.gt_Float(nodeDist, dist[nodeID])) {
+				continue;
 			}
+			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
+				outTarget = graph.getOutTarget(nodeID, i);
+
+				// without multiplier
+				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
+				// if (tempDist < dist[outTarget]) {
+				// dist[outTarget] = tempDist;
+				// prev[outTarget] = nodeID;
+				// h.insert(outTarget, dist[outTarget]);
+				// }
+
+				// with multiplier
+				// TODO: check if this usage of mult is right
+				tempDist = (dist[nodeID] + (graph.getOutDist(nodeID, i) / graph
+						.getOutMult(nodeID, i)));
+				if (graphrep.GraphRep.lt_Float(tempDist, dist[outTarget])) {
+					dist[outTarget] = tempDist;
+					prev[outTarget] = nodeID;
+					h.insert(outTarget, dist[outTarget]);
+				}
+			}
+		}
+		end1 = System.nanoTime();
+
+		if (nodeID != destid) {
+			System.err.println("There is no path from src to dest");
 		}
 
 		// Find out how much space to allocate
@@ -207,14 +208,16 @@ public class ShortestPath extends GraphAlgorithm {
 			lons[routeElements] = graph.getNodeLon(currNode);
 			currNode = prev[currNode];
 		} while (currNode != srcid);
-
+		end2 = System.nanoTime();
 		Map<String, Float> misc = new HashMap<String, Float>(2);
 		misc.put("distance", dist[outTarget]);
 
-		System.err
-				.println("found sp with dist = " + (distance / 1000.0)
-						+ " km (direct distance: " + (directDistance / 1000.0)
-						+ " km)");
+		System.err.println("found sp with dist = " + (distance / 1000.0)
+				+ " km (direct distance: " + (directDistance / 1000.0)
+				+ " km; Distance with multiplier: " + (dist[destid] / 1000.0)
+				+ ")");
+		System.err.println("Dijkstra: " + ((end1 - start) / 1000000.0)
+				+ "ms; Backtracking: " + ((end2 - end1) / 1000000.0));
 
 		// System.out
 		// .println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");

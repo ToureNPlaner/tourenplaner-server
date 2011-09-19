@@ -3,24 +3,21 @@ package graphrep;
 import java.util.Arrays;
 
 public class Heap {
-
 	// a trinary heap is supposed to be a little bit faster
 
 	// use one float array for dists and one int array for node ids
-
-	/**
-	 * uses two fields per node: ... id_35, dist[id_35], id=2, [dist[2], ...
-	 */
 	private int[] heaparr;
 	private float[] heaparr_dist;
+
 	private int heaplength;
 
 	// TODO: determine good value
-	private final int arrayGrowthSum = 10000;
+	// with 12000 array is big enaugh for stuttgart=>hamburg
+	private final int arrayGrowthSum = 12000;
 
 	public Heap() {
-		heaparr = new int[15000];
-		heaparr_dist = new float[15000];
+		heaparr = new int[arrayGrowthSum];
+		heaparr_dist = new float[arrayGrowthSum];
 		heaplength = 0;
 	}
 
