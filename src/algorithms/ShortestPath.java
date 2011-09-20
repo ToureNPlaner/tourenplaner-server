@@ -207,12 +207,12 @@ public class ShortestPath extends GraphAlgorithm {
 		} while (currNode != srcid);
 		backtracktime = System.nanoTime();
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);
-		misc.put("distance", multipliedDist[outTarget]);
+		misc.put("distance", distance);
 
 		System.out.println("found sp with dist = " + (distance / 1000.0)
 				+ " km (direct distance: " + (directDistance / 1000.0)
-				+ " km; Distance with multiplier: " + (multipliedDist[destid] / 1000.0)
-				+ ")");
+				+ " km; Distance with multiplier: "
+				+ (multipliedDist[destid] / 1000.0) + ")");
 		System.out.println("Dijkstra: "
 				+ ((dijkstratime - starttime) / 1000000.0)
 				+ " ms; Backtracking: "
