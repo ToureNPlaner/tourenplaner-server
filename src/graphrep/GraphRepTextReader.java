@@ -29,20 +29,20 @@ public class GraphRepTextReader extends GraphRepFactory {
 			// save to temp
 			int tempDest = graphRep.dest_in[i];
 			int tempDist = graphRep.dist_in[i];
-			int tempSrc = graphRep.source_in[i];
-			int tempMult = graphRep.mult_in[i];
+			int tempSrc = graphRep.src_in[i];
+			int tempMult = graphRep.multipliedDist_in[i];
 
 			// change place
 			graphRep.dest_in[i] = graphRep.dest_in[j];
 			graphRep.dist_in[i] = graphRep.dist_in[j];
-			graphRep.source_in[i] = graphRep.source_in[j];
-			graphRep.mult_in[i] = graphRep.mult_in[j];
+			graphRep.src_in[i] = graphRep.src_in[j];
+			graphRep.multipliedDist_in[i] = graphRep.multipliedDist_in[j];
 
 			// write back to the new place
 			graphRep.dest_in[j] = tempDest;
 			graphRep.dist_in[j] = tempDist;
-			graphRep.source_in[j] = tempSrc;
-			graphRep.mult_in[j] = tempMult;
+			graphRep.src_in[j] = tempSrc;
+			graphRep.multipliedDist_in[j] = tempMult;
 		}
 
 		private static boolean less(GraphRep graphRep, int i, int j) {
@@ -121,15 +121,15 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		graphRep.offsetOut = new int[graphRep.nodeCount + 1];
 
-		graphRep.source_out = new int[graphRep.edgeCount];
+		graphRep.src_out = new int[graphRep.edgeCount];
 		graphRep.dest_out = new int[graphRep.edgeCount];
-		graphRep.mult_out = new int[graphRep.edgeCount];
+		graphRep.multipliedDist_out = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_out = new float[edgeCount];
 		graphRep.dist_out = new int[graphRep.edgeCount];
 
-		graphRep.source_in = new int[graphRep.edgeCount];
+		graphRep.src_in = new int[graphRep.edgeCount];
 		graphRep.dest_in = new int[graphRep.edgeCount];
-		graphRep.mult_in = new int[graphRep.edgeCount];
+		graphRep.multipliedDist_in = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_in = new float[edgeCount];
 		graphRep.dist_in = new int[graphRep.edgeCount];
 
@@ -152,8 +152,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 		for (int i = 0; i < graphRep.edgeCount; i++) {
 			splittedLine = inb.readLine().split(" ");
 			currentSource = Integer.parseInt(splittedLine[0]);
-			graphRep.source_out[i] = currentSource;
-			graphRep.source_in[i] = currentSource;
+			graphRep.src_out[i] = currentSource;
+			graphRep.src_in[i] = currentSource;
 
 			graphRep.dest_out[i] = Integer.parseInt(splittedLine[1]);
 			graphRep.dest_in[i] = graphRep.dest_out[i];
@@ -163,9 +163,9 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 			// make mult better usable for us: save the distances with
 			// multipliers applied directly
-			graphRep.mult_out[i] = Math.round((1.3F / Float
+			graphRep.multipliedDist_out[i] = Math.round((1.3F / Float
 					.parseFloat(splittedLine[3])) * graphRep.dist_out[i]);
-			graphRep.mult_in[i] = graphRep.mult_out[i];
+			graphRep.multipliedDist_in[i] = graphRep.multipliedDist_out[i];
 
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);
 			// TODO graphRep.elev_in[i] = graphRep.elev_out[i];

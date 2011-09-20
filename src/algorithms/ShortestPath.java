@@ -54,15 +54,15 @@ public class ShortestPath extends GraphAlgorithm {
 	public ShortestPath(GraphRep graph) {
 		super(graph);
 		heap = new graphrep.Heap();
-		dist = new int[graph.getNodeCount()];
+		multipliedDist = new int[graph.getNodeCount()];
 		prev = new int[graph.getNodeCount()];
 	}
 
 	@Override
 	public void setRequest(ComputeRequest req) {
 		// reset dists
-		for (int i = 0; i < dist.length; i++) {
-			dist[i] = Integer.MAX_VALUE;
+		for (int i = 0; i < multipliedDist.length; i++) {
+			multipliedDist[i] = Integer.MAX_VALUE;
 		}
 		heap.resetHeap();
 		this.req = req;
@@ -75,7 +75,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 	// dists in this array are stored with the multiplier applied. They also are
 	// rounded and are stored as integers
-	private final int[] dist;
+	private final int[] multipliedDist;
 	private final int[] prev;
 
 	// in meters
@@ -129,8 +129,8 @@ public class ShortestPath extends GraphAlgorithm {
 		destid = graph.getIDForCoordinates(destlat, destlon);
 		directDistance = calcDirectDistance(srclat, srclon, destlat, destlon);
 
-		dist[srcid] = 0;
-		heap.insert(srcid, dist[srcid]);
+		multipliedDist[srcid] = 0;
+		heap.insert(srcid, multipliedDist[srcid]);
 
 		int nodeID = -1;
 		float nodeDist;
@@ -146,7 +146,7 @@ public class ShortestPath extends GraphAlgorithm {
 			heap.removeMin();
 			if (nodeID == destid) {
 				break DIJKSTRA;
-			} else if (nodeDist > dist[nodeID]) {
+			} else if (nodeDist > multipliedDist[nodeID]) {
 				continue;
 			}
 			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
@@ -156,12 +156,12 @@ public class ShortestPath extends GraphAlgorithm {
 				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
 
 				// with multiplier = fastest path
-				tempDist = dist[nodeID] + graph.getOutMult(nodeID, i);
+				tempDist = multipliedDist[nodeID] + graph.getOutMult(nodeID, i);
 
-				if (tempDist < dist[outTarget]) {
-					dist[outTarget] = tempDist;
+				if (tempDist < multipliedDist[outTarget]) {
+					multipliedDist[outTarget] = tempDist;
 					prev[outTarget] = nodeID;
-					heap.insert(outTarget, dist[outTarget]);
+					heap.insert(outTarget, multipliedDist[outTarget]);
 				}
 			}
 		}
@@ -207,11 +207,11 @@ public class ShortestPath extends GraphAlgorithm {
 		} while (currNode != srcid);
 		backtracktime = System.nanoTime();
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);
-		misc.put("distance", dist[outTarget]);
+		misc.put("distance", multipliedDist[outTarget]);
 
 		System.out.println("found sp with dist = " + (distance / 1000.0)
 				+ " km (direct distance: " + (directDistance / 1000.0)
-				+ " km; Distance with multiplier: " + (dist[destid] / 1000.0)
+				+ " km; Distance with multiplier: " + (multipliedDist[destid] / 1000.0)
 				+ ")");
 		System.out.println("Dijkstra: "
 				+ ((dijkstratime - starttime) / 1000000.0)

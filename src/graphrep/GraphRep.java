@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 2L;
 
 	protected NNSearcher searcher;
 
@@ -23,17 +23,17 @@ public class GraphRep implements Serializable {
 	protected int[] height;
 
 	// edges
-	protected int[] source_out;
+	protected int[] src_out;
 	protected int[] dest_out;
-	protected int[] mult_out;
+	protected int[] multipliedDist_out;
 	protected int[] dist_out;
 	protected float[] elev_out;
 
 	protected int[] offsetOut;
 
-	protected int[] source_in;
+	protected int[] src_in;
 	protected int[] dest_in;
-	protected int[] mult_in;
+	protected int[] multipliedDist_in;
 	protected int[] dist_in;
 	protected float[] elev_in;
 
@@ -119,7 +119,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 */
 	public final int getInSource(int nodeId, int edgeNum) {
-		return source_in[offsetIn[nodeId] + edgeNum];
+		return src_in[offsetIn[nodeId] + edgeNum];
 	}
 
 	/**
@@ -137,7 +137,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 */
 	public final int getOutMult(int nodeId, int edgeNum) {
-		return mult_out[offsetOut[nodeId] + edgeNum];
+		return multipliedDist_out[offsetOut[nodeId] + edgeNum];
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 */
 	public final int getInMult(int nodeId, int edgeNum) {
-		return mult_in[offsetIn[nodeId] + edgeNum];
+		return multipliedDist_in[offsetIn[nodeId] + edgeNum];
 	}
 
 	/**
