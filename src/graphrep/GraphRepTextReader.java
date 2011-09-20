@@ -1,9 +1,9 @@
 package graphrep;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class GraphRepTextReader extends GraphRepFactory {
 
@@ -89,25 +89,18 @@ public class GraphRepTextReader extends GraphRepFactory {
 	}
 
 	@Override
-	public GraphRep createGraphRep(String filename) throws IOException {
+	public GraphRep createGraphRep(InputStream in) throws IOException {
 		GraphRep graphRep = new GraphRep();
 
-		BufferedReader in = null;
-		try {
-			in = new BufferedReader(new FileReader(filename));
-
-		} catch (FileNotFoundException e) {
-			// TODO: what happens here?
-			e.printStackTrace();
-		}
+		BufferedReader inb = new BufferedReader(new InputStreamReader(in));
 
 		String line;
 
 		// exception should happen when file format is wrong
-		line = in.readLine();
+		line = inb.readLine();
 
 		while ((line != null) && line.trim().startsWith("#")) {
-			line = in.readLine();
+			line = inb.readLine();
 		}
 		if (line != null) {
 			graphRep.nodeCount = Integer.parseInt(line);
@@ -115,7 +108,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 			graphRep.nodeCount = 0;
 		}
 
-		line = in.readLine();
+		line = inb.readLine();
 		if (line != null) {
 			graphRep.edgeCount = Integer.parseInt(line);
 		} else {
@@ -148,7 +141,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		System.out.println("Reading " + graphRep.nodeCount + " nodes and "
 				+ graphRep.edgeCount + " edges ...");
 		for (int i = 0; i < graphRep.nodeCount; i++) {
-			splittedLine = in.readLine().split(" ");
+			splittedLine = inb.readLine().split(" ");
 			graphRep.lat[i] = Float.parseFloat(splittedLine[1]);
 			graphRep.lon[i] = Float.parseFloat(splittedLine[2]);
 			graphRep.height[i] = Integer.parseInt(splittedLine[3]);
@@ -157,7 +150,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		int currentSource;
 		int prevSource = -1;
 		for (int i = 0; i < graphRep.edgeCount; i++) {
-			splittedLine = in.readLine().split(" ");
+			splittedLine = inb.readLine().split(" ");
 			currentSource = Integer.parseInt(splittedLine[0]);
 			graphRep.source_out[i] = currentSource;
 			graphRep.source_in[i] = currentSource;

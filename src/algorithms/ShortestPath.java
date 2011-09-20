@@ -81,7 +81,6 @@ public class ShortestPath extends GraphAlgorithm {
 	// in meters
 	private float directDistance;
 
-
 	// maybe use http://code.google.com/p/simplelatlng/ instead
 	private final float calcDirectDistance(double lat1, double lng1,
 			double lat2, double lng2) {
@@ -100,12 +99,8 @@ public class ShortestPath extends GraphAlgorithm {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
-		if (req == null) {
-			// TODO: some problem here
-			System.err
-					.println("We don't have a request object, how did we even get called without one??");
-			return;
-		}
+		assert (req != null) : "We ended up without a request object in run";
+
 		res = req.getResultObject();
 
 		ArrayList<Map<String, Double>> points = null;

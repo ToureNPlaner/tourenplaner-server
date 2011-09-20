@@ -1,20 +1,15 @@
 package graphrep;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 
 public class GraphRepDumpReader extends GraphRepFactory {
 
 	@Override
-	/**
-	 * returns null when graph not readable
-	 */
-	public GraphRep createGraphRep(String filename) throws IOException {
-		// TODO Auto-generated method stub
+	public GraphRep createGraphRep(InputStream in) throws IOException {
 		GraphRep g = null;
-		FileInputStream fin = new FileInputStream(filename);
-		ObjectInputStream ois = new ObjectInputStream(fin);
+		ObjectInputStream ois = new ObjectInputStream(in);
 		try {
 			System.out.println("Reading graph ...");
 			g = (GraphRep) ois.readObject();

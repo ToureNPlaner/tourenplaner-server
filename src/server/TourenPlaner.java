@@ -4,6 +4,7 @@ import graphrep.GraphRep;
 import graphrep.GraphRepDumpReader;
 import graphrep.GraphRepTextReader;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -52,7 +53,7 @@ public class TourenPlaner {
 
 		return info;
 	}
-	
+
 	/**
 	 * This is the main class of ToureNPlaner. It passes CLI parameters to the
 	 * handler and creates the httpserver
@@ -75,7 +76,8 @@ public class TourenPlaner {
 					"graphfilepath",
 					System.getProperty("user.home") + "/germany.txt");
 			try {
-				graph = new GraphRepTextReader().createGraphRep(graphfilename);
+				graph = new GraphRepTextReader()
+						.createGraphRep(new FileInputStream(graphfilename));
 				utils.GraphSerializer.serialize(graphfilename, graph);
 				System.exit(0);
 			} catch (IOException e) {
@@ -91,17 +93,19 @@ public class TourenPlaner {
 				System.getProperty("user.home") + "/germany.txt");
 		try {
 			if (handler.loadTextGraph()) {
-				graph = new GraphRepTextReader().createGraphRep(graphfilename);
+				graph = new GraphRepTextReader()
+						.createGraphRep(new FileInputStream(graphfilename));
 			} else {
-				graph = new GraphRepDumpReader().createGraphRep(graphfilename
-						+ ".dat");
+				graph = new GraphRepDumpReader()
+						.createGraphRep(new FileInputStream(graphfilename
+								+ ".dat"));
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			// TODO: server won't calculate graph algorithms without a graph,
 			// but maybe it will provide some other functionality?
 		}
-		
+
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();
 		reg.registerAlgorithm(new ShortestPathFactory(graph));
@@ -112,9 +116,7 @@ public class TourenPlaner {
 
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);
-		
-		
-		
+
 		new HttpServer(cm, reg, serverInfo, comCore);
 	}
 }
