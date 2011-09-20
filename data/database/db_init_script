@@ -40,5 +40,5 @@ CREATE TABLE Requests (
 
 INSERT INTO Users (Email, Passwordhash, Salt, AdminFlag, Status, 
   FirstName, LastName, Address, RegistrationDate, VerifiedDate) 
-  VALUES('root@tourenplaner', 'rootpwhash', 'rootsalt', '1', 'Verified', 
+  VALUES('root@tourenplaner', '', 'fe394f70a381403d4af33595823c7d733', '1', 'Verified', 
     'ro', 'ot', 'localhost', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

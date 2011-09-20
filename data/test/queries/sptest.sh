@@ -7,4 +7,4 @@ then
    exit 1
 fi
 
-./curl.sh "$2" "$1" algsp FooUser FooPassword
+./curl.sh "$2" "$1" algsp root@tourenplaner toureNPlaner

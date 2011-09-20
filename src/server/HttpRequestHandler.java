@@ -324,8 +324,14 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			// TODO Database
 
 			UsersDBRow user = dbm.getUser(email);
+			if (user == null) {
+				System.err.println("User with email:" + email
+						+ " does not exist");
+				return false;
+			}
+
 			// Compute SHA1 of PW:SALT
-			String toHash = pw + user.salt;
+			String toHash = pw + ":" + user.salt;
 
 			byte[] bindigest = digester.digest(toHash.getBytes("UTF-8"));
 			// Convert to Hex String
