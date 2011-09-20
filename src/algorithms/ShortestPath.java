@@ -73,28 +73,18 @@ public class ShortestPath extends GraphAlgorithm {
 		return res;
 	}
 
-	// we will store dists with multiplier applied in here, and since
-	// multipliers are 0.0 < mult < 1.3 (?), we need float
+	// dists in this array are stored with the multiplier applied. They also are
+	// rounded and are stored as integers
 	private final int[] dist;
 	private final int[] prev;
 
 	// in meters
 	private float directDistance;
 
-	/**
-	 * @return Whether the given point is near enaugh at the direct connection
-	 *         to add it to U
-	 */
-	private boolean nearEnaugh(float lt, float ln) {
-		// TODO: find good values
-		// at the moment derivation from direct way is 50 km + 10% of total
-		// length of the direct way
-		return true;
-	}
 
 	// maybe use http://code.google.com/p/simplelatlng/ instead
-	private final float distFrom(double lat1, double lng1, double lat2,
-			double lng2) {
+	private final float calcDirectDistance(double lat1, double lng1,
+			double lat2, double lng2) {
 		double earthRadius = 6370.97327862;
 		double dLat = Math.toRadians(lat2 - lat1);
 		double dLng = Math.toRadians(lng2 - lng1);
@@ -107,6 +97,7 @@ public class ShortestPath extends GraphAlgorithm {
 		return (float) (dist * 1000);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		if (req == null) {
@@ -117,9 +108,22 @@ public class ShortestPath extends GraphAlgorithm {
 		}
 		res = req.getResultObject();
 
-		// TODO: Validation!
-		ArrayList<Map<String, Double>> points = (ArrayList<Map<String, Double>>) req
-				.get("points");
+		ArrayList<Map<String, Double>> points = null;
+		// TODO: send error messages to client
+		try {
+			points = (ArrayList<Map<String, Double>>) req.get("points");
+		} catch (ClassCastException e) {
+			System.err.println("The request's contents are invalid\n"
+					+ e.getMessage());
+			e.printStackTrace();
+			return;
+		} catch (NullPointerException e) {
+			System.err
+					.println("The request doesn't contain the information required for this algorithm\n"
+							+ e.getMessage());
+			e.printStackTrace();
+			return;
+		}
 
 		srclat = points.get(0).get("lt").floatValue();
 		srclon = points.get(0).get("ln").floatValue();
@@ -128,11 +132,9 @@ public class ShortestPath extends GraphAlgorithm {
 
 		srcid = graph.getIDForCoordinates(srclat, srclon);
 		destid = graph.getIDForCoordinates(destlat, destlon);
-
-		directDistance = distFrom(srclat, srclon, destlat, destlon);
+		directDistance = calcDirectDistance(srclat, srclon, destlat, destlon);
 
 		dist[srcid] = 0;
-
 		heap.insert(srcid, dist[srcid]);
 
 		int nodeID = -1;
@@ -140,9 +142,9 @@ public class ShortestPath extends GraphAlgorithm {
 		int outTarget = 0;
 		int tempDist;
 
-		long start = System.nanoTime();
-		long end1;
-		long end2;
+		long starttime = System.nanoTime();
+		long dijkstratime;
+		long backtracktime;
 		DIJKSTRA: while (!heap.isEmpty()) {
 			nodeID = heap.peekMinId();
 			nodeDist = heap.peekMinDist();
@@ -155,20 +157,12 @@ public class ShortestPath extends GraphAlgorithm {
 			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
 				outTarget = graph.getOutTarget(nodeID, i);
 
-				// without multiplier
+				// without multiplier = shortest path
 				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
-				// if (tempDist < dist[outTarget]) {
-				// dist[outTarget] = tempDist;
-				// prev[outTarget] = nodeID;
-				// h.insert(outTarget, dist[outTarget]);
-				// }
 
-				// with multiplier
-				// TODO: check if this usage of mult is right
-				tempDist = (dist[nodeID] + graph.getOutMult(nodeID, i)); // *(1.3F
-				// /
-				// graph
-				// .getOutMult(nodeID, i)))));
+				// with multiplier = fastest path
+				tempDist = dist[nodeID] + graph.getOutMult(nodeID, i);
+
 				if (tempDist < dist[outTarget]) {
 					dist[outTarget] = tempDist;
 					prev[outTarget] = nodeID;
@@ -176,10 +170,12 @@ public class ShortestPath extends GraphAlgorithm {
 				}
 			}
 		}
-		end1 = System.nanoTime();
+		dijkstratime = System.nanoTime();
 
 		if (nodeID != destid) {
+			// TODO: send errmsg to client and do something useful
 			System.err.println("There is no path from src to dest");
+			return;
 		}
 
 		// Find out how much space to allocate
@@ -214,29 +210,19 @@ public class ShortestPath extends GraphAlgorithm {
 			lons[routeElements] = graph.getNodeLon(currNode);
 			currNode = prev[currNode];
 		} while (currNode != srcid);
-		end2 = System.nanoTime();
+		backtracktime = System.nanoTime();
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);
 		misc.put("distance", dist[outTarget]);
 
-		System.err.println("found sp with dist = " + (distance / 1000.0)
+		System.out.println("found sp with dist = " + (distance / 1000.0)
 				+ " km (direct distance: " + (directDistance / 1000.0)
 				+ " km; Distance with multiplier: " + (dist[destid] / 1000.0)
 				+ ")");
-		System.err.println("Dijkstra: " + ((end1 - start) / 1000000.0)
-				+ "ms; Backtracking: " + ((end2 - end1) / 1000000.0));
+		System.out.println("Dijkstra: "
+				+ ((dijkstratime - starttime) / 1000000.0)
+				+ " ms; Backtracking: "
+				+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
 
-		// System.out
-		// .println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
-		// System.out
-		// .println("<gpx xmlns=\"http://www.topografix.com/GPX/1/1\" xmlns:gpxx=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\" xmlns:gpxtpx=\"http://www.garmin.com/xmlschemas/TrackPointExtension/v1\" creator=\"Oregon 400t\" version=\"1.1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd\">");
-		// System.out.println("  <trk>\n"
-		// + "    <name>Example GPX Document</name>");
-		// System.out.println("<trkseg>");
-		// for (ArrayList<Float> l : list) {
-		// System.out.println("<trkpt lat=\"" + l.get(0) + "\" lon=\""
-		// + l.get(1) + "\"></trkpt>");
-		// }
-		// System.out.println("</trkseg>\n</trk>\n</gpx>");
 		res.put("points", new Points(lats, lons));
 		res.put("misc", misc);
 	}

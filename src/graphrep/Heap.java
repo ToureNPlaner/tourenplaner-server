@@ -4,62 +4,61 @@ import java.util.Arrays;
 
 public class Heap {
 
-	// make this consistent:
-
 	// 1) the heaplength is the number of elements in the
-	// heap, not the real number of ints in the array
+	// heap, not the real number of ints in the array. For example heaplength =
+	// 3 means that the array containing the heap contains 6*integers. So for
+	// heaplength = 3 the index of the last element is (3-1)/2 and the index for
+	// the dist of the last element is ((3-1)/2)+1
 	// 2) the pos parameter is the real position in the array
-	// trinary is supposed to be a little bit faster
+	// 3) a trinary heap is supposed to be a little bit faster
 
-	/**
-	 * uses two fields per node: ... id_35, dist[id_35], id=2, [dist[2], ...
-	 */
 	private int[] heaparr;
 	private int heaplength;
 
 	// TODO: determine good value
-	// with 5000 no growing from stuttgart-> hamburg
-	private final int arrayGrowthSum = 5000;
+	// with max 5000 elements in the heap there is no growing from stuttgart->
+	// hamburg
+	private final int arrayGrowthSum = 10000;
 
 	public Heap() {
-		heaparr = new int[5000];
+		heaparr = new int[arrayGrowthSum];
 		heaplength = 0;
 	}
 
-	public void insert(int id, int dist) {
-		heaplength += 1;
+	public final void insert(int id, int dist) {
 		checkHeapArray();
-		heaparr[(heaplength - 1) * 2] = id;
-		heaparr[((heaplength - 1) * 2) + 1] = dist;
+		heaparr[heaplength * 2] = id;
+		heaparr[(heaplength * 2) + 1] = dist;
+		heaplength += 1;
 		bubbleUp((heaplength - 1) * 2);
 	}
 
-	public boolean isEmpty() {
+	public final boolean isEmpty() {
 		return heaplength <= 0;
 	}
 
-	public int peekMinId() {
+	public final int peekMinId() {
 		return heaparr[0];
 	}
 
-	public int peekMinDist() {
+	public final int peekMinDist() {
 		return heaparr[1];
 	}
 
-	public void removeMin() {
-		heaparr[0] = heaparr[(heaplength - 1) * 2];
-		heaparr[1] = heaparr[((heaplength - 1) * 2) + 1];
+	public final void removeMin() {
 		heaplength -= 1;
+		heaparr[0] = heaparr[heaplength * 2];
+		heaparr[1] = heaparr[(heaplength * 2) + 1];
 		siftDown(0);
 	}
 
-	private void bubbleUp(int pos) {
+	private final void bubbleUp(int pos) {
 		int parent;
 		int tempid;
 		int tempdist;
 		while (true) {
 			// TODO: improve
-			parent = ((((pos) / 2) - 1) / 3) * 2;
+			parent = (((pos / 2) - 1) / 3) * 2;
 			if ((parent >= 0) && (heaparr[parent + 1] > heaparr[pos + 1])) {
 				tempid = heaparr[parent];
 				tempdist = heaparr[parent + 1];
@@ -75,7 +74,7 @@ public class Heap {
 		}
 	}
 
-	private void siftDown(int pos) {
+	private final void siftDown(int pos) {
 		int tempid;
 		int tempdist;
 
@@ -83,7 +82,6 @@ public class Heap {
 		int child2;
 		int child3;
 		int minChild;
-
 		while (true) {
 			// TODO: improve
 			child1 = (((pos / 2) * 3) + 1) * 2;
@@ -118,13 +116,13 @@ public class Heap {
 		}
 	}
 
-	public void resetHeap() {
+	public final void resetHeap() {
 		heaplength = 0;
 	}
 
-	private void checkHeapArray() {
+	private final void checkHeapArray() {
 		if (((heaplength * 2) + 1) >= heaparr.length) {
-			System.err.println("Increased Heap size from " + heaparr.length
+			System.out.println("Increased Heap size from " + heaparr.length
 					+ " to " + (heaparr.length + arrayGrowthSum));
 			heaparr = Arrays.copyOf(heaparr, heaparr.length + arrayGrowthSum);
 		}
