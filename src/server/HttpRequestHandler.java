@@ -11,9 +11,8 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -37,8 +36,10 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
@@ -167,7 +168,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		} else if (path.startsWith("/alg")) {
 
-			if (!isPrivate || auth(request)) {
+			if (!isPrivate || auth(request, responder) != null) {
 				String algName = queryStringDecoder.getPath().substring(4);
 				handleAlg(request, responder, algName);
 			} else {
@@ -178,25 +179,51 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	private void handleAlg(HttpRequest request, Responder responder,
-			String algName) throws Exception {
+			String algName) throws IOException {
 
-		ChannelBuffer content = request.getContent();
-		if (content.readableBytes() != 0) {
-			InputStreamReader inReader = new InputStreamReader(
-					new ChannelBufferInputStream(content));
-
-			JSONObject requestJSON = (JSONObject) parser.parse(inReader);
-			// System.out.println(requestJSON);
-			@SuppressWarnings("unchecked")
-			Map<String, Object> objmap = requestJSON;
-
+		Map<String, Object> objmap = getJSONContent(responder, request);
+		if (objmap != null) {
 			// Create ComputeRequest and commit to workqueue
 			ComputeRequest req = new ComputeRequest(responder, algName, objmap);
 			boolean sucess = computer.submit(req);
 
 			if (!sucess) {
-				responder.writeServerOverloaded();
+				responder
+						.writeErrorMessage(
+								"EBUSY",
+								"This server is currently too busy to fullfill the request",
+								null, HttpResponseStatus.SERVICE_UNAVAILABLE);
 			}
+		}
+	}
+
+	/**
+	 * Extracts and parses the JSON encoded content of the given HttpRequest, in
+	 * case of error sends a EBADJSON or HttpStatus.NO_CONTENT answer to the
+	 * client and returns null, the connection will be closed afterwards.
+	 * 
+	 * @param responder
+	 * @param request
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	private Map<String, Object> getJSONContent(Responder responder,
+			HttpRequest request) throws IOException {
+
+		Map<String, Object> objmap = null;
+		ChannelBuffer content = request.getContent();
+		if (content.readableBytes() != 0) {
+			InputStreamReader inReader = new InputStreamReader(
+					new ChannelBufferInputStream(content));
+			try {
+				objmap = (JSONObject) parser.parse(inReader);
+			} catch (ParseException e) {
+				responder.writeErrorMessage("EBADJSON",
+						"Could not parse supplied JSON", null,
+						HttpResponseStatus.UNAUTHORIZED);
+				objmap = null;
+			}
+
 		} else {
 			// Respond with No Content
 			HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
@@ -206,6 +233,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
 
+		return objmap;
 	}
 
 	private void handleListUsers(HttpRequest request, Responder responder) {
@@ -285,72 +313,74 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	/**
-	 * Authenticates a Request using HTTP Basic Authentication returns true if
-	 * authorized false otherwise
+	 * Authenticates a Request using HTTP Basic Authentication and returns the
+	 * UsersDBRow object of the authenticated user or null if authentication
+	 * failed. Errors will be sent to the client as error messages see protocol
+	 * specification for details. The connection will get closed after the error
+	 * has been sent
 	 * 
-	 * @param request2
-	 * @return
+	 * @param responder
+	 * 
+	 * @param request
+	 * @return the UsersDBRow object of the user or null if auth failed
 	 * @throws SQLException
 	 */
-	private boolean auth(HttpRequest myReq) throws SQLException {
+	private UsersDBRow auth(HttpRequest myReq, Responder responder)
+			throws SQLException {
 		String email, emailandpw, pw;
+		UsersDBRow user = null;
 		int index = 0;
 		// Why between heaven and earth does Java have AES Encryption in
 		// the standard library but not Base64 though it has it internally
 		// several times
 		emailandpw = myReq.getHeader("Authorization");
 		if (emailandpw == null) {
-			return false;
+			return null;
 		}
 
 		ChannelBuffer encodeddata;
 		ChannelBuffer data;
-		boolean result = false;
-		try {
+		// Base64 is always ASCII
+		encodeddata = ChannelBuffers.wrappedBuffer(emailandpw.substring(
+				emailandpw.lastIndexOf(' ')).getBytes(CharsetUtil.US_ASCII));
 
-			// Base64 is always ASCII
-			encodeddata = ChannelBuffers.wrappedBuffer(emailandpw.substring(
-					emailandpw.lastIndexOf(' ')).getBytes("US-ASCII"));
-
-			data = Base64.decode(encodeddata);
-			// The string itself is utf-8
-			emailandpw = data.toString(Charset.forName("UTF-8"));
-			index = emailandpw.indexOf(':');
-			if (index <= 0) {
-				return false;
-			}
-			email = emailandpw.substring(0, index);
-			pw = emailandpw.substring(index + 1);
-			// TODO Database
-
-			UsersDBRow user = dbm.getUser(email);
-			if (user == null) {
-				System.err.println("User with email:" + email
-						+ " does not exist");
-				return false;
-			}
-
-			// Compute SHA1 of PW:SALT
-			String toHash = pw + ":" + user.salt;
-
-			byte[] bindigest = digester.digest(toHash.getBytes("UTF-8"));
-			// Convert to Hex String
-			StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
-			for (byte b : bindigest) {
-				hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
-				hexbuilder.append(Integer.toHexString(b & 0x0F));
-			}
-			System.out.println(toHash + " : " + hexbuilder.toString());
-			if (user.passwordhash.equals(hexbuilder.toString())) {
-				result = true;
-			}
-
-		} catch (UnsupportedEncodingException e) {
-			System.err
-					.println("We can't fcking convert to the specified charset this box is really broken");
+		data = Base64.decode(encodeddata);
+		// The string itself is utf-8
+		emailandpw = data.toString(CharsetUtil.UTF_8);
+		index = emailandpw.indexOf(':');
+		if (index <= 0) {
+			return null;
 		}
 
-		return result;
+		email = emailandpw.substring(0, index);
+		pw = emailandpw.substring(index + 1);
+		// TODO Database
+
+		user = dbm.getUser(email);
+		if (user == null) {
+			responder.writeErrorMessage("EAUTH", "Wrong username or password",
+					null, HttpResponseStatus.UNAUTHORIZED);
+			return null;
+		}
+
+		// Compute SHA1 of PW:SALT
+		String toHash = pw + ":" + user.salt;
+
+		byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
+		// Convert to Hex String
+		StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
+		for (byte b : bindigest) {
+			hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
+			hexbuilder.append(Integer.toHexString(b & 0x0F));
+		}
+		System.out.println(toHash + " : " + hexbuilder.toString());
+		if (!user.passwordhash.equals(hexbuilder.toString())) {
+			responder.writeErrorMessage("EAUTH", "Wrong username or password",
+					null, HttpResponseStatus.UNAUTHORIZED);
+			return null;
+		}
+
+		return user;
 	}
 
 	/**

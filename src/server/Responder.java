@@ -5,7 +5,6 @@ package server;
 
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.SERVICE_UNAVAILABLE;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
@@ -105,15 +104,51 @@ public class Responder {
 	}
 
 	/**
-	 * Writes a server overloaded response and closes the connection
+	 * Sends an error to the client, the connection will be closed afterwards
+	 * 
+	 * @param errorId
+	 * @param message
+	 * @param details
+	 * @param status
 	 */
-	public void writeServerOverloaded() {
-		HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
-				SERVICE_UNAVAILABLE);
+	public void writeErrorMessage(String errorId, String message,
+			String details, HttpResponseStatus status) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("{\"errorid\":");
+		sb.append("\"");
+		sb.append(errorId);
+		sb.append("\",");
+
+		sb.append("\"message\":");
+		sb.append("\"");
+		sb.append(message);
+		sb.append("\"");
+
+		if (details != null) {
+			sb.append(",\"errorid\":");
+			sb.append("\"");
+			sb.append(errorId);
+			sb.append("\"}");
+		} else {
+			sb.append("}");
+		}
+
+		// Build the response object.
+		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
+
+		response.setContent(ChannelBuffers.copiedBuffer(sb.toString(),
+				CharsetUtil.UTF_8));
+
 		// Write the response.
 		ChannelFuture future = replyChannel.write(response);
-		// Close the connection
+
+		// Close the connection after the write operation is
+		// done.
 		future.addListener(ChannelFutureListener.CLOSE);
 
 	}
+
 }
