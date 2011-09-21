@@ -8,9 +8,12 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+
+import com.mysql.jdbc.DatabaseMetaData;
 
 /**
  * @author Sascha Meusel
@@ -172,11 +175,19 @@ public class DatabaseManager {
 	 * @param lastName
 	 * @param address
 	 * @param isAdmin
+	 * @return TODO
 	 * @throws SQLException
 	 */
-	public void addNewUser(String email, String passwordhash, String salt, 
+	public UsersDBRow addNewUser(String email, String passwordhash, String salt, 
 			String firstName, String lastName, String address, boolean isAdmin) 
 			throws SQLException  {
+		
+		UsersDBRow user = null;
+		
+		try {
+		
+		Timestamp stamp = new Timestamp(System.currentTimeMillis());
+		
 		pstAddNewUser.setString(1, email);
 		pstAddNewUser.setString(2, passwordhash);
 		pstAddNewUser.setString(3, salt);
@@ -184,10 +195,31 @@ public class DatabaseManager {
 		pstAddNewUser.setString(5, lastName);
 		pstAddNewUser.setString(6, address);
 		pstAddNewUser.setBoolean(7, isAdmin);
-		pstAddNewUser.setTimestamp(8, 
-				new Timestamp(System.currentTimeMillis()));
+		pstAddNewUser.setTimestamp(8, stamp);
 		
 		pstAddNewUser.executeUpdate();
+		
+		user = new UsersDBRow(
+				-1, 
+				email, 
+				passwordhash, 
+				salt,
+				isAdmin, 
+				UserStatusEnum.NeedsVerification, 
+				firstName, 
+				lastName, 
+				address, 
+				new Date(stamp.getTime()), 
+				null, 
+				null
+				);
+		} catch (SQLIntegrityConstraintViolationException ex) {
+			if (ex.getNextException() == null) {
+				return null;
+			}
+			throw ex;
+		}
+		return user;
 	}
 	
 	/**
@@ -594,6 +626,46 @@ public class DatabaseManager {
 			return null;
 		}
 		return new Timestamp(date.getTime());
+	}
+	
+	/**
+	 * Yet only for testing purpose
+	 */
+	public void printDatabaseInformation() {
+		try {
+			addNewUser("sascha@tourenplaner", "xyz", "pepper", 
+					"sascha", "verratinet", "", true);
+			//addNewRequest(10, ("EinTestBlob mit falscher UserID").getBytes());
+		} catch (SQLIntegrityConstraintViolationException e) {
+			
+			SQLException ex = e;
+			
+			while(ex != null) {
+			
+				System.out.println("errorcode: " + ex.getErrorCode());
+				System.out.println("sqlstate: " + ex.getSQLState());
+				try {
+					System.out.println("stateType: " 
+							+ con.getMetaData().getSQLStateType());
+				} catch (SQLException e1) {
+					System.out.println("someConnectionError:");
+					e1.printStackTrace();
+				}
+				System.out.println(ex.getLocalizedMessage());
+			
+				ex = ex.getNextException();
+			}
+			
+			System.out.println("xopen: " + DatabaseMetaData.sqlStateXOpen);
+			System.out.println("sql: " + DatabaseMetaData.sqlStateSQL);
+			System.out.println("sql99: " + DatabaseMetaData.sqlStateSQL99);
+			
+		} catch (SQLException ex) {
+			System.out.println("anotherConnectionError:");
+			ex.printStackTrace();
+		}
+		
+		
 	}
 
 }
