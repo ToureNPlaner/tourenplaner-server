@@ -1,9 +1,12 @@
 package graphrep;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
+
+import config.ConfigManager;
 
 public class GraphRepDumpReader extends GraphRepFactory {
 
@@ -21,23 +24,19 @@ public class GraphRepDumpReader extends GraphRepFactory {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InvalidClassException e) {
-
 			System.err
 					.println("Dumped Graph version does not match the required version: "
 							+ e.getMessage());
-
-			// TODO: doesn't work, because the in channel is not at the begin.
-			// mark() and reset don't work on this stream. Need solution!
-
-			// System.out.println("Falling back to text reading...");
-			//
-			// GraphRepTextReader f = new GraphRepTextReader();
-			// // throws the same IOException the other read would throw
-			// return f.createGraphRep(in);
-
-			System.err.println("Please restart using \"-f text\"");
-			System.exit(1);
-
+			// TODO: unify default options?
+			String textGraphFilename = ConfigManager.getInstance()
+					.getEntryString("graphfilepath",
+							System.getProperty("user.home") + "/germany.txt");
+			System.out
+					.println("Falling back to text reading from "
+							+ textGraphFilename
+							+ " (path provided by config file) ...");
+			in = new FileInputStream(textGraphFilename);
+			return (new GraphRepTextReader()).createGraphRep(in);
 		}
 		return g;
 	}
