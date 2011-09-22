@@ -9,10 +9,13 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+
+import com.mysql.jdbc.Statement;
 
 /**
  * @author Sascha Meusel
@@ -28,7 +31,6 @@ public class DatabaseManager {
 	private final PreparedStatement pstGetAllUsers;
 	private final PreparedStatement pstGetUserWithEmail;
 	private final PreparedStatement pstGetUserWithId;
-
 	private final PreparedStatement pstUpdateRequest;
 	private final PreparedStatement pstUpdateUser;
 	private final PreparedStatement pstDeleteRequestWithRequestId;
@@ -103,24 +105,35 @@ public class DatabaseManager {
 			+ " LIMIT ? OFFSET ?";
 
 	/**
+	 * Tries to establish a database connection and upholds the connection 
+	 * until the garbage collection deletes the object or the connection is
+	 * disconnected. Also creates prepared statements.
 	 * 
 	 * @param url
+	 *            A database driver specific url of the form 
+	 *            <i>jdbc:subprotocol:subnamewithoutdatabase</i> where 
+	 *            <i>subnamewithoutdatabase</i> is the server address without 
+	 *            the database name but with a slash at the end</br>
 	 *            Example: "jdbc:mysql://localhost:3306/"
-	 * @param dbName
+	 * @param dbName The database name
 	 *            Example: "tourenplaner"
 	 * @param userName
 	 *            User name of the database user account
 	 * @param password
 	 *            To the user according password
-	 * @throws SQLException
+	 * @throws SQLException Thrown if connection could not be established
+	 *            or if errors occur while creating prepared statements
+	 * @see java.sql.DriverManager.html#getConnection(java.lang.String, java.lang.String, java.lang.String)
 	 */
 	public DatabaseManager(String url, String dbName, String userName,
 			String password) throws SQLException {
 
 		con = DriverManager.getConnection(url + dbName, userName, password);
 
-		pstAddNewRequest = con.prepareStatement(addNewRequestString);
-		pstAddNewUser = con.prepareStatement(addNewUserString);
+		pstAddNewRequest = con.prepareStatement(addNewRequestString, 
+				Statement.RETURN_GENERATED_KEYS);
+		pstAddNewUser = con.prepareStatement(addNewUserString, 
+				Statement.RETURN_GENERATED_KEYS);
 		pstGetAllRequests = con.prepareStatement(getAllRequestsString);
 		pstGetAllUsers = con.prepareStatement(getAllUsersString);
 		pstGetUserWithEmail = con.prepareStatement(getUserStringWithEmail);
@@ -147,42 +160,91 @@ public class DatabaseManager {
 				.prepareStatement(getAllUsersWithLimitOffsetString);
 	}
 
+
+
 	/**
-	 * {@value #addNewRequestString}
+	 * Tries to insert a new request dataset into the database. 
+	 * </br>SQL command: {@value #addNewRequestString}
 	 * 
-	 * @param userID
-	 * @param jsonRequest
-	 * @throws SQLException
+	 * @param userID The id of the user, who has sent the request
+	 * @param jsonRequest The request encoded as byte array
+	 * @return 
+	 * 			Returns the inserted request object only if the id 
+	 * 			could received from the database and the insert was 
+	 * 			successful, else an exception will be thrown.
+	 * @throws SQLException Thrown if the insertion failed.
 	 */
-	public void addNewRequest(int userID, byte[] jsonRequest)
+	public RequestsDBRow addNewRequest(int userID, byte[] jsonRequest)
 			throws SQLException {
+		
+		RequestsDBRow request = null;
+		ResultSet generatedKey = null;
+		
+		Timestamp stamp = new Timestamp(System.currentTimeMillis());
+		
 		pstAddNewRequest.setInt(1, userID);
 		pstAddNewRequest.setBytes(2, jsonRequest);
-		pstAddNewRequest.setTimestamp(3,
-				new Timestamp(System.currentTimeMillis()));
+		pstAddNewRequest.setTimestamp(3,stamp);
 
 		pstAddNewRequest.executeUpdate();
-
+		
+		request = new RequestsDBRow(-1, userID, jsonRequest, null, true,
+				0, false, new Date(stamp.getTime()),
+				null, 0, false, null);
+		
+		generatedKey = pstAddNewUser.getGeneratedKeys();
+		if (generatedKey.next()) {
+			request.id = generatedKey.getInt(1);
+		}
+		
+		return request;
 	}
 
 	/**
-	 * {@value #addNewUserString}
+	 * Tries to insert a new user dataset into the database.
+	 * </br>SQL command: {@value #addNewUserString}
 	 * 
-	 * @param email
-	 * @param passwordhash
-	 * @param salt
-	 * @param firstName
-	 * @param lastName
-	 * @param address
+	 * @param email 
+	 * 			Have to be unique, that means another user must not have
+	 * 			the same email. Parameter will be trimmed from this method.
+	 * @param passwordhash 
+	 * 			Hash of the user password.
+	 * 			Parameter will be trimmed from this method.
+	 * @param salt 
+	 * 			Salt for the user password hash.
+	 * 			Parameter will be trimmed from this method.
+	 * @param firstName 
+	 *          First name of the user.
+	 * 			Parameter will be trimmed from this method.
+	 * @param lastName 
+	 * 			Last Name of the user.
+	 * 			Parameter will be trimmed from this method.
+	 * @param address 
+	 *          Address of the user.
+	 * 			Parameter will be trimmed from this method.
 	 * @param isAdmin
-	 * @return TODO
-	 * @throws SQLException
+	 * 			True, if user is an admin, else false.
+	 * @return 
+	 * 			Returns the inserted user object only if the id 
+	 * 			could received from the database and the insert was 
+	 * 			successful. If the insert was not successful because 
+	 *          the email already existed, null will be returned. 
+	 * @throws SQLException Thrown if other errors occurred than a duplicate
+	 * 			email.
 	 */
 	public UsersDBRow addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
 			boolean isAdmin) throws SQLException {
 
 		UsersDBRow user = null;
+		ResultSet generatedKey = null;
+		
+		email = email.trim();
+		passwordhash = passwordhash.trim();
+		salt = salt.trim();
+		firstName = firstName.trim();
+		lastName = lastName.trim();
+		address = address.trim();
 
 		try {
 
@@ -198,24 +260,40 @@ public class DatabaseManager {
 			pstAddNewUser.setTimestamp(8, stamp);
 
 			pstAddNewUser.executeUpdate();
-
+			
 			user = new UsersDBRow(-1, email, passwordhash, salt, isAdmin,
 					UserStatusEnum.NeedsVerification, firstName, lastName,
 					address, new Date(stamp.getTime()), null, null);
+			
+			//try {
+			generatedKey = pstAddNewUser.getGeneratedKeys();
+			if (generatedKey.next()) {
+				user.id = generatedKey.getInt(1);
+			}
+			/*} catch (SQLFeatureNotSupportedException ex) {
+				if (ex.getNextException() != null) {
+					throw ex;
+				}
+			}*/
 		} catch (SQLIntegrityConstraintViolationException ex) {
 			if (ex.getNextException() == null) {
 				return null;
 			}
 			throw ex;
-		}
+		} 
 		return user;
 	}
 
 	/**
-	 * {@value #updateRequestString}
+	 * Updates the Requests table row with the id given through the parameter 
+	 * (<b><code>request.id</code></b>). All values within the given object 
+	 * will be written into the database, so all old values within the row will 
+	 * be overwritten. <b><code>request.id</code></b> has to be > 0 and must 
+	 * exists within the database table.
+	 * </br>SQL command: {@value #updateRequestString}
 	 * 
-	 * @param request
-	 * @throws SQLException
+	 * @param request The request object to write into the database.
+	 * @throws SQLException Thrown if update fails.
 	 */
 	public void updateRequest(RequestsDBRow request) throws SQLException {
 
@@ -236,10 +314,15 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #updateUserString}
+	 * Updates the Users table row with the id given through the parameter 
+	 * (<b><code>request.id</code></b>). All values within the given object 
+	 * will be written into the database, so all old values within the row will 
+	 * be overwritten. <b><code>user.id</code></b> has to be > 0 and must 
+	 * exists within the database table.
+	 * </br>SQL command: {@value #updateUserString}
 	 * 
-	 * @param request
-	 * @throws SQLException
+	 * @param request The user object to write into the database.
+	 * @throws SQLException Thrown if update fails.
 	 */
 	public void updateUser(UsersDBRow user) throws SQLException {
 		pstUpdateUser.setString(1, user.email);
@@ -259,10 +342,11 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #deleteRequestWithRequestIdString}
+	 * Deletes the Requests table row with the given request id.
+	 * </br>SQL command: {@value #deleteRequestWithRequestIdString}
 	 * 
-	 * @param id
-	 * @throws SQLException
+	 * @param id Request id
+	 * @throws SQLException Thrown if delete fails.
 	 */
 	public void deleteRequest(int id) throws SQLException {
 		pstDeleteRequestWithRequestId.setInt(1, id);
@@ -271,10 +355,11 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #deleteRequestsOfUserWithUserIdString}
+	 * Deletes the Requests table rows with the given user id.
+	 * </br>SQL command: {@value #deleteRequestsOfUserWithUserIdString}
 	 * 
-	 * @param userId
-	 * @throws SQLException
+	 * @param userId User id of the user, whose requests should be deleted.
+	 * @throws SQLException Thrown if delete fails.
 	 */
 	public void deleteRequestsOfUser(int userId) throws SQLException {
 		pstDeleteRequestsOfUserWithUserId.setInt(1, userId);
@@ -283,22 +368,30 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #deleteUserWithUserIdString}
+	 * Deletes the Users table row with the given user id. Depending on
+	 * the database configuration(for example strict mode) maybe the according 
+	 * requests could be deleted too because of the FOREIGN KEY UserId within 
+	 * the Requests table. 
+	 * </br>SQL command: {@value #deleteUserWithUserIdString}
 	 * 
-	 * @param id
-	 * @throws SQLException
+	 * @param userId User id
+	 * @throws SQLException Thrown if delete fails.
 	 */
-	public void deleteUser(int id) throws SQLException {
-		pstDeleteUserWithUserId.setInt(1, id);
+	public void deleteUser(int userId) throws SQLException {
+		pstDeleteUserWithUserId.setInt(1, userId);
 
 		pstDeleteUserWithUserId.executeUpdate();
 	}
 
 	/**
-	 * {@value #deleteUserWithEmailString}
+	 * Deletes the Users table row with the given user email. Depending on
+	 * the database configuration(for example strict mode) maybe the according 
+	 * requests could be deleted too because of the FOREIGN KEY UserId within 
+	 * the Requests table. 
+	 * </br>SQL command: {@value #deleteUserWithEmailString}
 	 * 
 	 * @param email
-	 * @throws SQLException
+	 * @throws SQLException Thrown if delete fails.
 	 */
 	public void deleteUser(String email) throws SQLException {
 		pstDeleteUserWithEmail.setString(1, email);
@@ -307,10 +400,13 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #getAllRequestsString}
+	 * Gets an array with all requests within the Requests table. If no
+	 * requests are within the table, an empty array will be returned.
+	 * </br>SQL command: {@value #getAllRequestsString}
 	 * 
-	 * @return
-	 * @throws SQLException
+	 * @return An array with all requests. If no requests exists, the array is
+	 * empty, but not null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public RequestsDBRow[] getAllRequests() throws SQLException {
 		ResultSet resultSet = pstGetAllRequests.executeQuery();
@@ -332,12 +428,16 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #getAllRequestsWithLimitOffsetString}
+	 * Gets an array with all requests within the Requests table with regard to
+	 * the limit and offset constraints. If no requests are found with the 
+	 * given constraints or the table is empty, an empty array will be returned.
+	 * </br>SQL command: {@value #getAllRequestsWithLimitOffsetString}
 	 * 
-	 * @param limit
-	 * @param offset
-	 * @return
-	 * @throws SQLException
+	 * @param limit How many rows should maximal selected.
+	 * @param offset How many rows should be skimmed.
+	 * @return An array with all selected requests. If no requests selected, 
+	 * the array is empty, but not null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public RequestsDBRow[] getAllRequests(int limit, int offset)
 			throws SQLException {
@@ -362,13 +462,16 @@ public class DatabaseManager {
 
 		return list.toArray(new RequestsDBRow[0]);
 	}
-
+	
+	
 	/**
-	 * {@value #getRequestWithRequestIdString}
+	 * Gets a request object of the Requests table with the given request id.
 	 * 
-	 * @param id
-	 * @return
-	 * @throws SQLException
+	 * </br>SQL command: {@value #getRequestWithRequestIdString}
+	 * 
+	 * @param id Request id
+	 * @return A request object if the request with the id exists, else null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public RequestsDBRow getRequest(int id) throws SQLException {
 
@@ -389,13 +492,17 @@ public class DatabaseManager {
 
 		return request;
 	}
-
+	
 	/**
-	 * {@value #getRequestsWithUserIdString}
+	 * Gets an array with all requests within the Requests table which have
+	 * the given user id. If no requests are found with the given user id
+	 * or the table is empty, an empty array will be returned.
+	 * </br>SQL command: {@value #getRequestsWithUserIdString}
 	 * 
 	 * @param userId
-	 * @return
-	 * @throws SQLException
+	 * @return An array with all selected requests. If no requests selected, 
+	 * the array is empty, but not null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public RequestsDBRow[] getRequests(int userId) throws SQLException {
 		pstGetRequestsWithUserId.setInt(1, userId);
@@ -419,13 +526,18 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #getRequestsWithUserIdLimitOffsetString}
+	 * Gets an array with all requests within the Requests table which have
+	 * the given user id with regard to the limit and offset constraints. 
+	 * If no requests are found with the given user id and
+	 * given constraints or the table is empty, an empty array will be returned.
+	 * </br>SQL command: {@value #getRequestsWithUserIdLimitOffsetString}
 	 * 
-	 * @param userId
-	 * @param limit
-	 * @param offset
-	 * @return
-	 * @throws SQLException
+	 * @param userId User id
+	 * @param limit How many rows should maximal selected.
+	 * @param offset How many rows should be skimmed.
+	 * @return An array with all selected requests. If no requests selected, 
+	 * the array is empty, but not null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public RequestsDBRow[] getRequests(int userId, int limit, int offset)
 			throws SQLException {
@@ -453,10 +565,13 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #getAllUsersString}
+	 * Gets an array with all users within the Users table. If the table is 
+	 * empty, an empty array will be returned.
+	 * </br>SQL command: {@value #getAllUsersString}
 	 * 
-	 * @return
-	 * @throws SQLException
+	 * @return An array with all selected users. If no users selected, 
+	 * the array is empty, but not null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public UsersDBRow[] getAllUsers() throws SQLException {
 		ResultSet resultSet = pstGetAllUsers.executeQuery();
@@ -479,12 +594,16 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #getAllUsersWithLimitOffsetString}
+	 * Gets an array with all users within the Users table with regard to 
+	 * the limit and offset constraints. If no users are found with the given
+	 * constraints or the table is empty, an empty array will be returned.
+	 * </br>SQL command: {@value #getAllUsersWithLimitOffsetString}
 	 * 
-	 * @param limit
-	 * @param offset
-	 * @return
-	 * @throws SQLException
+	 * @param limit How many rows should maximal selected.
+	 * @param offset How many rows should be skimmed.
+	 * @return An array with all selected users. If no users selected, 
+	 * the array is empty, but not null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public UsersDBRow[] getAllUsers(int limit, int offset) throws SQLException {
 		pstGetAllUsersWithLimitOffset.setInt(1, limit);
@@ -510,11 +629,12 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #getUserStringWithEmail}
+	 * Gets a user object from the Users table with the given email.
+	 * </br>SQL command: {@value #getUserStringWithEmail}
 	 * 
 	 * @param email
-	 * @return
-	 * @throws SQLException
+	 * @return The user object, if the user is found, else null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public UsersDBRow getUser(String email) throws SQLException {
 		pstGetUserWithEmail.setString(1, email);
@@ -537,11 +657,12 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * {@value #getUserStringWithId}
+	 * Gets a user object from the Users table with the given user id.
+	 * </br>SQL command: {@value #getUserStringWithId}
 	 * 
-	 * @param id
-	 * @return
-	 * @throws SQLException
+	 * @param id User id
+	 * @returnThe user object, if the user is found, else null.
+	 * @throws SQLException Thrown if select fails.
 	 */
 	public UsersDBRow getUser(int id) throws SQLException {
 		pstGetUserWithId.setInt(1, id);
@@ -563,6 +684,11 @@ public class DatabaseManager {
 		return user;
 	}
 
+	/**
+	 * Converts a sql timestamp to a java date
+	 * @param stamp The sql timestamp
+	 * @return The generated jave date
+	 */
 	private Date timestampToDate(Timestamp stamp) {
 		if (stamp == null) {
 			return null;
@@ -570,6 +696,11 @@ public class DatabaseManager {
 		return new Date(stamp.getTime());
 	}
 
+	/**
+	 * Converts a java date to a sql timestamp
+	 * @param date The java date
+	 * @return The generated sql timestamp
+	 */
 	private Timestamp dateToTimestamp(Date date) {
 		if (date == null) {
 			return null;
