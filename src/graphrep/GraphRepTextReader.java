@@ -31,18 +31,27 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int tempDist = graphRep.dist_in[i];
 			int tempSrc = graphRep.src_in[i];
 			int tempMult = graphRep.multipliedDist_in[i];
+			int tempShortedID = graphRep.shortedID_in[i];
+			int tempOutEdgeSourceNum = graphRep.outEdgeSourceNum_in[i];
+			int tempOutEdgeShortedNum = graphRep.outEdgeShortedNum_in[i];
 
 			// change place
 			graphRep.dest_in[i] = graphRep.dest_in[j];
 			graphRep.dist_in[i] = graphRep.dist_in[j];
 			graphRep.src_in[i] = graphRep.src_in[j];
 			graphRep.multipliedDist_in[i] = graphRep.multipliedDist_in[j];
+			graphRep.shortedID_in[i] = graphRep.shortedID_in[j];
+			graphRep.outEdgeSourceNum_in[i] = graphRep.outEdgeSourceNum_in[j];
+			graphRep.outEdgeShortedNum_in[i] = graphRep.outEdgeShortedNum_in[j];
 
 			// write back to the new place
 			graphRep.dest_in[j] = tempDest;
 			graphRep.dist_in[j] = tempDist;
 			graphRep.src_in[j] = tempSrc;
 			graphRep.multipliedDist_in[j] = tempMult;
+			graphRep.shortedID_in[j] = tempShortedID;
+			graphRep.outEdgeSourceNum_in[i] = tempOutEdgeSourceNum;
+			graphRep.outEdgeShortedNum_in[j] = tempOutEdgeShortedNum;
 		}
 
 		private static boolean less(GraphRep graphRep, int i, int j) {
@@ -63,8 +72,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int cRI;
 			int cMaxI;
 
-			while (((topI * 3) + 1) <= endI) {
-				cLI = (topI * 3) + 1;
+			while (topI * 3 + 1 <= endI) {
+				cLI = topI * 3 + 1;
 				cMI = cLI + 1;
 				cRI = cLI + 2;
 				cMaxI = topI;
@@ -72,10 +81,10 @@ public class GraphRepTextReader extends GraphRepFactory {
 				if (less(graphRep, cMaxI, cLI)) {
 					cMaxI = cLI;
 				}
-				if ((cMI <= endI) && less(graphRep, cMaxI, cMI)) {
+				if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
 					cMaxI = cMI;
 				}
-				if ((cRI <= endI) && less(graphRep, cMaxI, cRI)) {
+				if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
 					cMaxI = cRI;
 				}
 				if (cMaxI != topI) {
@@ -99,7 +108,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// exception should happen when file format is wrong
 		line = inb.readLine();
 
-		while ((line != null) && line.trim().startsWith("#")) {
+		while (line != null && line.trim().startsWith("#")) {
 			line = inb.readLine();
 		}
 		if (line != null) {
@@ -118,22 +127,28 @@ public class GraphRepTextReader extends GraphRepFactory {
 		graphRep.lat = new float[graphRep.nodeCount];
 		graphRep.lon = new float[graphRep.nodeCount];
 		graphRep.height = new int[graphRep.nodeCount];
+		graphRep.rank = new int[graphRep.nodeCount];
 
 		graphRep.offsetOut = new int[graphRep.nodeCount + 1];
+		graphRep.offsetIn = new int[graphRep.nodeCount + 1];
 
 		graphRep.src_out = new int[graphRep.edgeCount];
 		graphRep.dest_out = new int[graphRep.edgeCount];
 		graphRep.multipliedDist_out = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_out = new float[edgeCount];
 		graphRep.dist_out = new int[graphRep.edgeCount];
+		graphRep.shortedID_out = new int[graphRep.edgeCount];
+		graphRep.outEdgeSourceNum_out = new int[graphRep.edgeCount];
+		graphRep.outEdgeShortedNum_out = new int[graphRep.edgeCount];
 
 		graphRep.src_in = new int[graphRep.edgeCount];
 		graphRep.dest_in = new int[graphRep.edgeCount];
 		graphRep.multipliedDist_in = new int[graphRep.edgeCount];
 		// TODO graphRep.elev_in = new float[edgeCount];
 		graphRep.dist_in = new int[graphRep.edgeCount];
-
-		graphRep.offsetIn = new int[graphRep.nodeCount + 1];
+		graphRep.shortedID_in = new int[graphRep.edgeCount];
+		graphRep.outEdgeSourceNum_in = new int[graphRep.edgeCount];
+		graphRep.outEdgeShortedNum_in = new int[graphRep.edgeCount];
 
 		// used for splitted lines in 1. nodes 2. edges
 		String[] splittedLine;
@@ -145,6 +160,11 @@ public class GraphRepTextReader extends GraphRepFactory {
 			graphRep.lat[i] = Float.parseFloat(splittedLine[1]);
 			graphRep.lon[i] = Float.parseFloat(splittedLine[2]);
 			graphRep.height[i] = Integer.parseInt(splittedLine[3]);
+			if (splittedLine.length == 5) {
+				graphRep.rank[i] = Integer.parseInt(splittedLine[4]);
+			} else {
+				graphRep.rank[i] = Integer.MAX_VALUE;
+			}
 		}
 
 		int currentSource;
@@ -163,12 +183,27 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 			// make mult better usable for us: save the distances with
 			// multipliers applied directly
-			graphRep.multipliedDist_out[i] = Math.round((1.3F / Float
-					.parseFloat(splittedLine[3])) * graphRep.dist_out[i]);
+			graphRep.multipliedDist_out[i] = Math.round(1.3F
+					/ Float.parseFloat(splittedLine[3]) * graphRep.dist_out[i]);
 			graphRep.multipliedDist_in[i] = graphRep.multipliedDist_out[i];
 
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);
 			// TODO graphRep.elev_in[i] = graphRep.elev_out[i];
+
+			if (splittedLine.length == 7) {
+				graphRep.shortedID_out[i] = Integer.parseInt(splittedLine[4]);
+				graphRep.outEdgeShortedNum_out[i] = Integer
+						.parseInt(splittedLine[5]);
+				graphRep.outEdgeSourceNum_out[i] = Integer
+						.parseInt(splittedLine[6]);
+			} else {
+				graphRep.shortedID_out[i] = -1;
+				graphRep.outEdgeShortedNum_out[i] = -1;
+				graphRep.outEdgeSourceNum_out[i] = -1;
+			}
+			graphRep.shortedID_in[i] = graphRep.shortedID_out[i];
+			graphRep.outEdgeShortedNum_in[i] = graphRep.outEdgeShortedNum_out[i];
+			graphRep.outEdgeSourceNum_in[i] = graphRep.outEdgeSourceNum_out[i];
 
 			if (currentSource != prevSource) {
 				for (int j = currentSource; j > prevSource; j--) {

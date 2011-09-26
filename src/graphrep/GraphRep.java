@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 2L;
+	private static final long serialVersionUID = 3L;
 
 	protected NNSearcher searcher;
 
@@ -21,6 +21,7 @@ public class GraphRep implements Serializable {
 	protected float[] lat;
 	protected float[] lon;
 	protected int[] height;
+	protected int[] rank;
 
 	// edges
 	protected int[] src_out;
@@ -28,6 +29,9 @@ public class GraphRep implements Serializable {
 	protected int[] multipliedDist_out;
 	protected int[] dist_out;
 	protected float[] elev_out;
+	protected int[] shortedID_out;
+	protected int[] outEdgeSourceNum_out;
+	protected int[] outEdgeShortedNum_out;
 
 	protected int[] offsetOut;
 
@@ -36,6 +40,9 @@ public class GraphRep implements Serializable {
 	protected int[] multipliedDist_in;
 	protected int[] dist_in;
 	protected float[] elev_in;
+	protected int[] shortedID_in;
+	protected int[] outEdgeSourceNum_in;
+	protected int[] outEdgeShortedNum_in;
 
 	protected int[] offsetIn;
 
@@ -188,6 +195,68 @@ public class GraphRep implements Serializable {
 	 */
 	public final int getEdgeCount() {
 		return edgeCount;
+	}
+
+	/**
+	 * @param nodeId
+	 * @return
+	 */
+	public int getRank(int nodeId) {
+		return rank[nodeId];
+	}
+
+	/**
+	 * @param nodeId
+	 * @param edgeNum
+	 * @return
+	 */
+	public int getShortedID_out(int nodeId, int edgeNum) {
+		return shortedID_out[offsetOut[nodeId] + edgeNum];
+	}
+
+	/**
+	 * @param nodeId
+	 * @param edgeNum
+	 * @return
+	 */
+	public int getOutEdgeSourceNum_out(int nodeId, int edgeNum) {
+		return outEdgeSourceNum_out[offsetOut[nodeId] + edgeNum];
+	}
+
+	/**
+	 * @param nodeId
+	 * @param edgeNum
+	 * @return
+	 */
+	public int getOutEdgeShortedNum_out(int nodeId, int edgeNum) {
+		return outEdgeShortedNum_out[offsetOut[nodeId] + edgeNum];
+	}
+
+	/**
+	 * @param nodeId
+	 * @param edgeNum
+	 * @return
+	 */
+	public int getShortedID_in(int nodeId, int edgeNum) {
+		return shortedID_in[offsetIn[nodeId] + edgeNum];
+	}
+
+	/**
+	 * @param nodeId
+	 * @param edgeNum
+	 * @return
+	 */
+	public int getOutEdgeSourceNum_in(int nodeId, int edgeNum) {
+		return outEdgeSourceNum_in[offsetIn[nodeId] + edgeNum];
+	}
+
+	/**
+	 * @param nodeId
+	 * @param edgeNum
+	 * @return
+	 */
+	public int getOutEdgeShortedNum_in(int nodeId, int edgeNum) {
+		return outEdgeShortedNum_in[offsetIn[nodeId] + edgeNum];
 	}
 
 }
