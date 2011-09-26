@@ -97,7 +97,7 @@ int main(int args, char** argv) {
        cout << nodes[i].data.lat << " ";
        cout << nodes[i].data.lon << " ";
        cout << nodes[i].data.ele << " ";
-       cout << ((nodes[i].rank < (uint32_t)numeric_limits<uint32_t>::max())?(int32_t)nodes[i].rank:numeric_limits<int32_t>::max())<< endl;
+       cout << ((nodes[i].rank < (int32_t)numeric_limits<int32_t>::max())?(int32_t)nodes[i].rank:numeric_limits<int32_t>::max())<< endl;
     }
  
     
@@ -108,9 +108,9 @@ int main(int args, char** argv) {
             cout << nodes[i].outEdges[j].targetId << " " ;
             cout << nodes[i].outEdges[j].length << " ";
             cout << nodes[i].outEdges[j].mult << " ";
-            cout << ((nodes[i].outEdges[j].shortedId < (uint32_t) numeric_limits<uint32_t>::max())? nodes[i].outEdges[j].shortedId : -1)<< " ";
-            cout << ((nodes[i].outEdges[j].outEdgeNumSource < (uint32_t) numeric_limits<uint32_t>::max())? nodes[i].outEdges[j].outEdgeNumSource : -1)<< " ";
-            cout << ((nodes[i].outEdges[j].outEdgeNumShorted < (uint32_t) numeric_limits<uint32_t>::max())? nodes[i].outEdges[j].outEdgeNumShorted : -1)<< endl;
+            cout << ((nodes[i].outEdges[j].shortedId < (int32_t) numeric_limits<int32_t>::max())? nodes[i].outEdges[j].shortedId : -1)<< " ";
+            cout << ((nodes[i].outEdges[j].outEdgeNumSource < (int32_t) numeric_limits<int32_t>::max())? nodes[i].outEdges[j].outEdgeNumSource : -1)<< " ";
+            cout << ((nodes[i].outEdges[j].outEdgeNumShorted < (int32_t) numeric_limits<int32_t>::max())? nodes[i].outEdges[j].outEdgeNumShorted : -1)<< endl;
         
         }
 
