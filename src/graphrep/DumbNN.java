@@ -15,13 +15,13 @@ public class DumbNN implements NNSearcher {
 	}
 
 	@Override
-	public int getIDForCoordinates(float lat, float lon) {
+	public int getIDForCoordinates(double lat, double lon) {
 
 		int numberOfNodes = graphRep.getNodeCount();
 
 		int pos = 0;
-		float squareDistance = 0;
-		float bestDistance = 0;
+		double squareDistance = 0;
+		double bestDistance = 0;
 		if (numberOfNodes <= 0) {
 			return -1;
 		}

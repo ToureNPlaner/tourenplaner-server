@@ -383,7 +383,7 @@ public class KDTreeNN implements NNSearcher {
 	// }
 
 	@Override
-	public int getIDForCoordinates(float lat, float lon) {
+	public int getIDForCoordinates(double lat, double lon) {
 		// TODO Auto-generated method stub
 		return 0;
 	}

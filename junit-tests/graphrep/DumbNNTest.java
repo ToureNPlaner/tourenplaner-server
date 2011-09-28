@@ -10,8 +10,8 @@ public class DumbNNTest {
 	public final void testGetIDForCoordinates() {
 
 		GraphRep graphRep = new GraphRep();
-		graphRep.lat = new float[3];
-		graphRep.lon = new float[3];
+		graphRep.lat = new double[3];
+		graphRep.lon = new double[3];
 		graphRep.lat[0] = 2.5F;
 		graphRep.lat[1] = 5.0F;
 		graphRep.lat[2] = 2.0F;

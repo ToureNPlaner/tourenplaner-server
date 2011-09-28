@@ -15,11 +15,11 @@ import computecore.ComputeResult;
 public class ShortestPath extends GraphAlgorithm {
 
 	private class Points implements JSONAware {
-		private final float[] lats;
-		private final float[] lons;
+		private final double[] lats;
+		private final double[] lons;
 		StringBuilder sb;
 
-		public Points(float[] lats, float[] lons) {
+		public Points(double[] lats, double[] lons) {
 			this.lats = lats;
 			this.lons = lons;
 			sb = new StringBuilder();
@@ -41,10 +41,10 @@ public class ShortestPath extends GraphAlgorithm {
 	private ComputeRequest req = null;
 	private ComputeResult res = null;
 
-	float srclat;
-	float srclon;
-	float destlat;
-	float destlon;
+	double srclat;
+	double srclon;
+	double destlat;
+	double destlon;
 
 	int srcid;
 	int destid;
@@ -55,7 +55,7 @@ public class ShortestPath extends GraphAlgorithm {
 		super(graph);
 		heap = new graphrep.Heap();
 		multipliedDist = new int[graph.getNodeCount()];
-		prev = new int[graph.getNodeCount()];
+		prevEdges = new int[graph.getNodeCount()];
 	}
 
 	@Override
@@ -76,13 +76,17 @@ public class ShortestPath extends GraphAlgorithm {
 	// dists in this array are stored with the multiplier applied. They also are
 	// rounded and are stored as integers
 	private final int[] multipliedDist;
-	private final int[] prev;
+
+	/**
+	 * edge id
+	 */
+	private final int[] prevEdges;
 
 	// in meters
-	private float directDistance;
+	private double directDistance;
 
 	// maybe use http://code.google.com/p/simplelatlng/ instead
-	private final float calcDirectDistance(double lat1, double lng1,
+	private final double calcDirectDistance(double lat1, double lng1,
 			double lat2, double lng2) {
 		double earthRadius = 6370.97327862;
 		double dLat = Math.toRadians(lat2 - lat1);
@@ -93,7 +97,7 @@ public class ShortestPath extends GraphAlgorithm {
 							.sin(dLng / 2));
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double dist = earthRadius * c;
-		return (float) (dist * 1000);
+		return dist * 1000;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -120,26 +124,28 @@ public class ShortestPath extends GraphAlgorithm {
 			return;
 		}
 
-		srclat = points.get(0).get("lt").floatValue();
-		srclon = points.get(0).get("ln").floatValue();
-		destlat = points.get(1).get("lt").floatValue();
-		destlon = points.get(1).get("ln").floatValue();
+		srclat = points.get(0).get("lt");
+		srclon = points.get(0).get("ln");
+		destlat = points.get(1).get("lt");
+		destlon = points.get(1).get("ln");
 
 		srcid = graph.getIDForCoordinates(srclat, srclon);
 		destid = graph.getIDForCoordinates(destlat, destlon);
 		directDistance = calcDirectDistance(srclat, srclon, destlat, destlon);
-
 		multipliedDist[srcid] = 0;
 		heap.insert(srcid, multipliedDist[srcid]);
 
 		int nodeID = -1;
-		float nodeDist;
-		int outTarget = 0;
+		int nodeDist;
+		int targetNode = 0;
 		int tempDist;
 
 		long starttime = System.nanoTime();
 		long dijkstratime;
 		long backtracktime;
+
+		System.out.println("Starting dijkstra with direct distance of "
+				+ (directDistance / 1000.0) + " km");
 		DIJKSTRA: while (!heap.isEmpty()) {
 			nodeID = heap.peekMinId();
 			nodeDist = heap.peekMinDist();
@@ -150,18 +156,19 @@ public class ShortestPath extends GraphAlgorithm {
 				continue;
 			}
 			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
-				outTarget = graph.getOutTarget(nodeID, i);
+				targetNode = graph.getOutTarget(nodeID, i);
 
 				// without multiplier = shortest path
 				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
 
 				// with multiplier = fastest path
-				tempDist = multipliedDist[nodeID] + graph.getOutMult(nodeID, i);
+				tempDist = multipliedDist[nodeID]
+						+ graph.getOutMultipliedDist(nodeID, i);
 
-				if (tempDist < multipliedDist[outTarget]) {
-					multipliedDist[outTarget] = tempDist;
-					prev[outTarget] = nodeID;
-					heap.insert(outTarget, multipliedDist[outTarget]);
+				if (tempDist < multipliedDist[targetNode]) {
+					multipliedDist[targetNode] = tempDist;
+					prevEdges[targetNode] = graph.getOutEdgeID(nodeID, i);
+					heap.insert(targetNode, multipliedDist[targetNode]);
 				}
 			}
 		}
@@ -179,31 +186,23 @@ public class ShortestPath extends GraphAlgorithm {
 
 		do {
 			routeElements++;
-			currNode = prev[currNode];
+			currNode = graph.getSource(prevEdges[currNode]);
 		} while (currNode != srcid);
 
-		float[] lats = new float[routeElements];
-		float[] lons = new float[routeElements];
+		double[] lats = new double[routeElements];
+		double[] lons = new double[routeElements];
 
 		// backtracking here
 		// Don't read distance from dist[], because there are distances with
 		// regard to the multiplier
 		int distance = 0;
 		currNode = nodeID;
-		// don't declare new integer all the time
-		int tempEdge;
 		do {
-			for (tempEdge = 0; tempEdge < graph.getOutEdgeCount(prev[currNode]); tempEdge++) {
-				if (graph.getOutTarget(prev[currNode], tempEdge) == currNode) {
-					// we found our edge, now get the dist and add it
-					distance += graph.getOutDist(prev[currNode], tempEdge);
-					break;
-				}
-			}
+			distance += graph.getDist(prevEdges[currNode]);
 			routeElements--;
 			lats[routeElements] = graph.getNodeLat(currNode);
 			lons[routeElements] = graph.getNodeLon(currNode);
-			currNode = prev[currNode];
+			currNode = graph.getSource(prevEdges[currNode]);
 		} while (currNode != srcid);
 		backtracktime = System.nanoTime();
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);
