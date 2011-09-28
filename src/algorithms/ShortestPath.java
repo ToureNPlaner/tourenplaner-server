@@ -144,8 +144,6 @@ public class ShortestPath extends GraphAlgorithm {
 		long dijkstratime;
 		long backtracktime;
 
-		System.out.println("Starting dijkstra with direct distance of "
-				+ (directDistance / 1000.0) + " km");
 		DIJKSTRA: while (!heap.isEmpty()) {
 			nodeID = heap.peekMinId();
 			nodeDist = heap.peekMinDist();
@@ -189,6 +187,7 @@ public class ShortestPath extends GraphAlgorithm {
 			currNode = graph.getSource(prevEdges[currNode]);
 		} while (currNode != srcid);
 
+		System.out.println("path goes over " + routeElements + " nodes");
 		double[] lats = new double[routeElements];
 		double[] lons = new double[routeElements];
 

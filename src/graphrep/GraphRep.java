@@ -295,11 +295,11 @@ public class GraphRep implements Serializable {
 	}
 
 	public int getOutEdgeID(int nodeID, int edgeNum) {
-		return offsetOut[nodeID + edgeNum];
+		return offsetOut[nodeID] + edgeNum;
 	}
 
 	public int getInEdgeID(int nodeID, int edgeNum) {
-		return mapping_InToOut[offsetIn[nodeID + edgeNum]];
+		return mapping_InToOut[offsetIn[nodeID] + edgeNum];
 	}
 
 }
