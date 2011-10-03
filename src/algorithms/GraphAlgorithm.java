@@ -13,6 +13,7 @@ import graphrep.GraphRep;
  *
  */
 public abstract class GraphAlgorithm implements Algorithm {
+	@SuppressWarnings("unused")
 	private GraphAlgorithm() {
 	}
 

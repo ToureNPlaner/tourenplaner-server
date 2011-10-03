@@ -61,6 +61,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the node id of the node nearest to the given coordinates
+	 * 
 	 * @param srclat
 	 * @param srclon
 	 * @return
@@ -70,7 +72,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * @return float
+	 * Gets the latitude of the node with the given nodeId
+	 * 
+	 * @return double
 	 * @param nodeID
 	 */
 	public final double getNodeLat(int nodeID) {
@@ -78,7 +82,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * @return float
+	 * Gets the longitude of the node with the given nodeId
+	 * 
+	 * @return double
 	 * @param nodeID
 	 */
 	public final double getNodeLon(int nodeID) {
@@ -86,6 +92,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the height of the given node in meters
+	 * 
 	 * @return float
 	 * @param nodeID
 	 */
@@ -94,6 +102,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the number of out going edges of the given node
+	 * 
 	 * @param nodeID
 	 */
 	public final int getOutEdgeCount(int nodeID) {
@@ -101,6 +111,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the number of in going edges of the given node
+	 * 
 	 * @return int
 	 * @param nodeID
 	 */
@@ -109,6 +121,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the target of the out going edge identified by it's source node and edgeNum
+	 * the edgeNum is between 0 and getOutEdgeCount(nodeId)-1
+	 * 
 	 * @return int
 	 * @param nodeID
 	 * @param edgeNum
@@ -118,6 +133,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the source of the the edge given by it's edgeId (that's not an edgeNum but a unique Id for each edge)
+	 * get the Id with GetOutEdgeID() and GetInEdgeID()
+	 * 
 	 * @return int
 	 * @param edgeID
 	 */
@@ -126,6 +144,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the target of the the edge given by it's edgeId (that's not an edgeNum but a unique Id for each edge)
+	 * get the Id with GetOutEdgeID() and GetInEdgeID()
+	 * 
 	 * @return int
 	 * @param edgeID
 	 */
@@ -134,6 +155,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the source of the in going edge identified by it's target node and edgeNum
+	 * the edgeNum is between 0 and getInEdgeCount(nodeId)-1
+	 * 
 	 * @return int
 	 * @param nodeID
 	 */
@@ -143,6 +167,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the distance (in meters) of the out going edge identified by it's source node and edgeNum
+	 * the edgeNum is between 0 and getOutEdgeCount(nodeId)-1
+	 * 
 	 * @return int
 	 * @param nodeID
 	 * @param edgeNum
@@ -152,6 +179,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the distance (in meters) of the the edge given by it's edgeId (that's not an edgeNum but a unique Id for each edge)
+	 * get the Id with GetOutEdgeID() and GetInEdgeID()
+	 * 
 	 * @return int
 	 * @param edgeID
 	 * @param edgeNum
@@ -161,6 +191,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the weighted distance of the out going edge identified by it's source node and edgeNum
+	 * the edgeNum is between 0 and getOutEdgeCount(nodeId)-1
+	 * 
 	 * @return int
 	 * @param nodeID
 	 * @param edgeNum
@@ -168,17 +201,22 @@ public class GraphRep implements Serializable {
 	public final int getOutMultipliedDist(int nodeID, int edgeNum) {
 		return multipliedDist[offsetOut[nodeID] + edgeNum];
 	}
+	/**
+	 * Gets the weighted distance of the the edge given by it's edgeId (that's not an edgeNum but a unique Id for each edge)
+	 * get the Id with GetOutEdgeID() and GetInEdgeID()
+	 * 
+	 * @param edgeId
+	 * @return
+	 */
+	public final int getMultipliedDist(int edgeId) {
+		return multipliedDist[edgeId];
+	}
 
-	// /**
-	// * @param nodeID
-	// * @param edgeNum
-	// */
-	// public final float getOutEleDelta(int nodeID, int edgeNum) {
-	// // TODO
-	// return -1;
-	// }
 
 	/**
+	 * Gets the distance (in meters) of the in going edge identified by it's target node and edgeNum
+	 * the edgeNum is between 0 and getInEdgeCount(nodeId)-1
+	 * 
 	 * @return int
 	 * @param nodeID
 	 * @param edgeNum
@@ -189,6 +227,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the weighted distance of the in going edge identified by it's target node and edgeNum
+	 * the edgeNum is between 0 and getInEdgeCount(nodeId)-1
+	 * 
 	 * @return int
 	 * @param nodeID
 	 * @param edgeNum
@@ -198,24 +239,10 @@ public class GraphRep implements Serializable {
 		return multipliedDist[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
 
-	/**
-	 * @return int
-	 * @param edgeID
-	 */
-	public final int getInMultipliedDist(int edgeID) {
-		return multipliedDist[edgeID];
-	}
-
-	// /**
-	// * @param nodeID
-	// * @param edgeNum
-	// */
-	// public final float getInEleDelta(int nodeID, int edgeNum) {
-	// // TODO
-	// return -1;
-	// }
 
 	/**
+	 * Gets the number of nodes in the graph
+	 * 
 	 * @return int
 	 */
 	public final int getNodeCount() {
@@ -223,6 +250,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the number of edges in the graph
+	 * 
 	 * @return int
 	 */
 	public final int getEdgeCount() {
@@ -230,6 +259,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the CH rank in the graph, can be MAX_INT if the node hasn't been contracted at all
+	 * CH property is getRank(nodeA)<=getRank(nodeB)
+	 * 
 	 * @param nodeID
 	 * @return
 	 */
@@ -238,66 +270,99 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the nodeId of the shortcutted node of the out going edge identified by it's source node and edgeNum
+	 * This is -1 if this edge is not a shortcut
+	 * 
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getShortedID_out(int nodeID, int edgeNum) {
+	public int getOutShortedId(int nodeID, int edgeNum) {
 		return shortedID[offsetOut[nodeID] + edgeNum];
 	}
 
 	/**
+	 * Gets the edgeNum of the out going edge from the source of this edge
+	 * to the shortcutted node.
+	 * This is -1 if this edge is not a shortcut
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getOutEdgeSourceNum_out(int nodeID, int edgeNum) {
+	public int getOutEdgeSourceNum(int nodeID, int edgeNum) {
 		return outEdgeSourceNum[offsetOut[nodeID] + edgeNum];
 	}
 
 	/**
+	 * Gets the edgeNum of the out going edge from the shortcutted node of this edge
+	 * to the target of this edge.
+	 * This is -1 if this edge is not a shortcut
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getOutEdgeShortedNum_out(int nodeID, int edgeNum) {
+	public int getOutEdgeShortedOut(int nodeID, int edgeNum) {
 		return outEdgeShortedNum[offsetOut[nodeID] + edgeNum];
 	}
 
 	/**
+	 * Gets the nodeId of the shortcutted node of the in going edge identified by it's target node and edgeNum
+	 * This is -1 if this edge is not a shortcut
+	 * 
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getShortedID_in(int nodeID, int edgeNum) {
+	public int getInEdgeShortedId(int nodeID, int edgeNum) {
 		// return shortedID_in[offsetIn[nodeID] + edgeNum];
 		return shortedID[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
 
 	/**
+	 * Gets the edgeNum of the out going edge from the source of this edge
+	 * to the shortcutted node.
+	 * This is -1 if this edge is not a shortcut
+	 *
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getOutEdgeSourceNum_in(int nodeID, int edgeNum) {
+	public int getInEdgeSourceOut(int nodeID, int edgeNum) {
 		// return outEdgeSourceNum_in[offsetIn[nodeID] + edgeNum];
 		return outEdgeSourceNum[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
 
 	/**
+	 * Gets the edgeNum of the out going edge from the shortcutted node of this edge
+	 * to the target of this edge.
+	 * This is -1 if this edge is not a shortcut
+	 * 
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getOutEdgeShortedNum_in(int nodeID, int edgeNum) {
+	public int getInEdgeShortedOut(int nodeID, int edgeNum) {
 		// return outEdgeShortedNum_in[offsetIn[nodeID] + edgeNum];
 		return outEdgeShortedNum[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
-
+	
+	/**
+	 * Gets the edgeId of the out going edge identified by it's source node and edgeNum
+	 * 
+	 * @param nodeID
+	 * @param edgeNum
+	 * @return 
+	 */
 	public int getOutEdgeID(int nodeID, int edgeNum) {
 		return offsetOut[nodeID] + edgeNum;
 	}
-
+	/**
+	 * gets the edgeId of the in going edge identified by it's target node and edgeNum
+	 * 
+	 * @param nodeID
+	 * @param edgeNum
+	 * @return
+	 */
 	public int getInEdgeID(int nodeID, int edgeNum) {
 		return mapping_InToOut[offsetIn[nodeID] + edgeNum];
 	}
