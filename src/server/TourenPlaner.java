@@ -14,6 +14,7 @@ import java.util.Map;
 
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
+import algorithms.ShortestPathCHFactory;
 import algorithms.ShortestPathFactory;
 
 import computecore.AlgorithmRegistry;
@@ -74,7 +75,7 @@ public class TourenPlaner {
 			GraphRep graph = null;
 			String graphfilename = ConfigManager.getInstance().getEntryString(
 					"graphfilepath",
-					System.getProperty("user.home") + "/germany.txt");
+					System.getProperty("user.home") + "/germany-ch.txt");
 			try {
 				graph = new GraphRepTextReader()
 						.createGraphRep(new FileInputStream(graphfilename));
@@ -90,7 +91,7 @@ public class TourenPlaner {
 		// Load the Graph
 		GraphRep graph = null;
 		String graphfilename = cm.getEntryString("graphfilepath",
-				System.getProperty("user.home") + "/germany.txt");
+				System.getProperty("user.home") + "/germany-ch.txt");
 		try {
 			if (handler.loadTextGraph()) {
 				graph = new GraphRepTextReader()
@@ -108,7 +109,7 @@ public class TourenPlaner {
 
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();
-		reg.registerAlgorithm(new ShortestPathFactory(graph));
+		reg.registerAlgorithm(new ShortestPathCHFactory(graph));
 
 		// Create our ComputeCore that manages all ComputeThreads
 		ComputeCore comCore = new ComputeCore(reg, (int) cm.getEntryLong(

@@ -3,6 +3,7 @@ package algorithms;
 import graphrep.GraphRep;
 import graphrep.Heap;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,7 +13,7 @@ import org.json.simple.JSONAware;
 import computecore.ComputeRequest;
 import computecore.ComputeResult;
 
-public class ShortestPath extends GraphAlgorithm {
+public class ShortestPathCH extends GraphAlgorithm {
 
 	private ComputeRequest req = null;
 	private ComputeResult res = null;
@@ -27,20 +28,39 @@ public class ShortestPath extends GraphAlgorithm {
 
 	private final Heap heap;
 
-	public ShortestPath(GraphRep graph) {
+	// Used to mark nodes with BFS
+	private final boolean[] marked;
+	private final boolean[] visited;
+
+	// TODO: Replace with int array based fifo
+	private final ArrayDeque<Integer> fifo;
+
+	public ShortestPathCH(GraphRep graph) {
 		super(graph);
 		heap = new graphrep.Heap();
 		multipliedDist = new int[graph.getNodeCount()];
 		prevEdges = new int[graph.getNodeCount()];
+		marked = new boolean[graph.getEdgeCount()]; // TODO: Compare with BitSet
+		visited = new boolean[graph.getNodeCount()];										
+		fifo = new ArrayDeque<Integer>();
 	}
 
 	@Override
 	public void setRequest(ComputeRequest req) {
 		// reset dists
-		for (int i = 0; i < multipliedDist.length; i++) {
+		for (int i = 0; i < graph.getNodeCount(); i++) {
 			multipliedDist[i] = Integer.MAX_VALUE;
+			visited[i] =false;
+		}
+		// reset marks
+		for (int i = 0; i < graph.getEdgeCount(); i++) {
+			marked[i] = false;
+			// Don't need to reset prevEdges because we backtrack visited edges
+			// only by design
 		}
 		heap.resetHeap();
+		fifo.clear();
+
 		this.req = req;
 	}
 
@@ -108,15 +128,53 @@ public class ShortestPath extends GraphAlgorithm {
 		srcid = graph.getIDForCoordinates(srclat, srclon);
 		destid = graph.getIDForCoordinates(destlat, destlon);
 		directDistance = calcDirectDistance(srclat, srclon, destlat, destlon);
+		
+		int nodeID = destid;
+		int sourceNode;
+		int edgeId;
+		/*
+		 * Start BFS on G_down beginning at destination and marking edges for
+		 * consideration
+		 * 
+		 * TODO: Create proper infrastructure for getting arrays with |nodes| length
+		 */
+
+		
+		System.out.println("Start BFS");
+		long starttime = System.nanoTime();
+		long numEdges =0;
+		fifo.addLast(destid);
+		visited[destid] = true;
+		
+		while (!fifo.isEmpty()) {
+			nodeID = fifo.poll();		
+			
+			for (int i = 0; i < graph.getInEdgeCount(nodeID); i++) {
+				edgeId = graph.getInEdgeID(nodeID, i);
+				sourceNode = graph.getSource(edgeId);
+
+				if (!visited[sourceNode] && graph.getRank(sourceNode) >= graph.getRank(nodeID)){
+					// Mark the edge
+					marked[edgeId] = true;
+					visited[sourceNode] = true;
+					// Add source for exploration
+					fifo.addLast(sourceNode);
+				}
+				numEdges++;
+				
+			}
+		}
+		
+		System.out.println("BFS("+numEdges+") time: "+(System.nanoTime()-starttime)/1000000.0);
+
 		multipliedDist[srcid] = 0;
 		heap.insert(srcid, multipliedDist[srcid]);
 
-		int nodeID = -1;
 		int nodeDist;
-		int targetNode = 0;
+		
 		int tempDist;
-
-		long starttime = System.nanoTime();
+		int targetNode;
+		starttime = System.nanoTime();
 		long dijkstratime;
 		long backtracktime;
 
@@ -130,25 +188,23 @@ public class ShortestPath extends GraphAlgorithm {
 				continue;
 			}
 			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
-				// Ignore Shortcuts
-				if(graph.getOutShortedId(nodeID, i) != -1){
-					continue;
-				}
-				targetNode = graph.getOutTarget(nodeID, i);
+				edgeId = graph.getOutEdgeID(nodeID, i);
+				targetNode = graph.getTarget(edgeId);
+				// Either marked (by BFS) or G_up edge
+				if (marked[edgeId] || graph.getRank(nodeID) <= graph.getRank(targetNode)) {
+					// without multiplier = shortest path
+					// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
 
-				// without multiplier = shortest path
-				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
-				
+					// with multiplier = fastest path
+					tempDist = multipliedDist[nodeID]
+							+ graph.getMultipliedDist(edgeId);
 
-				
-				// with multiplier = fastest path
-				tempDist = multipliedDist[nodeID]
-						+ graph.getOutMultipliedDist(nodeID, i);
-			
-				if (tempDist < multipliedDist[targetNode]) {
-					multipliedDist[targetNode] = tempDist;
-					prevEdges[targetNode] = graph.getOutEdgeID(nodeID, i);
-					heap.insert(targetNode, multipliedDist[targetNode]);
+					if (tempDist < multipliedDist[targetNode]) {
+						multipliedDist[targetNode] = tempDist;
+						prevEdges[targetNode] = graph.getOutEdgeID(nodeID, i);
+						heap.insert(targetNode, tempDist);
+					}
+					
 				}
 			}
 		}
@@ -169,7 +225,7 @@ public class ShortestPath extends GraphAlgorithm {
 			currNode = graph.getSource(prevEdges[currNode]);
 		} while (currNode != srcid);
 
-		System.out.println("path goes over " + routeElements + " nodes");
+		System.out.println("path goes over " + routeElements + " edges");
 		double[] lats = new double[routeElements];
 		double[] lons = new double[routeElements];
 

@@ -5,27 +5,30 @@ package algorithms;
 
 import graphrep.GraphRep;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer
- *
+ * 
  */
-public class DummyFactory extends GraphAlgorithmFactory {
+public class ShortestPathCHFactory extends GraphAlgorithmFactory {
 
-	public DummyFactory(GraphRep graph) {
+	public ShortestPathCHFactory(GraphRep graph) {
 		super(graph);
 	}
 
-	/* (non-Javadoc)
+	static ShortestPath sp = null;
+
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see algorithms.AlgorithmFactory#createAlgorithm()
 	 */
 	@Override
 	public Algorithm createAlgorithm() {
-		return new ShortestPathDummy();
+		return new ShortestPathCH(graph);
 	}
 
 	@Override
@@ -35,7 +38,7 @@ public class DummyFactory extends GraphAlgorithmFactory {
 
 	@Override
 	public String getAlgName() {
-		return "Shortest Path";
+		return "Shortest Path CH";
 	}
 
 	@Override
@@ -45,14 +48,7 @@ public class DummyFactory extends GraphAlgorithmFactory {
 
 	@Override
 	public List<Map<String, Object>> getPointConstraints() {
-		List<Map<String, Object>> ret=new ArrayList<Map<String, Object>>(1);
-		Map<String, Object> map = new HashMap<String, Object>(4);
-		map.put("name", "height");
-		map.put("type", "meter");
-		map.put("min", new Float(-20.0));
-		map.put("max", new Float(9000.0));
-		ret.add(map);
-		return ret;
+		return null;
 	}
 
 	@Override
