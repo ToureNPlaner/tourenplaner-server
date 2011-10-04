@@ -18,6 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Random;
 
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
@@ -262,7 +263,71 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	private void handleRegisterUser(HttpRequest request, Responder responder) {
-		// TODO Auto-generated method stub
+		try {
+			UsersDBRow user = null;
+			UsersDBRow authUser = null;
+			
+			Map<String, Object> objmap = getJSONContent(responder, request);
+			if (objmap == null) {
+				return;
+			}
+			
+			//TODO optimize salt-generation
+			Random rand = new Random();
+			StringBuilder saltBuilder = new StringBuilder(100);
+			for (int i=0; i<10; i++) {
+				saltBuilder.append(Long.toHexString(rand.nextLong()));
+			}
+			
+			String salt = saltBuilder.toString();
+			String pw = (String) objmap.get("password");
+			
+			// Compute SHA1 of PW:SALT
+			String toHash = pw + ":" + salt;
+
+			byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
+			// Convert to Hex String
+			StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
+			for (byte b : bindigest) {
+				hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
+				hexbuilder.append(Integer.toHexString(b & 0x0F));
+			}
+			
+			// TODO cover all cases
+			
+			//if no authorization header add not verified user
+			if (request.getHeader("Authorization") == null) {
+				
+				user = dbm.addNewUser((String) objmap.get("email"), 
+						hexbuilder.toString(), 
+						salt, 
+						(String) objmap.get("firstname"), 
+						(String) objmap.get("lastname"), 
+						(String) objmap.get("address"), 
+						(Boolean) objmap.get("admin"));
+			} else {
+				if ((authUser = auth(request, responder)) != null 
+						&& authUser.isAdmin) {
+					
+				} else {
+					responder.writeUnauthorizedClose();
+				}
+			}
+			
+			// TODO handler if user already existed
+			if (user == null) {
+				
+			}
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			
+		// TODO JSON Exception Handling
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

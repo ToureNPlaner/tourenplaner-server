@@ -9,7 +9,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -48,7 +47,8 @@ public class DatabaseManager {
 
 	private final static String addNewUserString = "INSERT INTO Users "
 			+ "(Email, Passwordhash, Salt, FirstName, LastName, Address, "
-			+ "AdminFlag, RegistrationDate) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+			+ "AdminFlag, Status, RegistrationDate, VerifiedDate)" 
+			+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	private final static String getAllRequestsString = "SELECT id, UserID, "
 			+ "JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag, "
@@ -236,6 +236,59 @@ public class DatabaseManager {
 			String salt, String firstName, String lastName, String address,
 			boolean isAdmin) throws SQLException {
 
+		return addNewUser(email, passwordhash, salt, firstName, lastName, 
+				address, isAdmin, UserStatusEnum.NeedsVerification, false);
+	}
+	
+	/**
+	 * Tries to insert a new user dataset into the database, 
+	 * but request should have legit admin authentication (will not be checked
+	 * within this method). New user will be verified.
+	 * .
+	 * </br>SQL command: {@value #addNewUserString}
+	 * 
+	 * @param email 
+	 * 			Have to be unique, that means another user must not have
+	 * 			the same email. Parameter will be trimmed from this method.
+	 * @param passwordhash 
+	 * 			Hash of the user password.
+	 * 			Parameter will be trimmed from this method.
+	 * @param salt 
+	 * 			Salt for the user password hash.
+	 * 			Parameter will be trimmed from this method.
+	 * @param firstName 
+	 *          First name of the user.
+	 * 			Parameter will be trimmed from this method.
+	 * @param lastName 
+	 * 			Last Name of the user.
+	 * 			Parameter will be trimmed from this method.
+	 * @param address 
+	 *          Address of the user.
+	 * 			Parameter will be trimmed from this method.
+	 * @param isAdmin
+	 * 			True, if user is an admin, else false.
+	 * @return 
+	 * 			Returns the inserted user object only if the id 
+	 * 			could received from the database and the insert was 
+	 * 			successful. If the insert was not successful because 
+	 *          the email already existed, null will be returned. 
+	 * @throws SQLException Thrown if other errors occurred than a duplicate
+	 * 			email.
+	 */
+	public UsersDBRow addNeVerifiedwUser(String email, String passwordhash,
+			String salt, String firstName, String lastName, String address,
+			boolean isAdmin) throws SQLException {
+		
+		return addNewUser(email, passwordhash, salt, firstName, lastName, 
+				address, isAdmin, UserStatusEnum.Verified, true);
+	}
+	
+	private UsersDBRow addNewUser(String email, String passwordhash,
+			String salt, String firstName, String lastName, String address,
+			boolean isAdmin, UserStatusEnum status, boolean isVerified) 
+					throws SQLException {
+		
+		
 		UsersDBRow user = null;
 		ResultSet generatedKey = null;
 		
@@ -247,8 +300,17 @@ public class DatabaseManager {
 		address = address.trim();
 
 		try {
-
-			Timestamp stamp = new Timestamp(System.currentTimeMillis());
+			
+			Timestamp registeredStamp = new Timestamp(
+					System.currentTimeMillis());
+			Timestamp verifiedStamp = null;
+			Date registeredDate = timestampToDate(registeredStamp);
+			Date verifiedDate = null;
+			
+			if (isVerified) {
+				verifiedStamp = registeredStamp;
+				verifiedDate = registeredDate;
+			}
 
 			pstAddNewUser.setString(1, email);
 			pstAddNewUser.setString(2, passwordhash);
@@ -257,13 +319,15 @@ public class DatabaseManager {
 			pstAddNewUser.setString(5, lastName);
 			pstAddNewUser.setString(6, address);
 			pstAddNewUser.setBoolean(7, isAdmin);
-			pstAddNewUser.setTimestamp(8, stamp);
-
+			pstAddNewUser.setString(8, status.toString());
+			pstAddNewUser.setTimestamp(9, registeredStamp);
+			pstAddNewUser.setTimestamp(10, verifiedStamp);
+			
 			pstAddNewUser.executeUpdate();
 			
 			user = new UsersDBRow(-1, email, passwordhash, salt, isAdmin,
-					UserStatusEnum.NeedsVerification, firstName, lastName,
-					address, new Date(stamp.getTime()), null, null);
+					status, firstName, lastName,
+					address, registeredDate, verifiedDate, null);
 			
 			//try {
 			generatedKey = pstAddNewUser.getGeneratedKeys();
@@ -283,6 +347,8 @@ public class DatabaseManager {
 		} 
 		return user;
 	}
+	
+	
 
 	/**
 	 * Updates the Requests table row with the id given through the parameter 
