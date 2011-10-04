@@ -11,7 +11,7 @@ using namespace std;
 struct NodeData {
     double lon;
     double lat;
-    uint32_t ele;
+    int32_t ele;
     uint32_t deg;
 };
 
