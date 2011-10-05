@@ -45,10 +45,27 @@
     	</zip>
     </target>
 	
+	<target name="sptogpx" depends="compile">
+    	<delete dir="${jar.temp.dir}"/>
+    	<mkdir dir="${jar.temp.dir}"/>
+        <jar destfile="${jar.temp.dir}/temp_${ant.project.name}.jar" basedir="${bin.dir}">
+            <manifest>
+                <attribute name="Main-Class" value="utils.SPtoGPX"/>
+            </manifest>
+        </jar>
+    	
+    	<copy todir="${jar.temp.dir}">
+    	    <fileset dir="${lib.dir}" includes="json_simple-1.1.jar"/>
+    	</copy>
+    	
+    	<zip destfile="${jar.dir}/sptogpx.jar">
+    		<zipgroupfileset dir="${jar.temp.dir}" includes="*.jar"/>
+    	</zip>
+    </target>
 
 	<target name="run" depends="jar">
 		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
 	</target>
 	
-    <target name="main" depends="clean,run"/>
+    <target name="main" depends="clean,jar"/>
 </project>

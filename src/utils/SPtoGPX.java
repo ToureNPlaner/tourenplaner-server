@@ -30,6 +30,7 @@ public class SPtoGPX {
 		if (args.length != 1) {
 			System.err
 					.println("Please supply a .json file as first parameter or - to read from stdin");
+			return;
 		}
 		BufferedReader reader;
 		try {
@@ -55,8 +56,8 @@ public class SPtoGPX {
 					+ "    <name>Example GPX Document</name>");
 			System.out.println("<trkseg>");
 			for (Map<String, Object> point : points) {
-				System.out.println("<trkpt lat=\"" + point.get("lt") + "\" lon=\""
-						+ point.get("ln") + "\"></trkpt>");
+				System.out.println("<trkpt lat=\"" + point.get("lt")
+						+ "\" lon=\"" + point.get("ln") + "\"></trkpt>");
 			}
 			System.out.println("</trkseg>\n</trk>\n</gpx>");
 

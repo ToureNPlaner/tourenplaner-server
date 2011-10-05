@@ -266,69 +266,78 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		try {
 			UsersDBRow user = null;
 			UsersDBRow authUser = null;
-			
+
 			Map<String, Object> objmap = getJSONContent(responder, request);
 			if (objmap == null) {
 				return;
 			}
-			
-			//TODO optimize salt-generation
+
+			// TODO optimize salt-generation
 			Random rand = new Random();
 			StringBuilder saltBuilder = new StringBuilder(100);
-			for (int i=0; i<10; i++) {
+			for (int i = 0; i < 10; i++) {
 				saltBuilder.append(Long.toHexString(rand.nextLong()));
 			}
-			
+
 			String salt = saltBuilder.toString();
 			String pw = (String) objmap.get("password");
-			
-			// Compute SHA1 of PW:SALT
-			String toHash = pw + ":" + salt;
 
-			byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
-			// Convert to Hex String
-			StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
-			for (byte b : bindigest) {
-				hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
-				hexbuilder.append(Integer.toHexString(b & 0x0F));
-			}
-			
+			String toHash = generateHash(salt, pw);
 			// TODO cover all cases
-			
-			//if no authorization header add not verified user
+
+			// if no authorization header add not verified user
 			if (request.getHeader("Authorization") == null) {
-				
-				user = dbm.addNewUser((String) objmap.get("email"), 
-						hexbuilder.toString(), 
-						salt, 
-						(String) objmap.get("firstname"), 
-						(String) objmap.get("lastname"), 
-						(String) objmap.get("address"), 
+
+				user = dbm.addNewUser((String) objmap.get("email"), toHash,
+						salt, (String) objmap.get("firstname"),
+						(String) objmap.get("lastname"),
+						(String) objmap.get("address"),
 						(Boolean) objmap.get("admin"));
 			} else {
-				if ((authUser = auth(request, responder)) != null 
+				if ((authUser = auth(request, responder)) != null
 						&& authUser.isAdmin) {
-					
+
+					user = dbm.addNewVerifiedUser((String) objmap.get("email"),
+							toHash, salt, (String) objmap.get("firstname"),
+							(String) objmap.get("lastname"),
+							(String) objmap.get("address"),
+							(Boolean) objmap.get("admin"));
+
 				} else {
 					responder.writeUnauthorizedClose();
 				}
 			}
-			
+
 			// TODO handler if user already existed
 			if (user == null) {
-				
+
 			}
-			
+
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			
-		// TODO JSON Exception Handling
+
+			// TODO JSON Exception Handling
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
+	}
+
+	protected String generateHash(String salt, String pw) {
+		// Compute SHA1 of PW:SALT
+		String toHash = pw + ":" + salt;
+
+		byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
+		// Convert to Hex String
+		StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
+		for (byte b : bindigest) {
+			hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
+			hexbuilder.append(Integer.toHexString(b & 0x0F));
+		}
+		toHash = hexbuilder.toString();
+		return toHash;
 	}
 
 	private void handleInfo(HttpRequest request, Responder responder) {
@@ -429,17 +438,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 
 		// Compute SHA1 of PW:SALT
-		String toHash = pw + ":" + user.salt;
+		String toHash = generateHash(user.salt, pw);
 
-		byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
-		// Convert to Hex String
-		StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
-		for (byte b : bindigest) {
-			hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
-			hexbuilder.append(Integer.toHexString(b & 0x0F));
-		}
-		System.out.println(toHash + " : " + hexbuilder.toString());
-		if (!user.passwordhash.equals(hexbuilder.toString())) {
+		System.out.println(pw + ":" + user.salt + " : " + toHash);
+		if (!user.passwordhash.equals(toHash)) {
 			responder.writeErrorMessage("EAUTH", "Wrong username or password",
 					null, HttpResponseStatus.UNAUTHORIZED);
 			return null;
