@@ -15,7 +15,7 @@ public class Points implements JSONAware {
 		this.lons = lons;
 		sb = new StringBuilder();
 	}
-
+	
 	@Override
 	public String toJSONString() {
 		sb.append("[");

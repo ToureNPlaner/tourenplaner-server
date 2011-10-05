@@ -113,7 +113,7 @@ public class TourenPlaner {
 
 		// Create our ComputeCore that manages all ComputeThreads
 		ComputeCore comCore = new ComputeCore(reg, (int) cm.getEntryLong(
-				"threads", 16), (int) cm.getEntryLong("queuelength", 32));
+				"threads", 1), (int) cm.getEntryLong("queuelength", 32));
 
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);

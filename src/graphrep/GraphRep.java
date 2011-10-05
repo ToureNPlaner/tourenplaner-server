@@ -105,6 +105,17 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
+	 * Gets the edgeNum of the out going edge from the shortcutted node of this edge
+	 * to the shortcutted node.
+	 * This is -1 if this edge is not a shortcut
+	 * @param edgeId
+	 * @return
+	 */
+	public int getEdgeShortedNum(int edgeId) {
+		return outEdgeShortedNum[edgeId];
+	}
+	
+	/**
 	 * Gets the node id of the node nearest to the given coordinates
 	 * 
 	 * @param srclat
@@ -321,6 +332,7 @@ public class GraphRep implements Serializable {
 	public int getOutEdgeSourceNum(int nodeID, int edgeNum) {
 		return outEdgeSourceNum[offsetOut[nodeID] + edgeNum];
 	}
+	
 	
 	/**
 	 * Gets the weighted distance of the out going edge identified by it's source node and edgeNum

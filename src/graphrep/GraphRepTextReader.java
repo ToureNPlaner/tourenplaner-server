@@ -198,8 +198,9 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 			// make mult better usable for us: save the distances with
 			// multipliers applied directly
-			graphRep.multipliedDist[i] = (int) Math.round((1.3 / Double
-					.parseDouble(splittedLine[3])) * graphRep.dist[i]);
+			// TODO find out what exactly is used by CH generator
+			graphRep.multipliedDist[i] = (int) ((1.3 / Double
+					.parseDouble(splittedLine[3])) * ((double) graphRep.dist[i]));
 			// graphRep.multipliedDist_in[i] = graphRep.multipliedDist[i];
 
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);
