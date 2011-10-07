@@ -200,7 +200,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 			// multipliers applied directly
 			// TODO find out what exactly is used by CH generator
 			graphRep.multipliedDist[i] = (int) ((1.3 / Double
-					.parseDouble(splittedLine[3])) * ((double) graphRep.dist[i]));
+					.parseDouble(splittedLine[3])) * graphRep.dist[i]);
 			// graphRep.multipliedDist_in[i] = graphRep.multipliedDist[i];
 
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);
@@ -208,14 +208,15 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 			if (splittedLine.length == 7) {
 				graphRep.shortedID[i] = Integer.parseInt(splittedLine[4]);
-				graphRep.outEdgeShortedNum[i] = Integer
-						.parseInt(splittedLine[5]);
 				graphRep.outEdgeSourceNum[i] = Integer
+						.parseInt(splittedLine[5]);
+				graphRep.outEdgeShortedNum[i] = Integer
 						.parseInt(splittedLine[6]);
+
 			} else {
 				graphRep.shortedID[i] = -1;
-				graphRep.outEdgeShortedNum[i] = -1;
 				graphRep.outEdgeSourceNum[i] = -1;
+				graphRep.outEdgeShortedNum[i] = -1;
 			}
 			// graphRep.shortedID_in[i] = graphRep.shortedID[i];
 			// graphRep.outEdgeShortedNum_in[i] = graphRep.outEdgeShortedNum[i];

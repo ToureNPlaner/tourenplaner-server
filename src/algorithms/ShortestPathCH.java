@@ -3,13 +3,12 @@ package algorithms;
 import graphrep.GraphRep;
 import graphrep.Heap;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.json.simple.JSONAware;
-
+import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.IntArrayDeque;
 import computecore.ComputeRequest;
 import computecore.ComputeResult;
 
@@ -33,7 +32,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	private final boolean[] visited;
 
 	// TODO: Replace with int array based fifo
-	private final ArrayDeque<Integer> deque;
+	private final IntArrayDeque deque;
 
 	public ShortestPathCH(GraphRep graph) {
 		super(graph);
@@ -41,8 +40,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 		multipliedDist = new int[graph.getNodeCount()];
 		prevEdges = new int[graph.getNodeCount()];
 		marked = new boolean[graph.getEdgeCount()]; // TODO: Compare with BitSet
-		visited = new boolean[graph.getNodeCount()];										
-		deque = new ArrayDeque<Integer>(graph.getEdgeCount());
+		visited = new boolean[graph.getNodeCount()];
+		deque = new IntArrayDeque();
 	}
 
 	@Override
@@ -50,7 +49,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		// reset dists
 		for (int i = 0; i < graph.getNodeCount(); i++) {
 			multipliedDist[i] = Integer.MAX_VALUE;
-			visited[i] =false;
+			visited[i] = false;
 		}
 		// reset marks
 		for (int i = 0; i < graph.getEdgeCount(); i++) {
@@ -128,7 +127,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		srcid = graph.getIDForCoordinates(srclat, srclon);
 		destid = graph.getIDForCoordinates(destlat, destlon);
 		directDistance = calcDirectDistance(srclat, srclon, destlat, destlon);
-		
+
 		int nodeID = destid;
 		int sourceNode;
 		int edgeId;
@@ -136,40 +135,42 @@ public class ShortestPathCH extends GraphAlgorithm {
 		 * Start BFS on G_down beginning at destination and marking edges for
 		 * consideration
 		 * 
-		 * TODO: Create proper infrastructure for getting arrays with |nodes| length
+		 * TODO: Create proper infrastructure for getting arrays with |nodes|
+		 * length
 		 */
 
-		
 		System.out.println("Start BFS");
 		long starttime = System.nanoTime();
 		deque.addLast(destid);
 		visited[destid] = true;
-		
+
 		while (!deque.isEmpty()) {
-			nodeID = deque.poll();		
-			
+			nodeID = deque.removeLast();
+
 			for (int i = 0; i < graph.getInEdgeCount(nodeID); i++) {
 				edgeId = graph.getInEdgeID(nodeID, i);
 				sourceNode = graph.getSource(edgeId);
 
-				if (!visited[sourceNode] && graph.getRank(sourceNode) >= graph.getRank(nodeID)){
+				if (!visited[sourceNode]
+						&& graph.getRank(sourceNode) >= graph.getRank(nodeID)) {
 					// Mark the edge
 					marked[edgeId] = true;
 					visited[sourceNode] = true;
 					// Add source for exploration
-					deque.addLast(sourceNode);
+					deque.addFirst(sourceNode);
 				}
-				
+
 			}
 		}
-		
-		System.out.println("BFS time: "+(System.nanoTime()-starttime)/1000000.0);
+
+		System.out.println("BFS time: " + (System.nanoTime() - starttime)
+				/ 1000000.0);
 
 		multipliedDist[srcid] = 0;
 		heap.insert(srcid, multipliedDist[srcid]);
 
 		int nodeDist;
-		
+
 		int tempDist;
 		int targetNode;
 		starttime = System.nanoTime();
@@ -189,7 +190,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 				edgeId = graph.getOutEdgeID(nodeID, i);
 				targetNode = graph.getTarget(edgeId);
 				// Either marked (by BFS) or G_up edge
-				if (marked[edgeId] || graph.getRank(nodeID) <= graph.getRank(targetNode)) {
+				if (marked[edgeId]
+						|| graph.getRank(nodeID) <= graph.getRank(targetNode)) {
 					// without multiplier = shortest path
 					// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
 
@@ -202,7 +204,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 						prevEdges[targetNode] = graph.getOutEdgeID(nodeID, i);
 						heap.insert(targetNode, tempDist);
 					}
-					
+
 				}
 			}
 		}
@@ -218,42 +220,47 @@ public class ShortestPathCH extends GraphAlgorithm {
 		deque.clear();
 		// Add the edges to our unpacking stack we
 		// go from destination to start so add at the end of the deque
-		int distance=0;
-		int currNode = nodeID;
+		int distance = 0;
+		int currNode = destid;
 		int outofSource, outofShortcuted, shortcutted, source;
-		// TODO: Replace with something fast
-		//ArrayList<Double> lats = new ArrayList<Double>();
-		//ArrayList<Double> lons = new ArrayList<Double>();
-		
+		DoubleArrayList lats = new DoubleArrayList();
+		DoubleArrayList lons = new DoubleArrayList();
+
 		do {
 			edgeId = prevEdges[currNode];
-			deque.add(edgeId);
+			deque.addFirst(edgeId);
 			currNode = graph.getSource(edgeId);
 		} while (currNode != srcid);
+
+		System.out.println("Start unpacking " + deque.size() + " edges");
 		// Unpack shortcuts "recursively"
-		while(!deque.isEmpty()){
-			// Get the top edge and check if it's a shortcut that needs further unpacking
-			edgeId = deque.pollFirst();
+		while (!deque.isEmpty()) {
+			// Get the top edge and check if it's a shortcut that needs further
+			// unpacking
+			edgeId = deque.removeFirst();
 			shortcutted = graph.getShortedId(edgeId);
-			if(shortcutted != -1){
+			if (shortcutted != -1) {
+
 				// We have a shortcut unpack it
 				source = graph.getSource(edgeId);
-				outofShortcuted = graph.getOutEdgeID(shortcutted, graph.getEdgeShortedNum(edgeId));
-				outofSource = graph.getOutEdgeID(source, graph.getEdgeSourceNum(edgeId));
-				deque.offerFirst(outofShortcuted);
-				deque.offerFirst(outofSource);
+				outofShortcuted = graph.getOutEdgeID(shortcutted,
+						graph.getEdgeShortedNum(edgeId));
+				outofSource = graph.getOutEdgeID(source,
+						graph.getEdgeSourceNum(edgeId));
+				deque.addFirst(outofShortcuted);
+				deque.addFirst(outofSource);
 			} else {
 				// No shortcut remember it
 				distance += graph.getDist(edgeId);
-				//currNode = graph.getSource(edgeId); 
-				//lats.add(graph.getNodeLat(currNode));
-				//lons.add(graph.getNodeLon(currNode));
+				currNode = graph.getSource(edgeId);
+				lats.add(graph.getNodeLat(currNode));
+				lons.add(graph.getNodeLon(currNode));
 			}
 		}
 		// Don't forget to add destination
-		//lats.add(graph.getNodeLat(destid));
-		//lons.add(graph.getNodeLon(destid));
-		
+		lats.add(graph.getNodeLat(destid));
+		lons.add(graph.getNodeLon(destid));
+
 		backtracktime = System.nanoTime();
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);
 		misc.put("distance", distance);
@@ -267,7 +274,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				+ " ms; Backtracking: "
 				+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
 
-		//res.put("points", new Points(lats.toArray(), lons));
+		res.put("points", new Points(lats.toArray(), lons.toArray()));
 		res.put("misc", misc);
 	}
 }

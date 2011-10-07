@@ -15,7 +15,6 @@ import java.util.Map;
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
 import algorithms.ShortestPathCHFactory;
-import algorithms.ShortestPathFactory;
 
 import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
@@ -113,7 +112,7 @@ public class TourenPlaner {
 
 		// Create our ComputeCore that manages all ComputeThreads
 		ComputeCore comCore = new ComputeCore(reg, (int) cm.getEntryLong(
-				"threads", 1), (int) cm.getEntryLong("queuelength", 32));
+				"threads", 16), (int) cm.getEntryLong("queuelength", 32));
 
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);
