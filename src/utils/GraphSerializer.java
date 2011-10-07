@@ -2,20 +2,16 @@ package utils;
 
 import graphrep.GraphRep;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 
 public class GraphSerializer {
-	public static void serialize(String filename, GraphRep g)
+	public static void serialize(OutputStream dumpStream, GraphRep g)
 			throws IOException {
-
-		String dumpedfilename = filename + ".dat";
-		FileOutputStream fout = new FileOutputStream(dumpedfilename);
-		ObjectOutputStream oos = new ObjectOutputStream(fout);
+		ObjectOutputStream oos = new ObjectOutputStream(dumpStream);
 		oos.writeObject(g);
 		oos.close();
-		System.out.println("Dumped graph to " + dumpedfilename);
-
+		System.out.println("Successfully dumped graph");
 	}
 }

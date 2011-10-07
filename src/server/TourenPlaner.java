@@ -4,8 +4,11 @@ import graphrep.GraphRep;
 import graphrep.GraphRepDumpReader;
 import graphrep.GraphRepTextReader;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InvalidClassException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -15,7 +18,6 @@ import java.util.Map;
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
 import algorithms.ShortestPathCHFactory;
-import algorithms.ShortestPathFactory;
 
 import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
@@ -23,6 +25,14 @@ import computecore.ComputeCore;
 import config.ConfigManager;
 
 public class TourenPlaner {
+	/**
+	 * @param graphName
+	 *            Original file name of the graph
+	 * @return The filename of the dumped graph
+	 */
+	private static String dumpName(String graphName) {
+		return graphName + ".dat";
+	}
 
 	private static Map<String, Object> getServerInfo(AlgorithmRegistry reg) {
 		Map<String, Object> info = new HashMap<String, Object>(4);
@@ -79,7 +89,8 @@ public class TourenPlaner {
 			try {
 				graph = new GraphRepTextReader()
 						.createGraphRep(new FileInputStream(graphfilename));
-				utils.GraphSerializer.serialize(graphfilename, graph);
+				utils.GraphSerializer.serialize(new FileOutputStream(
+						dumpName(graphfilename)), graph);
 				System.exit(0);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -97,14 +108,50 @@ public class TourenPlaner {
 				graph = new GraphRepTextReader()
 						.createGraphRep(new FileInputStream(graphfilename));
 			} else {
-				graph = new GraphRepDumpReader()
-						.createGraphRep(new FileInputStream(graphfilename
-								+ ".dat"));
+				try {
+					graph = new GraphRepDumpReader()
+							.createGraphRep(new FileInputStream(graphfilename
+									+ ".dat"));
+				} catch (InvalidClassException e) {
+					// TODO: unify default options?
+					String textGraphFilename = ConfigManager.getInstance()
+							.getEntryString(
+									"graphfilepath",
+									System.getProperty("user.home")
+											+ "/germany.txt");
+					System.err
+							.println("Dumped Graph version does not match the required version: "
+									+ e.getMessage());
+					System.out
+							.println("Falling back to text reading from file: "
+									+ textGraphFilename
+									+ " (path provided by config file) ...");
+					graph = (new GraphRepTextReader())
+							.createGraphRep(new FileInputStream(
+									textGraphFilename));
+					System.out
+							.println("Graph successfully read. Now replacing old dumped graph ...");
+
+					if ((new File(dumpName(graphfilename))).delete()) {
+						utils.GraphSerializer.serialize(new FileOutputStream(
+								dumpName(graphfilename)), graph);
+						System.out
+								.println("... success. Now running server ...");
+					} else {
+						System.out
+								.println("... failed. Now running server ...");
+					}
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			// TODO: server won't calculate graph algorithms without a graph,
 			// but maybe it will provide some other functionality?
+		}
+
+		if (graph == null) {
+			System.out
+					.println("Graph reading FAILED! Only non graph related services will be available!");
 		}
 
 		// Register Algorithms
