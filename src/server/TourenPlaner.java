@@ -158,15 +158,9 @@ public class TourenPlaner {
 									textGraphFilename));
 					System.out
 							.println("Graph successfully read. Now dumping graph ...");
-					if ((new File(dumpName(graphfilename))).delete()) {
-						utils.GraphSerializer.serialize(new FileOutputStream(
-								dumpName(graphfilename)), graph);
-						System.out
-								.println("... success. Now running server ...");
-					} else {
-						System.out
-								.println("... failed. Now running server ...");
-					}
+					utils.GraphSerializer.serialize(new FileOutputStream(
+							dumpName(graphfilename)), graph);
+					System.out.println("... success. Now running server ...");
 				}
 			}
 		} catch (IOException e) {
