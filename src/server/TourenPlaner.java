@@ -141,6 +141,26 @@ public class TourenPlaner {
 						System.out
 								.println("... failed. Now running server ...");
 					}
+				} catch (IOException e) {
+					String textGraphFilename = ConfigManager.getInstance()
+							.getEntryString(
+									"graphfilepath",
+									System.getProperty("user.home")
+											+ "/germany.txt");
+					System.err.println("Dumped Graph does not exist: "
+							+ e.getMessage());
+					System.out
+							.println("Falling back to text reading from file: "
+									+ textGraphFilename
+									+ " (path provided by config file) ...");
+					graph = (new GraphRepTextReader())
+							.createGraphRep(new FileInputStream(
+									textGraphFilename));
+					System.out
+							.println("Graph successfully read. Now dumping graph ...");
+					utils.GraphSerializer.serialize(new FileOutputStream(
+							dumpName(graphfilename)), graph);
+					System.out.println("... success. Now running server ...");
 				}
 			}
 		} catch (IOException e) {
