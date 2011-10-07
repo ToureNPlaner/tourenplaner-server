@@ -145,8 +145,6 @@ public class TourenPlaner {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			// TODO: server won't calculate graph algorithms without a graph,
-			// but maybe it will provide some other functionality?
 		}
 
 		if (graph == null) {

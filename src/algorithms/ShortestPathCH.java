@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.DoubleArrayList;
 import com.carrotsearch.hppc.IntArrayDeque;
 import computecore.ComputeRequest;
@@ -28,8 +29,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 	private final Heap heap;
 
 	// Used to mark nodes with BFS
-	private final boolean[] marked;
-	private final boolean[] visited;
+	private final BitSet marked;
+	private final BitSet visited;
 
 	// TODO: Replace with int array based fifo
 	private final IntArrayDeque deque;
@@ -39,26 +40,21 @@ public class ShortestPathCH extends GraphAlgorithm {
 		heap = new graphrep.Heap();
 		multipliedDist = new int[graph.getNodeCount()];
 		prevEdges = new int[graph.getNodeCount()];
-		marked = new boolean[graph.getEdgeCount()]; // TODO: Compare with BitSet
-		visited = new boolean[graph.getNodeCount()];
+		marked = new BitSet(graph.getEdgeCount());
+		visited = new BitSet(graph.getNodeCount());
 		deque = new IntArrayDeque();
 	}
 
 	@Override
 	public void setRequest(ComputeRequest req) {
 		// reset dists
+		visited.clear();
+		marked.clear();
+
 		for (int i = 0; i < graph.getNodeCount(); i++) {
 			multipliedDist[i] = Integer.MAX_VALUE;
-			visited[i] = false;
-		}
-		// reset marks
-		for (int i = 0; i < graph.getEdgeCount(); i++) {
-			marked[i] = false;
-			// Don't need to reset prevEdges because we backtrack visited edges
-			// only by design
 		}
 		heap.resetHeap();
-		deque.clear();
 
 		this.req = req;
 	}
@@ -100,8 +96,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 	public void run() {
 		assert (req != null) : "We ended up without a request object in run";
 
-		res = req.getResultObject();
-
 		ArrayList<Map<String, Double>> points = null;
 		// TODO: send error messages to client
 		try {
@@ -119,6 +113,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			return;
 		}
 
+		res = req.getResultObject();
 		srclat = points.get(0).get("lt");
 		srclon = points.get(0).get("ln");
 		destlat = points.get(1).get("lt");
@@ -141,9 +136,10 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 		System.out.println("Start BFS");
 		long starttime = System.nanoTime();
+		deque.clear();
 		deque.addLast(destid);
-		visited[destid] = true;
-
+		// visited[destid] = true;
+		visited.set(destid);
 		while (!deque.isEmpty()) {
 			nodeID = deque.removeLast();
 
@@ -151,20 +147,17 @@ public class ShortestPathCH extends GraphAlgorithm {
 				edgeId = graph.getInEdgeID(nodeID, i);
 				sourceNode = graph.getSource(edgeId);
 
-				if (!visited[sourceNode]
+				if (!visited.get(sourceNode)
 						&& graph.getRank(sourceNode) >= graph.getRank(nodeID)) {
 					// Mark the edge
-					marked[edgeId] = true;
-					visited[sourceNode] = true;
+					marked.set(edgeId);
+					visited.set(sourceNode);
 					// Add source for exploration
 					deque.addFirst(sourceNode);
 				}
 
 			}
 		}
-
-		System.out.println("BFS time: " + (System.nanoTime() - starttime)
-				/ 1000000.0);
 
 		multipliedDist[srcid] = 0;
 		heap.insert(srcid, multipliedDist[srcid]);
@@ -173,7 +166,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 		int tempDist;
 		int targetNode;
-		starttime = System.nanoTime();
 		long dijkstratime;
 		long backtracktime;
 
@@ -190,7 +182,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				edgeId = graph.getOutEdgeID(nodeID, i);
 				targetNode = graph.getTarget(edgeId);
 				// Either marked (by BFS) or G_up edge
-				if (marked[edgeId]
+				if (marked.get(edgeId)
 						|| graph.getRank(nodeID) <= graph.getRank(targetNode)) {
 					// without multiplier = shortest path
 					// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
@@ -232,7 +224,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			currNode = graph.getSource(edgeId);
 		} while (currNode != srcid);
 
-		System.out.println("Start unpacking " + deque.size() + " edges");
+		// System.out.println("Start unpacking " + deque.size() + " edges");
 		// Unpack shortcuts "recursively"
 		while (!deque.isEmpty()) {
 			// Get the top edge and check if it's a shortcut that needs further
