@@ -1,7 +1,6 @@
 package algorithms;
 
 import graphrep.GraphRep;
-import graphrep.Heap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +36,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 	public ShortestPathCH(GraphRep graph) {
 		super(graph);
-		heap = new graphrep.Heap();
+		heap = new algorithms.Heap();
 		multipliedDist = new int[graph.getNodeCount()];
 		prevEdges = new int[graph.getNodeCount()];
 		marked = new BitSet(graph.getEdgeCount());

@@ -1,13 +1,10 @@
 package algorithms;
 
 import graphrep.GraphRep;
-import graphrep.Heap;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.json.simple.JSONAware;
 
 import computecore.ComputeRequest;
 import computecore.ComputeResult;
@@ -29,7 +26,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 	public ShortestPath(GraphRep graph) {
 		super(graph);
-		heap = new graphrep.Heap();
+		heap = new algorithms.Heap(10000);
 		multipliedDist = new int[graph.getNodeCount()];
 		prevEdges = new int[graph.getNodeCount()];
 	}
@@ -131,20 +128,18 @@ public class ShortestPath extends GraphAlgorithm {
 			}
 			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
 				// Ignore Shortcuts
-				if(graph.getOutShortedId(nodeID, i) != -1){
+				if (graph.getOutShortedId(nodeID, i) != -1) {
 					continue;
 				}
 				targetNode = graph.getOutTarget(nodeID, i);
 
 				// without multiplier = shortest path
 				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
-				
 
-				
 				// with multiplier = fastest path
 				tempDist = multipliedDist[nodeID]
 						+ graph.getOutMultipliedDist(nodeID, i);
-			
+
 				if (tempDist < multipliedDist[targetNode]) {
 					multipliedDist[targetNode] = tempDist;
 					prevEdges[targetNode] = graph.getOutEdgeID(nodeID, i);

@@ -15,7 +15,7 @@
 
 	<target name="compile">
 		<mkdir dir="${bin.dir}"/>
-		<javac srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
+		<javac target="1.6" source="1.6" srcdir="${src.dir}" destdir="${bin.dir}" includeantruntime="false">
 			<compilerarg value="-Xlint"/>
 			<classpath>
 				<pathelement path="${classpath}"/>

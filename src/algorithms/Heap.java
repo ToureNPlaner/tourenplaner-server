@@ -1,4 +1,4 @@
-package graphrep;
+package algorithms;
 
 import java.util.Arrays;
 
@@ -16,12 +16,20 @@ public class Heap {
 	private int heaplength;
 
 	// TODO: determine good value
-	// with max 5000 elements in the heap there is no growing from stuttgart->
-	// hamburg
-	private final int arrayGrowthSum = 10000;
+	// with this number of elements in the heap there is no growing from
+	// stuttgart-> hamburg
+	private static final int arrayGrowthSum = 4000;
 
+	/**
+	 * initial size is {@value #arrayGrowthSum}
+	 */
 	public Heap() {
 		heaparr = new int[arrayGrowthSum];
+		heaplength = 0;
+	}
+
+	public Heap(int initialSize) {
+		heaparr = new int[initialSize];
 		heaplength = 0;
 	}
 
