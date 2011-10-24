@@ -56,10 +56,10 @@ public class HashNN implements NNSearcher {
 		if (hashMap.containsKey(key)) {
 			int[] arr = (int[]) hashMap.get(key);
 			for (int nodeID : arr) {
-				tempDist = Math.sqrt((graphRep.getNodeLat(nodeID) - lat)
+				tempDist = (graphRep.getNodeLat(nodeID) - lat)
 						* (graphRep.getNodeLat(nodeID) - lat)
 						+ (graphRep.getNodeLon(nodeID) - lon)
-						* (graphRep.getNodeLon(nodeID) - lon));
+						* (graphRep.getNodeLon(nodeID) - lon);
 				if (tempDist < dist) {
 					dist = tempDist;
 					pos = nodeID;
@@ -67,7 +67,7 @@ public class HashNN implements NNSearcher {
 
 			}
 		}
-		// test Ring
+		// test ring 1
 		long ringkey = 0;
 		for (int i = -1; i < 2; i++) {
 			for (int j = -1; i < 2; i++) {
@@ -75,17 +75,85 @@ public class HashNN implements NNSearcher {
 				if (hashMap.containsKey(ringkey)) {
 					int[] ringArr = (int[]) hashMap.get(key);
 					for (int nodeID : ringArr) {
-						tempDist = Math
-								.sqrt((graphRep.getNodeLat(nodeID) - lat)
-										* (graphRep.getNodeLat(nodeID) - lat)
-										+ (graphRep.getNodeLon(nodeID) - lon)
-										* (graphRep.getNodeLon(nodeID) - lon));
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
 						if (tempDist < dist) {
 							dist = tempDist;
 							pos = nodeID;
 						}
 
 					}
+				}
+			}
+		}
+		// some parts of ring 2
+		for (int j = -1; j < 2; j++) {
+			ringkey = keyLat + -2 << 32 | keyLon + j;
+			if (hashMap.containsKey(ringkey)) {
+				int[] ringArr = (int[]) hashMap.get(key);
+				for (int nodeID : ringArr) {
+					tempDist = (graphRep.getNodeLat(nodeID) - lat)
+							* (graphRep.getNodeLat(nodeID) - lat)
+							+ (graphRep.getNodeLon(nodeID) - lon)
+							* (graphRep.getNodeLon(nodeID) - lon);
+					if (tempDist < dist) {
+						dist = tempDist;
+						pos = nodeID;
+					}
+
+				}
+			}
+		}
+		for (int j = -1; j < 2; j++) {
+			ringkey = keyLat + 2 << 32 | keyLon + j;
+			if (hashMap.containsKey(ringkey)) {
+				int[] ringArr = (int[]) hashMap.get(key);
+				for (int nodeID : ringArr) {
+					tempDist = (graphRep.getNodeLat(nodeID) - lat)
+							* (graphRep.getNodeLat(nodeID) - lat)
+							+ (graphRep.getNodeLon(nodeID) - lon)
+							* (graphRep.getNodeLon(nodeID) - lon);
+					if (tempDist < dist) {
+						dist = tempDist;
+						pos = nodeID;
+					}
+
+				}
+			}
+		}
+		for (int i = -1; i < 2; i++) {
+			ringkey = keyLat + i << 32 | keyLon + -2;
+			if (hashMap.containsKey(ringkey)) {
+				int[] ringArr = (int[]) hashMap.get(key);
+				for (int nodeID : ringArr) {
+					tempDist = (graphRep.getNodeLat(nodeID) - lat)
+							* (graphRep.getNodeLat(nodeID) - lat)
+							+ (graphRep.getNodeLon(nodeID) - lon)
+							* (graphRep.getNodeLon(nodeID) - lon);
+					if (tempDist < dist) {
+						dist = tempDist;
+						pos = nodeID;
+					}
+
+				}
+			}
+		}
+		for (int i = -1; i < 2; i++) {
+			ringkey = keyLat + i << 32 | keyLon + 2;
+			if (hashMap.containsKey(ringkey)) {
+				int[] ringArr = (int[]) hashMap.get(key);
+				for (int nodeID : ringArr) {
+					tempDist = (graphRep.getNodeLat(nodeID) - lat)
+							* (graphRep.getNodeLat(nodeID) - lat)
+							+ (graphRep.getNodeLon(nodeID) - lon)
+							* (graphRep.getNodeLon(nodeID) - lon);
+					if (tempDist < dist) {
+						dist = tempDist;
+						pos = nodeID;
+					}
+
 				}
 			}
 		}
