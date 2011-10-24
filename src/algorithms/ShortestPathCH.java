@@ -117,9 +117,11 @@ public class ShortestPathCH extends GraphAlgorithm {
 		srclon = points.get(0).get("ln");
 		destlat = points.get(1).get("lt");
 		destlon = points.get(1).get("ln");
-
+		long nntime = System.nanoTime();
 		srcid = graph.getIDForCoordinates(srclat, srclon);
 		destid = graph.getIDForCoordinates(destlat, destlon);
+		System.out.println("NNSearch took " + (System.nanoTime() - nntime)
+				/ 1000000.0 + " ms");
 		directDistance = calcDirectDistance(srclat, srclon, destlat, destlon);
 
 		int nodeID = destid;

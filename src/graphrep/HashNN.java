@@ -21,8 +21,8 @@ public class HashNN implements NNSearcher {
 		this.graphRep = graphRep;
 		hashMap = new HashMap<Long, Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
-			int tempLat = (int) (graphRep.getNodeLat(i) * 10);
-			int tempLon = (int) (graphRep.getNodeLon(i) * 10);
+			int tempLat = (int) (graphRep.getNodeLat(i) * 1000);
+			int tempLon = (int) (graphRep.getNodeLon(i) * 1000);
 
 			long key = tempLat << 32 | tempLon;
 			IntArrayList tempValues = (IntArrayList) hashMap.get(key);
@@ -47,14 +47,14 @@ public class HashNN implements NNSearcher {
 	 */
 	@Override
 	public int getIDForCoordinates(double lat, double lon) {
-		int keyLat = (int) (lat * 10);
-		int keyLon = (int) (lon * 10);
+		int keyLat = (int) (lat * 1000);
+		int keyLon = (int) (lon * 1000);
 		int pos = -1;
 		long key = keyLat << 32 | keyLon;
 		double dist = Long.MAX_VALUE;
 		double tempDist = Long.MAX_VALUE;
 		if (hashMap.containsKey(key)) {
-			int[] arr = ((IntArrayList) hashMap.get(key)).toArray();
+			int[] arr = (int[]) hashMap.get(key);
 			for (int nodeID : arr) {
 				tempDist = Math.sqrt((graphRep.getNodeLat(nodeID) - lat)
 						* (graphRep.getNodeLat(nodeID) - lat)
@@ -73,7 +73,7 @@ public class HashNN implements NNSearcher {
 			for (int j = -1; i < 2; i++) {
 				ringkey = keyLat + i << 32 | keyLon + j;
 				if (hashMap.containsKey(ringkey)) {
-					int[] ringArr = ((IntArrayList) hashMap.get(key)).toArray();
+					int[] ringArr = (int[]) hashMap.get(key);
 					for (int nodeID : ringArr) {
 						tempDist = Math
 								.sqrt((graphRep.getNodeLat(nodeID) - lat)
@@ -95,5 +95,4 @@ public class HashNN implements NNSearcher {
 		}
 		return pos;
 	}
-
 }
