@@ -175,6 +175,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			} else {
 				responder.writeUnauthorizedClose();
 			}
+		} else {
+			// Unknown request, close connection
+			responder.writeErrorMessage("EUNKNOWNURL",
+					"An unknown URL was requested", null,
+					HttpResponseStatus.NOT_FOUND);
 		}
 
 	}
