@@ -84,8 +84,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 			int cRI;
 			int cMaxI;
 
-			while (((topI * 3) + 1) <= endI) {
-				cLI = (topI * 3) + 1;
+			while (topI * 3 + 1 <= endI) {
+				cLI = topI * 3 + 1;
 				cMI = cLI + 1;
 				cRI = cLI + 2;
 				cMaxI = topI;
@@ -93,10 +93,10 @@ public class GraphRepTextReader extends GraphRepFactory {
 				if (less(graphRep, cMaxI, cLI)) {
 					cMaxI = cLI;
 				}
-				if ((cMI <= endI) && less(graphRep, cMaxI, cMI)) {
+				if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
 					cMaxI = cMI;
 				}
-				if ((cRI <= endI) && less(graphRep, cMaxI, cRI)) {
+				if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
 					cMaxI = cRI;
 				}
 				if (cMaxI != topI) {
@@ -120,7 +120,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// exception should happen when file format is wrong
 		line = inb.readLine();
 
-		while ((line != null) && line.trim().startsWith("#")) {
+		while (line != null && line.trim().startsWith("#")) {
 			line = inb.readLine();
 		}
 		if (line != null) {
@@ -199,8 +199,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 			// make mult better usable for us: save the distances with
 			// multipliers applied directly
 			// TODO find out what exactly is used by CH generator
-			graphRep.multipliedDist[i] = (int) ((1.3 / Double
-					.parseDouble(splittedLine[3])) * graphRep.dist[i]);
+			graphRep.multipliedDist[i] = (int) (1.3 / Double
+					.parseDouble(splittedLine[3]) * graphRep.dist[i]);
 			// graphRep.multipliedDist_in[i] = graphRep.multipliedDist[i];
 
 			// TODO graphRep.elev_out[i] = Float.parseFloat(splittedLine[4]);
@@ -261,7 +261,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// choose the NNSearcher here
 		// DumbNN uses linear search and is slow.
 		// KDTreeNN should be faster
-		graphRep.searcher = new DumbNN(graphRep);
+		graphRep.searcher = new HashNN(graphRep);
 		System.out.println("... success!");
 		return graphRep;
 	}
