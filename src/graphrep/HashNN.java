@@ -59,33 +59,102 @@ public class HashNN implements NNSearcher {
 		boolean finished = false;
 		int hops = 0;
 		for (int i = 0; i <= hops; i++) {
+			// North
 			for (int j = -i; j <= i; j++) {
-				for (int k = -i; k <= i; k++) {
-					key = keyLat + j << 32 | keyLon + k;
-					if (hashMap.containsKey(key)) {
-						int[] ringArr = (int[]) hashMap.get(key);
-						for (int nodeID : ringArr) {
-							tempDist = (graphRep.getNodeLat(nodeID) - lat)
-									* (graphRep.getNodeLat(nodeID) - lat)
-									+ (graphRep.getNodeLon(nodeID) - lon)
-									* (graphRep.getNodeLon(nodeID) - lon);
-							if (tempDist < dist) {
-								dist = tempDist;
-								pos = nodeID;
-							}
-
+				key = keyLat + i << 32 | keyLon + j;
+				if (hashMap.containsKey(key)) {
+					int[] ringArr = (int[]) hashMap.get(key);
+					for (int nodeID : ringArr) {
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
+						if (tempDist < dist) {
+							dist = tempDist;
+							pos = nodeID;
 						}
-						found = true;
-					}
-				}
-				if (found != true && hops <= maxHopLimit) {
-					hops++;
-				} else if (found && !finished) {
-					finished = true;
-					hops++;
-				}
 
+					}
+					found = true;
+				}
 			}
+			// East
+			for (int j = -i + 1; j <= i - 1; j++) {
+				key = keyLat + j << 32 | keyLon - i;
+				if (hashMap.containsKey(key)) {
+					int[] ringArr = (int[]) hashMap.get(key);
+					for (int nodeID : ringArr) {
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
+						if (tempDist < dist) {
+							dist = tempDist;
+							pos = nodeID;
+						}
+
+					}
+					found = true;
+				}
+			}
+			// West
+			for (int j = -i + 1; j <= i - 1; j++) {
+				key = keyLat + j << 32 | keyLon + i;
+				if (hashMap.containsKey(key)) {
+					int[] ringArr = (int[]) hashMap.get(key);
+					for (int nodeID : ringArr) {
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
+						if (tempDist < dist) {
+							dist = tempDist;
+							pos = nodeID;
+						}
+
+					}
+					found = true;
+				}
+			}
+
+			// South
+			for (int j = -i; j <= i; j++) {
+				key = keyLat - i << 32 | keyLon + j;
+				if (hashMap.containsKey(key)) {
+					int[] ringArr = (int[]) hashMap.get(key);
+					for (int nodeID : ringArr) {
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
+						if (tempDist < dist) {
+							dist = tempDist;
+							pos = nodeID;
+						}
+
+					}
+					found = true;
+				}
+			}
+			/*
+			 * for (int j = -i; j <= i; j++) { for (int k = -i; k <= i; k++) {
+			 * key = keyLat + j << 32 | keyLon + k; if
+			 * (hashMap.containsKey(key)) { int[] ringArr = (int[])
+			 * hashMap.get(key); for (int nodeID : ringArr) { tempDist =
+			 * (graphRep.getNodeLat(nodeID) - lat) (graphRep.getNodeLat(nodeID)
+			 * - lat) + (graphRep.getNodeLon(nodeID) - lon)
+			 * (graphRep.getNodeLon(nodeID) - lon); if (tempDist < dist) { dist
+			 * = tempDist; pos = nodeID; }
+			 * 
+			 * } found = true; } } }
+			 */
+			if (found != true && hops <= maxHopLimit) {
+				hops++;
+			} else if (found && !finished) {
+				finished = true;
+				hops++;
+			}
+
 		}
 
 		if (!found) {
