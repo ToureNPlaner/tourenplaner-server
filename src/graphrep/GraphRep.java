@@ -6,7 +6,7 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 6L;
+	private static final long serialVersionUID = 7L;
 
 	protected NNSearcher searcher;
 
