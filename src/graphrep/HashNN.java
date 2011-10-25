@@ -56,7 +56,8 @@ public class HashNN implements NNSearcher {
 		double dist = Long.MAX_VALUE;
 		double tempDist = Long.MAX_VALUE;
 		boolean found = false;
-		int hops = 1;
+		boolean finished = false;
+		int hops = 0;
 		for (int i = 0; i <= hops; i++) {
 			for (int j = -i; j <= i; j++) {
 				for (int k = -i; k <= i; k++) {
@@ -77,14 +78,17 @@ public class HashNN implements NNSearcher {
 						found = true;
 					}
 				}
-				if (found != true) {
+				if (found != true && hops <= maxHopLimit) {
+					hops++;
+				} else if (found && !finished) {
+					finished = true;
 					hops++;
 				}
 
 			}
 		}
 
-		if (pos == -1) {
+		if (!found) {
 			pos = dumpNN.getIDForCoordinates(lat, lon);
 		}
 		return pos;
