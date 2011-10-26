@@ -141,18 +141,40 @@ public class GraphRep implements Serializable {
 		this.mapping_InToOut = new int[edgeCount];
 	}
 
-	protected final void setNodeData(int index, double lat, double lon,
-			int height) {
-		this.lat[index] = lat;
-		this.lon[index] = lon;
-		this.height[index] = height;
-		this.rank[index] = Integer.MAX_VALUE;
+	/**
+	 * Sets the data fields of the node given by it's id
+	 * 
+	 * @param id
+	 * @param lat
+	 * @param lon
+	 * @param height
+	 */
+	protected final void setNodeData(int id, double lat, double lon, int height) {
+		this.lat[id] = lat;
+		this.lon[id] = lon;
+		this.height[id] = height;
+		this.rank[id] = Integer.MAX_VALUE;
 	}
 
-	protected final void setNodeRank(int index, int rank) {
-		this.rank[index] = rank;
+	/**
+	 * Sets the rank of the node given by it's id
+	 * 
+	 * @param id
+	 * @param rank
+	 */
+	protected final void setNodeRank(int id, int rank) {
+		this.rank[id] = rank;
 	}
 
+	/**
+	 * Set the data filed of the edge given by it's id
+	 * 
+	 * @param index
+	 * @param src
+	 * @param dest
+	 * @param dist
+	 * @param multipliedDist
+	 */
 	protected final void setEdgeData(int index, int src, int dest, int dist,
 			int multipliedDist) {
 		this.mapping_InToOut[index] = index;
@@ -167,13 +189,24 @@ public class GraphRep implements Serializable {
 		this.outEdgeShortedNum[index] = -1;
 	}
 
-	protected final void setShortcutData(int index, int shortedID,
+	/**
+	 * Sets the shortcut fields of the edge given by it's id
+	 * 
+	 * @param id
+	 * @param shortedID
+	 * @param outEdgeSourceNum
+	 * @param outEdgeShortedNum
+	 */
+	protected final void setShortcutData(int id, int shortedID,
 			int outEdgeSourceNum, int outEdgeShortedNum) {
-		this.shortedID[index] = shortedID;
-		this.outEdgeSourceNum[index] = outEdgeSourceNum;
-		this.outEdgeShortedNum[index] = outEdgeShortedNum;
+		this.shortedID[id] = shortedID;
+		this.outEdgeSourceNum[id] = outEdgeSourceNum;
+		this.outEdgeShortedNum[id] = outEdgeShortedNum;
 	}
 
+	/**
+	 * Regenerates the offset arrays from the current edge arrays
+	 */
 	protected final void generateOffsets() {
 		int currentSource;
 		int prevSource = -1;

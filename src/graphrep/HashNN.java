@@ -13,15 +13,14 @@ import com.carrotsearch.hppc.IntArrayList;
  */
 public class HashNN implements NNSearcher {
 
-	private static final long serialVersionUID = 1L;
 	GraphRep graphRep;
 	HashMap<Long, Object> hashMap;
 	NNSearcher dumpNN;
+	private static final int maxHopLimit = 10;
 
 	public HashNN(GraphRep graphRep) {
 		this.graphRep = graphRep;
 		dumpNN = new DumbNN(graphRep);
-
 		hashMap = new HashMap<Long, Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
 			int tempLat = (int) (graphRep.getNodeLat(i) * 1000);
@@ -53,29 +52,17 @@ public class HashNN implements NNSearcher {
 		int keyLat = (int) (lat * 1000);
 		int keyLon = (int) (lon * 1000);
 		int pos = -1;
-		long key = keyLat << 32 | keyLon;
+		long key;
 		double dist = Long.MAX_VALUE;
 		double tempDist = Long.MAX_VALUE;
-		if (hashMap.containsKey(key)) {
-			int[] arr = (int[]) hashMap.get(key);
-			for (int nodeID : arr) {
-				tempDist = (graphRep.getNodeLat(nodeID) - lat)
-						* (graphRep.getNodeLat(nodeID) - lat)
-						+ (graphRep.getNodeLon(nodeID) - lon)
-						* (graphRep.getNodeLon(nodeID) - lon);
-				if (tempDist < dist) {
-					dist = tempDist;
-					pos = nodeID;
-				}
-
-			}
-		}
-		// test ring 1
-		long ringkey = 0;
-		for (int i = -1; i < 2; i++) {
-			for (int j = -1; i < 2; i++) {
-				ringkey = keyLat + i << 32 | keyLon + j;
-				if (hashMap.containsKey(ringkey)) {
+		boolean found = false;
+		boolean finished = false;
+		int hops = 0;
+		for (int i = 0; i <= hops; i++) {
+			// North
+			for (int j = -i; j <= i; j++) {
+				key = keyLat + i << 32 | keyLon + j;
+				if (hashMap.containsKey(key)) {
 					int[] ringArr = (int[]) hashMap.get(key);
 					for (int nodeID : ringArr) {
 						tempDist = (graphRep.getNodeLat(nodeID) - lat)
@@ -88,80 +75,89 @@ public class HashNN implements NNSearcher {
 						}
 
 					}
+					found = true;
 				}
 			}
-		}
-		// some parts of ring 2
-		for (int j = -1; j < 2; j++) {
-			ringkey = keyLat + -2 << 32 | keyLon + j;
-			if (hashMap.containsKey(ringkey)) {
-				int[] ringArr = (int[]) hashMap.get(key);
-				for (int nodeID : ringArr) {
-					tempDist = (graphRep.getNodeLat(nodeID) - lat)
-							* (graphRep.getNodeLat(nodeID) - lat)
-							+ (graphRep.getNodeLon(nodeID) - lon)
-							* (graphRep.getNodeLon(nodeID) - lon);
-					if (tempDist < dist) {
-						dist = tempDist;
-						pos = nodeID;
+			// East
+			for (int j = -i + 1; j <= i - 1; j++) {
+				key = keyLat + j << 32 | keyLon - i;
+				if (hashMap.containsKey(key)) {
+					int[] ringArr = (int[]) hashMap.get(key);
+					for (int nodeID : ringArr) {
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
+						if (tempDist < dist) {
+							dist = tempDist;
+							pos = nodeID;
+						}
+
 					}
-
+					found = true;
 				}
 			}
-		}
-		for (int j = -1; j < 2; j++) {
-			ringkey = keyLat + 2 << 32 | keyLon + j;
-			if (hashMap.containsKey(ringkey)) {
-				int[] ringArr = (int[]) hashMap.get(key);
-				for (int nodeID : ringArr) {
-					tempDist = (graphRep.getNodeLat(nodeID) - lat)
-							* (graphRep.getNodeLat(nodeID) - lat)
-							+ (graphRep.getNodeLon(nodeID) - lon)
-							* (graphRep.getNodeLon(nodeID) - lon);
-					if (tempDist < dist) {
-						dist = tempDist;
-						pos = nodeID;
+			// West
+			for (int j = -i + 1; j <= i - 1; j++) {
+				key = keyLat + j << 32 | keyLon + i;
+				if (hashMap.containsKey(key)) {
+					int[] ringArr = (int[]) hashMap.get(key);
+					for (int nodeID : ringArr) {
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
+						if (tempDist < dist) {
+							dist = tempDist;
+							pos = nodeID;
+						}
+
 					}
-
+					found = true;
 				}
 			}
-		}
-		for (int i = -1; i < 2; i++) {
-			ringkey = keyLat + i << 32 | keyLon + -2;
-			if (hashMap.containsKey(ringkey)) {
-				int[] ringArr = (int[]) hashMap.get(key);
-				for (int nodeID : ringArr) {
-					tempDist = (graphRep.getNodeLat(nodeID) - lat)
-							* (graphRep.getNodeLat(nodeID) - lat)
-							+ (graphRep.getNodeLon(nodeID) - lon)
-							* (graphRep.getNodeLon(nodeID) - lon);
-					if (tempDist < dist) {
-						dist = tempDist;
-						pos = nodeID;
+
+			// South
+			for (int j = -i; j <= i; j++) {
+				key = keyLat - i << 32 | keyLon + j;
+				if (hashMap.containsKey(key)) {
+					int[] ringArr = (int[]) hashMap.get(key);
+					for (int nodeID : ringArr) {
+						tempDist = (graphRep.getNodeLat(nodeID) - lat)
+								* (graphRep.getNodeLat(nodeID) - lat)
+								+ (graphRep.getNodeLon(nodeID) - lon)
+								* (graphRep.getNodeLon(nodeID) - lon);
+						if (tempDist < dist) {
+							dist = tempDist;
+							pos = nodeID;
+						}
+
 					}
-
+					found = true;
 				}
 			}
-		}
-		for (int i = -1; i < 2; i++) {
-			ringkey = keyLat + i << 32 | keyLon + 2;
-			if (hashMap.containsKey(ringkey)) {
-				int[] ringArr = (int[]) hashMap.get(key);
-				for (int nodeID : ringArr) {
-					tempDist = (graphRep.getNodeLat(nodeID) - lat)
-							* (graphRep.getNodeLat(nodeID) - lat)
-							+ (graphRep.getNodeLon(nodeID) - lon)
-							* (graphRep.getNodeLon(nodeID) - lon);
-					if (tempDist < dist) {
-						dist = tempDist;
-						pos = nodeID;
-					}
-
-				}
+			/*
+			 * for (int j = -i; j <= i; j++) { for (int k = -i; k <= i; k++) {
+			 * key = keyLat + j << 32 | keyLon + k; if
+			 * (hashMap.containsKey(key)) { int[] ringArr = (int[])
+			 * hashMap.get(key); for (int nodeID : ringArr) { tempDist =
+			 * (graphRep.getNodeLat(nodeID) - lat) (graphRep.getNodeLat(nodeID)
+			 * - lat) + (graphRep.getNodeLon(nodeID) - lon)
+			 * (graphRep.getNodeLon(nodeID) - lon); if (tempDist < dist) { dist
+			 * = tempDist; pos = nodeID; }
+			 * 
+			 * } found = true; } } }
+			 */
+			if (found != true && hops <= maxHopLimit) {
+				hops++;
+			} else if (found && !finished) {
+				finished = true;
+				hops++;
 			}
+
 		}
 
-		if (pos == -1) {
+		if (!found) {
 			pos = dumpNN.getIDForCoordinates(lat, lon);
 		}
 		return pos;
