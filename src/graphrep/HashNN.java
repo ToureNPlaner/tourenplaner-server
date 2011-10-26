@@ -13,12 +13,15 @@ import com.carrotsearch.hppc.IntArrayList;
  */
 public class HashNN implements NNSearcher {
 
+	private static final long serialVersionUID = 1L;
 	GraphRep graphRep;
 	HashMap<Long, Object> hashMap;
-	NNSearcher dumpNN = new DumbNN(graphRep);
+	NNSearcher dumpNN;
 
 	public HashNN(GraphRep graphRep) {
 		this.graphRep = graphRep;
+		dumpNN = new DumbNN(graphRep);
+
 		hashMap = new HashMap<Long, Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
 			int tempLat = (int) (graphRep.getNodeLat(i) * 1000);

@@ -118,7 +118,7 @@ public class TourenPlaner {
 							.getEntryString(
 									"graphfilepath",
 									System.getProperty("user.home")
-											+ "/germany.txt");
+											+ "/germany-ch.txt");
 					System.err
 							.println("Dumped Graph version does not match the required version: "
 									+ e.getMessage());
@@ -146,7 +146,7 @@ public class TourenPlaner {
 							.getEntryString(
 									"graphfilepath",
 									System.getProperty("user.home")
-											+ "/germany.txt");
+											+ "/germany-ch.txt");
 					System.err.println("Dumped Graph does not exist: "
 							+ e.getMessage());
 					System.out

@@ -6,69 +6,212 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 6L;
+	private static final long serialVersionUID = 7L;
+
+	private static class Sorter {
+		private static void Sort(GraphRep graphRep) {
+
+			Heapify(graphRep);
+			int endI = graphRep.dest.length - 1;
+			while (endI > 0) {
+				swap(graphRep, endI, 0);
+				siftDown(graphRep, 0, endI - 1);
+				endI--;
+			}
+		}
+
+		private static void swap(GraphRep graphRep, int i, int j) {
+			int temp = graphRep.mapping_InToOut[i];
+			graphRep.mapping_InToOut[i] = graphRep.mapping_InToOut[j];
+			graphRep.mapping_InToOut[j] = temp;
+		}
+
+		/**
+		 * 
+		 * @param graphRep
+		 * @param i
+		 * @param j
+		 * @return
+		 */
+		private static boolean less(GraphRep graphRep, int i, int j) {
+			return graphRep.dest[graphRep.mapping_InToOut[i]] < graphRep.dest[graphRep.mapping_InToOut[j]];
+		}
+
+		private static void Heapify(GraphRep graphRep) {
+			int pos = graphRep.dest.length - 1;
+			while (pos >= 0) {
+				siftDown(graphRep, pos, graphRep.dest.length - 1);
+				pos--;
+			}
+		}
+
+		private static void siftDown(GraphRep graphRep, int topI, int endI) {
+			int cLI;
+			int cMI;
+			int cRI;
+			int cMaxI;
+
+			while (topI * 3 + 1 <= endI) {
+				cLI = topI * 3 + 1;
+				cMI = cLI + 1;
+				cRI = cLI + 2;
+				cMaxI = topI;
+
+				if (less(graphRep, cMaxI, cLI)) {
+					cMaxI = cLI;
+				}
+				if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
+					cMaxI = cMI;
+				}
+				if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
+					cMaxI = cRI;
+				}
+				if (cMaxI != topI) {
+					swap(graphRep, cMaxI, topI);
+					topI = cMaxI;
+				} else {
+					return;
+				}
+			}
+		}
+	}
 
 	protected NNSearcher searcher;
 
-	protected int nodeCount;
-	protected int edgeCount;
+	private int nodeCount;
+	private int edgeCount;
 
 	// note: edgeNum refers to the relative number of an outgoing edge
 	// from a node:
 	// (first outgoing edge = 0, second outgoing edge = 1, ...)
 
 	// nodes
-	protected double[] lat;
-	protected double[] lon;
-	protected int[] height;
-	protected int[] rank;
+	private double[] lat;
+	private double[] lon;
+	private int[] height;
+	private int[] rank;
 
 	// edges
-	protected int[] src;
-	protected int[] dest;
-	protected int[] multipliedDist;
-	protected int[] dist;
-	// protected double[] elev_out;
-	protected int[] shortedID;
-	protected int[] outEdgeSourceNum;
-	protected int[] outEdgeShortedNum;
+	private int[] src;
+	private int[] dest;
+	private int[] multipliedDist;
+	private int[] dist;
 
-	protected int[] offsetOut;
-	protected int[] offsetIn;
+	private int[] shortedID;
+	private int[] outEdgeSourceNum;
+	private int[] outEdgeShortedNum;
+
+	private int[] offsetOut;
+	private int[] offsetIn;
 
 	/**
 	 * Index = "virtual" id for in edges
 	 * 
 	 * content = position in the edge array
 	 */
-	protected int[] mapping_InToOut;
-
-	// protected int[] src_in;
-	// protected int[] dest_in;
-	// protected int[] multipliedDist_in;
-	// protected int[] dist_in;
-	// // protected double[] elev_in;
-	// protected int[] shortedID_in;
-	// protected int[] outEdgeSourceNum_in;
-	// protected int[] outEdgeShortedNum_in;
+	private int[] mapping_InToOut;
 
 	/**
 	 * A graphrep is the representation of a graph used to perform several
 	 * algorithms on. All its protected fields must be be set from the outside
 	 * (which is not nice)
 	 */
-	public GraphRep() {
+	public GraphRep(int nodeCount, int edgeCount) {
+		this.nodeCount = nodeCount;
+		this.edgeCount = edgeCount;
+
+		this.lat = new double[nodeCount];
+		this.lon = new double[nodeCount];
+		this.height = new int[nodeCount];
+
+		this.rank = new int[nodeCount];
+
+		this.offsetOut = new int[nodeCount + 1];
+		this.offsetIn = new int[nodeCount + 1];
+
+		this.src = new int[edgeCount];
+		this.dest = new int[edgeCount];
+		this.multipliedDist = new int[edgeCount];
+		this.dist = new int[edgeCount];
+
+		this.shortedID = new int[edgeCount];
+		this.outEdgeSourceNum = new int[edgeCount];
+		this.outEdgeShortedNum = new int[edgeCount];
+
+		this.mapping_InToOut = new int[edgeCount];
 	}
 
-	/**
-	 * Gets the distance (in meters) of the given edge
-	 * 
-	 * @return int
-	 * @param nodeID
-	 * @param edgeNum
-	 */
-	public final int geDist(int edgeId) {
-		return dist[edgeId];
+	protected final void setNodeData(int index, double lat, double lon,
+			int height) {
+		this.lat[index] = lat;
+		this.lon[index] = lon;
+		this.height[index] = height;
+		this.rank[index] = Integer.MAX_VALUE;
+	}
+
+	protected final void setNodeRank(int index, int rank) {
+		this.rank[index] = rank;
+	}
+
+	protected final void setEdgeData(int index, int src, int dest, int dist,
+			int multipliedDist) {
+		this.mapping_InToOut[index] = index;
+
+		this.src[index] = src;
+		this.dest[index] = dest;
+		this.dist[index] = dist;
+		this.multipliedDist[index] = multipliedDist;
+
+		this.shortedID[index] = -1;
+		this.outEdgeSourceNum[index] = -1;
+		this.outEdgeShortedNum[index] = -1;
+	}
+
+	protected final void setShortcutData(int index, int shortedID,
+			int outEdgeSourceNum, int outEdgeShortedNum) {
+		this.shortedID[index] = shortedID;
+		this.outEdgeSourceNum[index] = outEdgeSourceNum;
+		this.outEdgeShortedNum[index] = outEdgeShortedNum;
+	}
+
+	protected final void generateOffsets() {
+		int currentSource;
+		int prevSource = -1;
+		for (int i = 0; i < edgeCount; i++) {
+			currentSource = src[i];
+			if (currentSource != prevSource) {
+				for (int j = currentSource; j > prevSource; j--) {
+					offsetOut[j] = i;
+				}
+				prevSource = currentSource;
+			}
+		}
+
+		offsetOut[nodeCount] = edgeCount;
+		// assuming we have at least one edge
+		for (int cnt = nodeCount - 1; offsetOut[cnt] == 0; cnt--) {
+			offsetOut[cnt] = offsetOut[cnt + 1];
+		}
+
+		Sorter.Sort(this);
+
+		int currentDest;
+		int prevDest = -1;
+		for (int i = 0; i < edgeCount; i++) {
+			currentDest = dest[mapping_InToOut[i]];
+			if (currentDest != prevDest) {
+				for (int j = currentDest; j > prevDest; j--) {
+					offsetIn[j] = i;
+				}
+				prevDest = currentDest;
+			}
+		}
+
+		offsetIn[nodeCount] = edgeCount;
+		// assuming we have at least one edge
+		for (int cnt = nodeCount - 1; offsetIn[cnt] == 0; cnt--) {
+			offsetIn[cnt] = offsetIn[cnt + 1];
+		}
 	}
 
 	/**

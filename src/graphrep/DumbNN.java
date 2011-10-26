@@ -26,11 +26,14 @@ public class DumbNN implements NNSearcher {
 			return -1;
 		}
 
-		bestDistance = ((lon - graphRep.lon[pos]) * (lon - graphRep.lon[pos]))
-				+ ((lat - graphRep.lat[pos]) * (lat - graphRep.lat[pos]));
+		bestDistance = ((lon - graphRep.getNodeLat(pos)
+				* (lon - graphRep.getNodeLon(pos) + ((lat - graphRep
+						.getNodeLat(pos)) * (lat - graphRep.getNodeLat(pos))))));
 		for (int i = 1; i < numberOfNodes; i++) {
-			squareDistance = ((lon - graphRep.lon[i]) * (lon - graphRep.lon[i]))
-					+ ((lat - graphRep.lat[i]) * (lat - graphRep.lat[i]));
+			squareDistance = ((lon - graphRep.getNodeLon(i)) * (lon - graphRep
+					.getNodeLon(i)))
+					+ ((lat - graphRep.getNodeLat(i)) * (lat - graphRep
+							.getNodeLat(i)));
 			if (squareDistance < bestDistance) {
 				bestDistance = squareDistance;
 				pos = i;
