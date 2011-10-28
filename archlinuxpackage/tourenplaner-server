@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo -u http java -Xmx5g -jar '/usr/share/java/tourenplaner/tourenplaner-server.jar' -c /etc/tourenplaner.conf -f dump

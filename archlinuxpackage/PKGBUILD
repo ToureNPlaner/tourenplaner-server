@@ -1,0 +1,45 @@
+# $Id: PKGBUILD 57193 2011-10-23 18:23:05Z jlichtblau $
+# Maintainer: Jaroslav Lichtblau <dragonlord@aur.archlinux.org>
+# Contributor: Michele Schäuble <mschaeuble@swissonline.ch>
+
+pkgname=tourenplaner-server
+pkgver=1
+pkgrel=1
+pkgdesc="A server for calculating shortest paths, TSP and CSP"
+arch=('any')
+url="http://gerbera.informatik.uni-stuttgart.de/"
+license=('GPL')
+depends=('java-runtime')
+install=install
+source=(https://gerbera.informatik.uni-stuttgart.de/wwwfiles/tourenplaner-server.jar \
+        https://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar)
+
+build() {
+  cd ${srcdir}
+  install -d ${pkgdir}/usr/share/java/tourenplaner/
+  install -m644 ${srcdir}/tourenplaner-server.jar ${pkgdir}/usr/share/java/tourenplaner/tourenplaner-server.jar
+  install -d ${pkgdir}/usr/bin
+
+  install -m 755 ${startdir}/tourenplaner-server ${pkgdir}/usr/bin/tourenplaner-server
+
+  install -d ${pkgdir}/etc
+  install -m 644 ${startdir}/tourenplaner.conf ${pkgdir}/etc/tourenplaner.conf
+
+  install -d ${pkgdir}/etc/rc.d
+  install -m 755 ${startdir}/tourenplanerd ${pkgdir}/etc/rc.d/tourenplanerd
+
+# maybe i needing later
+# http://thedailywtf.com/Articles/Maybe-I-Needing-Later.aspx
+# install -d ${pkgdir}/etc/conf.d
+
+}
+
+package_sptogpx() {
+  pkgdesc="A small tool to convert the answer to a shortest path query from json to gpx"
+  depends=('java-runtime')
+  install -m644 ${srcdir}/sptogpx.jar ${pkgdir}/usr/share/java/tourenplaner/sptogpx.jar
+  install -m 755 ${startdir}/sptogpx ${pkgdir}/usr/bin/sptogpx
+}
+
+md5sums=('46b1da68a1805ccf4a82a32970484b74'
+         '97b775b3f47bf8a29a27a9a165bc955c')
