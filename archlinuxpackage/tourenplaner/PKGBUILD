@@ -10,7 +10,7 @@ arch=('any')
 url="http://gerbera.informatik.uni-stuttgart.de/"
 license=('GPL')
 depends=('java-runtime')
-backup=('/etc/tourenplaner.conf')
+backup=('etc/tourenplaner.conf')
 license=('BSD')
 install=install
 
