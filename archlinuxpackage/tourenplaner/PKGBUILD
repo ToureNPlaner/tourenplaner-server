@@ -10,7 +10,10 @@ arch=('any')
 url="http://gerbera.informatik.uni-stuttgart.de/"
 license=('GPL')
 depends=('java-runtime')
+backup=('/etc/tourenplaner.conf')
+license=('BSD')
 install=install
+
 source=(https://gerbera.informatik.uni-stuttgart.de/wwwfiles/tourenplaner-server.jar \
         https://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar)
 
