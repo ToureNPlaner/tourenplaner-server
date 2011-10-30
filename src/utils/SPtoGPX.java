@@ -4,18 +4,15 @@
  */
 package utils;
 
-import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * This utility class is used to convert the result of a /algsp request to gpx
@@ -32,18 +29,20 @@ public class SPtoGPX {
 					.println("Please supply a .json file as first parameter or - to read from stdin");
 			return;
 		}
-		BufferedReader reader;
+		InputStream input;
 		try {
-			reader = new BufferedReader(new InputStreamReader(
-					args[0].equals("-") ? System.in : new FileInputStream(
-							args[0]), Charset.forName("UTF-8")));
+			input = args[0].equals("-") ? System.in : new FileInputStream(
+					args[0]);
 		} catch (FileNotFoundException e) {
 			System.err.println("The file: " + args[0] + " could not be found");
 			return;
 		}
-		JSONParser parser = new JSONParser();
+		ObjectMapper mapper = new ObjectMapper();
+
 		try {
-			JSONObject requestJSON = (JSONObject) parser.parse(reader);
+			Map<String, Object> requestJSON = mapper.readValue(input,
+					new TypeReference<Map<String, Object>>() {
+					});
 			@SuppressWarnings("unchecked")
 			ArrayList<Map<String, Object>> points = (ArrayList<Map<String, Object>>) requestJSON
 					.get("points");
@@ -63,9 +62,6 @@ public class SPtoGPX {
 
 		} catch (IOException e) {
 			System.err.println("An IO Error ocurred: " + e.getMessage());
-		} catch (ParseException e) {
-			System.err.println("The file: " + args[0]
-					+ " could not be parsed: " + e.getMessage());
 		}
 	}
 }

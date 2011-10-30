@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
@@ -32,8 +33,9 @@ import config.ConfigManager;
  */
 public class HttpServer {
 
-
-	public HttpServer(ConfigManager cm, AlgorithmRegistry reg, Map<String, Object> serverInfo, ComputeCore comCore) {
+	public HttpServer(ObjectMapper mapper, ConfigManager cm,
+			AlgorithmRegistry reg, Map<String, Object> serverInfo,
+			ComputeCore comCore) {
 		// Configure the server.
 		ServerBootstrap bootstrap = new ServerBootstrap(
 				new NioServerSocketChannelFactory( // Change to Oio* if you want
@@ -41,8 +43,7 @@ public class HttpServer {
 						Executors.newCachedThreadPool(), Executors
 								.newCachedThreadPool()));
 
-
-		if (serverInfo.get("servertype").equals("private")) {
+		if (cm.getEntryBool("private", false)) {
 			// The Bootstrap handling info only
 			ServerBootstrap infoBootstrap = new ServerBootstrap(
 					new NioServerSocketChannelFactory( // Change to Oio* if you
@@ -52,11 +53,11 @@ public class HttpServer {
 									.newCachedThreadPool()));
 
 			// Set up the event pipeline factory with ssl
-			bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore,
-					true, serverInfo));
+			bootstrap.setPipelineFactory(new ServerPipelineFactory(mapper,
+					comCore, serverInfo));
 
 			infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(
-					serverInfo));
+					mapper, serverInfo));
 			// Bind and start to accept incoming connections.
 			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
 					"sslport", 8081)));
@@ -64,8 +65,8 @@ public class HttpServer {
 					"httpport", 8080)));
 		} else {
 			// Set up the event pipeline factory without ssl
-			bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore,
-					false, serverInfo));
+			bootstrap.setPipelineFactory(new ServerPipelineFactory(mapper,
+					comCore, serverInfo));
 			// Bind and start to accept incoming connections.
 			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
 					"httpport", 8080)));

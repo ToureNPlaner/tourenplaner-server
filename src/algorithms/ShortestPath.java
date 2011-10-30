@@ -2,17 +2,14 @@ package algorithms;
 
 import graphrep.GraphRep;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import computecore.ComputeRequest;
-import computecore.ComputeResult;
 
 public class ShortestPath extends GraphAlgorithm {
 
 	private ComputeRequest req = null;
-	private ComputeResult res = null;
 
 	double srclat;
 	double srclon;
@@ -39,11 +36,6 @@ public class ShortestPath extends GraphAlgorithm {
 		}
 		heap.resetHeap();
 		this.req = req;
-	}
-
-	@Override
-	public ComputeResult getResult() {
-		return res;
 	}
 
 	// dists in this array are stored with the multiplier applied. They also are
@@ -73,17 +65,14 @@ public class ShortestPath extends GraphAlgorithm {
 		return dist * 1000;
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void run() {
 		assert (req != null) : "We ended up without a request object in run";
 
-		res = req.getResultObject();
-
-		ArrayList<Map<String, Double>> points = null;
+		Points points = null;
 		// TODO: send error messages to client
 		try {
-			points = (ArrayList<Map<String, Double>>) req.get("points");
+			points = req.getPoints();
 		} catch (ClassCastException e) {
 			System.err.println("The request's contents are invalid\n"
 					+ e.getMessage());
@@ -96,104 +85,115 @@ public class ShortestPath extends GraphAlgorithm {
 			e.printStackTrace();
 			return;
 		}
-
-		srclat = points.get(0).get("lt");
-		srclon = points.get(0).get("ln");
-		destlat = points.get(1).get("lt");
-		destlon = points.get(1).get("ln");
-
-		srcid = graph.getIDForCoordinates(srclat, srclon);
-		destid = graph.getIDForCoordinates(destlat, destlon);
-		directDistance = calcDirectDistance(srclat, srclon, destlat, destlon);
-		multipliedDist[srcid] = 0;
-		heap.insert(srcid, multipliedDist[srcid]);
-
-		int nodeID = -1;
-		int nodeDist;
-		int targetNode = 0;
-		int tempDist;
-
-		long starttime = System.nanoTime();
-		long dijkstratime;
-		long backtracktime;
-
-		DIJKSTRA: while (!heap.isEmpty()) {
-			nodeID = heap.peekMinId();
-			nodeDist = heap.peekMinDist();
-			heap.removeMin();
-			if (nodeID == destid) {
-				break DIJKSTRA;
-			} else if (nodeDist > multipliedDist[nodeID]) {
-				continue;
-			}
-			for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
-				// Ignore Shortcuts
-				if (graph.getOutShortedId(nodeID, i) != -1) {
-					continue;
-				}
-				targetNode = graph.getOutTarget(nodeID, i);
-
-				// without multiplier = shortest path
-				// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
-
-				// with multiplier = fastest path
-				tempDist = multipliedDist[nodeID]
-						+ graph.getOutMultipliedDist(nodeID, i);
-
-				if (tempDist < multipliedDist[targetNode]) {
-					multipliedDist[targetNode] = tempDist;
-					prevEdges[targetNode] = graph.getOutEdgeID(nodeID, i);
-					heap.insert(targetNode, multipliedDist[targetNode]);
-				}
-			}
-		}
-		dijkstratime = System.nanoTime();
-
-		if (nodeID != destid) {
-			// TODO: send errmsg to client and do something useful
-			System.err.println("There is no path from src to dest");
+		// Check if we have enough points to do something useful
+		if (points.size() < 2) {
 			return;
 		}
 
-		// Find out how much space to allocate
-		int currNode = nodeID;
-		int routeElements = 0;
-
-		do {
-			routeElements++;
-			currNode = graph.getSource(prevEdges[currNode]);
-		} while (currNode != srcid);
-
-		System.out.println("path goes over " + routeElements + " nodes");
-		double[] lats = new double[routeElements];
-		double[] lons = new double[routeElements];
-
-		// backtracking here
-		// Don't read distance from dist[], because there are distances with
-		// regard to the multiplier
+		Points resultPoints = req.getResultPoints();
 		int distance = 0;
-		currNode = nodeID;
-		do {
-			distance += graph.getDist(prevEdges[currNode]);
-			routeElements--;
-			lats[routeElements] = graph.getNodeLat(currNode);
-			lons[routeElements] = graph.getNodeLon(currNode);
-			currNode = graph.getSource(prevEdges[currNode]);
-		} while (currNode != srcid);
-		backtracktime = System.nanoTime();
-		Map<String, Integer> misc = new HashMap<String, Integer>(2);
+
+		for (int pointIndex = 0; pointIndex < points.size() - 1; pointIndex++) {
+			srclat = points.getPointLat(pointIndex);
+			srclon = points.getPointLon(pointIndex);
+			destlat = points.getPointLat(pointIndex + 1);
+			destlon = points.getPointLon(pointIndex + 1);
+
+			srcid = graph.getIDForCoordinates(srclat, srclon);
+			destid = graph.getIDForCoordinates(destlat, destlon);
+			directDistance = calcDirectDistance(srclat, srclon, destlat,
+					destlon);
+			multipliedDist[srcid] = 0;
+			heap.insert(srcid, multipliedDist[srcid]);
+
+			int nodeID = -1;
+			int nodeDist;
+			int targetNode = 0;
+			int tempDist;
+
+			long starttime = System.nanoTime();
+			long dijkstratime;
+			long backtracktime;
+
+			DIJKSTRA: while (!heap.isEmpty()) {
+				nodeID = heap.peekMinId();
+				nodeDist = heap.peekMinDist();
+				heap.removeMin();
+				if (nodeID == destid) {
+					break DIJKSTRA;
+				} else if (nodeDist > multipliedDist[nodeID]) {
+					continue;
+				}
+				for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
+					// Ignore Shortcuts
+					if (graph.getOutShortedId(nodeID, i) != -1) {
+						continue;
+					}
+					targetNode = graph.getOutTarget(nodeID, i);
+
+					// without multiplier = shortest path
+					// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
+
+					// with multiplier = fastest path
+					tempDist = multipliedDist[nodeID]
+							+ graph.getOutMultipliedDist(nodeID, i);
+
+					if (tempDist < multipliedDist[targetNode]) {
+						multipliedDist[targetNode] = tempDist;
+						prevEdges[targetNode] = graph.getOutEdgeID(nodeID, i);
+						heap.insert(targetNode, multipliedDist[targetNode]);
+					}
+				}
+			}
+			dijkstratime = System.nanoTime();
+
+			if (nodeID != destid) {
+				// TODO: send errmsg to client and do something useful
+				System.err.println("There is no path from src to dest");
+				return;
+			}
+
+			// Find out how much space to allocate
+			int currNode = nodeID;
+			int routeElements = 0;
+
+			do {
+				routeElements++;
+				currNode = graph.getSource(prevEdges[currNode]);
+			} while (currNode != srcid);
+
+			System.out.println("path goes over " + routeElements + " nodes");
+			// Add them without values we set the values in the next step
+			resultPoints.addEmptyPoints(routeElements);
+
+			// backtracking here
+			// Don't read distance from dist[], because there are distances with
+			// regard to the multiplier
+			currNode = nodeID;
+			do {
+				distance += graph.getDist(prevEdges[currNode]);
+				routeElements--;
+
+				points.setPointLat(routeElements, graph.getNodeLat(currNode));
+				points.setPointLon(routeElements, graph.getNodeLon(currNode));
+
+				currNode = graph.getSource(prevEdges[currNode]);
+			} while (currNode != srcid);
+
+			backtracktime = System.nanoTime();
+
+			System.out.println("found sp with dist = " + (distance / 1000.0)
+					+ " km (direct distance: " + (directDistance / 1000.0)
+					+ " km; Distance with multiplier: "
+					+ (multipliedDist[destid] / 1000.0) + ")");
+			System.out.println("Dijkstra: "
+					+ ((dijkstratime - starttime) / 1000000.0)
+					+ " ms; Backtracking: "
+					+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
+		}
+
+		Map<String, Object> misc = new HashMap<String, Object>(1);
 		misc.put("distance", distance);
-
-		System.out.println("found sp with dist = " + (distance / 1000.0)
-				+ " km (direct distance: " + (directDistance / 1000.0)
-				+ " km; Distance with multiplier: "
-				+ (multipliedDist[destid] / 1000.0) + ")");
-		System.out.println("Dijkstra: "
-				+ ((dijkstratime - starttime) / 1000000.0)
-				+ " ms; Backtracking: "
-				+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
-
-		res.put("points", new Points(lats, lons));
-		res.put("misc", misc);
+		req.setMisc(misc);
 	}
 }

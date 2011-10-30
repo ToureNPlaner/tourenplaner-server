@@ -12,7 +12,6 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -20,6 +19,13 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonToken;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -38,9 +44,8 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+
+import algorithms.Points;
 
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
@@ -60,8 +65,8 @@ import database.UsersDBRow;
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
-	/** JSONParser we can reuse **/
-	private final JSONParser parser = new JSONParser();
+	/** ObjectMapper we can reuse **/
+	private final ObjectMapper mapper;
 
 	/** The ComputeCore managing the threads **/
 	private final ComputeCore computer;
@@ -74,6 +79,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private MessageDigest digester;
 
+	private Responder responder;
+
 	/**
 	 * Constructs a new RequestHandler using the given ComputeCore and
 	 * ServerInfo
@@ -81,13 +88,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @param cCore
 	 * @param serverInfo
 	 */
-	public HttpRequestHandler(ComputeCore cCore,
-			Map<String, Object> serverInfo, boolean isPrivate) {
+	public HttpRequestHandler(ObjectMapper mapper, ComputeCore cCore,
+			Map<String, Object> serverInfo) {
 		super();
 		ConfigManager cm = ConfigManager.getInstance();
-		computer = cCore;
+		this.mapper = mapper;
+		this.computer = cCore;
 		this.serverInfo = serverInfo;
-		this.isPrivate = isPrivate;
+		this.isPrivate = cm.getEntryBool("private", false);
+
 		if (isPrivate) {
 			try {
 
@@ -131,7 +140,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			return;
 		}
 
-		Responder responder = new Responder(channel, isKeepAlive(request));
+		if (responder == null) {
+			responder = new Responder(mapper, channel, isKeepAlive(request));
+		}
 
 		// Get the Requeststring e.g. /info
 		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
@@ -141,37 +152,37 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		if (path.equals("/info")) {
 
-			handleInfo(request, responder);
+			handleInfo(request);
 
 		} else if (isPrivate && path.equals("/registeruser")) {
 
-			handleRegisterUser(request, responder);
+			handleRegisterUser(request);
 
 		} else if (isPrivate && path.equals("/authuser")) {
 
-			handleAuthUser(request, responder);
+			handleAuthUser(request);
 
 		} else if (isPrivate && path.equals("/getuser")) {
 
-			handleGetUser(request, responder);
+			handleGetUser(request);
 
 		} else if (isPrivate && path.equals("/updateuser")) {
 
-			handleUpdateUser(request, responder);
+			handleUpdateUser(request);
 
 		} else if (isPrivate && path.equals("/listrequests")) {
 
-			handleListRequests(request, responder);
+			handleListRequests(request);
 
 		} else if (isPrivate && path.equals("/listusers")) {
 
-			handleListUsers(request, responder);
+			handleListUsers(request);
 
 		} else if (path.startsWith("/alg")) {
 
-			if (!isPrivate || auth(request, responder) != null) {
+			if (!isPrivate || auth(request) != null) {
 				String algName = queryStringDecoder.getPath().substring(4);
-				handleAlg(request, responder, algName);
+				handleAlg(request, algName);
 			} else {
 				responder.writeUnauthorizedClose();
 			}
@@ -184,13 +195,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	private void handleAlg(HttpRequest request, Responder responder,
-			String algName) throws IOException {
+	private void handleAlg(HttpRequest request, String algName)
+			throws IOException {
 
-		Map<String, Object> objmap = getJSONContent(responder, request);
-		if (objmap != null) {
-			// Create ComputeRequest and commit to workqueue
-			ComputeRequest req = new ComputeRequest(responder, algName, objmap);
+		ComputeRequest req = readComputeRequest(algName, responder, request);
+		if (req != null) {
+
 			boolean sucess = computer.submit(req);
 
 			if (!sucess) {
@@ -212,18 +222,18 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @param request
 	 * @throws IOException
 	 */
-	@SuppressWarnings("unchecked")
 	private Map<String, Object> getJSONContent(Responder responder,
 			HttpRequest request) throws IOException {
 
 		Map<String, Object> objmap = null;
 		ChannelBuffer content = request.getContent();
 		if (content.readableBytes() != 0) {
-			InputStreamReader inReader = new InputStreamReader(
-					new ChannelBufferInputStream(content));
 			try {
-				objmap = (JSONObject) parser.parse(inReader);
-			} catch (ParseException e) {
+				objmap = mapper.readValue(
+						new ChannelBufferInputStream(content),
+						new TypeReference<Map<String, Object>>() {
+						});
+			} catch (JsonParseException e) {
 				responder.writeErrorMessage("EBADJSON",
 						"Could not parse supplied JSON", null,
 						HttpResponseStatus.UNAUTHORIZED);
@@ -242,32 +252,119 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		return objmap;
 	}
 
-	private void handleListUsers(HttpRequest request, Responder responder) {
+	/**
+	 * Reads a JSON encoded compute request from the content field of the given
+	 * request
+	 * 
+	 * @param mapper
+	 * @param algName
+	 * @param responder
+	 * @param request
+	 * @return
+	 * @throws IOException
+	 * @throws JsonParseException
+	 */
+	private ComputeRequest readComputeRequest(String algName,
+			Responder responder, HttpRequest request) throws IOException,
+			JsonParseException {
+
+		Map<String, Object> constraints = null;
+		Points points = new Points();
+		ChannelBuffer content = request.getContent();
+		if (content.readableBytes() != 0) {
+
+			JsonParser jp = mapper.getJsonFactory().createJsonParser(
+					new ChannelBufferInputStream(content));
+			jp.setCodec(mapper);
+
+			if (jp.nextToken() != JsonToken.START_OBJECT) {
+				throw new JsonParseException("Request contains no json object",
+						jp.getCurrentLocation());
+			}
+
+			String fieldname;
+			JsonToken token;
+			double lat = 0, lon = 0;
+			while (jp.nextToken() != JsonToken.END_OBJECT) {
+				fieldname = jp.getCurrentName();
+				token = jp.nextToken(); // move to value, or
+										// START_OBJECT/START_ARRAY
+				if ("points".equals(fieldname)) {
+					// Should be on START_ARRAY
+					if (token != JsonToken.START_ARRAY) {
+						throw new JsonParseException("points is no array",
+								jp.getCurrentLocation());
+					}
+					// Read array elements
+					while (jp.nextToken() != JsonToken.END_ARRAY) {
+						while (jp.nextToken() != JsonToken.END_OBJECT) {
+							fieldname = jp.getCurrentName();
+							token = jp.nextToken();
+							if ("lt".equals(fieldname)) {
+								lat = jp.getDoubleValue();
+							} else if ("ln".equals(fieldname)) {
+								lon = jp.getDoubleValue();
+							} else {
+								throw new JsonParseException("Unknown field "
+										+ fieldname, jp.getCurrentLocation());
+							}
+						}
+						points.addPoint(lat, lon);
+					}
+
+				} else if ("constraints".equals(fieldname)) {
+					constraints = jp
+							.readValueAs(new TypeReference<Map<String, Object>>() {
+							});
+				} else {
+					// ignore for now TODO: user version string etc.
+					if (token != JsonToken.START_ARRAY
+							&& token != JsonToken.START_OBJECT) {
+						token = jp.nextToken();
+					} else {
+						jp.skipChildren();
+					}
+				}
+			}
+
+		} else {
+			// Respond with No Content
+			HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
+					NO_CONTENT);
+			// Write the response.
+			ChannelFuture future = responder.getChannel().write(response);
+			future.addListener(ChannelFutureListener.CLOSE);
+		}
+
+		return new ComputeRequest(responder, algName, points, constraints);
+	}
+
+	private void handleListUsers(HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleListRequests(HttpRequest request, Responder responder) {
+	private void handleListRequests(HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleUpdateUser(HttpRequest request, Responder responder) {
+	private void handleUpdateUser(HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleGetUser(HttpRequest request, Responder responder) {
+	private void handleGetUser(HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleAuthUser(HttpRequest request, Responder responder) {
+	private void handleAuthUser(HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleRegisterUser(HttpRequest request, Responder responder) {
+	private void handleRegisterUser(HttpRequest request) {
 		try {
 			UsersDBRow user = null;
 			UsersDBRow authUser = null;
@@ -299,8 +396,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						(String) objmap.get("address"),
 						(Boolean) objmap.get("admin"));
 			} else {
-				if ((authUser = auth(request, responder)) != null
-						&& authUser.isAdmin) {
+				if ((authUser = auth(request)) != null && authUser.isAdmin) {
 
 					user = dbm.addNewVerifiedUser((String) objmap.get("email"),
 							toHash, salt, (String) objmap.get("firstname"),
@@ -345,7 +441,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		return toHash;
 	}
 
-	private void handleInfo(HttpRequest request, Responder responder) {
+	private void handleInfo(HttpRequest request)
+			throws JsonGenerationException, JsonMappingException, IOException {
 		responder.writeJSON(serverInfo, HttpResponseStatus.OK);
 	}
 
@@ -398,14 +495,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * specification for details. The connection will get closed after the error
 	 * has been sent
 	 * 
-	 * @param responder
-	 * 
 	 * @param request
 	 * @return the UsersDBRow object of the user or null if auth failed
 	 * @throws SQLException
 	 */
-	private UsersDBRow auth(HttpRequest myReq, Responder responder)
-			throws SQLException {
+	private UsersDBRow auth(HttpRequest myReq) throws SQLException {
 		String email, emailandpw, pw;
 		UsersDBRow user = null;
 		int index = 0;

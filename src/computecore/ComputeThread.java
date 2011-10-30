@@ -43,7 +43,6 @@ public class ComputeThread extends Thread {
 	public void run() {
 		ComputeRequest work;
 		Algorithm alg;
-		ComputeResult res;
 
 		while (!Thread.interrupted()) {
 			try {
@@ -52,14 +51,9 @@ public class ComputeThread extends Thread {
 				if (alg != null) {
 					alg.setRequest(work);
 					alg.run();
-					res = alg.getResult();
-					if (res != null) {
-						work.getResponder().writeJSON(res,
-								HttpResponseStatus.OK);
-					} else {
-						System.err.println("Compute Thread couldn't process: "
-								+ work);
-					}
+					work.getResponder().writeComputeResult(work,
+							HttpResponseStatus.OK);
+
 				} else {
 					System.err.println("Unsupported algorithm "
 							+ work.getAlgorithmURLSuffix() + " requested");

@@ -3,28 +3,42 @@
  */
 package algorithms;
 
-import org.json.simple.JSONAware;
+import com.carrotsearch.hppc.DoubleArrayList;
 
-public class Points implements JSONAware {
-	private final double[] lats;
-	private final double[] lons;
-	StringBuilder sb;
+public class Points {
+	private DoubleArrayList points;
 
-	public Points(double[] lats, double[] lons) {
-		this.lats = lats;
-		this.lons = lons;
-		sb = new StringBuilder();
+	public Points() {
+		points = new DoubleArrayList();
 	}
-	
-	@Override
-	public String toJSONString() {
-		sb.append("[");
-		for (int i = 0; i < (lats.length - 1); i++) {
-			sb.append("{\"lt\":" + lats[i] + ",\"ln\":" + lons[i] + "},");
-		}
-		sb.append("{\"lt\":" + lats[lats.length - 1] + ",\"ln\":"
-				+ lons[lats.length - 1] + "}");
-		sb.append("]");
-		return sb.toString();
+
+	public void addPoint(double lat, double lon) {
+		points.add(lat);
+		points.add(lon);
 	}
+
+	public void addEmptyPoints(int num) {
+		points.resize(points.size() + num);
+	}
+
+	public double getPointLat(int index) {
+		return points.get(index * 2);
+	}
+
+	public double getPointLon(int index) {
+		return points.get(index * 2 + 1);
+	}
+
+	public void setPointLat(int index, double lat) {
+		points.set(index * 2, lat);
+	}
+
+	public void setPointLon(int index, double lon) {
+		points.set(index * 2 + 1, lon);
+	}
+
+	public int size() {
+		return points.size() / 2;
+	}
+
 }

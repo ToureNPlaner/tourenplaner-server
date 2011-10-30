@@ -8,8 +8,16 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.ChannelBufferOutputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
@@ -18,7 +26,10 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
-import org.json.simple.JSONValue;
+
+import algorithms.Points;
+
+import computecore.ComputeRequest;
 
 /**
  * This class encapsulates the translation from Map<String, Object> to JSON and
@@ -32,6 +43,9 @@ public class Responder {
 
 	private final Channel replyChannel;
 	private final boolean keepAlive;
+	private final ObjectMapper mapper;
+	private final StringBuilder sb;
+	private final ChannelBuffer outputBuffer;
 
 	/**
 	 * Constructs a new Responder from the given Channel that either uses
@@ -40,9 +54,12 @@ public class Responder {
 	 * @param replyChan
 	 * @param keepAlive
 	 */
-	public Responder(Channel replyChan, boolean keepAlive) {
+	public Responder(ObjectMapper mapper, Channel replyChan, boolean keepAlive) {
+		this.mapper = mapper;
 		this.replyChannel = replyChan;
 		this.keepAlive = keepAlive;
+		this.sb = new StringBuilder();
+		this.outputBuffer = ChannelBuffers.dynamicBuffer(4096);
 	}
 
 	/**
@@ -74,9 +91,12 @@ public class Responder {
 	 * 
 	 * @param toWrite
 	 * @param status
+	 * @throws IOException
+	 * @throws JsonMappingException
+	 * @throws JsonGenerationException
 	 */
-	public void writeJSON(Map<String, Object> toWrite, HttpResponseStatus status) {
-		String result = JSONValue.toJSONString(toWrite);
+	public void writeJSON(Map<String, Object> toWrite, HttpResponseStatus status)
+			throws JsonGenerationException, JsonMappingException, IOException {
 
 		// Build the response object.
 		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
@@ -84,8 +104,11 @@ public class Responder {
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
 
-		response.setContent(ChannelBuffers.copiedBuffer(result,
-				CharsetUtil.UTF_8));
+		OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+
+		mapper.writeValue(resultStream, toWrite);
+		resultStream.flush();
+		response.setContent(outputBuffer);
 
 		if (keepAlive) {
 			// Add 'Content-Length' header only for a keep-alive connection.
@@ -113,7 +136,7 @@ public class Responder {
 	 */
 	public void writeErrorMessage(String errorId, String message,
 			String details, HttpResponseStatus status) {
-		StringBuilder sb = new StringBuilder();
+		sb.delete(0, sb.length());
 		sb.append("{\"errorid\":");
 		sb.append("\"");
 		sb.append(errorId);
@@ -151,4 +174,46 @@ public class Responder {
 
 	}
 
+	public void writeComputeResult(ComputeRequest work,
+			HttpResponseStatus status) throws IOException {
+		// Build the response object.
+		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+
+		response.setHeader("Access-Control-Allow-Origin", "*");
+		response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
+		OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+
+		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(
+				resultStream);
+		gen.setCodec(mapper);
+		gen.writeStartObject();
+		gen.writeArrayFieldStart("points");
+		Points points = work.getResultPoints();
+		for (int i = 0; i < points.size(); i++) {
+			gen.writeStartObject();
+			gen.writeNumberField("lt", points.getPointLat(i));
+			gen.writeNumberField("ln", points.getPointLon(i));
+			gen.writeEndObject();
+		}
+		gen.writeEndArray();
+		gen.writeObjectField("misc", work.getMisc());
+		gen.writeEndObject();
+		gen.close();
+		response.setContent(outputBuffer);
+		if (keepAlive) {
+			// Add 'Content-Length' header only for a keep-alive connection.
+			response.setHeader(CONTENT_LENGTH, response.getContent()
+					.readableBytes());
+		}
+
+		// Write the response.
+		ChannelFuture future = replyChannel.write(response);
+
+		// Close the non-keep-alive connection after the write operation is
+		// done.
+		if (!keepAlive) {
+			future.addListener(ChannelFutureListener.CLOSE);
+		}
+
+	}
 }

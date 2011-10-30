@@ -13,6 +13,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import java.util.ArrayList;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.channel.Channel;
 import org.jboss.netty.channel.ChannelFuture;
 import org.jboss.netty.channel.ChannelFutureListener;
@@ -40,10 +41,13 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 
 	private final Map<String, Object> info;
+	// The globally shared ObjectMapper
+	private final ObjectMapper mapper;
 
-	public ServerInfoHandler(Map<String, Object> sInfo) {
+	public ServerInfoHandler(ObjectMapper mapper, Map<String, Object> sInfo) {
 		super();
-		info = sInfo;
+		this.mapper = mapper;
+		this.info = sInfo;
 	}
 
 	@Override
@@ -59,7 +63,7 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 			return;
 		}
 
-		Responder responder = new Responder(channel, false);
+		Responder responder = new Responder(mapper, channel, false);
 
 		// Get the Requeststring e.g. /info
 		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(

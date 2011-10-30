@@ -7,6 +7,7 @@ import static org.jboss.netty.channel.Channels.pipeline;
 
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
@@ -26,9 +27,13 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
  */
 public class ServerInfoOnlyPipelineFactory implements ChannelPipelineFactory {
 	private final Map<String, Object> info;
+	// The globally shared ObjectMapper
+	private final ObjectMapper mapper;
 
-	public ServerInfoOnlyPipelineFactory(Map<String, Object> sInfo) {
-		info = sInfo;
+	public ServerInfoOnlyPipelineFactory(ObjectMapper mapper,
+			Map<String, Object> sInfo) {
+		this.info = sInfo;
+		this.mapper = mapper;
 	}
 
 	@Override
@@ -41,7 +46,7 @@ public class ServerInfoOnlyPipelineFactory implements ChannelPipelineFactory {
 		pipeline.addLast("encoder", new HttpResponseEncoder());
 		// We could add compression support by uncommenting the following line
 		// pipeline.addLast("deflater", new HttpContentCompressor());
-		pipeline.addLast("handler", new ServerInfoHandler(info));
+		pipeline.addLast("handler", new ServerInfoHandler(mapper, info));
 		return pipeline;
 	}
 }

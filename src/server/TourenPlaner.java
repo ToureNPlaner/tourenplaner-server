@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
 import algorithms.ShortestPathCHFactory;
@@ -70,11 +72,14 @@ public class TourenPlaner {
 	 * handler and creates the httpserver
 	 */
 	public static void main(String[] args) {
+		// Create globally shared ObjectMapper so we reuse it's data structures
+		ObjectMapper mapper = new ObjectMapper();
+
 		/**
 		 * inits config manager if config file is provided; also prints usage
 		 * information if necessary
 		 */
-		CLIHandler handler = new CLIHandler(args);
+		CLIHandler handler = new CLIHandler(mapper, args);
 
 		// if serialize, then ignore whether to read text or dump and read
 		// text graph since it wouldn't make sense to read a serialized
@@ -183,6 +188,6 @@ public class TourenPlaner {
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);
 
-		new HttpServer(cm, reg, serverInfo, comCore);
+		new HttpServer(mapper, cm, reg, serverInfo, comCore);
 	}
 }

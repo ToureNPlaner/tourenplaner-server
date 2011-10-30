@@ -7,6 +7,7 @@ import static org.jboss.netty.channel.Channels.pipeline;
 
 import java.util.Map;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
@@ -14,6 +15,8 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
 import computecore.ComputeCore;
+
+import config.ConfigManager;
 
 /**
  * This class is used to create the ServerPipeline
@@ -27,14 +30,17 @@ import computecore.ComputeCore;
  */
 public class ServerPipelineFactory implements ChannelPipelineFactory {
 	private final ComputeCore cCore;
-	private final boolean isPrivate;
+	/**
+	 * The globally shared ObjectMapper
+	 */
+	private final ObjectMapper mapper;
 	private final Map<String, Object> serverInfo;
 
-	public ServerPipelineFactory(ComputeCore comCore, boolean isPrivate,
+	public ServerPipelineFactory(ObjectMapper mapper, ComputeCore comCore,
 			Map<String, Object> serverInfo) {
-		cCore = comCore;
+		this.mapper = mapper;
+		this.cCore = comCore;
 		this.serverInfo = serverInfo;
-		this.isPrivate = isPrivate;
 	}
 
 	@Override
@@ -43,7 +49,7 @@ public class ServerPipelineFactory implements ChannelPipelineFactory {
 		ChannelPipeline pipeline = pipeline();
 
 		// TODO Implement SSL SSLEngine
-		if (isPrivate) {
+		if (ConfigManager.getInstance().getEntryBool("private", false)) {
 			// SSLEngine engine =
 			// TPSslContextFactory.getServerContext().createSSLEngine();
 			// engine.setUseClientMode(false);
@@ -58,8 +64,8 @@ public class ServerPipelineFactory implements ChannelPipelineFactory {
 		// We could add compression support by uncommenting the following line
 		// pipeline.addLast("deflater", new HttpContentCompressor());
 
-		pipeline.addLast("handler", new HttpRequestHandler(cCore, serverInfo,
-				isPrivate));
+		pipeline.addLast("handler", new HttpRequestHandler(mapper, cCore,
+				serverInfo));
 		return pipeline;
 	}
 }

@@ -4,34 +4,23 @@
 package algorithms;
 
 import computecore.ComputeRequest;
-import computecore.ComputeResult;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer
  * 
- * A class implementing this interface can be used by the ComputeCore
- * to do Computations
- *
+ *         A class implementing this interface can be used by the ComputeCore to
+ *         do Computations
+ * 
  */
 public interface Algorithm extends Runnable {
-	
+
 	/**
-	 * Sets the ComputeRequest to work on when run is called.
-	 * This method obviously need to be called before run.
-	 * Implementations are allowed to transform the request into a domain
-	 * specific representation and forget about it
+	 * Sets the ComputeRequest to work on when run is called. This method
+	 * obviously need to be called before run. The algorihtm instance will use
+	 * the Request object to store it's results in the points and misc fields
+	 * 
 	 * @param req
 	 */
 	public void setRequest(ComputeRequest req);
-	
 
-	
-	/**
-	 * Used by the Algorithm to save the result of the computation.
-	 * It must be created with the ComputeRequest as parameter
-	 * 
-	 */
-	public ComputeResult getResult();
-	
-	
 }

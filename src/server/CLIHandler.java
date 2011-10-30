@@ -1,5 +1,7 @@
 package server;
 
+import org.codehaus.jackson.map.ObjectMapper;
+
 import config.ConfigManager;
 
 class CLIHandler {
@@ -29,7 +31,7 @@ class CLIHandler {
 	private boolean dumpgraph = false;
 	private boolean parametersProvided;
 
-	public CLIHandler(String[] args) {
+	public CLIHandler(ObjectMapper mapper, String[] args) {
 		parametersProvided = args.length > 0;
 		textGraph = true;
 		dumpgraph = false;
@@ -54,7 +56,7 @@ class CLIHandler {
 						.println("Use \"$ server -c PATH\" to load the config at PATH");
 			} else {
 				try {
-					ConfigManager.Init(getConfigFilePath());
+					ConfigManager.Init(mapper, getConfigFilePath());
 				} catch (Exception e) {
 					System.err.println("Couldn't load configuration File: "
 							+ e.getMessage());

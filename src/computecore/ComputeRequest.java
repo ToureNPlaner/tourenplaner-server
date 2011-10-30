@@ -6,75 +6,98 @@ package computecore;
 import java.util.Map;
 
 import server.Responder;
+import algorithms.Points;
 
 /**
  * This class is used to represent a request for computation
  * 
  * @author Niklas Schnelle, Peter Vollmer
- *
+ * 
  */
 public class ComputeRequest {
-	
-	protected Map<String, Object> request;
+
+	private Points points;
+	private Points resultPoints;
+	private Map<String, Object> constraints;
+	private Map<String, Object> misc;
 	private String algName;
-	private ComputeResult result;
 	private Responder responder;
-	
+
 	/**
-	 * Constructs a new ComputeRequest using the given Responder and initialized with
-	 * the given Map (representing a JSON Object)
+	 * Constructs a new ComputeRequest using the given Responder, Points and
+	 * Constraints
 	 * 
 	 * @param responder
 	 * @param algName
 	 * @param request
 	 */
-	public ComputeRequest(Responder responder, String algName, Map<String, Object> request){		
+	public ComputeRequest(Responder responder, String algName, Points points,
+			Map<String, Object> constraints) {
 		this.algName = algName;
-		this.request = request;
+		this.points = points;
+		this.resultPoints = new Points();
+		this.constraints = constraints;
 		this.responder = responder;
-		
-		//TODO Make sure the Result object holds all additional data 
-		this.result = new ComputeResult();
-		result.putAll(request);
+		this.misc = null;
 	}
+
 	/**
-	 * Get the result object in which to write the result of the computation
-	 * of this request
-	 * 
-	 * @return
-	 */
-	public ComputeResult getResultObject(){
-		return result;
-	}
-	/**
-	 * Gets the responder object which is used to send the result to the correct 
+	 * Gets the responder object which is used to send the result to the correct
 	 * client connection
 	 * 
 	 * @return
 	 */
-	public Responder getResponder(){
+	public Responder getResponder() {
 		return responder;
 	}
-	
+
 	/**
-	 * Gets the URLSuffix for the requested algorithmm e.g. "sp" for
-	 * a shortest path algorithm
+	 * Gets the URLSuffix for the requested algorithmm e.g. "sp" for a shortest
+	 * path algorithm
 	 * 
 	 * @return
 	 */
-	public String getAlgorithmURLSuffix(){
-		return algName;		
+	public String getAlgorithmURLSuffix() {
+		return algName;
 	}
-	
+
 	/**
-	 * Returns the Object referenced with the given key
+	 * Returns the Points object associated with this request
 	 * 
-	 * @param index
 	 * @return
 	 */
-	public Object get(String index){
-		return request.get(index);
+	public Points getPoints() {
+		return points;
 	}
-	
-	
+
+	/**
+	 * Returns the Points object used to store the result of this request
+	 * 
+	 * @return
+	 */
+	public Points getResultPoints() {
+		return resultPoints;
+	}
+
+	/**
+	 * Returns the constraints associated with this request
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> getConstraints() {
+		return constraints;
+	}
+
+	/**
+	 * Returns the misc field used to store results, initially this is null
+	 * 
+	 * @return
+	 */
+	public Map<String, Object> getMisc() {
+		return misc;
+	}
+
+	public void setMisc(Map<String, Object> misc) {
+		this.misc = misc;
+	}
 }

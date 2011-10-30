@@ -3,14 +3,11 @@
  */
 package config;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
+import java.io.File;
 import java.util.Map;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  * @author Peter Vollmer
@@ -23,31 +20,24 @@ public class ConfigManager {
 	private static ConfigManager instance = null;
 
 	/**
-	 * Parses the config file in JSON format.
-	 */
-	private final JSONParser parser = new JSONParser();
-
-	/**
 	 * Storage of configuration entries
 	 */
-	private Map<String, Object> confMap = null;
+	private Map<String, Object> confMap;
 
 	/**
 	 * Construct the ConfigManager and loads the config from JSON file with the
 	 * given file path.
 	 * 
+	 * @param globally
+	 *            shared ObjectMapper
 	 * @param configPath
 	 * @throws Exception
 	 */
-
-	@SuppressWarnings("unchecked")
-	private ConfigManager(String configPath) throws Exception {
-		BufferedReader reader = null;
-		reader = new BufferedReader(new InputStreamReader(new FileInputStream(
-				configPath), Charset.forName("UTF-8")));
-		JSONObject requestJSON = (JSONObject) parser.parse(reader);
-
-		this.confMap = requestJSON;
+	private ConfigManager(ObjectMapper mapper, String configPath)
+			throws Exception {
+		this.confMap = mapper.readValue(new File(configPath),
+				new TypeReference<Map<String, Object>>() {
+				});
 
 	}
 
@@ -55,6 +45,7 @@ public class ConfigManager {
 	 * Used to construct an empty config Manager that only returns defaults
 	 */
 	private ConfigManager() {
+		this.confMap = null;
 	}
 
 	/**
@@ -66,8 +57,9 @@ public class ConfigManager {
 	 * 
 	 * @throws Exception
 	 */
-	public static void Init(String configPath) throws Exception {
-		instance = new ConfigManager(configPath);
+	public static void Init(ObjectMapper mapper, String configPath)
+			throws Exception {
+		instance = new ConfigManager(mapper, configPath);
 	}
 
 	/**
