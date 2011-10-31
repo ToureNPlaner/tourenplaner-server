@@ -22,7 +22,7 @@ public class ConfigManager {
 	/**
 	 * Storage of configuration entries
 	 */
-	private Map<String, Object> confMap;
+	private final Map<String, Object> confMap;
 
 	/**
 	 * Construct the ConfigManager and loads the config from JSON file with the
@@ -57,7 +57,7 @@ public class ConfigManager {
 	 * 
 	 * @throws Exception
 	 */
-	public static void Init(ObjectMapper mapper, String configPath)
+	public static void init(ObjectMapper mapper, String configPath)
 			throws Exception {
 		instance = new ConfigManager(mapper, configPath);
 	}

@@ -56,7 +56,7 @@ class CLIHandler {
 						.println("Use \"$ server -c PATH\" to load the config at PATH");
 			} else {
 				try {
-					ConfigManager.Init(mapper, getConfigFilePath());
+					ConfigManager.init(mapper, getConfigFilePath());
 				} catch (Exception e) {
 					System.err.println("Couldn't load configuration File: "
 							+ e.getMessage());

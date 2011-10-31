@@ -13,6 +13,11 @@ import com.carrotsearch.hppc.IntArrayList;
  */
 public class HashNN implements NNSearcher {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	GraphRep graphRep;
 	HashMap<Long, Object> hashMap;
 	NNSearcher dumpNN;
