@@ -5,6 +5,8 @@ package computecore;
 
 import java.util.Map;
 
+import org.codehaus.jackson.type.TypeReference;
+
 import server.Responder;
 import algorithms.Points;
 
@@ -16,6 +18,11 @@ import algorithms.Points;
  */
 public class ComputeRequest {
 
+	private static final class MapType extends
+			TypeReference<Map<String, Object>> {
+	};
+
+	private static final MapType JSONOBJECT = new MapType();
 	private Points points;
 	private Points resultPoints;
 	private Map<String, Object> constraints;

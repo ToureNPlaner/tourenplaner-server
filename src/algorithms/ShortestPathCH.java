@@ -13,14 +13,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 	private ComputeRequest req = null;
 
-	double srclat;
-	double srclon;
-	double destlat;
-	double destlon;
-
-	int srcid;
-	int destid;
-
 	private final Heap heap;
 
 	// Used to mark nodes with BFS
@@ -65,9 +57,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 */
 	private final int[] prevEdges;
 
-	// in meters
-	private double directDistance;
-
 	// maybe use http://code.google.com/p/simplelatlng/ instead
 	private final double calcDirectDistance(double lat1, double lng1,
 			double lat2, double lng2) {
@@ -89,20 +78,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 		Points points = null;
 		// TODO: send error messages to client
-		try {
-			points = req.getPoints();
-		} catch (ClassCastException e) {
-			System.err.println("The request's contents are invalid\n"
-					+ e.getMessage());
-			e.printStackTrace();
-			return;
-		} catch (NullPointerException e) {
-			System.err
-					.println("The request doesn't contain the information required for this algorithm\n"
-							+ e.getMessage());
-			e.printStackTrace();
-			return;
-		}
+		points = req.getPoints();
 		// Check if we have enough points to do something useful
 		if (points.size() < 2) {
 			return;
@@ -132,9 +108,17 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 */
 	public int shortestPath(Points points, Points resultPoints)
 			throws Exception {
-		int distance = 0;
+		double srclat;
+		double srclon;
+		double destlat;
+		double destlon;
 
-		for (int pointIndex = 0; pointIndex < points.size() - 1; pointIndex++) {
+		int srcid = 0;
+		int destid = 0;
+		int distance = 0;
+		// in meters
+		double directDistance;
+		for (int pointIndex = 0; pointIndex < (points.size() - 1); pointIndex++) {
 
 			// New Dijkstra need to reset
 
@@ -146,8 +130,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 			long nntime = System.nanoTime();
 			srcid = graph.getIDForCoordinates(srclat, srclon);
 			destid = graph.getIDForCoordinates(destlat, destlon);
-			System.out.println("NNSearch took " + (System.nanoTime() - nntime)
-					/ 1000000.0 + " ms");
+			System.out.println("NNSearch took "
+					+ ((System.nanoTime() - nntime) / 1000000.0) + " ms");
 			directDistance = calcDirectDistance(srclat, srclon, destlat,
 					destlon);
 
@@ -176,8 +160,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 					sourceNode = graph.getSource(edgeId);
 
 					if (!visited.get(sourceNode)
-							&& graph.getRank(sourceNode) >= graph
-									.getRank(nodeID)) {
+							&& (graph.getRank(sourceNode) >= graph
+									.getRank(nodeID))) {
 						// Mark the edge
 						marked.set(edgeId);
 						visited.set(sourceNode);
@@ -212,8 +196,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 					targetNode = graph.getTarget(edgeId);
 					// Either marked (by BFS) or G_up edge
 					if (marked.get(edgeId)
-							|| graph.getRank(nodeID) <= graph
-									.getRank(targetNode)) {
+							|| (graph.getRank(nodeID) <= graph
+									.getRank(targetNode))) {
 						// without multiplier = shortest path
 						// tempDist = dist[nodeID] + graph.getOutDist(nodeID,
 						// i);
@@ -281,9 +265,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 			}
 
 			backtracktime = System.nanoTime();
-			Map<String, Integer> misc = new HashMap<String, Integer>(2);
-			misc.put("distance", distance);
-
 			System.out.println("found sp with dist = " + (distance / 1000.0)
 					+ " km (direct distance: " + (directDistance / 1000.0)
 					+ " km; Distance with multiplier: "
@@ -293,6 +274,9 @@ public class ShortestPathCH extends GraphAlgorithm {
 					+ " ms; Backtracking: "
 					+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
 		}
+
+		Map<String, Integer> misc = new HashMap<String, Integer>(2);
+		misc.put("distance", distance);
 		// Don't forget to add destination
 		resultPoints.addPoint(graph.getNodeLat(destid),
 				graph.getNodeLon(destid));
