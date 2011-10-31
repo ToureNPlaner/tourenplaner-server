@@ -13,6 +13,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import com.mysql.jdbc.Statement;
 
@@ -180,7 +181,7 @@ public class DatabaseManager {
 			throws SQLException {
 
 		RequestsDBRow request = null;
-		ResultSet generatedKey = null;
+		ResultSet generatedKeyResultSet = null;
 
 		Timestamp stamp = new Timestamp(System.currentTimeMillis());
 
@@ -193,11 +194,12 @@ public class DatabaseManager {
 		request = new RequestsDBRow(-1, userID, jsonRequest, null, true, 0,
 				false, new Date(stamp.getTime()), null, 0, false, null);
 
-		generatedKey = pstAddNewUser.getGeneratedKeys();
-		if (generatedKey.next()) {
-			request.id = generatedKey.getInt(1);
+		generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
+		if (generatedKeyResultSet.next()) {
+			request.id = generatedKeyResultSet.getInt(1);
 		}
-
+		generatedKeyResultSet.close();
+		
 		return request;
 	}
 
@@ -286,7 +288,7 @@ public class DatabaseManager {
 			throws SQLException {
 
 		UsersDBRow user = null;
-		ResultSet generatedKey = null;
+		ResultSet generatedKeyResultSet = null;
 
 		email = email.trim();
 		passwordhash = passwordhash.trim();
@@ -326,10 +328,11 @@ public class DatabaseManager {
 					verifiedDate, null);
 
 			// try {
-			generatedKey = pstAddNewUser.getGeneratedKeys();
-			if (generatedKey.next()) {
-				user.id = generatedKey.getInt(1);
+			generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
+			if (generatedKeyResultSet.next()) {
+				user.id = generatedKeyResultSet.getInt(1);
 			}
+			generatedKeyResultSet.close();
 			/*
 			 * } catch (SQLFeatureNotSupportedException ex) { if
 			 * (ex.getNextException() != null) { throw ex; } }
@@ -468,16 +471,16 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Gets an array with all requests within the Requests table. If no requests
-	 * are within the table, an empty array will be returned. </br>SQL command:
+	 * Gets a list with all requests within the Requests table. If no requests
+	 * are within the table, an empty list will be returned. </br>SQL command:
 	 * {@value #getAllRequestsString}
 	 * 
-	 * @return An array with all requests. If no requests exists, the array is
+	 * @return A list with all requests. If no requests exists, the list is
 	 *         empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public RequestsDBRow[] getAllRequests() throws SQLException {
+	public List<RequestsDBRow> getAllRequests() throws SQLException {
 		ResultSet resultSet = pstGetAllRequests.executeQuery();
 		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
 
@@ -493,25 +496,25 @@ public class DatabaseManager {
 							.getString(12)));
 		}
 
-		return list.toArray(new RequestsDBRow[0]);
+		return list;
 	}
 
 	/**
-	 * Gets an array with all requests within the Requests table with regard to
+	 * Gets a list with all requests within the Requests table with regard to
 	 * the limit and offset constraints. If no requests are found with the given
-	 * constraints or the table is empty, an empty array will be returned.
+	 * constraints or the table is empty, an empty list will be returned.
 	 * </br>SQL command: {@value #getAllRequestsWithLimitOffsetString}
 	 * 
 	 * @param limit
 	 *            How many rows should maximal selected.
 	 * @param offset
 	 *            How many rows should be skimmed.
-	 * @return An array with all selected requests. If no requests selected, the
-	 *         array is empty, but not null.
+	 * @return A list with all selected requests. If no requests selected, the
+	 *         list is empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public RequestsDBRow[] getAllRequests(int limit, int offset)
+	public List<RequestsDBRow> getAllRequests(int limit, int offset)
 			throws SQLException {
 
 		pstGetAllRequestsWithLimitOffset.setInt(1, limit);
@@ -532,7 +535,7 @@ public class DatabaseManager {
 							.getString(12)));
 		}
 
-		return list.toArray(new RequestsDBRow[0]);
+		return list;
 	}
 
 	/**
@@ -567,18 +570,18 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Gets an array with all requests within the Requests table which have the
+	 * Gets a list with all requests within the Requests table which have the
 	 * given user id. If no requests are found with the given user id or the
-	 * table is empty, an empty array will be returned. </br>SQL command:
+	 * table is empty, an empty list will be returned. </br>SQL command:
 	 * {@value #getRequestsWithUserIdString}
 	 * 
 	 * @param userId
-	 * @return An array with all selected requests. If no requests selected, the
-	 *         array is empty, but not null.
+	 * @return A list with all selected requests. If no requests selected, the
+	 *         list is empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public RequestsDBRow[] getRequests(int userId) throws SQLException {
+	public List<RequestsDBRow> getRequests(int userId) throws SQLException {
 		pstGetRequestsWithUserId.setInt(1, userId);
 
 		ResultSet resultSet = pstGetRequestsWithUserId.executeQuery();
@@ -596,14 +599,14 @@ public class DatabaseManager {
 							.getString(12)));
 		}
 
-		return list.toArray(new RequestsDBRow[0]);
+		return list;
 	}
 
 	/**
-	 * Gets an array with all requests within the Requests table which have the
+	 * Gets a list with all requests within the Requests table which have the
 	 * given user id with regard to the limit and offset constraints. If no
 	 * requests are found with the given user id and given constraints or the
-	 * table is empty, an empty array will be returned. </br>SQL command:
+	 * table is empty, an empty list will be returned. </br>SQL command:
 	 * {@value #getRequestsWithUserIdLimitOffsetString}
 	 * 
 	 * @param userId
@@ -612,12 +615,12 @@ public class DatabaseManager {
 	 *            How many rows should maximal selected.
 	 * @param offset
 	 *            How many rows should be skimmed.
-	 * @return An array with all selected requests. If no requests selected, the
-	 *         array is empty, but not null.
+	 * @return A list with all selected requests. If no requests selected, the
+	 *         list is empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public RequestsDBRow[] getRequests(int userId, int limit, int offset)
+	public List<RequestsDBRow> getRequests(int userId, int limit, int offset)
 			throws SQLException {
 		pstGetRequestsWithUserIdLimitOffset.setInt(1, userId);
 		pstGetRequestsWithUserIdLimitOffset.setInt(2, limit);
@@ -639,20 +642,20 @@ public class DatabaseManager {
 							.getString(12)));
 		}
 
-		return list.toArray(new RequestsDBRow[0]);
+		return list;
 	}
 
 	/**
-	 * Gets an array with all users within the Users table. If the table is
-	 * empty, an empty array will be returned. </br>SQL command:
+	 * Gets a list with all users within the Users table. If the table is
+	 * empty, an empty list will be returned. </br>SQL command:
 	 * {@value #getAllUsersString}
 	 * 
-	 * @return An array with all selected users. If no users selected, the array
+	 * @return A list with all selected users. If no users selected, the list
 	 *         is empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public UsersDBRow[] getAllUsers() throws SQLException {
+	public List<UsersDBRow> getAllUsers() throws SQLException {
 		ResultSet resultSet = pstGetAllUsers.executeQuery();
 		ArrayList<UsersDBRow> list = new ArrayList<UsersDBRow>();
 
@@ -669,25 +672,25 @@ public class DatabaseManager {
 							.getTimestamp(12))));
 		}
 
-		return list.toArray(new UsersDBRow[0]);
+		return list;
 	}
 
 	/**
-	 * Gets an array with all users within the Users table with regard to the
+	 * Gets a list with all users within the Users table with regard to the
 	 * limit and offset constraints. If no users are found with the given
-	 * constraints or the table is empty, an empty array will be returned.
+	 * constraints or the table is empty, an empty list will be returned.
 	 * </br>SQL command: {@value #getAllUsersWithLimitOffsetString}
 	 * 
 	 * @param limit
 	 *            How many rows should maximal selected.
 	 * @param offset
 	 *            How many rows should be skimmed.
-	 * @return An array with all selected users. If no users selected, the array
+	 * @return A list with all selected users. If no users selected, the list
 	 *         is empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public UsersDBRow[] getAllUsers(int limit, int offset) throws SQLException {
+	public List<UsersDBRow> getAllUsers(int limit, int offset) throws SQLException {
 		pstGetAllUsersWithLimitOffset.setInt(1, limit);
 		pstGetAllUsersWithLimitOffset.setInt(2, offset);
 
@@ -707,7 +710,7 @@ public class DatabaseManager {
 							.getTimestamp(12))));
 		}
 
-		return list.toArray(new UsersDBRow[0]);
+		return list;
 	}
 
 	/**
