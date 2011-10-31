@@ -28,8 +28,8 @@ public class HashNN implements NNSearcher {
 		dumpNN = new DumbNN(graphRep);
 		hashMap = new HashMap<Long, Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
-			long tempLat = (long) graphRep.getNodeLat(i) * 1000;
-			long tempLon = (long) graphRep.getNodeLon(i) * 1000;
+			long tempLat = (long) (graphRep.getNodeLat(i) * 1000);
+			long tempLon = (long) (graphRep.getNodeLon(i) * 1000);
 
 			long key = tempLat << 32 | tempLon;
 			IntArrayList tempValues = (IntArrayList) hashMap.get(key);
