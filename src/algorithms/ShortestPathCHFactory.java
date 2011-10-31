@@ -55,7 +55,7 @@ public class ShortestPathCHFactory extends GraphAlgorithmFactory {
 	public Map<String, Object> getConstraints() {
 		Map<String, Object> map = new HashMap<String, Object>(2);
 		map.put("minPoints", new Integer(2));
-		map.put("sourceIsTarget", new Boolean(false));
+		map.put("sourceIsTarget", Boolean.valueOf(false));
 		return map;
 	}
 
