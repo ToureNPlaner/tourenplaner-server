@@ -81,6 +81,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private Responder responder;
 
+	private static final class MapType extends
+			TypeReference<Map<String, Object>> {
+	};
+
+	private static final MapType JSONOBJECT = new MapType();
+
 	/**
 	 * Constructs a new RequestHandler using the given ComputeCore and
 	 * ServerInfo
@@ -88,10 +94,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @param cCore
 	 * @param serverInfo
 	 */
-	public HttpRequestHandler(ObjectMapper mapper, ComputeCore cCore,
-			Map<String, Object> serverInfo) {
+	public HttpRequestHandler(final ObjectMapper mapper,
+			final ComputeCore cCore, final Map<String, Object> serverInfo) {
 		super();
-		ConfigManager cm = ConfigManager.getInstance();
+		final ConfigManager cm = ConfigManager.getInstance();
 		this.mapper = mapper;
 		this.computer = cCore;
 		this.serverInfo = serverInfo;
@@ -99,28 +105,24 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		if (isPrivate) {
 			try {
-
 				this.dbm = new DatabaseManager(cm.getEntryString("dburi",
 						"jdbc:mysql://localhost:3306/"), cm.getEntryString(
 						"dbname", "tourenplaner"), cm.getEntryString("dbuser",
 						"toureNPlaner"), cm.getEntryString("dbpw",
 						"toureNPlaner"));
+				digester = MessageDigest.getInstance("SHA-1");
 			} catch (SQLException e) {
 				System.err
 						.println("Can't connect to database (switching to public mode) "
 								+ e.getMessage());
 				this.isPrivate = false;
-			}
-		}
-
-		if (isPrivate) {
-			try {
-				digester = MessageDigest.getInstance("SHA-1");
 			} catch (NoSuchAlgorithmException e) {
 				System.err
 						.println("Can't load SHA-1 Digester. Will now switch to public mode");
 				this.isPrivate = false;
 			}
+		} else {
+			digester = null;
 		}
 	}
 
@@ -128,11 +130,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * Called when a message is received
 	 */
 	@Override
-	public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)
-			throws Exception {
+	public void messageReceived(final ChannelHandlerContext ctx,
+			final MessageEvent e) throws Exception {
 
-		HttpRequest request = (HttpRequest) e.getMessage();
-		Channel channel = e.getChannel();
+		final HttpRequest request = (HttpRequest) e.getMessage();
+		final Channel channel = e.getChannel();
 		// System.out.print(request.toString());
 		// Handle preflighted requests so wee need to work with OPTION Requests
 		if (request.getMethod().equals(HttpMethod.OPTIONS)) {
@@ -145,46 +147,50 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 
 		// Get the Requeststring e.g. /info
-		QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
+		final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
 				request.getUri());
 
-		String path = queryStringDecoder.getPath();
+		final String path = queryStringDecoder.getPath();
 
-		if (path.equals("/info")) {
+		if ("/info".equals(path)) {
 
 			handleInfo(request);
 
-		} else if (isPrivate && path.equals("/registeruser")) {
-
-			handleRegisterUser(request);
-
-		} else if (isPrivate && path.equals("/authuser")) {
-
-			handleAuthUser(request);
-
-		} else if (isPrivate && path.equals("/getuser")) {
-
-			handleGetUser(request);
-
-		} else if (isPrivate && path.equals("/updateuser")) {
-
-			handleUpdateUser(request);
-
-		} else if (isPrivate && path.equals("/listrequests")) {
-
-			handleListRequests(request);
-
-		} else if (isPrivate && path.equals("/listusers")) {
-
-			handleListUsers(request);
-
 		} else if (path.startsWith("/alg")) {
 
-			if (!isPrivate || (auth(request) != null)) {
-				String algName = queryStringDecoder.getPath().substring(4);
-				handleAlg(request, algName);
-			} else {
+			if (isPrivate && (auth(request) == null)) {
 				responder.writeUnauthorizedClose();
+			} else {
+				final String algName = queryStringDecoder.getPath()
+						.substring(4);
+				handleAlg(request, algName);
+			}
+
+		} else if (isPrivate) {
+			if ("/registeruser".equals(path)) {
+
+				handleRegisterUser(request);
+
+			} else if ("/authuser".equals(path)) {
+
+				handleAuthUser(request);
+
+			} else if ("/getuser".equals(path)) {
+
+				handleGetUser(request);
+
+			} else if ("/updateuser".equals(path)) {
+
+				handleUpdateUser(request);
+
+			} else if ("/listrequests".equals(path)) {
+
+				handleListRequests(request);
+
+			} else if ("/listusers".equals(path)) {
+
+				handleListUsers(request);
+
 			}
 		} else {
 			// Unknown request, close connection
@@ -195,15 +201,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	private void handleAlg(HttpRequest request, String algName)
+	private void handleAlg(final HttpRequest request, final String algName)
 			throws IOException {
 
-		ComputeRequest req = readComputeRequest(algName, responder, request);
+		final ComputeRequest req = readComputeRequest(algName, responder,
+				request);
 		if (req != null) {
 
-			boolean sucess = computer.submit(req);
+			final boolean success = computer.submit(req);
 
-			if (!sucess) {
+			if (!success) {
 				responder
 						.writeErrorMessage(
 								"EBUSY",
@@ -222,12 +229,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @param request
 	 * @throws IOException
 	 */
-	private Map<String, Object> getJSONContent(Responder responder,
-			HttpRequest request) throws IOException {
+	private Map<String, Object> getJSONContent(final Responder responder,
+			final HttpRequest request) throws IOException {
 
 		Map<String, Object> objmap = null;
-		ChannelBuffer content = request.getContent();
-		if (content.readableBytes() != 0) {
+		final ChannelBuffer content = request.getContent();
+		if (content.readableBytes() > 0) {
 			try {
 				objmap = mapper.readValue(
 						new ChannelBufferInputStream(content),
@@ -242,10 +249,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		} else {
 			// Respond with No Content
-			HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
+			final HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
 					NO_CONTENT);
 			// Write the response.
-			ChannelFuture future = responder.getChannel().write(response);
+			final ChannelFuture future = responder.getChannel().write(response);
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
 
@@ -264,16 +271,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @throws IOException
 	 * @throws JsonParseException
 	 */
-	private ComputeRequest readComputeRequest(String algName,
-			Responder responder, HttpRequest request) throws IOException,
-			JsonParseException {
+	private ComputeRequest readComputeRequest(final String algName,
+			final Responder responder, final HttpRequest request)
+			throws IOException, JsonParseException {
 
 		Map<String, Object> constraints = null;
-		Points points = new Points();
-		ChannelBuffer content = request.getContent();
-		if (content.readableBytes() != 0) {
+		final Points points = new Points();
+		final ChannelBuffer content = request.getContent();
+		if (content.readableBytes() > 0) {
 
-			JsonParser jp = mapper.getJsonFactory().createJsonParser(
+			final JsonParser jp = mapper.getJsonFactory().createJsonParser(
 					new ChannelBufferInputStream(content));
 			jp.setCodec(mapper);
 
@@ -299,7 +306,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					while (jp.nextToken() != JsonToken.END_ARRAY) {
 						while (jp.nextToken() != JsonToken.END_OBJECT) {
 							fieldname = jp.getCurrentName();
-							token = jp.nextToken();
+							jp.nextToken();
 							if ("lt".equals(fieldname)) {
 								lat = jp.getDoubleValue();
 							} else if ("ln".equals(fieldname)) {
@@ -313,9 +320,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					}
 
 				} else if ("constraints".equals(fieldname)) {
-					constraints = jp
-							.readValueAs(new TypeReference<Map<String, Object>>() {
-							});
+					constraints = jp.readValueAs(JSONOBJECT);
 				} else {
 					// ignore for now TODO: user version string etc.
 					if ((token != JsonToken.START_ARRAY)
@@ -329,62 +334,63 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		} else {
 			// Respond with No Content
-			HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
+			final HttpResponse response = new DefaultHttpResponse(HTTP_1_1,
 					NO_CONTENT);
 			// Write the response.
-			ChannelFuture future = responder.getChannel().write(response);
+			final ChannelFuture future = responder.getChannel().write(response);
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
 
 		return new ComputeRequest(responder, algName, points, constraints);
 	}
 
-	private void handleListUsers(HttpRequest request) {
+	private void handleListUsers(final HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleListRequests(HttpRequest request) {
+	private void handleListRequests(final HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleUpdateUser(HttpRequest request) {
+	private void handleUpdateUser(final HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleGetUser(HttpRequest request) {
+	private void handleGetUser(final HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleAuthUser(HttpRequest request) {
+	private void handleAuthUser(final HttpRequest request) {
 		// TODO Auto-generated method stub
 
 	}
 
-	private void handleRegisterUser(HttpRequest request) {
+	private void handleRegisterUser(final HttpRequest request) {
 		try {
 			UsersDBRow user = null;
 			UsersDBRow authUser = null;
 
-			Map<String, Object> objmap = getJSONContent(responder, request);
+			final Map<String, Object> objmap = getJSONContent(responder,
+					request);
 			if (objmap == null) {
 				return;
 			}
 
 			// TODO optimize salt-generation
-			Random rand = new Random();
-			StringBuilder saltBuilder = new StringBuilder(100);
+			final Random rand = new Random();
+			final StringBuilder saltBuilder = new StringBuilder(100);
 			for (int i = 0; i < 10; i++) {
 				saltBuilder.append(Long.toHexString(rand.nextLong()));
 			}
 
-			String salt = saltBuilder.toString();
-			String pw = (String) objmap.get("password");
+			final String salt = saltBuilder.toString();
+			final String pw = (String) objmap.get("password");
 
-			String toHash = generateHash(salt, pw);
+			final String toHash = generateHash(salt, pw);
 			// TODO cover all cases
 
 			// if no authorization header add not verified user
@@ -426,13 +432,14 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	protected String generateHash(String salt, String pw) {
+	protected String generateHash(final String salt, final String pw) {
 		// Compute SHA1 of PW:SALT
 		String toHash = pw + ":" + salt;
 
-		byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
+		final byte[] bindigest = digester.digest(toHash
+				.getBytes(CharsetUtil.UTF_8));
 		// Convert to Hex String
-		StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
+		final StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
 		for (byte b : bindigest) {
 			hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
 			hexbuilder.append(Integer.toHexString(b & 0x0F));
@@ -441,7 +448,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		return toHash;
 	}
 
-	private void handleInfo(HttpRequest request)
+	private void handleInfo(final HttpRequest request)
 			throws JsonGenerationException, JsonMappingException, IOException {
 		responder.writeJSON(serverInfo, HttpResponseStatus.OK);
 	}
@@ -452,13 +459,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @param request
 	 * @param channel
 	 */
-	private void handlePreflights(HttpRequest request, Channel channel) {
+	private void handlePreflights(final HttpRequest request,
+			final Channel channel) {
 		boolean keepAlive = isKeepAlive(request);
 		HttpResponse response;
 
 		// We only allow POST and GET methods so only allow request when Method
 		// is Post or Get
-		String methodType = request.getHeader("Access-Control-Request-Method");
+		final String methodType = request
+				.getHeader("Access-Control-Request-Method");
 		if ((methodType != null)
 				&& (methodType.trim().equals("POST") || methodType.trim()
 						.equals("GET"))) {
@@ -470,7 +479,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			keepAlive = false;
 		}
 
-		ArrayList<String> allowHeaders = new ArrayList<String>(2);
+		final ArrayList<String> allowHeaders = new ArrayList<String>(2);
 		allowHeaders.add("Content-Type");
 		allowHeaders.add("Authorization");
 
@@ -481,7 +490,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		response.setHeader("Access-Control-Allow-Headers", allowHeaders);
 
-		ChannelFuture future = channel.write(response);
+		final ChannelFuture future = channel.write(response);
 		if (!keepAlive) {
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
@@ -499,7 +508,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @return the UsersDBRow object of the user or null if auth failed
 	 * @throws SQLException
 	 */
-	private UsersDBRow auth(HttpRequest myReq) throws SQLException {
+	private UsersDBRow auth(final HttpRequest myReq) throws SQLException {
 		String email, emailandpw, pw;
 		UsersDBRow user = null;
 		int index = 0;
@@ -537,7 +546,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 
 		// Compute SHA1 of PW:SALT
-		String toHash = generateHash(user.salt, pw);
+		final String toHash = generateHash(user.salt, pw);
 
 		System.out.println(pw + ":" + user.salt + " : " + toHash);
 		if (!user.passwordhash.equals(toHash)) {
@@ -553,8 +562,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * Called when an uncaught exception occurs
 	 */
 	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)
-			throws Exception {
+	public void exceptionCaught(final ChannelHandlerContext ctx,
+			final ExceptionEvent e) throws Exception {
 		e.getCause().printStackTrace();
 		e.getChannel().close();
 	}
