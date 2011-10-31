@@ -19,8 +19,6 @@ public class ShortestPathCHFactory extends GraphAlgorithmFactory {
 		super(graph);
 	}
 
-	static ShortestPath sp = null;
-
 	/*
 	 * (non-Javadoc)
 	 * 

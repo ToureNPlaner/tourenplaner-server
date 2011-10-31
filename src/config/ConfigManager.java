@@ -17,7 +17,7 @@ import org.codehaus.jackson.type.TypeReference;
  */
 public class ConfigManager {
 
-	private static ConfigManager instance = null;
+	private static volatile ConfigManager instance = null;
 
 	/**
 	 * Storage of configuration entries
@@ -74,7 +74,7 @@ public class ConfigManager {
 	 */
 	public double getEntryDouble(String key, double defaultValue) {
 		Double value = null;
-		if (confMap != null && confMap.containsKey(key)) {
+		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (Double) confMap.get(key);
@@ -103,7 +103,7 @@ public class ConfigManager {
 
 	public boolean getEntryBool(String key, boolean defaultValue) {
 		Boolean value = null;
-		if (confMap != null && confMap.containsKey(key)) {
+		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (Boolean) confMap.get(key);
@@ -132,7 +132,7 @@ public class ConfigManager {
 	 */
 	public long getEntryLong(String key, long defaultValue) {
 		Long value = null;
-		if (confMap != null && confMap.containsKey(key)) {
+		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (Long) confMap.get(key);
@@ -161,7 +161,7 @@ public class ConfigManager {
 	 */
 	public String getEntryString(String key, String defaultValue) {
 		String value = null;
-		if (confMap != null && confMap.containsKey(key)) {
+		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
 					value = (String) confMap.get(key);

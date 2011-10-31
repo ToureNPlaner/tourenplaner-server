@@ -810,7 +810,7 @@ public class DatabaseManager {
 
 			SQLException ex = e;
 
-			while (ex != null) {
+			do {
 
 				System.out.println("errorcode: " + ex.getErrorCode());
 				System.out.println("sqlstate: " + ex.getSQLState());
@@ -824,7 +824,7 @@ public class DatabaseManager {
 				System.out.println(ex.getLocalizedMessage());
 
 				ex = ex.getNextException();
-			}
+			} while (ex != null);
 
 			System.out.println("xopen: " + DatabaseMetaData.sqlStateXOpen);
 			System.out.println("sql: " + DatabaseMetaData.sqlStateSQL);

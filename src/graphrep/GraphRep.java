@@ -9,9 +9,9 @@ public class GraphRep implements Serializable {
 	private static final long serialVersionUID = 7L;
 
 	private static class Sorter {
-		private static void Sort(GraphRep graphRep) {
+		private static void sort(GraphRep graphRep) {
 
-			Heapify(graphRep);
+			heapify(graphRep);
 			int endI = graphRep.dest.length - 1;
 			while (endI > 0) {
 				swap(graphRep, endI, 0);
@@ -37,7 +37,7 @@ public class GraphRep implements Serializable {
 			return graphRep.dest[graphRep.mapping_InToOut[i]] < graphRep.dest[graphRep.mapping_InToOut[j]];
 		}
 
-		private static void Heapify(GraphRep graphRep) {
+		private static void heapify(GraphRep graphRep) {
 			int pos = graphRep.dest.length - 1;
 			while (pos >= 0) {
 				siftDown(graphRep, pos, graphRep.dest.length - 1);
@@ -51,8 +51,8 @@ public class GraphRep implements Serializable {
 			int cRI;
 			int cMaxI;
 
-			while (topI * 3 + 1 <= endI) {
-				cLI = topI * 3 + 1;
+			while (((topI * 3) + 1) <= endI) {
+				cLI = (topI * 3) + 1;
 				cMI = cLI + 1;
 				cRI = cLI + 2;
 				cMaxI = topI;
@@ -60,10 +60,10 @@ public class GraphRep implements Serializable {
 				if (less(graphRep, cMaxI, cLI)) {
 					cMaxI = cLI;
 				}
-				if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
+				if ((cMI <= endI) && less(graphRep, cMaxI, cMI)) {
 					cMaxI = cMI;
 				}
-				if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
+				if ((cRI <= endI) && less(graphRep, cMaxI, cRI)) {
 					cMaxI = cRI;
 				}
 				if (cMaxI != topI) {
@@ -86,30 +86,30 @@ public class GraphRep implements Serializable {
 	// (first outgoing edge = 0, second outgoing edge = 1, ...)
 
 	// nodes
-	private double[] lat;
-	private double[] lon;
-	private int[] height;
-	private int[] rank;
+	protected double[] lat;
+	protected double[] lon;
+	protected int[] height;
+	protected int[] rank;
 
 	// edges
-	private int[] src;
-	private int[] dest;
-	private int[] multipliedDist;
-	private int[] dist;
+	protected int[] src;
+	protected int[] dest;
+	protected int[] multipliedDist;
+	protected int[] dist;
 
-	private int[] shortedID;
-	private int[] outEdgeSourceNum;
-	private int[] outEdgeShortedNum;
+	protected int[] shortedID;
+	protected int[] outEdgeSourceNum;
+	protected int[] outEdgeShortedNum;
 
-	private int[] offsetOut;
-	private int[] offsetIn;
+	protected int[] offsetOut;
+	protected int[] offsetIn;
 
 	/**
 	 * Index = "virtual" id for in edges
 	 * 
 	 * content = position in the edge array
 	 */
-	private int[] mapping_InToOut;
+	protected int[] mapping_InToOut;
 
 	/**
 	 * A graphrep is the representation of a graph used to perform several
@@ -226,7 +226,7 @@ public class GraphRep implements Serializable {
 			offsetOut[cnt] = offsetOut[cnt + 1];
 		}
 
-		Sorter.Sort(this);
+		Sorter.sort(this);
 
 		int currentDest;
 		int prevDest = -1;

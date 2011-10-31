@@ -180,7 +180,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		} else if (path.startsWith("/alg")) {
 
-			if (!isPrivate || auth(request) != null) {
+			if (!isPrivate || (auth(request) != null)) {
 				String algName = queryStringDecoder.getPath().substring(4);
 				handleAlg(request, algName);
 			} else {
@@ -318,9 +318,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 							});
 				} else {
 					// ignore for now TODO: user version string etc.
-					if (token != JsonToken.START_ARRAY
-							&& token != JsonToken.START_OBJECT) {
-						token = jp.nextToken();
+					if ((token != JsonToken.START_ARRAY)
+							&& (token != JsonToken.START_OBJECT)) {
+						jp.nextToken();
 					} else {
 						jp.skipChildren();
 					}
@@ -396,7 +396,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						(String) objmap.get("address"),
 						(Boolean) objmap.get("admin"));
 			} else {
-				if ((authUser = auth(request)) != null && authUser.isAdmin) {
+				if (((authUser = auth(request)) != null) && authUser.isAdmin) {
 
 					user = dbm.addNewVerifiedUser((String) objmap.get("email"),
 							toHash, salt, (String) objmap.get("firstname"),
@@ -459,7 +459,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		// We only allow POST and GET methods so only allow request when Method
 		// is Post or Get
 		String methodType = request.getHeader("Access-Control-Request-Method");
-		if (methodType != null
+		if ((methodType != null)
 				&& (methodType.trim().equals("POST") || methodType.trim()
 						.equals("GET"))) {
 			response = new DefaultHttpResponse(HTTP_1_1, OK);
