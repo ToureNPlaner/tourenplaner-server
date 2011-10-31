@@ -44,5 +44,5 @@ package_sptogpx() {
   install -m 755 ${startdir}/sptogpx ${pkgdir}/usr/bin/sptogpx
 }
 
-md5sums=('46b1da68a1805ccf4a82a32970484b74'
-         '97b775b3f47bf8a29a27a9a165bc955c')
+md5sums=('bc98dda320732aaeda6297da2cd05955'
+         '1e9c8797aa2f4b442647a82e5f5373e5')
