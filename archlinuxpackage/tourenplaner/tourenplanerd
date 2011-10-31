@@ -19,8 +19,9 @@ case "$1" in
 
   stop)
     stat_busy "Stopping tourenplaner-server"
-    [ -f /var/run/tourenplaner-server.pid ] && kill `cat /var/run/tourenplaner-server.pid`
+    [ -f /var/run/tourenplaner-server.pid ] && kill `cat /var/run/tourenplaner-server.pid` &>/dev/null
     if [ $? -gt 0 ]; then
+      rm_daemon tourenplanerd
       stat_fail
     else
       rm_daemon tourenplanerd
