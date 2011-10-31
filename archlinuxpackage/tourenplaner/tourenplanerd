@@ -6,7 +6,7 @@
 case "$1" in
   start)
     stat_busy "Starting tourenplaner-server"
-    [ ! -f /var/run/daemons/tourenplanerd ] && /usr/bin/tourenplaner-server &>/dev/null &
+    [ ! -f /var/run/daemons/tourenplanerd ] && /usr/bin/tourenplaner-server &>/var/log/tourenplanerd &
     if [ $? -gt 0 ]; then
       stat_fail
     else
