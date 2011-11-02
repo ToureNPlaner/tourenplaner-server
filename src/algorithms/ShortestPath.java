@@ -9,8 +9,6 @@ import computecore.ComputeRequest;
 
 public class ShortestPath extends GraphAlgorithm {
 
-	private ComputeRequest req = null;
-
 	private final Heap heap;
 
 	public ShortestPath(GraphRep graph) {
@@ -18,16 +16,6 @@ public class ShortestPath extends GraphAlgorithm {
 		heap = new algorithms.Heap(10000);
 		multipliedDist = new int[graph.getNodeCount()];
 		prevEdges = new int[graph.getNodeCount()];
-	}
-
-	@Override
-	public void setRequest(ComputeRequest req) {
-		// reset dists
-		for (int i = 0; i < multipliedDist.length; i++) {
-			multipliedDist[i] = Integer.MAX_VALUE;
-		}
-		heap.resetHeap();
-		this.req = req;
 	}
 
 	// dists in this array are stored with the multiplier applied. They also are
@@ -58,28 +46,19 @@ public class ShortestPath extends GraphAlgorithm {
 	}
 
 	@Override
-	public void run() {
+	public void compute(ComputeRequest req) throws ComputeException {
 		assert (req != null) : "We ended up without a request object in run";
 
-		Points points = null;
-		// TODO: send error messages to client
-		try {
-			points = req.getPoints();
-		} catch (ClassCastException e) {
-			System.err.println("The request's contents are invalid\n"
-					+ e.getMessage());
-			e.printStackTrace();
-			return;
-		} catch (NullPointerException e) {
-			System.err
-					.println("The request doesn't contain the information required for this algorithm\n"
-							+ e.getMessage());
-			e.printStackTrace();
-			return;
+		// reset dists
+		for (int i = 0; i < multipliedDist.length; i++) {
+			multipliedDist[i] = Integer.MAX_VALUE;
 		}
+		heap.resetHeap();
+		Points points = req.getPoints();
+
 		// Check if we have enough points to do something useful
 		if (points.size() < 2) {
-			return;
+			throw new ComputeException("Not enough points, need at least 2");
 		}
 
 		Points resultPoints = req.getResultPoints();
@@ -145,7 +124,7 @@ public class ShortestPath extends GraphAlgorithm {
 			if (nodeID != destid) {
 				// TODO: send errmsg to client and do something useful
 				System.err.println("There is no path from src to dest");
-				return;
+				throw new ComputeException("No path found");
 			}
 
 			// Find out how much space to allocate
