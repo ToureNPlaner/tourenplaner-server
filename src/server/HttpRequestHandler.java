@@ -365,21 +365,90 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	private void handleAuthUser(final HttpRequest request) {
-		// TODO Auto-generated method stub
-
+		UsersDBRow user = null;
+		
+		try {
+			user = auth(request);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (user == null) {
+			return;
+		}
+		
+		try {
+			responder.writeJSON(user.getSmallUserHashMap(), 
+					HttpResponseStatus.OK);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
+	/**
+	 * If authorization is okay, but no admin, registration fails.
+	 * If no authorization as admin, the new registered user will not 
+	 * be registered as admin, even if json admin flag is true.
+	 * @param request
+	 */
 	private void handleRegisterUser(final HttpRequest request) {
 		try {
 			UsersDBRow user = null;
 			UsersDBRow authUser = null;
-
-			final Map<String, Object> objmap = getJSONContent(responder,
-					request);
+			
+			// if no authorization header keep on with adding not verified user
+			if (request.getHeader("Authorization") != null) {
+				authUser = auth(request);
+				if (authUser == null) {
+					return;
+				}
+				if (authUser != null && !authUser.isAdmin) {
+					responder.writeUnauthorizedClose();
+					return;
+				}
+			}
+			
+			Map<String, Object> objmap = null;
+			
+			try {
+				objmap = getJSONContent(responder, request);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+				
+			// getJSONContent adds error-message to responder 
+			// if json object is bad or if there is no json object
+			// so no further handling needed if objmap == null
 			if (objmap == null) {
 				return;
 			}
 
+
+			final String email = (String) objmap.get("email");
+			final String pw = (String) objmap.get("password");
+			final String firstName = (String) objmap.get("firstname");
+			final String lastName = (String) objmap.get("lastname");
+			final String address = (String) objmap.get("address");
+			
+			if (pw == null || email == null || firstName == null 
+					|| lastName == null || address == null) {
+				// TODO maybe change error id and message
+				responder.writeErrorMessage("EBADJSON",
+						"Could not parse supplied JSON", 
+						"JSON user object was not correct " + 
+						"(needs email, password, firstname, lastname, address)",
+						HttpResponseStatus.UNAUTHORIZED);
+			}
+			
 			// TODO optimize salt-generation
 			final Random rand = new Random();
 			final StringBuilder saltBuilder = new StringBuilder(100);
@@ -388,43 +457,48 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			}
 
 			final String salt = saltBuilder.toString();
-			final String pw = (String) objmap.get("password");
-
+			
 			final String toHash = generateHash(salt, pw);
-			// TODO cover all cases
 
-			// if no authorization header add not verified user
-			if (request.getHeader("Authorization") == null) {
-
-				user = dbm.addNewUser((String) objmap.get("email"), toHash,
-						salt, (String) objmap.get("firstname"),
-						(String) objmap.get("lastname"),
-						(String) objmap.get("address"),
-						(Boolean) objmap.get("admin"));
+			// if no authorization add not verified user
+			if (authUser == null) {
+				// if no authorization as admin, the new registered user will 
+				// not be registered as admin, even if json admin flag is true
+				user = dbm.addNewUser(email, toHash, salt, 
+						firstName, lastName, address, false);
 			} else {
-				if (((authUser = auth(request)) != null) && authUser.isAdmin) {
+					
+				boolean admin = false;
 
-					user = dbm.addNewVerifiedUser((String) objmap.get("email"),
-							toHash, salt, (String) objmap.get("firstname"),
-							(String) objmap.get("lastname"),
-							(String) objmap.get("address"),
-							(Boolean) objmap.get("admin"));
-
-				} else {
-					responder.writeUnauthorizedClose();
+				if (objmap.get("admin") != null) {
+					admin = (Boolean) objmap.get("admin");
 				}
+
+				user = dbm.addNewVerifiedUser(email, toHash, salt, 
+						firstName, lastName, address, admin);
 			}
-
-			// TODO handler if user already existed
+			
 			if (user == null) {
-
+				responder.writeErrorMessage("EREGISTERED",
+						"This email is already registered", null,
+						HttpResponseStatus.FORBIDDEN);
+				return;
+			}
+			else {
+				responder.writeJSON(user.getSmallUserHashMap(), 
+						HttpResponseStatus.OK);
 			}
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 
-			// TODO JSON Exception Handling
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

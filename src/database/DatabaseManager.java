@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -194,11 +195,21 @@ public class DatabaseManager {
 		request = new RequestsDBRow(-1, userID, jsonRequest, null, true, 0,
 				false, new Date(stamp.getTime()), null, 0, false, null);
 
+		boolean hasKey = false;
 		generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
 		if (generatedKeyResultSet.next()) {
 			request.id = generatedKeyResultSet.getInt(1);
+			hasKey = true;
 		}
 		generatedKeyResultSet.close();
+		
+		if (!hasKey) {
+			System.err.println("Current database doesn't support " +
+					"java.sql.Statement.getGeneratedKeys()");
+			throw new SQLFeatureNotSupportedException(
+					"Current database doesn't support " +
+					"java.sql.Statement.getGeneratedKeys()");
+		}
 		
 		return request;
 	}
@@ -245,7 +256,7 @@ public class DatabaseManager {
 	/**
 	 * Tries to insert a new user dataset into the database, but request should
 	 * have legit admin authentication (will not be checked within this method).
-	 * New user will be verified. . </br>SQL command: {@value #addNewUserString}
+	 * New user will be verified. </br>SQL command: {@value #addNewUserString}
 	 * 
 	 * @param email
 	 *            Have to be unique, that means another user must not have the
@@ -288,7 +299,6 @@ public class DatabaseManager {
 			throws SQLException {
 
 		UsersDBRow user = null;
-		ResultSet generatedKeyResultSet = null;
 
 		email = email.trim();
 		passwordhash = passwordhash.trim();
@@ -328,15 +338,27 @@ public class DatabaseManager {
 					verifiedDate, null);
 
 			// try {
+			ResultSet generatedKeyResultSet = null;
+			
 			generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
+			
+			boolean hasKey = false;
 			if (generatedKeyResultSet.next()) {
 				user.id = generatedKeyResultSet.getInt(1);
+				hasKey = true;
 			}
 			generatedKeyResultSet.close();
+			
+			if (!hasKey) {
+				System.err.println("Current database doesn't support " +
+						"java.sql.Statement.getGeneratedKeys()");
+				user = this.getUser(email);
+			}
 			/*
 			 * } catch (SQLFeatureNotSupportedException ex) { if
 			 * (ex.getNextException() != null) { throw ex; } }
 			 */
+		// catch if duplicate key error
 		} catch (SQLIntegrityConstraintViolationException ex) {
 			if (ex.getNextException() == null) {
 				return null;
@@ -495,6 +517,8 @@ public class DatabaseManager {
 							.getLong(10), resultSet.getBoolean(11), resultSet
 							.getString(12)));
 		}
+		
+		resultSet.close();
 
 		return list;
 	}
@@ -534,6 +558,7 @@ public class DatabaseManager {
 							.getLong(10), resultSet.getBoolean(11), resultSet
 							.getString(12)));
 		}
+		resultSet.close();
 
 		return list;
 	}
@@ -565,6 +590,7 @@ public class DatabaseManager {
 					resultSet.getLong(10), resultSet.getBoolean(11),
 					resultSet.getString(12));
 		}
+		resultSet.close();
 
 		return request;
 	}
@@ -598,6 +624,7 @@ public class DatabaseManager {
 							.getLong(10), resultSet.getBoolean(11), resultSet
 							.getString(12)));
 		}
+		resultSet.close();
 
 		return list;
 	}
@@ -641,6 +668,7 @@ public class DatabaseManager {
 							.getLong(10), resultSet.getBoolean(11), resultSet
 							.getString(12)));
 		}
+		resultSet.close();
 
 		return list;
 	}
@@ -671,6 +699,7 @@ public class DatabaseManager {
 							.getTimestamp(11)), timestampToDate(resultSet
 							.getTimestamp(12))));
 		}
+		resultSet.close();
 
 		return list;
 	}
@@ -709,6 +738,7 @@ public class DatabaseManager {
 							.getTimestamp(11)), timestampToDate(resultSet
 							.getTimestamp(12))));
 		}
+		resultSet.close();
 
 		return list;
 	}
@@ -738,6 +768,7 @@ public class DatabaseManager {
 					timestampToDate(resultSet.getTimestamp(11)),
 					timestampToDate(resultSet.getTimestamp(12)));
 		}
+		resultSet.close();
 
 		return user;
 	}
@@ -768,6 +799,7 @@ public class DatabaseManager {
 					timestampToDate(resultSet.getTimestamp(11)),
 					timestampToDate(resultSet.getTimestamp(12)));
 		}
+		resultSet.close();
 
 		return user;
 	}

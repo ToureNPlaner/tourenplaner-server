@@ -4,6 +4,8 @@
 package database;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Sascha Meusel
@@ -42,6 +44,30 @@ public class UsersDBRow {
 		this.verifiedDate = verifiedDate;
 		this.deleteRequestDate = deleteRequestDate;
 		
+	}
+	
+	/**
+	 * Returns a HashMap with following structure and without password:<br>
+	 * <pre>
+	 * "email" : "...",
+	 * "firstname" : "...",
+	 * "lastname" : "...",
+	 * "address" : "...",
+	 * "admin" : false,
+	 * "status" : "..."</pre>
+	 * 
+	 * @return
+	 */
+	public Map<String,Object> getSmallUserHashMap() {
+		Map<String, Object> user = new HashMap<String, Object>(6);
+		user.put("email", email);
+		user.put("firstname", firstName);
+		user.put("lastname", lastName);
+		user.put("address", address);
+		user.put("admin", isAdmin);
+		user.put("status", status.toString());
+		
+		return user;
 	}
 	
 }
