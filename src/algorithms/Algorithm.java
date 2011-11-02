@@ -12,15 +12,13 @@ import computecore.ComputeRequest;
  *         do Computations
  * 
  */
-public interface Algorithm extends Runnable {
+public interface Algorithm {
 
 	/**
-	 * Sets the ComputeRequest to work on when run is called. This method
-	 * obviously need to be called before run. The algorihtm instance will use
-	 * the Request object to store it's results in the points and misc fields
+	 * Runs the Algorithm instance on the given ComputeRequest
 	 * 
 	 * @param req
 	 */
-	public void setRequest(ComputeRequest req);
+	public void compute(ComputeRequest req) throws ComputeException;
 
 }

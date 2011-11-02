@@ -3,16 +3,16 @@
  */
 package algorithms;
 
-import com.carrotsearch.hppc.DoubleArrayList;
+import com.carrotsearch.hppc.IntArrayList;
 
 public class Points {
-	private DoubleArrayList points;
+	private IntArrayList points;
 
 	public Points() {
-		points = new DoubleArrayList();
+		points = new IntArrayList();
 	}
 
-	public void addPoint(double lat, double lon) {
+	public void addPoint(int lat, int lon) {
 		points.add(lat);
 		points.add(lon);
 	}
@@ -21,19 +21,19 @@ public class Points {
 		points.resize(points.size() + num);
 	}
 
-	public double getPointLat(int index) {
+	public int getPointLat(int index) {
 		return points.get(index * 2);
 	}
 
-	public double getPointLon(int index) {
+	public int getPointLon(int index) {
 		return points.get(index * 2 + 1);
 	}
 
-	public void setPointLat(int index, double lat) {
+	public void setPointLat(int index, int lat) {
 		points.set(index * 2, lat);
 	}
 
-	public void setPointLon(int index, double lon) {
+	public void setPointLon(int index, int lon) {
 		points.set(index * 2 + 1, lon);
 	}
 

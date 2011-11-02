@@ -291,7 +291,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			String fieldname;
 			JsonToken token;
-			double lat = 0, lon = 0;
+			int lat = 0, lon = 0;
 			while (jp.nextToken() != JsonToken.END_OBJECT) {
 				fieldname = jp.getCurrentName();
 				token = jp.nextToken(); // move to value, or
@@ -308,9 +308,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 							fieldname = jp.getCurrentName();
 							jp.nextToken();
 							if ("lt".equals(fieldname)) {
-								lat = jp.getDoubleValue();
+								lat = jp.getIntValue();
 							} else if ("ln".equals(fieldname)) {
-								lon = jp.getDoubleValue();
+								lon = jp.getIntValue();
 							} else {
 								throw new JsonParseException("Unknown field "
 										+ fieldname, jp.getCurrentLocation());

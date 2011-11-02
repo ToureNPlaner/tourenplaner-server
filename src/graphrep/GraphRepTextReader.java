@@ -48,13 +48,13 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		System.out.println("Reading " + nodeCount + " nodes and " + edgeCount
 				+ " edges ...");
-		double lat, lon;
+		int lat, lon;
 		int height;
 
 		for (int i = 0; i < nodeCount; i++) {
 			splittedLine = inb.readLine().split(" ");
-			lat = Double.parseDouble(splittedLine[1]);
-			lon = Double.parseDouble(splittedLine[2]);
+			lat = Integer.parseInt(splittedLine[1]);
+			lon = Integer.parseInt(splittedLine[2]);
 			height = Integer.parseInt(splittedLine[3]);
 			graphRep.setNodeData(i, lat, lon, height);
 

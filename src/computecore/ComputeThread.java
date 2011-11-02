@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import algorithms.Algorithm;
+import algorithms.ComputeException;
 
 /**
  * A ComputeThread computes the results of ComputeRequests it gets from the
@@ -49,11 +50,17 @@ public class ComputeThread extends Thread {
 				work = reqQueue.take();
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
-					alg.setRequest(work);
-					alg.run();
-					work.getResponder().writeComputeResult(work,
-							HttpResponseStatus.OK);
-
+					try {
+						alg.compute(work);
+						work.getResponder().writeComputeResult(work,
+								HttpResponseStatus.OK);
+					} catch (ComputeException e) {
+						System.err.println("There was a ComputeException: "
+								+ e.getMessage());
+						work.getResponder().writeErrorMessage("ECOMPUTE",
+								e.getMessage(), "",
+								HttpResponseStatus.PROCESSING);
+					}
 				} else {
 					System.err.println("Unsupported algorithm "
 							+ work.getAlgorithmURLSuffix() + " requested");

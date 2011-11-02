@@ -1,3 +1,7 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
+
 package graphrep;
 
 import java.io.Serializable;
@@ -6,7 +10,7 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 7L;
+	private static final long serialVersionUID = 8L;
 
 	private static class Sorter {
 		private static void sort(GraphRep graphRep) {
@@ -86,8 +90,9 @@ public class GraphRep implements Serializable {
 	// (first outgoing edge = 0, second outgoing edge = 1, ...)
 
 	// nodes
-	protected double[] lat;
-	protected double[] lon;
+	// In degrees*10^7
+	protected int[] lat;
+	protected int[] lon;
 	protected int[] height;
 	protected int[] rank;
 
@@ -120,8 +125,8 @@ public class GraphRep implements Serializable {
 		this.nodeCount = nodeCount;
 		this.edgeCount = edgeCount;
 
-		this.lat = new double[nodeCount];
-		this.lon = new double[nodeCount];
+		this.lat = new int[nodeCount];
+		this.lon = new int[nodeCount];
 		this.height = new int[nodeCount];
 
 		this.rank = new int[nodeCount];
@@ -146,10 +151,12 @@ public class GraphRep implements Serializable {
 	 * 
 	 * @param id
 	 * @param lat
+	 *            in degrees*10^7
 	 * @param lon
+	 *            in degrees*10^7
 	 * @param height
 	 */
-	protected final void setNodeData(int id, double lat, double lon, int height) {
+	protected final void setNodeData(int id, int lat, int lon, int height) {
 		this.lat[id] = lat;
 		this.lon[id] = lon;
 		this.height[id] = height;
@@ -299,7 +306,7 @@ public class GraphRep implements Serializable {
 	 * @param srclon
 	 * @return
 	 */
-	public final int getIDForCoordinates(double srclat, double srclon) {
+	public final int getIDForCoordinates(int srclat, int srclon) {
 		return searcher.getIDForCoordinates(srclat, srclon);
 	}
 
@@ -438,20 +445,20 @@ public class GraphRep implements Serializable {
 	/**
 	 * Gets the latitude of the node with the given nodeId
 	 * 
-	 * @return double
+	 * @return int (degrees*10^7)
 	 * @param nodeID
 	 */
-	public final double getNodeLat(int nodeID) {
+	public final int getNodeLat(int nodeID) {
 		return lat[nodeID];
 	}
 
 	/**
 	 * Gets the longitude of the node with the given nodeId
 	 * 
-	 * @return double
+	 * @return int (degrees*10^7)
 	 * @param nodeID
 	 */
-	public final double getNodeLon(int nodeID) {
+	public final int getNodeLon(int nodeID) {
 		return lon[nodeID];
 	}
 

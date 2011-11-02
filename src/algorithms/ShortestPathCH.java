@@ -1,3 +1,6 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
 package algorithms;
 
 import graphrep.GraphRep;
@@ -10,8 +13,6 @@ import com.carrotsearch.hppc.IntArrayDeque;
 import computecore.ComputeRequest;
 
 public class ShortestPathCH extends GraphAlgorithm {
-
-	private ComputeRequest req = null;
 
 	private final Heap heap;
 
@@ -30,11 +31,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 		marked = new BitSet(graph.getEdgeCount());
 		visited = new BitSet(graph.getNodeCount());
 		deque = new IntArrayDeque();
-	}
-
-	@Override
-	public void setRequest(ComputeRequest req) {
-		this.req = req;
 	}
 
 	private void reset() {
@@ -73,24 +69,19 @@ public class ShortestPathCH extends GraphAlgorithm {
 	}
 
 	@Override
-	public void run() {
+	public void compute(ComputeRequest req) throws ComputeException {
 		assert (req != null) : "We ended up without a request object in run";
 
-		Points points = null;
 		// TODO: send error messages to client
-		points = req.getPoints();
+		Points points = req.getPoints();
 		// Check if we have enough points to do something useful
 		if (points.size() < 2) {
-			return;
+			throw new ComputeException("Not enough points, need at least 2");
 		}
 
 		Points resultPoints = req.getResultPoints();
 		int distance = 0;
-		try {
-			distance = shortestPath(points, resultPoints);
-		} catch (Exception e) {
-
-		}
+		distance = shortestPath(points, resultPoints);
 
 		Map<String, Object> misc = new HashMap<String, Object>(1);
 		misc.put("distance", distance);
@@ -107,11 +98,11 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @throws Exception
 	 */
 	public int shortestPath(Points points, Points resultPoints)
-			throws Exception {
-		double srclat;
-		double srclon;
-		double destlat;
-		double destlon;
+			throws ComputeException {
+		int srclat;
+		int srclon;
+		int destlat;
+		int destlon;
 
 		int srcid = 0;
 		int destid = 0;
@@ -132,8 +123,10 @@ public class ShortestPathCH extends GraphAlgorithm {
 			destid = graph.getIDForCoordinates(destlat, destlon);
 			System.out.println("NNSearch took "
 					+ ((System.nanoTime() - nntime) / 1000000.0) + " ms");
-			directDistance = calcDirectDistance(srclat, srclon, destlat,
-					destlon);
+			directDistance = calcDirectDistance(((double) srclat) / 10000000.0,
+					((double) srclon) / 10000000,
+					((double) destlat) / 10000000,
+					((double) destlon) / 10000000);
 
 			int nodeID = destid;
 			int sourceNode;
@@ -220,7 +213,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			if (nodeID != destid) {
 				// TODO: send errmsg to client and do something useful
 				System.err.println("There is no path from src to dest");
-				throw new Exception("No Path found");
+				throw new ComputeException("No Path found");
 			}
 
 			// backtracking and shortcut unpacking use dequeue as stack
@@ -265,8 +258,9 @@ public class ShortestPathCH extends GraphAlgorithm {
 			}
 
 			backtracktime = System.nanoTime();
-			System.out.println("found sp with dist = " + (distance / 1000.0)
-					+ " km (direct distance: " + (directDistance / 1000.0)
+			System.out.println("found sp with dist = "
+					+ ((double) distance / 1000.0) + " km (direct distance: "
+					+ (directDistance / 1000.0)
 					+ " km; Distance with multiplier: "
 					+ (dists[destid] / 1000.0) + ")");
 			System.out.println("Dijkstra: "

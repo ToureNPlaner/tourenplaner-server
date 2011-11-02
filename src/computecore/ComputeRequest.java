@@ -22,6 +22,7 @@ public class ComputeRequest {
 			TypeReference<Map<String, Object>> {
 	};
 
+	@SuppressWarnings("unused")
 	private static final MapType JSONOBJECT = new MapType();
 	private Points points;
 	private Points resultPoints;

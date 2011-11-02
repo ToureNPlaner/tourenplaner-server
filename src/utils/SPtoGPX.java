@@ -55,8 +55,11 @@ public class SPtoGPX {
 					+ "    <name>Example GPX Document</name>");
 			System.out.println("<trkseg>");
 			for (Map<String, Object> point : points) {
-				System.out.println("<trkpt lat=\"" + point.get("lt")
-						+ "\" lon=\"" + point.get("ln") + "\"></trkpt>");
+				System.out.println("<trkpt lat=\""
+						+ ((Integer) point.get("lt")).doubleValue()
+						/ 10000000.0 + "\" lon=\""
+						+ ((Integer) point.get("ln")).doubleValue()
+						/ 10000000.0 + "\"></trkpt>");
 			}
 			System.out.println("</trkseg>\n</trk>\n</gpx>");
 
