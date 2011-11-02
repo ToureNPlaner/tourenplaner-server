@@ -93,8 +93,8 @@ int main(int args, char** argv) {
     // Write Nodes
     for(unsigned int i=0 ; i<n; ++i) {
        cout << i << " ";
-       cout << nodes[i].data.lat << " ";
-       cout << nodes[i].data.lon << " ";
+       cout << ((int32_t) (nodes[i].data.lat*10000000.0)) << " ";
+       cout << ((int32_t) (nodes[i].data.lon*10000000.0)) << " ";
        cout << nodes[i].data.ele << " ";
        cout << ((nodes[i].rank < (uint32_t)numeric_limits<int32_t>::max())?(int32_t)nodes[i].rank:(int32_t)numeric_limits<int32_t>::max())<< endl;
     }

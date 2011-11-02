@@ -28,8 +28,8 @@ public class HashNN implements NNSearcher {
 		dumpNN = new DumbNN(graphRep);
 		hashMap = new HashMap<Long, Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
-			long tempLat = (long) (graphRep.getNodeLat(i) * 1000);
-			long tempLon = (long) (graphRep.getNodeLon(i) * 1000);
+			long tempLat = graphRep.getNodeLat(i) / 1000;
+			long tempLon = graphRep.getNodeLon(i) / 1000;
 
 			long key = tempLat << 32 | tempLon;
 			IntArrayList tempValues = (IntArrayList) hashMap.get(key);
@@ -50,16 +50,16 @@ public class HashNN implements NNSearcher {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see graphrep.NNSearcher#getIDForCoordinates(double, double)
+	 * @see graphrep.NNSearcher#getIDForCoordinates(int, int)
 	 */
 	@Override
-	public int getIDForCoordinates(double lat, double lon) {
-		long keyLat = (long) (lat * 1000);
-		long keyLon = (long) (lon * 1000);
+	public int getIDForCoordinates(int lat, int lon) {
 		int pos = -1;
 		long key;
-		double dist = Long.MAX_VALUE;
-		double tempDist = Long.MAX_VALUE;
+		long keyLat = lat / 1000;
+		long keyLon = lon / 1000;
+		long dist = Long.MAX_VALUE;
+		long tempDist = Long.MAX_VALUE;
 		boolean found = false;
 		boolean finished = false;
 		int hops = 0;

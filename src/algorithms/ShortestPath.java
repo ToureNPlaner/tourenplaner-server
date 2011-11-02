@@ -11,14 +11,6 @@ public class ShortestPath extends GraphAlgorithm {
 
 	private ComputeRequest req = null;
 
-	double srclat;
-	double srclon;
-	double destlat;
-	double destlon;
-
-	int srcid;
-	int destid;
-
 	private final Heap heap;
 
 	public ShortestPath(GraphRep graph) {
@@ -92,6 +84,9 @@ public class ShortestPath extends GraphAlgorithm {
 
 		Points resultPoints = req.getResultPoints();
 		int distance = 0;
+		int srclat, srclon;
+		int destlat, destlon;
+		int srcid, destid;
 
 		for (int pointIndex = 0; pointIndex < points.size() - 1; pointIndex++) {
 			srclat = points.getPointLat(pointIndex);

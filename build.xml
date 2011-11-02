@@ -55,7 +55,7 @@
         </jar>
     	
     	<copy todir="${jar.temp.dir}">
-    	    <fileset dir="${lib.dir}" includes="json_simple-1.1.jar"/>
+    	    <fileset dir="${lib.dir}" includes="**/*.jar"/>
     	</copy>
     	
     	<zip destfile="${jar.dir}/sptogpx.jar">

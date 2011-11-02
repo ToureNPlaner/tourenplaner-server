@@ -108,10 +108,10 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 */
 	public int shortestPath(Points points, Points resultPoints)
 			throws Exception {
-		double srclat;
-		double srclon;
-		double destlat;
-		double destlon;
+		int srclat;
+		int srclon;
+		int destlat;
+		int destlon;
 
 		int srcid = 0;
 		int destid = 0;
@@ -132,8 +132,10 @@ public class ShortestPathCH extends GraphAlgorithm {
 			destid = graph.getIDForCoordinates(destlat, destlon);
 			System.out.println("NNSearch took "
 					+ ((System.nanoTime() - nntime) / 1000000.0) + " ms");
-			directDistance = calcDirectDistance(srclat, srclon, destlat,
-					destlon);
+			directDistance = calcDirectDistance(((double) srclat) / 10000000.0,
+					((double) srclon) / 10000000,
+					((double) destlat) / 10000000,
+					((double) destlon) / 10000000);
 
 			int nodeID = destid;
 			int sourceNode;
@@ -265,8 +267,9 @@ public class ShortestPathCH extends GraphAlgorithm {
 			}
 
 			backtracktime = System.nanoTime();
-			System.out.println("found sp with dist = " + (distance / 1000.0)
-					+ " km (direct distance: " + (directDistance / 1000.0)
+			System.out.println("found sp with dist = "
+					+ ((double) distance / 1000.0) + " km (direct distance: "
+					+ (directDistance / 1000.0)
 					+ " km; Distance with multiplier: "
 					+ (dists[destid] / 1000.0) + ")");
 			System.out.println("Dijkstra: "
