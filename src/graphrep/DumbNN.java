@@ -14,6 +14,13 @@ public class DumbNN implements NNSearcher {
 		this.graphRep = graphRep;
 	}
 
+	private final long sqDistToCoords(int nodeID, int lat, int lon) {
+		return ((long) (graphRep.getNodeLat(nodeID) - lat))
+				* ((long) (graphRep.getNodeLat(nodeID) - lat))
+				+ ((long) (graphRep.getNodeLon(nodeID) - lon))
+				* ((long) (graphRep.getNodeLon(nodeID) - lon));
+	}
+
 	@Override
 	public int getIDForCoordinates(int lat, int lon) {
 
@@ -26,14 +33,9 @@ public class DumbNN implements NNSearcher {
 			return -1;
 		}
 
-		bestDistance = ((lon - graphRep.getNodeLat(pos)
-				* (lon - graphRep.getNodeLon(pos) + ((lat - graphRep
-						.getNodeLat(pos)) * (lat - graphRep.getNodeLat(pos))))));
+		bestDistance = sqDistToCoords(pos, lat, lon);
 		for (int i = 1; i < numberOfNodes; i++) {
-			squareDistance = ((lon - graphRep.getNodeLon(i)) * (lon - graphRep
-					.getNodeLon(i)))
-					+ ((lat - graphRep.getNodeLat(i)) * (lat - graphRep
-							.getNodeLat(i)));
+			squareDistance = sqDistToCoords(i, lat, lon);
 			if (squareDistance < bestDistance) {
 				bestDistance = squareDistance;
 				pos = i;
