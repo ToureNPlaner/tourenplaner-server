@@ -16,6 +16,7 @@ public class GraphRepDumpReader extends GraphRepFactory {
 			System.out.println("Reading graph ...");
 			g = (GraphRep) ois.readObject();
 			ois.close();
+			System.gc();
 			System.out.println("... success!");
 			return g;
 		} catch (ClassNotFoundException e) {

@@ -65,7 +65,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 		}
 
 		// temporary values for edges
-		int src, dest, dist, multipliedDist, shortedID, outEdgeSourceNum, outEdgeShortedNum;
+		int src, dest, dist, multipliedDist, shortedID;
+		short outEdgeSourceNum, outEdgeShortedNum;
 		for (int i = 0; i < edgeCount; i++) {
 
 			splittedLine = inb.readLine().split(" ");
@@ -83,8 +84,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 			if (splittedLine.length == 7) {
 				shortedID = Integer.parseInt(splittedLine[4]);
-				outEdgeSourceNum = Integer.parseInt(splittedLine[5]);
-				outEdgeShortedNum = Integer.parseInt(splittedLine[6]);
+				outEdgeSourceNum = Short.parseShort(splittedLine[5]);
+				outEdgeShortedNum = Short.parseShort(splittedLine[6]);
 				graphRep.setShortcutData(i, shortedID, outEdgeSourceNum,
 						outEdgeShortedNum);
 			}
@@ -99,6 +100,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// DumbNN uses linear search and is slow.
 		// HashNN should be faster but needs more RAM
 		graphRep.searcher = new HashNN(graphRep);
+		System.gc();
 		System.out.println("... success!");
 		return graphRep;
 	}
