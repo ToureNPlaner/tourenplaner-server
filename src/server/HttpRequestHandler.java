@@ -209,21 +209,28 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private void handleAlg(final HttpRequest request, final String algName)
 			throws IOException {
+		try {
+			final ComputeRequest req = readComputeRequest(algName, responder,
+					request);
+			if (req != null) {
 
-		final ComputeRequest req = readComputeRequest(algName, responder,
-				request);
-		if (req != null) {
+				final boolean success = computer.submit(req);
 
-			final boolean success = computer.submit(req);
-
-			if (!success) {
-				responder
-						.writeErrorMessage(
-								"EBUSY",
-								"This server is currently too busy to fullfill the request",
-								null, HttpResponseStatus.SERVICE_UNAVAILABLE);
+				if (!success) {
+					responder
+							.writeErrorMessage(
+									"EBUSY",
+									"This server is currently too busy to fullfill the request",
+									null,
+									HttpResponseStatus.SERVICE_UNAVAILABLE);
+				}
 			}
+		} catch (JsonParseException e) {
+			responder.writeErrorMessage("EBADJSON",
+					"Could not parse supplied JSON", e.getMessage(),
+					HttpResponseStatus.UNAUTHORIZED);
 		}
+
 	}
 
 	/**
@@ -248,7 +255,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						});
 			} catch (JsonParseException e) {
 				responder.writeErrorMessage("EBADJSON",
-						"Could not parse supplied JSON", null,
+						"Could not parse supplied JSON", e.getMessage(),
 						HttpResponseStatus.UNAUTHORIZED);
 				objmap = null;
 			}
