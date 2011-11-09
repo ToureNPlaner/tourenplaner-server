@@ -142,6 +142,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			return;
 		}
 
+		// DEBUG
+		System.out.println("Request: ");
+		request.getContent().readBytes(System.out,
+				request.getContent().readableBytes());
+		request.getContent().readerIndex(0);
+
 		if (responder == null) {
 			responder = new Responder(mapper, channel, isKeepAlive(request));
 		}
@@ -306,14 +312,17 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					while (jp.nextToken() != JsonToken.END_ARRAY) {
 						while (jp.nextToken() != JsonToken.END_OBJECT) {
 							fieldname = jp.getCurrentName();
-							jp.nextToken();
+							token = jp.nextToken();
+
 							if ("lt".equals(fieldname)) {
 								lat = jp.getIntValue();
 							} else if ("ln".equals(fieldname)) {
 								lon = jp.getIntValue();
 							} else {
-								throw new JsonParseException("Unknown field "
-										+ fieldname, jp.getCurrentLocation());
+								if ((token == JsonToken.START_ARRAY)
+										|| (token == JsonToken.START_OBJECT)) {
+									jp.skipChildren();
+								}
 							}
 						}
 						points.addPoint(lat, lon);
@@ -323,10 +332,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					constraints = jp.readValueAs(JSONOBJECT);
 				} else {
 					// ignore for now TODO: user version string etc.
-					if ((token != JsonToken.START_ARRAY)
-							&& (token != JsonToken.START_OBJECT)) {
-						jp.nextToken();
-					} else {
+					if ((token == JsonToken.START_ARRAY)
+							|| (token == JsonToken.START_OBJECT)) {
 						jp.skipChildren();
 					}
 				}
@@ -366,7 +373,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private void handleAuthUser(final HttpRequest request) {
 		UsersDBRow user = null;
-		
+
 		try {
 			user = auth(request);
 		} catch (SQLException e) {
@@ -376,9 +383,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (user == null) {
 			return;
 		}
-		
+
 		try {
-			responder.writeJSON(user.getSmallUserHashMap(), 
+			responder.writeJSON(user.getSmallUserHashMap(),
 					HttpResponseStatus.OK);
 		} catch (JsonGenerationException e) {
 			// TODO Auto-generated catch block
@@ -390,20 +397,21 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	/**
-	 * If authorization is okay, but no admin, registration fails.
-	 * If no authorization as admin, the new registered user will not 
-	 * be registered as admin, even if json admin flag is true.
+	 * If authorization is okay, but no admin, registration fails. If no
+	 * authorization as admin, the new registered user will not be registered as
+	 * admin, even if json admin flag is true.
+	 * 
 	 * @param request
 	 */
 	private void handleRegisterUser(final HttpRequest request) {
 		try {
 			UsersDBRow user = null;
 			UsersDBRow authUser = null;
-			
+
 			// if no authorization header keep on with adding not verified user
 			if (request.getHeader("Authorization") != null) {
 				authUser = auth(request);
@@ -415,40 +423,41 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					return;
 				}
 			}
-			
+
 			Map<String, Object> objmap = null;
-			
+
 			try {
 				objmap = getJSONContent(responder, request);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-				
-			// getJSONContent adds error-message to responder 
+
+			// getJSONContent adds error-message to responder
 			// if json object is bad or if there is no json object
 			// so no further handling needed if objmap == null
 			if (objmap == null) {
 				return;
 			}
 
-
 			final String email = (String) objmap.get("email");
 			final String pw = (String) objmap.get("password");
 			final String firstName = (String) objmap.get("firstname");
 			final String lastName = (String) objmap.get("lastname");
 			final String address = (String) objmap.get("address");
-			
-			if (pw == null || email == null || firstName == null 
+
+			if (pw == null || email == null || firstName == null
 					|| lastName == null || address == null) {
 				// TODO maybe change error id and message
-				responder.writeErrorMessage("EBADJSON",
-						"Could not parse supplied JSON", 
-						"JSON user object was not correct " + 
-						"(needs email, password, firstname, lastname, address)",
-						HttpResponseStatus.UNAUTHORIZED);
+				responder
+						.writeErrorMessage(
+								"EBADJSON",
+								"Could not parse supplied JSON",
+								"JSON user object was not correct "
+										+ "(needs email, password, firstname, lastname, address)",
+								HttpResponseStatus.UNAUTHORIZED);
 			}
-			
+
 			// TODO optimize salt-generation
 			final Random rand = new Random();
 			final StringBuilder saltBuilder = new StringBuilder(100);
@@ -457,35 +466,34 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			}
 
 			final String salt = saltBuilder.toString();
-			
+
 			final String toHash = generateHash(salt, pw);
 
 			// if no authorization add not verified user
 			if (authUser == null) {
-				// if no authorization as admin, the new registered user will 
+				// if no authorization as admin, the new registered user will
 				// not be registered as admin, even if json admin flag is true
-				user = dbm.addNewUser(email, toHash, salt, 
-						firstName, lastName, address, false);
+				user = dbm.addNewUser(email, toHash, salt, firstName, lastName,
+						address, false);
 			} else {
-					
+
 				boolean admin = false;
 
 				if (objmap.get("admin") != null) {
 					admin = (Boolean) objmap.get("admin");
 				}
 
-				user = dbm.addNewVerifiedUser(email, toHash, salt, 
-						firstName, lastName, address, admin);
+				user = dbm.addNewVerifiedUser(email, toHash, salt, firstName,
+						lastName, address, admin);
 			}
-			
+
 			if (user == null) {
 				responder.writeErrorMessage("EREGISTERED",
 						"This email is already registered", null,
 						HttpResponseStatus.FORBIDDEN);
 				return;
-			}
-			else {
-				responder.writeJSON(user.getSmallUserHashMap(), 
+			} else {
+				responder.writeJSON(user.getSmallUserHashMap(),
 						HttpResponseStatus.OK);
 			}
 
