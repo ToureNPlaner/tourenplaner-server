@@ -19,6 +19,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
+import algorithms.NNLookupFactory;
 import algorithms.ShortestPathCHFactory;
 
 import computecore.AlgorithmRegistry;
@@ -131,13 +132,13 @@ public class TourenPlaner {
 							.println("Falling back to text reading from file: "
 									+ textGraphFilename
 									+ " (path provided by config file) ...");
-					graph = (new GraphRepTextReader())
+					graph = new GraphRepTextReader()
 							.createGraphRep(new FileInputStream(
 									textGraphFilename));
 					System.out
 							.println("Graph successfully read. Now replacing old dumped graph ...");
 
-					if ((new File(dumpName(graphfilename))).delete()) {
+					if (new File(dumpName(graphfilename)).delete()) {
 						utils.GraphSerializer.serialize(new FileOutputStream(
 								dumpName(graphfilename)), graph);
 						System.out
@@ -158,7 +159,7 @@ public class TourenPlaner {
 							.println("Falling back to text reading from file: "
 									+ textGraphFilename
 									+ " (path provided by config file) ...");
-					graph = (new GraphRepTextReader())
+					graph = new GraphRepTextReader()
 							.createGraphRep(new FileInputStream(
 									textGraphFilename));
 					System.out
@@ -180,6 +181,7 @@ public class TourenPlaner {
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();
 		reg.registerAlgorithm(new ShortestPathCHFactory(graph));
+		reg.registerAlgorithm(new NNLookupFactory(graph));
 
 		// Create our ComputeCore that manages all ComputeThreads
 		ComputeCore comCore = new ComputeCore(reg, (int) cm.getEntryLong(
