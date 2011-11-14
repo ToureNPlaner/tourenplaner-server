@@ -31,12 +31,12 @@ public class ShortestPathFactory extends GraphAlgorithmFactory {
 
 	@Override
 	public String getURLSuffix() {
-		return "sp";
+		return "sps";
 	}
 
 	@Override
 	public String getAlgName() {
-		return "Shortest Path";
+		return "Shortest Path Simple";
 	}
 
 	@Override
