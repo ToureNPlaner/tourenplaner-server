@@ -20,6 +20,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
 import algorithms.NNLookupFactory;
+import algorithms.ShortestPathFactory;
 import algorithms.ShortestPathCHFactory;
 
 import computecore.AlgorithmRegistry;
@@ -180,6 +181,7 @@ public class TourenPlaner {
 
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();
+		reg.registerAlgorithm(new ShortestPathFactory(graph));
 		reg.registerAlgorithm(new ShortestPathCHFactory(graph));
 		reg.registerAlgorithm(new NNLookupFactory(graph));
 
