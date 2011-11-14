@@ -122,7 +122,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 			srcid = graph.getIDForCoordinates(srclat, srclon);
 			destid = graph.getIDForCoordinates(destlat, destlon);
 			System.out.println("NNSearch took "
-					+ ((System.nanoTime() - nntime) / 1000000.0) + " ms");
+					+ ((System.nanoTime() - nntime) / 1000000.0)
+					+ " ms going from " + srcid + " to " + destid);
 			directDistance = calcDirectDistance(((double) srclat) / 10000000.0,
 					((double) srclon) / 10000000,
 					((double) destlat) / 10000000,
@@ -223,11 +224,11 @@ public class ShortestPathCH extends GraphAlgorithm {
 			int currNode = destid;
 			int outofSource, outofShortcuted, shortcutted, source;
 
-			do {
+			while (currNode != srcid) {
 				edgeId = prevEdges[currNode];
 				deque.addFirst(edgeId);
 				currNode = graph.getSource(edgeId);
-			} while (currNode != srcid);
+			}
 
 			// System.out.println("Start unpacking " + deque.size() + " edges");
 			// Unpack shortcuts "recursively"
