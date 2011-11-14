@@ -106,11 +106,12 @@ public class ShortestPath extends GraphAlgorithm {
 					targetNode = graph.getOutTarget(nodeID, i);
 
 					// without multiplier = shortest path
-					// tempDist = dist[nodeID] + graph.getOutDist(nodeID, i);
+					tempDist = multipliedDist[nodeID]
+							+ graph.getOutDist(nodeID, i);
 
 					// with multiplier = fastest path
-					tempDist = multipliedDist[nodeID]
-							+ graph.getOutMultipliedDist(nodeID, i);
+					// tempDist = multipliedDist[nodeID]
+					// + graph.getOutMultipliedDist(nodeID, i);
 
 					if (tempDist < multipliedDist[targetNode]) {
 						multipliedDist[targetNode] = tempDist;
@@ -141,7 +142,8 @@ public class ShortestPath extends GraphAlgorithm {
 			resultPoints.addEmptyPoints(routeElements);
 
 			// backtracking here
-			// Don't read distance from dist[], because there are distances with
+			// Don't read distance from multipliedDist[], because there are
+			// distances with
 			// regard to the multiplier
 			currNode = nodeID;
 			do {
@@ -152,7 +154,7 @@ public class ShortestPath extends GraphAlgorithm {
 				points.setPointLon(routeElements, graph.getNodeLon(currNode));
 
 				currNode = graph.getSource(prevEdges[currNode]);
-			} while (currNode != srcid);
+			} while (routeElements > 0);
 
 			backtracktime = System.nanoTime();
 
