@@ -18,7 +18,7 @@ public class Points {
 	}
 
 	public void addEmptyPoints(int num) {
-		points.resize(this.size() + num*2);
+		points.resize(points.size() + num*2);
 	}
 
 	public int getPointLat(int index) {
