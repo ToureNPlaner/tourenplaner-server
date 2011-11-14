@@ -147,7 +147,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		request.getContent().readBytes(System.out,
 				request.getContent().readableBytes());
 		request.getContent().readerIndex(0);
-
+      System.out.println();
 		if (responder == null) {
 			responder = new Responder(mapper, channel, isKeepAlive(request));
 		}
