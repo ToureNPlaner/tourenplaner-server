@@ -150,8 +150,8 @@ public class ShortestPath extends GraphAlgorithm {
 				distance += graph.getDist(prevEdges[currNode]);
 				routeElements--;
 
-				points.setPointLat(routeElements, graph.getNodeLat(currNode));
-				points.setPointLon(routeElements, graph.getNodeLon(currNode));
+				resultPoints.setPointLat(routeElements, graph.getNodeLat(currNode));
+				resultPoints.setPointLon(routeElements, graph.getNodeLon(currNode));
 
 				currNode = graph.getSource(prevEdges[currNode]);
 			} while (routeElements > 0);
