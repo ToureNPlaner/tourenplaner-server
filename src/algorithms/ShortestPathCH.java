@@ -104,8 +104,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 		int destlat;
 		int destlon;
 
-		int srcid = 0;
-		int destid = 0;
+		int srcId = 0;
+		int destId = 0;
 		int distance = 0;
 		// in meters
 		double directDistance;
@@ -119,17 +119,17 @@ public class ShortestPathCH extends GraphAlgorithm {
 			destlon = points.getPointLon(pointIndex + 1);
 			reset();
 			long nntime = System.nanoTime();
-			srcid = graph.getIDForCoordinates(srclat, srclon);
-			destid = graph.getIDForCoordinates(destlat, destlon);
+			srcId = graph.getIDForCoordinates(srclat, srclon);
+			destId = graph.getIDForCoordinates(destlat, destlon);
 			System.out.println("NNSearch took "
 					+ ((System.nanoTime() - nntime) / 1000000.0)
-					+ " ms going from " + srcid + " to " + destid);
-			directDistance = calcDirectDistance(((double) srclat) / 10000000.0,
+					+ " ms going from " + srcId + " to " + destId);
+			directDistance = calcDirectDistance(srclat / 10000000.0,
 					((double) srclon) / 10000000,
 					((double) destlat) / 10000000,
 					((double) destlon) / 10000000);
 
-			int nodeID = destid;
+			int nodeId = destId;
 			int sourceNode;
 			int edgeId;
 			/*
@@ -143,31 +143,30 @@ public class ShortestPathCH extends GraphAlgorithm {
 			System.out.println("Start BFS");
 			long starttime = System.nanoTime();
 			deque.clear();
-			deque.addLast(destid);
+			deque.addLast(destId);
 			// visited[destid] = true;
-			visited.set(destid);
+			visited.set(destId);
 			while (!deque.isEmpty()) {
-				nodeID = deque.removeLast();
+				nodeId = deque.removeLast();
 
-				for (int i = 0; i < graph.getInEdgeCount(nodeID); i++) {
-					edgeId = graph.getInEdgeID(nodeID, i);
+				for (int i = 0; i < graph.getInEdgeCount(nodeId); i++) {
+					edgeId = graph.getInEdgeID(nodeId, i);
 					sourceNode = graph.getSource(edgeId);
-
-					if (!visited.get(sourceNode)
-							&& (graph.getRank(sourceNode) >= graph
-									.getRank(nodeID))) {
+					if (graph.getRank(sourceNode) >= graph.getRank(nodeId)) {
 						// Mark the edge
 						marked.set(edgeId);
-						visited.set(sourceNode);
-						// Add source for exploration
-						deque.addFirst(sourceNode);
+						if (!visited.get(sourceNode)) {
+							visited.set(sourceNode);
+							// Add source for exploration
+							deque.addFirst(sourceNode);
+						}
 					}
 
 				}
 			}
 
-			dists[srcid] = 0;
-			heap.insert(srcid, dists[srcid]);
+			dists[srcId] = 0;
+			heap.insert(srcId, dists[srcId]);
 
 			int nodeDist;
 
@@ -177,32 +176,33 @@ public class ShortestPathCH extends GraphAlgorithm {
 			long backtracktime;
 
 			DIJKSTRA: while (!heap.isEmpty()) {
-				nodeID = heap.peekMinId();
+				nodeId = heap.peekMinId();
 				nodeDist = heap.peekMinDist();
 				heap.removeMin();
-				if (nodeID == destid) {
+				if (nodeId == destId) {
 					break DIJKSTRA;
-				} else if (nodeDist > dists[nodeID]) {
+				} else if (nodeDist > dists[nodeId]) {
 					continue;
 				}
-				for (int i = 0; i < graph.getOutEdgeCount(nodeID); i++) {
-					edgeId = graph.getOutEdgeID(nodeID, i);
+				for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
+					edgeId = graph.getOutEdgeID(nodeId, i);
 					targetNode = graph.getTarget(edgeId);
+
 					// Either marked (by BFS) or G_up edge
 					if (marked.get(edgeId)
-							|| (graph.getRank(nodeID) <= graph
+							|| (graph.getRank(nodeId) <= graph
 									.getRank(targetNode))) {
 						// without multiplier = shortest path
 						// tempDist = dist[nodeID] + graph.getOutDist(nodeID,
 						// i);
 
 						// with multiplier = fastest path
-						tempDist = dists[nodeID] + graph.getDist(edgeId);
+						tempDist = dists[nodeId] + graph.getDist(edgeId);
 
 						if (tempDist < dists[targetNode]) {
 							dists[targetNode] = tempDist;
-							prevEdges[targetNode] = graph.getOutEdgeID(nodeID,
-									i);
+
+							prevEdges[targetNode] = edgeId;
 							heap.insert(targetNode, tempDist);
 						}
 
@@ -211,8 +211,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			}
 			dijkstratime = System.nanoTime();
 
-			if (nodeID != destid) {
-				// TODO: send errmsg to client and do something useful
+			if (nodeId != destId) {
 				System.err.println("There is no path from src to dest");
 				throw new ComputeException("No Path found");
 			}
@@ -221,10 +220,10 @@ public class ShortestPathCH extends GraphAlgorithm {
 			deque.clear();
 			// Add the edges to our unpacking stack we
 			// go from destination to start so add at the end of the deque
-			int currNode = destid;
+			int currNode = destId;
 			int outofSource, outofShortcuted, shortcutted, source;
 
-			while (currNode != srcid) {
+			while (currNode != srcId) {
 				edgeId = prevEdges[currNode];
 				deque.addFirst(edgeId);
 				currNode = graph.getSource(edgeId);
@@ -259,11 +258,9 @@ public class ShortestPathCH extends GraphAlgorithm {
 			}
 
 			backtracktime = System.nanoTime();
-			System.out.println("found sp with dist = "
-					+ ((double) distance / 1000.0) + " km (direct distance: "
-					+ (directDistance / 1000.0)
-					+ " km; Distance with multiplier: "
-					+ (dists[destid] / 1000.0) + ")");
+			System.out.println("found sp with dist = " + (distance / 1000.0)
+					+ " km (direct distance: " + (directDistance / 1000.0)
+					+ " dist[destid] = " + dists[destId]);
 			System.out.println("Dijkstra: "
 					+ ((dijkstratime - starttime) / 1000000.0)
 					+ " ms; Backtracking: "
@@ -273,8 +270,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);
 		misc.put("distance", distance);
 		// Don't forget to add destination
-		resultPoints.addPoint(graph.getNodeLat(destid),
-				graph.getNodeLon(destid));
+		resultPoints.addPoint(graph.getNodeLat(destId),
+				graph.getNodeLon(destId));
 		return distance;
 	}
 }
