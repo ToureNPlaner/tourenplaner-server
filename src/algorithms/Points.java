@@ -6,7 +6,7 @@ package algorithms;
 import com.carrotsearch.hppc.IntArrayList;
 
 public class Points {
-	private IntArrayList points;
+	private final IntArrayList points;
 
 	public Points() {
 		points = new IntArrayList();
@@ -18,7 +18,7 @@ public class Points {
 	}
 
 	public void addEmptyPoints(int num) {
-		points.resize(points.size() + num*2);
+		points.resize(points.size() + num * 2);
 	}
 
 	public int getPointLat(int index) {

@@ -12,6 +12,7 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -147,7 +148,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		request.getContent().readBytes(System.out,
 				request.getContent().readableBytes());
 		request.getContent().readerIndex(0);
-      System.out.println();
+		System.out.println();
 		if (responder == null) {
 			responder = new Responder(mapper, channel, isKeepAlive(request));
 		}
@@ -653,7 +654,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(final ChannelHandlerContext ctx,
 			final ExceptionEvent e) throws Exception {
-		e.getCause().printStackTrace();
+		if (!(e instanceof ClosedChannelException)) {
+			e.getCause().printStackTrace();
+		}
 		e.getChannel().close();
 	}
 }
