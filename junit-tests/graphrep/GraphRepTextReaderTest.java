@@ -1,7 +1,6 @@
 package graphrep;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -15,7 +14,7 @@ public class GraphRepTextReaderTest {
 	public final void testCreateGraphRep() {
 		GraphRepTextReader graphRepTextReader = new GraphRepTextReader();
 		String testFile = new String(
-				"3\n5\n0 2.5 1.5 5\n 5.0 3.0 4\n2 2.0 4.0 3\n0 1 5 0.5\n0 2 2 0.5\n1 0 5 0.5\n1 2 3 0.5\n2 0 2 0.5");
+				"3\n5\n0 25 15 5\n 50 30 4\n2 20 40 3\n0 1 5 0.5\n0 2 2 0.5\n1 0 5 0.5\n1 2 3 0.5\n2 0 2 0.5");
 		byte[] testFileBytes = testFile.getBytes();
 		ByteArrayInputStream testFileByteArrayStream = new ByteArrayInputStream(
 				testFileBytes);
@@ -25,15 +24,15 @@ public class GraphRepTextReaderTest {
 			graphRep = graphRepTextReader
 					.createGraphRep(testFileByteArrayStream);
 
-			assertEquals(3, graphRep.nodeCount);
-			assertEquals(5, graphRep.edgeCount);
+			assertEquals(3, graphRep.getNodeCount());
+			assertEquals(5, graphRep.getEdgeCount());
 
-			assertEquals(2.5, graphRep.lat[0], 0.01);
-			assertEquals(5.0, graphRep.lat[1], 0.01);
-			assertEquals(2.0, graphRep.lat[2], 0.01);
-			assertEquals(1.5, graphRep.lon[0], 0.01);
-			assertEquals(3.0, graphRep.lon[1], 0.01);
-			assertEquals(4.0, graphRep.lon[2], 0.01);
+			assertEquals(25, graphRep.lat[0], 0.01);
+			assertEquals(50, graphRep.lat[1], 0.01);
+			assertEquals(20, graphRep.lat[2], 0.01);
+			assertEquals(15, graphRep.lon[0], 0.01);
+			assertEquals(30, graphRep.lon[1], 0.01);
+			assertEquals(40, graphRep.lon[2], 0.01);
 			assertEquals(5, graphRep.height[0]);
 			assertEquals(4, graphRep.height[1]);
 			assertEquals(3, graphRep.height[2]);
@@ -62,10 +61,6 @@ public class GraphRepTextReaderTest {
 			assertEquals(0, graphRep.offsetOut[0]);
 			assertEquals(2, graphRep.offsetOut[1]);
 			assertEquals(4, graphRep.offsetOut[2]);
-
-			for (int i = 0; i < 3; i++) {
-				assertTrue(graphRep.dest_in[i] <= graphRep.dest_in[i + 1]);
-			}
 
 			assertEquals(0, graphRep.offsetIn[0]);
 			assertEquals(2, graphRep.offsetIn[1]);

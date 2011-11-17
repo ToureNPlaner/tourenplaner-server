@@ -1,7 +1,6 @@
 package graphrep;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.ByteArrayInputStream;
@@ -20,7 +19,7 @@ public class GraphRepDumpReaderTest {
 			// makes somthing to dump
 			GraphRepTextReader graphRepTextReader = new GraphRepTextReader();
 			String testFile = new String(
-					"3\n5\n0 2.5 1.5 5\n 5.0 3.0 4\n2 2.0 4.0 3\n0 1 5 0.5\n0 2 2 0.5\n1 0 5 0.5\n1 2 3 0.5\n2 0 2 0.5");
+					"3\n5\n0 25 15 5\n 50 30 4\n2 20 40 3\n0 1 5 \n0 2 2 \n1 0 5 \n1 2 3 \n2 0 2 ");
 			byte[] testFileBytes = testFile.getBytes();
 			ByteArrayInputStream testFileByteArrayStream = new ByteArrayInputStream(
 					testFileBytes);
@@ -44,15 +43,15 @@ public class GraphRepDumpReaderTest {
 
 			graphRepDump = graphRepDumpReader
 					.createGraphRep(testDumpFileByteArrayStream);
-			assertEquals(3, graphRepDump.nodeCount);
-			assertEquals(5, graphRepDump.edgeCount);
+			assertEquals(3, graphRepDump.getNodeCount());
+			assertEquals(5, graphRepDump.getEdgeCount());
 
-			assertEquals(2.5, graphRepDump.lat[0], 0.01);
-			assertEquals(5.0, graphRepDump.lat[1], 0.01);
-			assertEquals(2.0, graphRepDump.lat[2], 0.01);
-			assertEquals(1.5, graphRepDump.lon[0], 0.01);
-			assertEquals(3.0, graphRepDump.lon[1], 0.01);
-			assertEquals(4.0, graphRepDump.lon[2], 0.01);
+			assertEquals(25, graphRepDump.lat[0], 0.01);
+			assertEquals(50, graphRepDump.lat[1], 0.01);
+			assertEquals(20, graphRepDump.lat[2], 0.01);
+			assertEquals(15, graphRepDump.lon[0], 0.01);
+			assertEquals(30, graphRepDump.lon[1], 0.01);
+			assertEquals(40, graphRepDump.lon[2], 0.01);
 			assertEquals(5, graphRepDump.height[0]);
 			assertEquals(4, graphRepDump.height[1]);
 			assertEquals(3, graphRepDump.height[2]);
@@ -67,11 +66,6 @@ public class GraphRepDumpReaderTest {
 			assertEquals(0, graphRepDump.dest[2]);
 			assertEquals(2, graphRepDump.dest[3]);
 			assertEquals(0, graphRepDump.dest[4]);
-			assertEquals(13, graphRepDump.multipliedDist[0]);
-			assertEquals(5, graphRepDump.multipliedDist[1]);
-			assertEquals(13, graphRepDump.multipliedDist[2]);
-			assertEquals(8, graphRepDump.multipliedDist[3]);
-			assertEquals(5, graphRepDump.multipliedDist[4]);
 			assertEquals(5, graphRepDump.dist[0]);
 			assertEquals(2, graphRepDump.dist[1]);
 			assertEquals(5, graphRepDump.dist[2]);
@@ -81,10 +75,6 @@ public class GraphRepDumpReaderTest {
 			assertEquals(0, graphRepDump.offsetOut[0]);
 			assertEquals(2, graphRepDump.offsetOut[1]);
 			assertEquals(4, graphRepDump.offsetOut[2]);
-
-			for (int i = 0; i < 3; i++) {
-				assertTrue(graphRepDump.dest_in[i] <= graphRepDump.dest_in[i + 1]);
-			}
 
 			assertEquals(0, graphRepDump.offsetIn[0]);
 			assertEquals(2, graphRepDump.offsetIn[1]);
