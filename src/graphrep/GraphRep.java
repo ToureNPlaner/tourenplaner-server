@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 9L;
+	private static final long serialVersionUID = 10L;
 
 	private static class Sorter {
 		private static void sort(GraphRep graphRep) {
@@ -38,7 +38,17 @@ public class GraphRep implements Serializable {
 		 * @return
 		 */
 		private static boolean less(GraphRep graphRep, int i, int j) {
-			return graphRep.dest[graphRep.mapping_InToOut[i]] < graphRep.dest[graphRep.mapping_InToOut[j]];
+			int edgeI, edgeJ;
+			int targetI, targetJ;
+			int sourceRankI, sourceRankJ;
+			edgeI = graphRep.mapping_InToOut[i];
+			edgeJ = graphRep.mapping_InToOut[j];
+			targetI = graphRep.dest[edgeI];
+			targetJ = graphRep.dest[edgeJ];
+			sourceRankI = graphRep.getRank(graphRep.src[edgeI]);
+			sourceRankJ = graphRep.getRank(graphRep.src[edgeJ]);
+			return targetI < targetJ
+					|| (targetI == targetJ && sourceRankI > sourceRankJ);
 		}
 
 		private static void heapify(GraphRep graphRep) {

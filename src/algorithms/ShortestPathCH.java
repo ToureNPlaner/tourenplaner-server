@@ -134,7 +134,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			int edgeId;
 			/*
 			 * Start BFS on G_down beginning at destination and marking edges
-			 * for consideration
+			 * for consideration !G_down edges are always before G_up edges!
 			 * 
 			 * TODO: Create proper infrastructure for getting arrays with
 			 * |nodes| length
@@ -149,7 +149,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			while (!deque.isEmpty()) {
 				nodeId = deque.removeLast();
 
-				for (int i = 0; i < graph.getInEdgeCount(nodeId); i++) {
+				Inner: for (int i = 0; i < graph.getInEdgeCount(nodeId); i++) {
 					edgeId = graph.getInEdgeID(nodeId, i);
 					sourceNode = graph.getSource(edgeId);
 					if (graph.getRank(sourceNode) >= graph.getRank(nodeId)) {
@@ -160,8 +160,9 @@ public class ShortestPathCH extends GraphAlgorithm {
 							// Add source for exploration
 							deque.addFirst(sourceNode);
 						}
+					} else {
+						break Inner;
 					}
-
 				}
 			}
 
