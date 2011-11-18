@@ -5,6 +5,7 @@ package algorithms;
 
 import graphrep.GraphRep;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,9 +39,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		visited.clear();
 		marked.clear();
 
-		for (int i = 0; i < graph.getNodeCount(); i++) {
-			dists[i] = Integer.MAX_VALUE;
-		}
+        Arrays.fill(dists,Integer.MAX_VALUE);
 		heap.resetHeap();
 	}
 
@@ -112,18 +111,15 @@ public class ShortestPathCH extends GraphAlgorithm {
 		for (int pointIndex = 0; pointIndex < (points.size() - 1); pointIndex++) {
 
 			// New Dijkstra need to reset
-
+			long starttime = System.nanoTime();
 			srclat = points.getPointLat(pointIndex);
 			srclon = points.getPointLon(pointIndex);
 			destlat = points.getPointLat(pointIndex + 1);
 			destlon = points.getPointLon(pointIndex + 1);
 			reset();
-			long nntime = System.nanoTime();
 			srcId = graph.getIDForCoordinates(srclat, srclon);
 			destId = graph.getIDForCoordinates(destlat, destlon);
-			System.out.println("NNSearch took "
-					+ ((System.nanoTime() - nntime) / 1000000.0)
-					+ " ms going from " + srcId + " to " + destId);
+
 			directDistance = calcDirectDistance(srclat / 10000000.0,
 					((double) srclon) / 10000000,
 					((double) destlat) / 10000000,
@@ -139,9 +135,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 			 * TODO: Create proper infrastructure for getting arrays with
 			 * |nodes| length
 			 */
+			long setuptime = System.nanoTime();
 
-			System.out.println("Start BFS");
-			long starttime = System.nanoTime();
 			deque.clear();
 			deque.addLast(destId);
 			// visited[destid] = true;
@@ -165,7 +160,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 					}
 				}
 			}
-
+			long bfsdonetime = System.nanoTime();
 			dists[srcId] = 0;
 			heap.insert(srcId, dists[srcId]);
 
@@ -173,8 +168,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 			int tempDist;
 			int targetNode;
-			long dijkstratime;
-			long backtracktime;
 
 			DIJKSTRA: while (!heap.isEmpty()) {
 				nodeId = heap.peekMinId();
@@ -193,11 +186,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 					if (marked.get(edgeId)
 							|| (graph.getRank(nodeId) <= graph
 									.getRank(targetNode))) {
-						// without multiplier = shortest path
-						// tempDist = dist[nodeID] + graph.getOutDist(nodeID,
-						// i);
 
-						// with multiplier = fastest path
 						tempDist = dists[nodeId] + graph.getDist(edgeId);
 
 						if (tempDist < dists[targetNode]) {
@@ -210,7 +199,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 					}
 				}
 			}
-			dijkstratime = System.nanoTime();
+			long dijkstratime = System.nanoTime();
 
 			if (nodeId != destId) {
 				System.err.println("There is no path from src to dest");
@@ -258,14 +247,22 @@ public class ShortestPathCH extends GraphAlgorithm {
 				}
 			}
 
-			backtracktime = System.nanoTime();
+			long backtracktime = System.nanoTime();
 			System.out.println("found sp with dist = " + (distance / 1000.0)
 					+ " km (direct distance: " + (directDistance / 1000.0)
 					+ " dist[destid] = " + dists[destId]);
+			System.out.println("Setup: "
+					+ ((setuptime - starttime) / 1000000.0) + " ms");
+
+			System.out.println("BFS: "
+					+ ((bfsdonetime - setuptime) / 1000000.0) + " ms");
+
 			System.out.println("Dijkstra: "
-					+ ((dijkstratime - starttime) / 1000000.0)
-					+ " ms; Backtracking: "
+					+ ((dijkstratime - bfsdonetime) / 1000000.0) + " ms");
+
+			System.out.println("Backtracking: "
 					+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
+
 		}
 
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);

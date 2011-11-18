@@ -20,8 +20,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
 import algorithms.NNLookupFactory;
-import algorithms.ShortestPathFactory;
 import algorithms.ShortestPathCHFactory;
+import algorithms.ShortestPathFactory;
 
 import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
@@ -46,7 +46,7 @@ public class TourenPlaner {
 				ConfigManager.getInstance().getEntryBool("private", false) ? "private"
 						: "public");
 		info.put("sslport",
-				ConfigManager.getInstance().getEntryLong("sslport", 8081));
+				ConfigManager.getInstance().getEntryInt("sslport", 8081));
 		// Enumerate Algorithms
 		Collection<AlgorithmFactory> algs = reg.getAlgorithms();
 		Map<String, Object> algInfo;
@@ -186,8 +186,9 @@ public class TourenPlaner {
 		reg.registerAlgorithm(new NNLookupFactory(graph));
 
 		// Create our ComputeCore that manages all ComputeThreads
-		ComputeCore comCore = new ComputeCore(reg, (int) cm.getEntryLong(
-				"threads", 16), (int) cm.getEntryLong("queuelength", 32));
+		ComputeCore comCore = new ComputeCore(reg,
+				cm.getEntryInt("threads", 16),
+				cm.getEntryInt("queuelength", 32));
 		comCore.start();
 
 		// Create ServerInfo object

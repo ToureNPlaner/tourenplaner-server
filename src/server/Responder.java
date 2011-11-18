@@ -103,7 +103,7 @@ public class Responder {
 
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
-		outputBuffer.writerIndex(0);
+		outputBuffer.clear();
 		OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
 
 		mapper.writeValue(resultStream, toWrite);
@@ -182,7 +182,7 @@ public class Responder {
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
 
-		outputBuffer.writerIndex(0);
+		outputBuffer.clear();
 		OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
 
 		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(
