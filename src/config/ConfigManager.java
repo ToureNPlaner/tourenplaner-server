@@ -79,6 +79,9 @@ public class ConfigManager {
 				try {
 					value = (Double) confMap.get(key);
 				} catch (ClassCastException e) {
+					System.out.println("Failed to read config value: "
+							+ e.getMessage());
+					e.printStackTrace();
 					return defaultValue;
 				}
 			} else {
@@ -100,7 +103,6 @@ public class ConfigManager {
 	 * @return value of a given key or the given defaultValue
 	 *         (ClassCastError/key not found)
 	 */
-
 	public boolean getEntryBool(String key, boolean defaultValue) {
 		Boolean value = null;
 		if ((confMap != null) && confMap.containsKey(key)) {
@@ -108,6 +110,9 @@ public class ConfigManager {
 				try {
 					value = (Boolean) confMap.get(key);
 				} catch (ClassCastException e) {
+					System.out.println("Failed to read config value: "
+							+ e.getMessage());
+					e.printStackTrace();
 					return defaultValue;
 				}
 			} else {
@@ -137,6 +142,9 @@ public class ConfigManager {
 				try {
 					value = (Long) confMap.get(key);
 				} catch (ClassCastException e) {
+					System.out.println("Failed to read config value: "
+							+ e.getMessage());
+					e.printStackTrace();
 					return defaultValue;
 				}
 			} else {
@@ -147,6 +155,38 @@ public class ConfigManager {
 			value = defaultValue;
 		}
 		return value;
+	}
+
+	/**
+	 * Return the int value of a given key or the given defaultValue if there is
+	 * a cast error or the key is not found. This is for all types of number
+	 * without an comma.
+	 * 
+	 * @param key
+	 * @param defaultValue
+	 * @return value of a given key or the given defaultValue
+	 *         (ClassCastError/key not found)
+	 */
+	public int getEntryInt(String key, int defaultValue) {
+		Number value = -1;
+		if ((confMap != null) && confMap.containsKey(key)) {
+			if (confMap.get(key) != null) {
+				try {
+					value = (java.lang.Number) confMap.get(key);
+				} catch (ClassCastException e) {
+					System.out.println("Failed to read config value: "
+							+ e.getMessage());
+					e.printStackTrace();
+					return defaultValue;
+				}
+			} else {
+				value = defaultValue;
+			}
+
+		} else {
+			value = defaultValue;
+		}
+		return value.intValue();
 	}
 
 	/**
@@ -166,6 +206,9 @@ public class ConfigManager {
 				try {
 					value = (String) confMap.get(key);
 				} catch (ClassCastException e) {
+					System.out.println("Failed to read config value: "
+							+ e.getMessage());
+					e.printStackTrace();
 					return defaultValue;
 				}
 			} else {
