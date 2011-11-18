@@ -59,17 +59,17 @@ public class HttpServer {
 			infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(
 					mapper, serverInfo));
 			// Bind and start to accept incoming connections.
-			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
-					"sslport", 8081)));
-			infoBootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
-					"httpport", 8080)));
+			bootstrap.bind(new InetSocketAddress(cm
+					.getEntryInt("sslport", 8081)));
+			infoBootstrap.bind(new InetSocketAddress(cm.getEntryInt("httpport",
+					8080)));
 		} else {
 			// Set up the event pipeline factory without ssl
 			bootstrap.setPipelineFactory(new ServerPipelineFactory(mapper,
 					comCore, serverInfo));
 			// Bind and start to accept incoming connections.
-			bootstrap.bind(new InetSocketAddress((int) cm.getEntryLong(
-					"httpport", 8080)));
+			bootstrap.bind(new InetSocketAddress(cm.getEntryInt("httpport",
+					8080)));
 		}
 	}
 }
