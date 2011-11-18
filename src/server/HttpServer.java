@@ -37,6 +37,7 @@ public class HttpServer {
 			AlgorithmRegistry reg, Map<String, Object> serverInfo,
 			ComputeCore comCore) {
 		// Configure the server.
+
 		ServerBootstrap bootstrap = new ServerBootstrap(
 				new NioServerSocketChannelFactory( // Change to Oio* if you want
 													// OIO

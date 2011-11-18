@@ -7,12 +7,15 @@ import static org.jboss.netty.channel.Channels.pipeline;
 
 import java.util.Map;
 
+import javax.net.ssl.SSLEngine;
+
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
 import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
+import org.jboss.netty.handler.ssl.SslHandler;
 
 import computecore.ComputeCore;
 
@@ -50,10 +53,11 @@ public class ServerPipelineFactory implements ChannelPipelineFactory {
 
 		// TODO Implement SSL SSLEngine
 		if (ConfigManager.getInstance().getEntryBool("private", false)) {
-			// SSLEngine engine =
-			// TPSslContextFactory.getServerContext().createSSLEngine();
-			// engine.setUseClientMode(false);
-			// pipeline.addLast("ssl", new SslHandler(engine));
+			SSLEngine engine = TPSSslContextFactory.getServerContext()
+					.createSSLEngine();
+			engine.setUseClientMode(false);
+			pipeline.addLast("ssl", new SslHandler(engine));
+
 		}
 
 		pipeline.addLast("decoder", new HttpRequestDecoder());
