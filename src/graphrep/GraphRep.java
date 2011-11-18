@@ -92,8 +92,8 @@ public class GraphRep implements Serializable {
 
 	protected NNSearcher searcher;
 
-	private int nodeCount;
-	private int edgeCount;
+	private final int nodeCount;
+	private final int edgeCount;
 
 	// note: edgeNum refers to the relative number of an outgoing edge
 	// from a node:
@@ -101,30 +101,30 @@ public class GraphRep implements Serializable {
 
 	// nodes
 	// In degrees*10^7
-	protected int[] lat;
-	protected int[] lon;
-	protected int[] height;
-	protected int[] rank;
+	protected final int[] lat;
+	protected final int[] lon;
+	protected final int[] height;
+	protected final int[] rank;
 
 	// edges
-	protected int[] src;
-	protected int[] dest;
-	protected int[] multipliedDist;
-	protected int[] dist;
+	protected final int[] src;
+	protected final int[] dest;
+	protected final int[] multipliedDist;
+	protected final int[] dist;
 
-	protected int[] shortedID;
-	protected short[] outEdgeSourceNum;
-	protected short[] outEdgeShortedNum;
+	protected final int[] shortedID;
+	protected final short[] outEdgeSourceNum;
+	protected final short[] outEdgeShortedNum;
 
-	protected int[] offsetOut;
-	protected int[] offsetIn;
+	protected final int[] offsetOut;
+	protected final int[] offsetIn;
 
 	/**
 	 * Index = "virtual" id for in edges
 	 * 
 	 * content = position in the edge array
 	 */
-	protected int[] mapping_InToOut;
+	protected final int[] mapping_InToOut;
 
 	/**
 	 * A graphrep is the representation of a graph used to perform several
@@ -294,7 +294,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public short getEdgeSourceNum(int edgeId) {
+	public final short getEdgeSourceNum(int edgeId) {
 		return outEdgeSourceNum[edgeId];
 	}
 
@@ -305,7 +305,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeId
 	 * @return
 	 */
-	public short getEdgeShortedNum(int edgeId) {
+	public final short getEdgeShortedNum(int edgeId) {
 		return outEdgeShortedNum[edgeId];
 	}
 
@@ -352,7 +352,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getInEdgeID(int nodeID, int edgeNum) {
+	public final int getInEdgeID(int nodeID, int edgeNum) {
 		return mapping_InToOut[offsetIn[nodeID] + edgeNum];
 	}
 
@@ -364,7 +364,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getInEdgeShortedId(int nodeID, int edgeNum) {
+	public final int getInEdgeShortedId(int nodeID, int edgeNum) {
 		// return shortedID_in[offsetIn[nodeID] + edgeNum];
 		return shortedID[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
@@ -378,7 +378,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public short getInEdgeShortedOut(int nodeID, int edgeNum) {
+	public final short getInEdgeShortedOut(int nodeID, int edgeNum) {
 		// return outEdgeShortedNum_in[offsetIn[nodeID] + edgeNum];
 		return outEdgeShortedNum[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
@@ -391,7 +391,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public short getInEdgeSourceOut(int nodeID, int edgeNum) {
+	public final short getInEdgeSourceOut(int nodeID, int edgeNum) {
 		// return outEdgeSourceNum_in[offsetIn[nodeID] + edgeNum];
 		return outEdgeSourceNum[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
@@ -502,7 +502,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getOutEdgeID(int nodeID, int edgeNum) {
+	public final int getOutEdgeID(int nodeID, int edgeNum) {
 		return offsetOut[nodeID] + edgeNum;
 	}
 
@@ -515,7 +515,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public short getOutEdgeShortedOut(int nodeID, int edgeNum) {
+	public final short getOutEdgeShortedOut(int nodeID, int edgeNum) {
 		return outEdgeShortedNum[offsetOut[nodeID] + edgeNum];
 	}
 
@@ -527,7 +527,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public short getOutEdgeSourceNum(int nodeID, int edgeNum) {
+	public final short getOutEdgeSourceNum(int nodeID, int edgeNum) {
 		return outEdgeSourceNum[offsetOut[nodeID] + edgeNum];
 	}
 
@@ -552,7 +552,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getOutShortedId(int nodeID, int edgeNum) {
+	public final int getOutShortedId(int nodeID, int edgeNum) {
 		return shortedID[offsetOut[nodeID] + edgeNum];
 	}
 
@@ -565,7 +565,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public short getOutShortedOut(int edgeId) {
+	public final short getOutShortedOut(int edgeId) {
 		return outEdgeShortedNum[edgeId];
 	}
 
@@ -588,7 +588,7 @@ public class GraphRep implements Serializable {
 	 * @param nodeID
 	 * @return
 	 */
-	public int getRank(int nodeID) {
+	public final int getRank(int nodeID) {
 		return rank[nodeID];
 	}
 
@@ -600,7 +600,7 @@ public class GraphRep implements Serializable {
 	 * @param edgeNum
 	 * @return
 	 */
-	public int getShortedId(int edgeId) {
+	public final int getShortedId(int edgeId) {
 		return shortedID[edgeId];
 	}
 
