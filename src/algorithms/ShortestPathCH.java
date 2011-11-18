@@ -5,6 +5,7 @@ package algorithms;
 
 import graphrep.GraphRep;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,9 +39,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		visited.clear();
 		marked.clear();
 
-		for (int i = 0; i < graph.getNodeCount(); i++) {
-			dists[i] = Integer.MAX_VALUE;
-		}
+        Arrays.fill(dists,Integer.MAX_VALUE);
 		heap.resetHeap();
 	}
 
