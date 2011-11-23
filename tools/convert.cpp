@@ -12,16 +12,15 @@ struct NodeData {
     double lon;
     double lat;
     int32_t ele;
-    uint32_t deg;
 };
 
 struct Edge {
+    uint32_t sourceId;
     uint32_t targetId;
     uint32_t length;
-    float mult;
-    uint32_t shortedId;
-    uint32_t outEdgeNumSource;
-    uint32_t outEdgeNumShorted;
+    uint32_t shortcuttedEdge1;
+    uint32_t shortcuttedEdge2;
+    
 };
 
 struct Node {
@@ -42,8 +41,8 @@ int main(int args, char** argv) {
     char* y = (char*)&x;
     assert(y[0]=='a' && y[1]=='b');
     // assert type sizes
-    assert(sizeof(Edge) == 6*4);
-    assert(sizeof(NodeData) == 2*8+2*4);
+    assert(sizeof(Edge) == 5*4);
+
     string graph(args >=2?argv[1]:"graph.dat");
     string ranks(args >=3?argv[2]:"graph_ids");
 
@@ -60,9 +59,12 @@ int main(int args, char** argv) {
         return 1;
     }
     
-    unsigned int n,nr;
+    uint32_t n,nr,ne;
     // Number of nodes read from graph file
-    gin.read((char*)&n,sizeof(uint32_t));
+    gin.read((char*)&n, sizeof(uint32_t));
+    // Number of edges from graph file
+    gin.read((char*)&ne, sizeof(uint32_t));
+    
     // Number of nodes read from rank file
     rin.read((char*)&nr, sizeof(uint32_t));
     
@@ -72,24 +74,24 @@ int main(int args, char** argv) {
     }
     
     Node* nodes = new Node[n];
-    
-    unsigned int edgeNum = 0;
-    
-    for(unsigned int i=0 ; i<n; ++i) {
-        
-        gin.read((char*)&nodes[i].data,sizeof(NodeData));
+    Edge* edges = new Edge[ne];
+    // Read nodes
+    for(unsigned int i=0 ; i<n; ++i) {        
+        gin.read((char*)&nodes[i].data.lon,sizeof(double));
+        gin.read((char*)&nodes[i].data.lat,sizeof(double));
+        gin.read((char*)&nodes[i].data.ele,sizeof(int32_t));
         // Read the rank of the node from rank file
         rin.read((char*)&nodes[i].rank, sizeof(uint32_t));
-        
-        nodes[i].outEdges = new Edge[nodes[i].data.deg];
-        
-        gin.read((char*)&nodes[i].outEdges[0],sizeof(Edge)*nodes[i].data.deg);
-        edgeNum+=nodes[i].data.deg;
-
     }
+    
+    // Read edges
+    for(unsigned int i=0; i<ne; ++i){
+        gin.read((char*)&edges[i], sizeof(Edge));
+    }
+    
     // Write num nodes, num edges
     cout << n << endl;
-    cout << edgeNum<< endl;
+    cout << ne << endl;
     // Write Nodes
     for(unsigned int i=0 ; i<n; ++i) {
        cout << i << " ";
@@ -101,18 +103,12 @@ int main(int args, char** argv) {
  
     
     // Write Edges
-    for(unsigned int i=0 ; i<n; ++i) {
-        for(unsigned int j=0; j < nodes[i].data.deg; j++){
-            cout << i << " ";
-            cout << nodes[i].outEdges[j].targetId << " " ;
-            cout << nodes[i].outEdges[j].length << " ";
-            cout << nodes[i].outEdges[j].mult << " ";
-            cout << ((nodes[i].outEdges[j].shortedId < (uint32_t)numeric_limits<int32_t>::max())? (int32_t)nodes[i].outEdges[j].shortedId : -1)<< " ";
-            cout << ((nodes[i].outEdges[j].outEdgeNumSource < (uint32_t) numeric_limits<int32_t>::max())? (int32_t)nodes[i].outEdges[j].outEdgeNumSource : -1)<< " ";
-            cout << ((nodes[i].outEdges[j].outEdgeNumShorted < (uint32_t) numeric_limits<int32_t>::max())? (int32_t)nodes[i].outEdges[j].outEdgeNumShorted : -1)<< endl;
-        
-        }
-
+    for(unsigned int i=0 ; i<ne; ++i) {
+            cout << edges[i].sourceId << " " ;
+            cout << edges[i].targetId << " " ;
+            cout << edges[i].length << " ";
+            cout << ((edges[i].shortcuttedEdge1< (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge1 : -1)<< " ";
+            cout << ((edges[i].shortcuttedEdge2 < (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge2 : -1)<< endl;
     }
        
     gin.close();
