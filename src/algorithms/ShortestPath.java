@@ -101,7 +101,7 @@ public class ShortestPath extends GraphAlgorithm {
 				}
 				for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
 					// Ignore Shortcuts
-					if (graph.getOutShortedId(nodeId, i) != -1) {
+					if (graph.getOutFirstShortcuttedEdge(nodeId, i) != -1) {
 						continue;
 					}
 					targetNode = graph.getOutTarget(nodeId, i);
@@ -123,7 +123,8 @@ public class ShortestPath extends GraphAlgorithm {
 			dijkstratime = System.nanoTime();
 
 			if (nodeId != destId) {
-				System.err.println("There is no path from src to dest");
+				System.err.println("There is no path from src: " + srcId
+						+ " to dest: " + destId);
 				throw new ComputeException("No path found");
 			}
 

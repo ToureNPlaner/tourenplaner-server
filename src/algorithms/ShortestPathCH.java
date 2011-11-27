@@ -39,7 +39,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		visited.clear();
 		marked.clear();
 
-        Arrays.fill(dists,Integer.MAX_VALUE);
+		Arrays.fill(dists, Integer.MAX_VALUE);
 		heap.resetHeap();
 	}
 
@@ -136,15 +136,18 @@ public class ShortestPathCH extends GraphAlgorithm {
 			 * |nodes| length
 			 */
 			long setuptime = System.nanoTime();
-
+			int bfsNodes = 0;
+			int bfsEdges = 0;
 			deque.clear();
 			deque.addLast(destId);
 			// visited[destid] = true;
 			visited.set(destId);
 			while (!deque.isEmpty()) {
 				nodeId = deque.removeLast();
-
+				bfsNodes++;
 				Inner: for (int i = 0; i < graph.getInEdgeCount(nodeId); i++) {
+					bfsEdges++;
+
 					edgeId = graph.getInEdgeID(nodeId, i);
 					sourceNode = graph.getSource(edgeId);
 					if (graph.getRank(sourceNode) >= graph.getRank(nodeId)) {
@@ -211,7 +214,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			// Add the edges to our unpacking stack we
 			// go from destination to start so add at the end of the deque
 			int currNode = destId;
-			int outofSource, outofShortcuted, shortcutted, source;
+			int shortedEdge1, shortedEdge2;
 
 			while (currNode != srcId) {
 				edgeId = prevEdges[currNode];
@@ -219,24 +222,21 @@ public class ShortestPathCH extends GraphAlgorithm {
 				currNode = graph.getSource(edgeId);
 			}
 
-			// System.out.println("Start unpacking " + deque.size() + " edges");
 			// Unpack shortcuts "recursively"
+			System.out.println("Start backtrack with " + deque.size()
+					+ " edges");
 			while (!deque.isEmpty()) {
 				// Get the top edge and check if it's a shortcut that needs
 				// further
 				// unpacking
 				edgeId = deque.removeFirst();
-				shortcutted = graph.getShortedId(edgeId);
-				if (shortcutted != -1) {
+				shortedEdge1 = graph.getFirstShortcuttedEdge(edgeId);
+				if (shortedEdge1 != -1) {
 
 					// We have a shortcut unpack it
-					source = graph.getSource(edgeId);
-					outofShortcuted = graph.getOutEdgeID(shortcutted,
-							graph.getEdgeShortedNum(edgeId));
-					outofSource = graph.getOutEdgeID(source,
-							graph.getEdgeSourceNum(edgeId));
-					deque.addFirst(outofShortcuted);
-					deque.addFirst(outofSource);
+					shortedEdge2 = graph.getSecondShortcuttedEdge(edgeId);
+					deque.addFirst(shortedEdge2);
+					deque.addFirst(shortedEdge1);
 				} else {
 					// No shortcut remember it
 					distance += graph.getDist(edgeId);
@@ -255,7 +255,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 					+ ((setuptime - starttime) / 1000000.0) + " ms");
 
 			System.out.println("BFS: "
-					+ ((bfsdonetime - setuptime) / 1000000.0) + " ms");
+					+ ((bfsdonetime - setuptime) / 1000000.0) + " ms with "
+					+ bfsNodes + " nodes and " + bfsEdges + " edges");
 
 			System.out.println("Dijkstra: "
 					+ ((dijkstratime - bfsdonetime) / 1000000.0) + " ms");
@@ -263,6 +264,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 			System.out.println("Backtracking: "
 					+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
 
+			System.out.println("Super Node: lat: " + graph.getNodeLat(555578)
+					+ " lon: " + graph.getNodeLon(555578));
 		}
 
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);

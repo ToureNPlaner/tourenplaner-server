@@ -65,8 +65,8 @@ public class GraphRepTextReader extends GraphRepFactory {
 		}
 
 		// temporary values for edges
-		int src, dest, dist, multipliedDist, shortedID;
-		short outEdgeSourceNum, outEdgeShortedNum;
+		int src, dest, dist;
+		int shortcuttedEdge1, shortcuttedEdge2;
 		for (int i = 0; i < edgeCount; i++) {
 
 			splittedLine = inb.readLine().split(" ");
@@ -75,19 +75,13 @@ public class GraphRepTextReader extends GraphRepFactory {
 			dest = Integer.parseInt(splittedLine[1]);
 			dist = Integer.parseInt(splittedLine[2]);
 
-			// make mult better usable for us: save the distances with
-			// multipliers applied directly
-			// TODO find out what exactly is used by CH generator
-			multipliedDist = (int) (1.3 / Double.parseDouble(splittedLine[3]) * dist);
+			graphRep.setEdgeData(i, src, dest, dist);
 
-			graphRep.setEdgeData(i, src, dest, dist, multipliedDist);
+			if (splittedLine.length == 5) {
+				shortcuttedEdge1 = Integer.parseInt(splittedLine[3]);
+				shortcuttedEdge2 = Integer.parseInt(splittedLine[4]);
 
-			if (splittedLine.length == 7) {
-				shortedID = Integer.parseInt(splittedLine[4]);
-				outEdgeSourceNum = Short.parseShort(splittedLine[5]);
-				outEdgeShortedNum = Short.parseShort(splittedLine[6]);
-				graphRep.setShortcutData(i, shortedID, outEdgeSourceNum,
-						outEdgeShortedNum);
+				graphRep.setShortcutData(i, shortcuttedEdge1, shortcuttedEdge2);
 			}
 
 		}

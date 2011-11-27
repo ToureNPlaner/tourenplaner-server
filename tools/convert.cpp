@@ -41,7 +41,6 @@ int main(int args, char** argv) {
     char* y = (char*)&x;
     assert(y[0]=='a' && y[1]=='b');
     // assert type sizes
-    assert(sizeof(Edge) == 5*4);
 
     string graph(args >=2?argv[1]:"graph.dat");
     string ranks(args >=3?argv[2]:"graph_ids");
@@ -86,7 +85,12 @@ int main(int args, char** argv) {
     
     // Read edges
     for(unsigned int i=0; i<ne; ++i){
-        gin.read((char*)&edges[i], sizeof(Edge));
+        //gin.read((char*)&edges[i], sizeof(Edge));
+        gin.read((char*)&edges[i].sourceId, sizeof(uint32_t));
+        gin.read((char*)&edges[i].targetId, sizeof(uint32_t));
+        gin.read((char*)&edges[i].length, sizeof(uint32_t));
+        gin.read((char*)&edges[i].shortcuttedEdge1, sizeof(uint32_t));
+        gin.read((char*)&edges[i].shortcuttedEdge2, sizeof(uint32_t));
     }
     
     // Write num nodes, num edges

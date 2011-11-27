@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 10L;
+	private static final long serialVersionUID = 12L;
 
 	private static class Sorter {
 		private static void sort(GraphRep graphRep) {
@@ -109,12 +109,10 @@ public class GraphRep implements Serializable {
 	// edges
 	protected final int[] src;
 	protected final int[] dest;
-	protected final int[] multipliedDist;
 	protected final int[] dist;
 
-	protected final int[] shortedID;
-	protected final short[] outEdgeSourceNum;
-	protected final short[] outEdgeShortedNum;
+	protected final int[] shortedEdge1;
+	protected final int[] shortedEdge2;
 
 	protected final int[] offsetOut;
 	protected final int[] offsetIn;
@@ -146,12 +144,10 @@ public class GraphRep implements Serializable {
 
 		this.src = new int[edgeCount];
 		this.dest = new int[edgeCount];
-		this.multipliedDist = new int[edgeCount];
 		this.dist = new int[edgeCount];
 
-		this.shortedID = new int[edgeCount];
-		this.outEdgeSourceNum = new short[edgeCount];
-		this.outEdgeShortedNum = new short[edgeCount];
+		this.shortedEdge1 = new int[edgeCount];
+		this.shortedEdge2 = new int[edgeCount];
 
 		this.mapping_InToOut = new int[edgeCount];
 	}
@@ -192,18 +188,15 @@ public class GraphRep implements Serializable {
 	 * @param dist
 	 * @param multipliedDist
 	 */
-	protected final void setEdgeData(int index, int src, int dest, int dist,
-			int multipliedDist) {
+	protected final void setEdgeData(int index, int src, int dest, int dist) {
 		this.mapping_InToOut[index] = index;
 
 		this.src[index] = src;
 		this.dest[index] = dest;
 		this.dist[index] = dist;
-		this.multipliedDist[index] = multipliedDist;
 
-		this.shortedID[index] = -1;
-		this.outEdgeSourceNum[index] = -1;
-		this.outEdgeShortedNum[index] = -1;
+		this.shortedEdge1[index] = -1;
+		this.shortedEdge1[index] = -1;
 	}
 
 	/**
@@ -214,11 +207,10 @@ public class GraphRep implements Serializable {
 	 * @param outEdgeSourceNum
 	 * @param outEdgeShortedNum
 	 */
-	protected final void setShortcutData(int id, int shortedID,
-			short outEdgeSourceNum, short outEdgeShortedNum) {
-		this.shortedID[id] = shortedID;
-		this.outEdgeSourceNum[id] = outEdgeSourceNum;
-		this.outEdgeShortedNum[id] = outEdgeShortedNum;
+	protected final void setShortcutData(int id, int shortedEdge1,
+			int shortedEdge2) {
+		this.shortedEdge1[id] = shortedEdge1;
+		this.shortedEdge2[id] = shortedEdge2;
 	}
 
 	/**
@@ -287,26 +279,23 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the edgeNum of the out going edge from the source of this edge to
-	 * the shortcutted node. This is -1 if this edge is not a shortcut
-	 * 
-	 * @param nodeID
-	 * @param edgeNum
-	 * @return
-	 */
-	public final short getEdgeSourceNum(int edgeId) {
-		return outEdgeSourceNum[edgeId];
-	}
-
-	/**
-	 * Gets the edgeNum of the out going edge from the shortcutted node of this
-	 * edge to the shortcutted node. This is -1 if this edge is not a shortcut
+	 * Gets the edgeId of the first shortcutted edge
 	 * 
 	 * @param edgeId
 	 * @return
 	 */
-	public final short getEdgeShortedNum(int edgeId) {
-		return outEdgeShortedNum[edgeId];
+	public final int getFirstShortcuttedEdge(int edgeId) {
+		return shortedEdge1[edgeId];
+	}
+
+	/**
+	 * Gets the edgeId of the second shortcutted edge
+	 * 
+	 * @param edgeId
+	 * @return
+	 */
+	public final int getSecondShortcuttedEdge(int edgeId) {
+		return shortedEdge2[edgeId];
 	}
 
 	/**
@@ -357,59 +346,6 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the nodeId of the shortcutted node of the in going edge identified
-	 * by it's target node and edgeNum This is -1 if this edge is not a shortcut
-	 * 
-	 * @param nodeID
-	 * @param edgeNum
-	 * @return
-	 */
-	public final int getInEdgeShortedId(int nodeID, int edgeNum) {
-		// return shortedID_in[offsetIn[nodeID] + edgeNum];
-		return shortedID[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
-	}
-
-	/**
-	 * Gets the edgeNum of the out going edge from the shortcutted node of this
-	 * edge to the target of this edge. This is -1 if this edge is not a
-	 * shortcut
-	 * 
-	 * @param nodeID
-	 * @param edgeNum
-	 * @return
-	 */
-	public final short getInEdgeShortedOut(int nodeID, int edgeNum) {
-		// return outEdgeShortedNum_in[offsetIn[nodeID] + edgeNum];
-		return outEdgeShortedNum[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
-	}
-
-	/**
-	 * Gets the edgeNum of the out going edge from the source of this edge to
-	 * the shortcutted node. This is -1 if this edge is not a shortcut
-	 * 
-	 * @param nodeID
-	 * @param edgeNum
-	 * @return
-	 */
-	public final short getInEdgeSourceOut(int nodeID, int edgeNum) {
-		// return outEdgeSourceNum_in[offsetIn[nodeID] + edgeNum];
-		return outEdgeSourceNum[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
-	}
-
-	/**
-	 * Gets the weighted distance of the in going edge identified by it's target
-	 * node and edgeNum the edgeNum is between 0 and getInEdgeCount(nodeId)-1
-	 * 
-	 * @return int
-	 * @param nodeID
-	 * @param edgeNum
-	 */
-	public final int getInMultipliedDist(int nodeID, int edgeNum) {
-		// return multipliedDist_in[offsetIn[nodeID] + edgeNum];
-		return multipliedDist[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
-	}
-
-	/**
 	 * Gets the source of the in going edge identified by it's target node and
 	 * edgeNum the edgeNum is between 0 and getInEdgeCount(nodeId)-1
 	 * 
@@ -422,15 +358,25 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the weighted distance of the the edge given by it's edgeId (that's
-	 * not an edgeNum but a unique Id for each edge) get the Id with
-	 * GetOutEdgeID() and GetInEdgeID()
+	 * Gets the edgeId of the first shortcutted edge of the given ingoing edge
 	 * 
-	 * @param edgeId
+	 * @param nodeID
+	 * @param edgeNum
 	 * @return
 	 */
-	public final int getMultipliedDist(int edgeId) {
-		return multipliedDist[edgeId];
+	public final int getInFirstShortcuttedEdge(int nodeID, int edgeNum) {
+		return shortedEdge1[mapping_InToOut[offsetOut[nodeID] + edgeNum]];
+	}
+
+	/**
+	 * Gets the edgeId of the second shortcutted edge of the given ingoing edge
+	 * 
+	 * @param nodeID
+	 * @param edgeNum
+	 * @return
+	 */
+	public final int getInSecondShortcuttedEdge(int nodeID, int edgeNum) {
+		return shortedEdge2[mapping_InToOut[offsetOut[nodeID] + edgeNum]];
 	}
 
 	/**
@@ -507,66 +453,25 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the edgeNum of the out going edge from the shortcutted node of this
-	 * edge to the target of this edge. This is -1 if this edge is not a
-	 * shortcut
+	 * Gets the edgeId of the first shortcutted edge of the given outgoing edge
 	 * 
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public final short getOutEdgeShortedOut(int nodeID, int edgeNum) {
-		return outEdgeShortedNum[offsetOut[nodeID] + edgeNum];
+	public final int getOutFirstShortcuttedEdge(int nodeID, int edgeNum) {
+		return shortedEdge1[offsetOut[nodeID] + edgeNum];
 	}
 
 	/**
-	 * Gets the edgeNum of the out going edge from the source of this edge to
-	 * the shortcutted node. This is -1 if this edge is not a shortcut
+	 * Gets the edgeId of the second shortcutted edge of the given outgoing edge
 	 * 
 	 * @param nodeID
 	 * @param edgeNum
 	 * @return
 	 */
-	public final short getOutEdgeSourceNum(int nodeID, int edgeNum) {
-		return outEdgeSourceNum[offsetOut[nodeID] + edgeNum];
-	}
-
-	/**
-	 * Gets the weighted distance of the out going edge identified by it's
-	 * source node and edgeNum the edgeNum is between 0 and
-	 * getOutEdgeCount(nodeId)-1
-	 * 
-	 * @return int
-	 * @param nodeID
-	 * @param edgeNum
-	 */
-	public final int getOutMultipliedDist(int nodeID, int edgeNum) {
-		return multipliedDist[offsetOut[nodeID] + edgeNum];
-	}
-
-	/**
-	 * Gets the nodeId of the shortcutted node of the out going edge identified
-	 * by it's source node and edgeNum This is -1 if this edge is not a shortcut
-	 * 
-	 * @param nodeID
-	 * @param edgeNum
-	 * @return
-	 */
-	public final int getOutShortedId(int nodeID, int edgeNum) {
-		return shortedID[offsetOut[nodeID] + edgeNum];
-	}
-
-	/**
-	 * Gets the edgeNum of the out going edge from the shortcutted node of this
-	 * edge to the target of this edge. This is -1 if this edge is not a
-	 * shortcut
-	 * 
-	 * @param nodeID
-	 * @param edgeNum
-	 * @return
-	 */
-	public final short getOutShortedOut(int edgeId) {
-		return outEdgeShortedNum[edgeId];
+	public final int getOutSecondShortcuttedEdge(int nodeID, int edgeNum) {
+		return shortedEdge2[offsetOut[nodeID] + edgeNum];
 	}
 
 	/**
@@ -590,18 +495,6 @@ public class GraphRep implements Serializable {
 	 */
 	public final int getRank(int nodeID) {
 		return rank[nodeID];
-	}
-
-	/**
-	 * Gets the nodeId of the shortcutted node of the given edge This is -1 if
-	 * this edge is not a shortcut
-	 * 
-	 * @param nodeID
-	 * @param edgeNum
-	 * @return
-	 */
-	public final int getShortedId(int edgeId) {
-		return shortedID[edgeId];
 	}
 
 	/**
