@@ -1,6 +1,7 @@
 package graphrep;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 import org.junit.Test;
 
@@ -15,8 +16,14 @@ public class DumbNNTest {
 		byte[] testFileBytes = testFile.getBytes();
 		ByteArrayInputStream testFileByteArrayStream = new ByteArrayInputStream(
 				testFileBytes);
-		GraphRep graphRep = graphRepTextReader
-				.createGraphRep(testFileByteArrayStream);
+		
+		// TODO Rework test case, adjust to changed graphrep, maybe no try/catch here
+		try {
+			GraphRep graphRep = graphRepTextReader
+					.createGraphRep(testFileByteArrayStream);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+		}
 
 	}
 }

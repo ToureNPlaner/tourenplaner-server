@@ -58,7 +58,7 @@ import database.UsersDBRow;
 /**
  * This handler handles HTTP Requests on the normal operation socket including *
  * 
- * @author Niklas Schnelle, Peter Vollmer
+ * @author Niklas Schnelle, Peter Vollmer, Sascha Meusel
  * @version 0.1
  * 
  *          Initially based on: http://docs.jboss.org/netty/3.2/xref
@@ -109,7 +109,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				this.dbm = new DatabaseManager(cm.getEntryString("dburi",
 						"jdbc:mysql://localhost:3306/"), cm.getEntryString(
 						"dbname", "tourenplaner"), cm.getEntryString("dbuser",
-						"toureNPlaner"), cm.getEntryString("dbpw",
+						"tnpuser"), cm.getEntryString("dbpw",
 						"toureNPlaner"));
 				digester = MessageDigest.getInstance("SHA-1");
 			} catch (SQLException e) {
