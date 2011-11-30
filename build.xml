@@ -5,15 +5,18 @@
 	<property name="lib.dir" value="lib"/>
 	<property name="jar.dir" value="jar"/>
 	<property name="jar.temp.dir" value="${jar.dir}/temp"/>
-	<property name="junit.dir" value="junit-tests"/>
+	<property name="junit-src.dir" value="junit-tests"/>
 	<property name="junit-reports.dir" value="junit-reports"/>
 	<property name="junit-lib.dir" value="junit-lib"/>
+	<property name="junit-bin.dir" value="junit-bin"/>
+	<property name="junit-bin.temp.dir" value="${junit-bin.dir}/temp"/>
 	<property name="main-class" value="server.TourenPlaner"/>
 	<property name="classpath" value="."/>
 	
 	<target name="clean">
 		<delete dir="${bin.dir}"/>
 		<delete dir="${jar.dir}"/>
+		<delete dir="${junit-bin.dir}"/>
 	</target>
 
 	<target name="compile">
@@ -70,7 +73,33 @@
 		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
 	</target>
 	
-	<target name="junit" depends="compile">
+	
+	
+	<target name="junit-compile">
+		<mkdir dir="${junit-bin.dir}"/>
+		
+		<copy todir="${junit-bin.temp.dir}">
+			<fileset dir="${src.dir}" includes="**/*"/>
+			<fileset dir="${junit-src.dir}" includes="**/*"/>
+		</copy>
+		
+		<javac target="1.6" source="1.6" srcdir="${junit-bin.temp.dir}" destdir="${junit-bin.dir}" includeantruntime="false">
+			<compilerarg value="-Xlint"/>
+			<classpath>
+				<pathelement path="${classpath}"/>
+				<fileset dir="${lib.dir}">
+					<include name="**/*.jar"/>
+				</fileset>
+				<fileset dir="${junit-lib.dir}">
+					<include name="**/*.jar"/>
+				</fileset>
+				<pathelement location="${junit-bin.dir}"/>
+			</classpath>
+		</javac>
+	</target>
+	
+	
+	<target name="junit" depends="junit-compile">
 		<junit haltonfailure="off" printsummary="withOutAndErr">
 			<classpath>
 				<pathelement path="${classpath}"/>
@@ -80,13 +109,13 @@
 				<fileset dir="${junit-lib.dir}">
 					<include name="**/*.jar"/>
 				</fileset>
-				<pathelement location="${bin.dir}"/>
+				<pathelement location="${junit-bin.dir}"/>
 			</classpath>
 			
 			<formatter type="plain"/>
 	
 			<batchtest todir="${junit-reports.dir}">
-				<fileset dir="${junit.dir}">
+				<fileset dir="${junit-src.dir}">
 					<include name="**/*Test.java"/>
 				</fileset>
 			</batchtest>
