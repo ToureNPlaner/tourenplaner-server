@@ -70,7 +70,7 @@
 		<java jar="${jar.dir}/${ant.project.name}.jar" fork="true"/>
 	</target>
 	
-	<target name="junit">
+	<target name="junit" depends="compile">
 		<junit haltonfailure="off" printsummary="withOutAndErr">
 			<classpath>
 				<pathelement path="${classpath}"/>

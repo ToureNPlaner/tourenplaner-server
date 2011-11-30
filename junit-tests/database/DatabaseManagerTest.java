@@ -62,6 +62,17 @@ public class DatabaseManagerTest {
 			}
 			
 		}
+		if (dbm != null && dbmFailureMessage == null) {
+			System.out.println("Database successful connected.");
+		} else {
+			System.out.println(dbmFailureMessage);
+		}
+		if (userFailureMessage == null) {
+			System.out.println("TestUser successful inserted.");
+		} else {
+			System.out.println(userFailureMessage);
+		}
+		
 	}
 	
 	/**
