@@ -65,7 +65,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		}
 
 		// temporary values for edges
-		int src, dest, dist;
+		int src, dest, dist, euclidianDist;
 		int shortcuttedEdge1, shortcuttedEdge2;
 		for (int i = 0; i < edgeCount; i++) {
 
@@ -74,12 +74,13 @@ public class GraphRepTextReader extends GraphRepFactory {
 			src = Integer.parseInt(splittedLine[0]);
 			dest = Integer.parseInt(splittedLine[1]);
 			dist = Integer.parseInt(splittedLine[2]);
+         euclidianDist = Integer.parseInt(splittedLine[3]);
 
-			graphRep.setEdgeData(i, src, dest, dist);
+			graphRep.setEdgeData(i, src, dest, dist, euclidianDist);
 
-			if (splittedLine.length == 5) {
-				shortcuttedEdge1 = Integer.parseInt(splittedLine[3]);
-				shortcuttedEdge2 = Integer.parseInt(splittedLine[4]);
+			if (splittedLine.length == 6) {
+				shortcuttedEdge1 = Integer.parseInt(splittedLine[4]);
+				shortcuttedEdge2 = Integer.parseInt(splittedLine[5]);
 
 				graphRep.setShortcutData(i, shortcuttedEdge1, shortcuttedEdge2);
 			}

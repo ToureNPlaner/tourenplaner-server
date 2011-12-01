@@ -107,9 +107,10 @@ public class GraphRep implements Serializable {
 	protected final int[] rank;
 
 	// edges
-	protected final int[] src;
+  	protected final int[] src;
 	protected final int[] dest;
 	protected final int[] dist;
+   protected final int[] euclidianDist; 
 
 	protected final int[] shortedEdge1;
 	protected final int[] shortedEdge2;
@@ -145,6 +146,7 @@ public class GraphRep implements Serializable {
 		this.src = new int[edgeCount];
 		this.dest = new int[edgeCount];
 		this.dist = new int[edgeCount];
+      this.euclidianDist = new int[edgeCount];
 
 		this.shortedEdge1 = new int[edgeCount];
 		this.shortedEdge2 = new int[edgeCount];
@@ -188,12 +190,13 @@ public class GraphRep implements Serializable {
 	 * @param dist
 	 * @param multipliedDist
 	 */
-	protected final void setEdgeData(int index, int src, int dest, int dist) {
+	protected final void setEdgeData(int index, int src, int dest, int dist, int euclidianDist) {
 		this.mapping_InToOut[index] = index;
 
 		this.src[index] = src;
 		this.dest[index] = dest;
 		this.dist[index] = dist;
+      this.euclidianDist[index] = euclidianDist;
 
 		this.shortedEdge1[index] = -1;
 		this.shortedEdge1[index] = -1;
@@ -257,7 +260,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the distance (in meters) of the the edge given by it's edgeId
+	 * Gets the distance in the shortest path format that is multiplied for travel time
+    * of the the edge given by it's edgeId
 	 * (that's not an edgeNum but a unique Id for each edge) get the Id with
 	 * GetOutEdgeID() and GetInEdgeID()
 	 * 
@@ -268,6 +272,19 @@ public class GraphRep implements Serializable {
 	public final int getDist(int edgeID) {
 		return dist[edgeID];
 	}
+
+   /**
+    * Gets the distance (in meters) of the the edge given by it's edgeId
+    * (that's not an edgeNum but a unique Id for each edge) get the Id with
+    * GetOutEdgeID() and GetInEdgeID()
+    * 
+    * @return int
+    * @param edgeID
+    * @param edgeNum
+    */
+   public final int getEuclidianDist(int edgeID) {
+      return euclidianDist[edgeID];
+   }
 
 	/**
 	 * Gets the number of edges in the graph
@@ -310,7 +327,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the distance (in meters) of the in going edge identified by it's
+	 * Gets the distance in shortest path form that is multiplied for travel time
+    *  of the in going edge identified by it's
 	 * target node and edgeNum the edgeNum is between 0 and
 	 * getInEdgeCount(nodeId)-1
 	 * 
@@ -322,6 +340,20 @@ public class GraphRep implements Serializable {
 		// return dist_in[offsetIn[nodeID] + edgeNum];
 		return dist[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
 	}
+
+   /**
+    * Gets the euclidian distance (in meters) of the in going edge identified by it's
+    * target node and edgeNum the edgeNum is between 0 and
+    * getInEdgeCount(nodeId)-1
+    * 
+    * @return int
+    * @param nodeID
+    * @param edgeNum
+    */
+   public final int getInEuclidianDist(int nodeID, int edgeNum) {
+      // return dist_in[offsetIn[nodeID] + edgeNum];
+      return euclidianDist[mapping_InToOut[offsetIn[nodeID] + edgeNum]];
+   }
 
 	/**
 	 * Gets the number of in going edges of the given node
