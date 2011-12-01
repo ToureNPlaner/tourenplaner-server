@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Class GraphRep
  */
 public class GraphRep implements Serializable {
-	private static final long serialVersionUID = 12L;
+	private static final long serialVersionUID = 13L;
 
 	private static class Sorter {
 		private static void sort(GraphRep graphRep) {
