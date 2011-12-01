@@ -5,14 +5,11 @@
 #include <limits>
 #include <assert.h>
 #include <stdint.h>
+#include <math.h>
 
 using namespace std;
 
-struct NodeData {
-    double lon;
-    double lat;
-    int32_t ele;
-};
+
 
 struct Edge {
     uint32_t sourceId;
@@ -24,15 +21,43 @@ struct Edge {
 };
 
 struct Node {
-    NodeData data;
+    double lon;
+    double lat;
+    int32_t ele;
     uint32_t rank;
     Edge* outEdges;
 };
 
+// PI/180
+static const double DEG_TO_RAD = 0.017453292519943295769236907684886;
+static const double EARTH_RADIUS_IN_METERS = 6372797.560856;
 
 
+double calcDirectDistance(double lat1, double lon1, double lat2, double lon2) {
 
+        /*double latitudeArc = (lat2 - lat1)*DEG_TO_RAD;
+        double longitudeArc = (lon2 - lon1)*DEG_TO_RAD;
+        
+        double latitudeH = sin(latitudeArc * 0.5);
+        latitudeH *= latitudeH;
+        double longitudeH = sin(longitudeArc * 0.5);
+        longitudeH *= longitudeH;
+        
+        double tmp = cos(lat1*DEG_TO_RAD) * cos(lat2*DEG_TO_RAD);
+        return 2.0 * asin(sqrt(latitudeH + tmp*longitudeH)) * EARTH_RADIUS_IN_METERS;*/
+        const double degTorad = 0.017453292519943;
+        const double R = 6371;
+        const double dLat = (lat2-lat1)*degTorad;
+        const double dLon = (lon2-lon1)*degTorad;
+        const double a = sin(dLat/2) * sin(dLat/2) + cos(lat1*degTorad) * cos(lat2*degTorad) * sin(dLon/2) * sin(dLon/2);
+        const double c = 2 * atan2(sqrt(a), sqrt(1-a));
+        return R * c*1000.0;
 
+}
+
+double calcEdgeDistance(Edge* e, Node* nodes){
+    return calcDirectDistance(nodes[e->sourceId].lat, nodes[e->sourceId].lon, nodes[e->targetId].lat, nodes[e->targetId].lon);
+}
 
 
 int main(int args, char** argv) {
@@ -76,9 +101,9 @@ int main(int args, char** argv) {
     Edge* edges = new Edge[ne];
     // Read nodes
     for(unsigned int i=0 ; i<n; ++i) {        
-        gin.read((char*)&nodes[i].data.lon,sizeof(double));
-        gin.read((char*)&nodes[i].data.lat,sizeof(double));
-        gin.read((char*)&nodes[i].data.ele,sizeof(int32_t));
+        gin.read((char*)&nodes[i].lon,sizeof(double));
+        gin.read((char*)&nodes[i].lat,sizeof(double));
+        gin.read((char*)&nodes[i].ele,sizeof(int32_t));
         // Read the rank of the node from rank file
         rin.read((char*)&nodes[i].rank, sizeof(uint32_t));
     }
@@ -99,9 +124,9 @@ int main(int args, char** argv) {
     // Write Nodes
     for(unsigned int i=0 ; i<n; ++i) {
        cout << i << " ";
-       cout << ((int32_t) (nodes[i].data.lat*10000000.0)) << " ";
-       cout << ((int32_t) (nodes[i].data.lon*10000000.0)) << " ";
-       cout << nodes[i].data.ele << " ";
+       cout << ((int32_t) (nodes[i].lat*10000000.0)) << " ";
+       cout << ((int32_t) (nodes[i].lon*10000000.0)) << " ";
+       cout << nodes[i].ele << " ";
        cout << ((nodes[i].rank < (uint32_t)numeric_limits<int32_t>::max())?(int32_t)nodes[i].rank:(int32_t)numeric_limits<int32_t>::max())<< endl;
     }
  
@@ -111,6 +136,7 @@ int main(int args, char** argv) {
             cout << edges[i].sourceId << " " ;
             cout << edges[i].targetId << " " ;
             cout << edges[i].length << " ";
+            cout << (int) calcEdgeDistance(&edges[i], nodes) << " ";
             cout << ((edges[i].shortcuttedEdge1< (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge1 : -1)<< " ";
             cout << ((edges[i].shortcuttedEdge2 < (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge2 : -1)<< endl;
     }
