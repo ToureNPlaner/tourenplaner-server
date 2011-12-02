@@ -7,13 +7,15 @@ import java.util.Map;
 
 import org.codehaus.jackson.type.TypeReference;
 
+import database.RequestDataset;
+
 import server.Responder;
 import algorithms.Points;
 
 /**
  * This class is used to represent a request for computation
  * 
- * @author Niklas Schnelle, Peter Vollmer
+ * @author Niklas Schnelle, Peter Vollmer, Sascha Meusel
  * 
  */
 public class ComputeRequest {
@@ -30,10 +32,12 @@ public class ComputeRequest {
 	private Map<String, Object> misc;
 	private String algName;
 	private Responder responder;
+	private RequestDataset requestDataset;
 
 	/**
 	 * Constructs a new ComputeRequest using the given Responder, Points and
-	 * Constraints
+	 * Constraints. The corresponding RequestDataset is null, should be set 
+	 * with {@link #setRequestDataset(RequestDataset)} if server is private.
 	 * 
 	 * @param responder
 	 * @param algName
@@ -47,6 +51,7 @@ public class ComputeRequest {
 		this.constraints = constraints;
 		this.responder = responder;
 		this.misc = null;
+		this.requestDataset = null;
 	}
 
 	/**
@@ -107,5 +112,26 @@ public class ComputeRequest {
 
 	public void setMisc(Map<String, Object> misc) {
 		this.misc = misc;
+	}
+	
+	/**
+	 * Sets the corresponding RequestDataset, should be null if server is
+	 * not in private mode.
+	 * @param requestDataset
+	 */
+	public void setRequestDataset(RequestDataset requestDataset) {
+		this.requestDataset = requestDataset;
+	}
+	
+	/**
+	 * Gets the corresponding RequestDataset, should be null if server is
+	 * not in private mode. The RequestDataset is not synchronized with
+	 * the database. So if you need the up-to-date corresponding RequestDataset,
+	 * you have to use the attribute id of this RequestDataset and get the
+	 * up-to-date RequestDataset from the database yourself.
+	 * @return
+	 */
+	public RequestDataset getRequestDataset() {
+		return this.requestDataset;
 	}
 }

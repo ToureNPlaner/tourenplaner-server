@@ -9,7 +9,7 @@ import java.util.Date;
  * @author Sascha Meusel
  *
  */
-public class RequestsDBRow {
+public class RequestDataset {
 	
 	public int id = 0;
 	public int userID = 0;
@@ -24,7 +24,7 @@ public class RequestsDBRow {
 	public boolean hasFailed = false;
 	public String failDescription = null;
 	
-	public RequestsDBRow(int id, int userID, byte[] jsonRequest, 
+	public RequestDataset(int id, int userID, byte[] jsonRequest, 
 			byte[] jsonResponse, boolean isPending, int costs, boolean isPaid, 
 			Date requestDate, Date finishedDate, long cpuTime, 
 			boolean hasFailed, String failDescription) {
