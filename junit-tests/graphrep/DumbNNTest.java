@@ -16,8 +16,9 @@ public class DumbNNTest {
 		byte[] testFileBytes = testFile.getBytes();
 		ByteArrayInputStream testFileByteArrayStream = new ByteArrayInputStream(
 				testFileBytes);
-		
-		// TODO Rework test case, adjust to changed graphrep, maybe no try/catch here
+
+		// TODO Rework test case, adjust to changed graphrep, maybe no try/catch
+		// here
 		try {
 			GraphRep graphRep = graphRepTextReader
 					.createGraphRep(testFileByteArrayStream);

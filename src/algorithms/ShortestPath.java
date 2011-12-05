@@ -124,7 +124,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 			if (nodeId != destId) {
 				System.err.println("There is no path from src: " + srcId
-						+ " to dest: " + destId);
+						+ " to trgt: " + destId);
 				throw new ComputeException("No path found");
 			}
 

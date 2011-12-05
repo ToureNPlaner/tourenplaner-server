@@ -11,7 +11,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 	// nodecount
 	// edgecount
 	// (nodecount *) ID lat lon height
-	// (edgecount *) source dest dist mult
+	// (edgecount *) source trgt dist mult
 
 	@Override
 	public GraphRep createGraphRep(InputStream in) throws IOException {

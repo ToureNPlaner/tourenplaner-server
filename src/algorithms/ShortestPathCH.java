@@ -205,7 +205,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			long dijkstratime = System.nanoTime();
 
 			if (nodeId != destId) {
-				System.err.println("There is no path from src to dest");
+				System.err.println("There is no path from src to trgt");
 				throw new ComputeException("No Path found");
 			}
 
