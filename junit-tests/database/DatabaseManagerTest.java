@@ -6,6 +6,7 @@ package database;
 import static org.junit.Assert.*;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -109,6 +110,9 @@ public class DatabaseManagerTest {
 			RequestDataset request =  dbm.addNewRequest(testUserID, "jsonRequestTestBlob".getBytes());
 			assertFalse("dbm is null", dbm == null);
 			assertFalse("returned object should never be null", request == null);
+		} catch (SQLFeatureNotSupportedException e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

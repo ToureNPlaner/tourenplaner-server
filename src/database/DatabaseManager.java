@@ -176,11 +176,13 @@ public class DatabaseManager {
 	 * @return Returns the inserted request object only if the id could received
 	 *         from the database and the insert was successful, else an
 	 *         exception will be thrown.
+	 * @throws SQLFeatureNotSupportedException
+	 *             Thrown if the id could not received.
 	 * @throws SQLException
 	 *             Thrown if the insertion failed.
 	 */
 	public RequestDataset addNewRequest(int userID, byte[] jsonRequest)
-			throws SQLException {
+			throws SQLFeatureNotSupportedException, SQLException {
 
 		/*
 		  id              INT           NOT NULL AUTO_INCREMENT,
@@ -214,7 +216,7 @@ public class DatabaseManager {
 				false, new Date(stamp.getTime()), null, 0, false, null);
 
 		boolean hasKey = false;
-		generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
+		generatedKeyResultSet = pstAddNewRequest.getGeneratedKeys();
 		if (generatedKeyResultSet.next()) {
 			request.id = generatedKeyResultSet.getInt(1);
 			hasKey = true;
@@ -260,12 +262,15 @@ public class DatabaseManager {
 	 *         from the database and the insert was successful. If the insert
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
+	 * @throws SQLFeatureNotSupportedException
+	 *             Thrown if the id could not received.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */
 	public UserDataset addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) throws SQLException {
+			boolean isAdmin) 
+					throws SQLFeatureNotSupportedException, SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.NeedsVerification, false);
@@ -300,12 +305,15 @@ public class DatabaseManager {
 	 *         from the database and the insert was successful. If the insert
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
+	 * @throws SQLFeatureNotSupportedException
+	 *             Thrown if the id could not received.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */
 	public UserDataset addNewVerifiedUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) throws SQLException {
+			boolean isAdmin) 
+					throws SQLFeatureNotSupportedException, SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.Verified, true);
@@ -314,7 +322,7 @@ public class DatabaseManager {
 	private UserDataset addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
 			boolean isAdmin, UserStatusEnum status, boolean isVerified)
-			throws SQLException {
+			throws SQLFeatureNotSupportedException, SQLException {
 
 		/*
 		  id                INT           NOT NULL AUTO_INCREMENT,
