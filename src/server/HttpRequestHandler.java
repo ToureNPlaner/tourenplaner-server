@@ -53,7 +53,8 @@ import computecore.ComputeRequest;
 
 import config.ConfigManager;
 import database.DatabaseManager;
-import database.UsersDBRow;
+import database.RequestDataset;
+import database.UserDataset;
 
 /**
  * This handler handles HTTP Requests on the normal operation socket including *
@@ -159,61 +160,86 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 		final String path = queryStringDecoder.getPath();
 
-		if ("/info".equals(path)) {
+		try {
+			if ("/info".equals(path)) {
 
-			handleInfo(request);
+				handleInfo(request);
 
-		} else if (path.startsWith("/alg")) {
+			} else if (path.startsWith("/alg")) {
 
-			if (isPrivate && (auth(request) == null)) {
-				responder.writeUnauthorizedClose();
-			} else {
 				final String algName = queryStringDecoder.getPath()
 						.substring(4);
 				handleAlg(request, algName);
+
+			} else if (isPrivate) {
+				if ("/registeruser".equals(path)) {
+
+					handleRegisterUser(request);
+
+				} else if ("/authuser".equals(path)) {
+
+					handleAuthUser(request);
+
+				} else if ("/getuser".equals(path)) {
+
+					handleGetUser(request);
+
+				} else if ("/updateuser".equals(path)) {
+
+					handleUpdateUser(request);
+
+				} else if ("/listrequests".equals(path)) {
+
+					handleListRequests(request);
+
+				} else if ("/listusers".equals(path)) {
+
+					handleListUsers(request);
+
+				}
+			} else {
+				// Unknown request, close connection
+				responder.writeErrorMessage("EUNKNOWNURL",
+						"An unknown URL was requested", null,
+						HttpResponseStatus.NOT_FOUND);
 			}
-
-		} else if (isPrivate) {
-			if ("/registeruser".equals(path)) {
-
-				handleRegisterUser(request);
-
-			} else if ("/authuser".equals(path)) {
-
-				handleAuthUser(request);
-
-			} else if ("/getuser".equals(path)) {
-
-				handleGetUser(request);
-
-			} else if ("/updateuser".equals(path)) {
-
-				handleUpdateUser(request);
-
-			} else if ("/listrequests".equals(path)) {
-
-				handleListRequests(request);
-
-			} else if ("/listusers".equals(path)) {
-
-				handleListUsers(request);
-
-			}
-		} else {
-			// Unknown request, close connection
-			responder.writeErrorMessage("EUNKNOWNURL",
-					"An unknown URL was requested", null,
+		} catch (SQLException ex) {
+			responder.writeErrorMessage("EDATABASE",
+					"The server can't contact it's database", null,
 					HttpResponseStatus.NOT_FOUND);
 		}
-
 	}
 
+	/**
+	 * 
+	 * @param request
+	 * @param algName
+	 * @throws IOException
+	 * @throws SQLException Thrown if auth fails or logging of request fails
+	 */
 	private void handleAlg(final HttpRequest request, final String algName)
-			throws IOException {
+			throws IOException, SQLException {
+		UserDataset userDataset = null;
+		
+		if (isPrivate) {
+			userDataset = auth(request);
+			if (userDataset == null) {
+				responder.writeUnauthorizedClose();
+				return;
+			}
+		}
+		
 		try {
 			final ComputeRequest req = readComputeRequest(algName, responder,
 					request);
 			if (req != null) {
+				
+				RequestDataset requestDataset = null;
+				
+				if (isPrivate) {
+					requestDataset = dbm.addNewRequest(userDataset.id, request.getContent().array());
+					req.setRequestDataset(requestDataset);
+				}
 
 				final boolean success = computer.submit(req);
 
@@ -224,6 +250,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 									"This server is currently too busy to fullfill the request",
 									null,
 									HttpResponseStatus.SERVICE_UNAVAILABLE);
+					// Log failed requests because of full queue as failed, as not pending and as paid
+					// TODO specify this case clearly, maybe behavior should be another
+					requestDataset.failDescription = "This server is currently too busy to fullfill the request";
+					requestDataset.hasFailed = true;
+					requestDataset.isPending = true;
+					requestDataset.isPaid = true;
+					dbm.updateRequest(requestDataset);
 				}
 			}
 		} catch (JsonParseException e) {
@@ -380,7 +413,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	}
 
 	private void handleAuthUser(final HttpRequest request) {
-		UsersDBRow user = null;
+		UserDataset user = null;
 
 		try {
 			user = auth(request);
@@ -417,8 +450,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 */
 	private void handleRegisterUser(final HttpRequest request) {
 		try {
-			UsersDBRow user = null;
-			UsersDBRow authUser = null;
+			UserDataset user = null;
+			UserDataset authUser = null;
 
 			// if no authorization header keep on with adding not verified user
 			if (request.getHeader("Authorization") != null) {
@@ -589,18 +622,18 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	/**
 	 * Authenticates a Request using HTTP Basic Authentication and returns the
-	 * UsersDBRow object of the authenticated user or null if authentication
+	 * UserDataset object of the authenticated user or null if authentication
 	 * failed. Errors will be sent to the client as error messages see protocol
 	 * specification for details. The connection will get closed after the error
 	 * has been sent
 	 * 
 	 * @param request
-	 * @return the UsersDBRow object of the user or null if auth failed
+	 * @return the UserDataset object of the user or null if auth failed
 	 * @throws SQLException
 	 */
-	private UsersDBRow auth(final HttpRequest myReq) throws SQLException {
+	private UserDataset auth(final HttpRequest myReq) throws SQLException {
 		String email, emailandpw, pw;
-		UsersDBRow user = null;
+		UserDataset user = null;
 		int index = 0;
 		// Why between heaven and earth does Java have AES Encryption in
 		// the standard library but not Base64 though it has it internally

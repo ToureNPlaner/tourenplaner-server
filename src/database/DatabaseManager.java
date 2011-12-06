@@ -165,7 +165,8 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Tries to insert a new request dataset into the database. </br>SQL
+	 * Tries to insert a new request dataset into the database. The inserted
+	 * dataset will be pending, have no costs and will be unpaid.</br>SQL
 	 * command: {@value #addNewRequestString}
 	 * 
 	 * @param userID
@@ -175,13 +176,32 @@ public class DatabaseManager {
 	 * @return Returns the inserted request object only if the id could received
 	 *         from the database and the insert was successful, else an
 	 *         exception will be thrown.
+	 * @throws SQLFeatureNotSupportedException
+	 *             Thrown if the id could not received.
 	 * @throws SQLException
 	 *             Thrown if the insertion failed.
 	 */
-	public RequestsDBRow addNewRequest(int userID, byte[] jsonRequest)
-			throws SQLException {
+	public RequestDataset addNewRequest(int userID, byte[] jsonRequest)
+			throws SQLFeatureNotSupportedException, SQLException {
 
-		RequestsDBRow request = null;
+		/*
+		  id              INT           NOT NULL AUTO_INCREMENT,
+		  UserID          INT           NOT NULL REFERENCES Users (id),
+		  JSONRequest     LONGBLOB,
+		  JSONResponse    LONGBLOB               DEFAULT NULL,
+		  PendingFlag     BOOL          NOT NULL DEFAULT 1,
+		  Costs           INT           NOT NULL DEFAULT 0,
+		  PaidFlag        BOOL          NOT NULL DEFAULT 0,
+		  RequestDate     DATETIME      NOT NULL,
+		  FinishedDate    DATETIME               DEFAULT NULL,
+		  CPUTime         BIGINT        NOT NULL DEFAULT 0,
+		  FailedFlag      BOOL          NOT NULL DEFAULT 0,
+		  FailDescription TEXT                   DEFAULT NULL,
+		  PRIMARY KEY (ID),
+		  FOREIGN KEY (UserID) REFERENCES Users (id)
+		*/
+		
+		RequestDataset request = null;
 		ResultSet generatedKeyResultSet = null;
 
 		Timestamp stamp = new Timestamp(System.currentTimeMillis());
@@ -192,11 +212,11 @@ public class DatabaseManager {
 
 		pstAddNewRequest.executeUpdate();
 
-		request = new RequestsDBRow(-1, userID, jsonRequest, null, true, 0,
+		request = new RequestDataset(-1, userID, jsonRequest, null, true, 0,
 				false, new Date(stamp.getTime()), null, 0, false, null);
 
 		boolean hasKey = false;
-		generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
+		generatedKeyResultSet = pstAddNewRequest.getGeneratedKeys();
 		if (generatedKeyResultSet.next()) {
 			request.id = generatedKeyResultSet.getInt(1);
 			hasKey = true;
@@ -242,12 +262,15 @@ public class DatabaseManager {
 	 *         from the database and the insert was successful. If the insert
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
+	 * @throws SQLFeatureNotSupportedException
+	 *             Thrown if the id could not received.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */
-	public UsersDBRow addNewUser(String email, String passwordhash,
+	public UserDataset addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) throws SQLException {
+			boolean isAdmin) 
+					throws SQLFeatureNotSupportedException, SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.NeedsVerification, false);
@@ -282,23 +305,46 @@ public class DatabaseManager {
 	 *         from the database and the insert was successful. If the insert
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
+	 * @throws SQLFeatureNotSupportedException
+	 *             Thrown if the id could not received.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */
-	public UsersDBRow addNewVerifiedUser(String email, String passwordhash,
+	public UserDataset addNewVerifiedUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) throws SQLException {
+			boolean isAdmin) 
+					throws SQLFeatureNotSupportedException, SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.Verified, true);
 	}
 
-	private UsersDBRow addNewUser(String email, String passwordhash,
+	private UserDataset addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
 			boolean isAdmin, UserStatusEnum status, boolean isVerified)
-			throws SQLException {
+			throws SQLFeatureNotSupportedException, SQLException {
 
-		UsersDBRow user = null;
+		/*
+		  id                INT           NOT NULL AUTO_INCREMENT,
+  		  Email             VARCHAR(255)  NOT NULL UNIQUE,
+  		  Passwordhash      TEXT          NOT NULL,
+  		  Salt              TEXT          NOT NULL,
+  		  AdminFlag         BOOL          NOT NULL DEFAULT 0,
+  		  Status            ENUM ('NeedsVerification', 
+                          		  'VerificationFailed', 
+                          		  'Verified', 
+                                  'Delete') 
+                                  NOT NULL DEFAULT 'NeedsVerification',
+  		  FirstName         TEXT          NOT NULL,
+  		  LastName          TEXT          NOT NULL,
+  		  Address           TEXT          NOT NULL,
+  		  RegistrationDate  DATETIME      NOT NULL,
+  		  VerifiedDate      DATETIME               DEFAULT NULL,
+  		  DeleteRequestDate DATETIME               DEFAULT NULL,
+  		  PRIMARY KEY (ID)
+		*/
+		
+		UserDataset user = null;
 
 		email = email.trim();
 		passwordhash = passwordhash.trim();
@@ -333,7 +379,7 @@ public class DatabaseManager {
 
 			pstAddNewUser.executeUpdate();
 
-			user = new UsersDBRow(-1, email, passwordhash, salt, isAdmin,
+			user = new UserDataset(-1, email, passwordhash, salt, isAdmin,
 					status, firstName, lastName, address, registeredDate,
 					verifiedDate, null);
 
@@ -381,7 +427,7 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if update fails.
 	 */
-	public void updateRequest(RequestsDBRow request) throws SQLException {
+	public void updateRequest(RequestDataset request) throws SQLException {
 
 		pstUpdateRequest.setInt(1, request.userID);
 		pstUpdateRequest.setBytes(2, request.jsonRequest);
@@ -411,7 +457,7 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if update fails.
 	 */
-	public void updateUser(UsersDBRow user) throws SQLException {
+	public void updateUser(UserDataset user) throws SQLException {
 		pstUpdateUser.setString(1, user.email);
 		pstUpdateUser.setString(2, user.passwordhash);
 		pstUpdateUser.setString(3, user.salt);
@@ -502,13 +548,13 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public List<RequestsDBRow> getAllRequests() throws SQLException {
+	public List<RequestDataset> getAllRequests() throws SQLException {
 		ResultSet resultSet = pstGetAllRequests.executeQuery();
-		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
+		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
 
 		while (resultSet.next()) {
 
-			list.add(new RequestsDBRow(resultSet.getInt(1),
+			list.add(new RequestDataset(resultSet.getInt(1),
 					resultSet.getInt(2), resultSet.getBytes(3), resultSet
 							.getBytes(4), resultSet.getBoolean(5), resultSet
 							.getInt(6), resultSet.getBoolean(7),
@@ -538,18 +584,18 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public List<RequestsDBRow> getAllRequests(int limit, int offset)
+	public List<RequestDataset> getAllRequests(int limit, int offset)
 			throws SQLException {
 
 		pstGetAllRequestsWithLimitOffset.setInt(1, limit);
 		pstGetAllRequestsWithLimitOffset.setInt(2, offset);
 
 		ResultSet resultSet = pstGetAllRequestsWithLimitOffset.executeQuery();
-		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
+		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
 
 		while (resultSet.next()) {
 
-			list.add(new RequestsDBRow(resultSet.getInt(1),
+			list.add(new RequestDataset(resultSet.getInt(1),
 					resultSet.getInt(2), resultSet.getBytes(3), resultSet
 							.getBytes(4), resultSet.getBoolean(5), resultSet
 							.getInt(6), resultSet.getBoolean(7),
@@ -574,14 +620,14 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public RequestsDBRow getRequest(int id) throws SQLException {
+	public RequestDataset getRequest(int id) throws SQLException {
 
 		pstGetRequestWithRequestId.setInt(1, id);
 		ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
-		RequestsDBRow request = null;
+		RequestDataset request = null;
 
 		while (resultSet.next()) {
-			request = new RequestsDBRow(resultSet.getInt(1),
+			request = new RequestDataset(resultSet.getInt(1),
 					resultSet.getInt(2), resultSet.getBytes(3),
 					resultSet.getBytes(4), resultSet.getBoolean(5),
 					resultSet.getInt(6), resultSet.getBoolean(7),
@@ -607,15 +653,15 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public List<RequestsDBRow> getRequests(int userId) throws SQLException {
+	public List<RequestDataset> getRequests(int userId) throws SQLException {
 		pstGetRequestsWithUserId.setInt(1, userId);
 
 		ResultSet resultSet = pstGetRequestsWithUserId.executeQuery();
-		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
+		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
 
 		while (resultSet.next()) {
 
-			list.add(new RequestsDBRow(resultSet.getInt(1),
+			list.add(new RequestDataset(resultSet.getInt(1),
 					resultSet.getInt(2), resultSet.getBytes(3), resultSet
 							.getBytes(4), resultSet.getBoolean(5), resultSet
 							.getInt(6), resultSet.getBoolean(7),
@@ -647,7 +693,7 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public List<RequestsDBRow> getRequests(int userId, int limit, int offset)
+	public List<RequestDataset> getRequests(int userId, int limit, int offset)
 			throws SQLException {
 		pstGetRequestsWithUserIdLimitOffset.setInt(1, userId);
 		pstGetRequestsWithUserIdLimitOffset.setInt(2, limit);
@@ -655,11 +701,11 @@ public class DatabaseManager {
 
 		ResultSet resultSet = pstGetRequestsWithUserIdLimitOffset
 				.executeQuery();
-		ArrayList<RequestsDBRow> list = new ArrayList<RequestsDBRow>();
+		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
 
 		while (resultSet.next()) {
 
-			list.add(new RequestsDBRow(resultSet.getInt(1),
+			list.add(new RequestDataset(resultSet.getInt(1),
 					resultSet.getInt(2), resultSet.getBytes(3), resultSet
 							.getBytes(4), resultSet.getBoolean(5), resultSet
 							.getInt(6), resultSet.getBoolean(7),
@@ -683,13 +729,13 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public List<UsersDBRow> getAllUsers() throws SQLException {
+	public List<UserDataset> getAllUsers() throws SQLException {
 		ResultSet resultSet = pstGetAllUsers.executeQuery();
-		ArrayList<UsersDBRow> list = new ArrayList<UsersDBRow>();
+		ArrayList<UserDataset> list = new ArrayList<UserDataset>();
 
 		while (resultSet.next()) {
 
-			list.add(new UsersDBRow(resultSet.getInt(1),
+			list.add(new UserDataset(resultSet.getInt(1),
 					resultSet.getString(2), resultSet.getString(3), resultSet
 							.getString(4), resultSet.getBoolean(5),
 					UserStatusEnum.valueOf(resultSet.getString(6)), resultSet
@@ -719,16 +765,16 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public List<UsersDBRow> getAllUsers(int limit, int offset) throws SQLException {
+	public List<UserDataset> getAllUsers(int limit, int offset) throws SQLException {
 		pstGetAllUsersWithLimitOffset.setInt(1, limit);
 		pstGetAllUsersWithLimitOffset.setInt(2, offset);
 
 		ResultSet resultSet = pstGetAllUsersWithLimitOffset.executeQuery();
-		ArrayList<UsersDBRow> list = new ArrayList<UsersDBRow>();
+		ArrayList<UserDataset> list = new ArrayList<UserDataset>();
 
 		while (resultSet.next()) {
 
-			list.add(new UsersDBRow(resultSet.getInt(1),
+			list.add(new UserDataset(resultSet.getInt(1),
 					resultSet.getString(2), resultSet.getString(3), resultSet
 							.getString(4), resultSet.getBoolean(5),
 					UserStatusEnum.valueOf(resultSet.getString(6)), resultSet
@@ -752,14 +798,14 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public UsersDBRow getUser(String email) throws SQLException {
+	public UserDataset getUser(String email) throws SQLException {
 		pstGetUserWithEmail.setString(1, email);
 		ResultSet resultSet = pstGetUserWithEmail.executeQuery();
-		UsersDBRow user = null;
+		UserDataset user = null;
 
 		while (resultSet.next()) {
 
-			user = new UsersDBRow(resultSet.getInt(1), resultSet.getString(2),
+			user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
 					resultSet.getString(3), resultSet.getString(4),
 					resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
 							.getString(6)), resultSet.getString(7),
@@ -783,14 +829,14 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public UsersDBRow getUser(int id) throws SQLException {
+	public UserDataset getUser(int id) throws SQLException {
 		pstGetUserWithId.setInt(1, id);
 		ResultSet resultSet = pstGetUserWithId.executeQuery();
-		UsersDBRow user = null;
+		UserDataset user = null;
 
 		while (resultSet.next()) {
 
-			user = new UsersDBRow(resultSet.getInt(1), resultSet.getString(2),
+			user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
 					resultSet.getString(3), resultSet.getString(4),
 					resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
 							.getString(6)), resultSet.getString(7),

@@ -61,11 +61,11 @@ public class GraphRepDumpReaderTest {
 			assertEquals(1, graphRepDump.src[2]);
 			assertEquals(1, graphRepDump.src[3]);
 			assertEquals(2, graphRepDump.src[4]);
-			assertEquals(1, graphRepDump.dest[0]);
-			assertEquals(2, graphRepDump.dest[1]);
-			assertEquals(0, graphRepDump.dest[2]);
-			assertEquals(2, graphRepDump.dest[3]);
-			assertEquals(0, graphRepDump.dest[4]);
+			assertEquals(1, graphRepDump.trgt[0]);
+			assertEquals(2, graphRepDump.trgt[1]);
+			assertEquals(0, graphRepDump.trgt[2]);
+			assertEquals(2, graphRepDump.trgt[3]);
+			assertEquals(0, graphRepDump.trgt[4]);
 			assertEquals(5, graphRepDump.dist[0]);
 			assertEquals(2, graphRepDump.dist[1]);
 			assertEquals(5, graphRepDump.dist[2]);
@@ -80,13 +80,6 @@ public class GraphRepDumpReaderTest {
 			assertEquals(2, graphRepDump.offsetIn[1]);
 			assertEquals(3, graphRepDump.offsetIn[2]);
 
-			// has to be implemented
-			// assertEquals(0.000, graphRep.elev_out[0], 0.01);
-			// assertEquals(0.000, graphRep.elev_out[1], 0.01);
-			// assertEquals(0.000, graphRep.elev_out[2], 0.01);
-			// assertEquals(0.000, graphRep.elev_in[0], 0.01);
-			// assertEquals(0.000, graphRep.elev_in[1], 0.01);
-			// assertEquals(0.000, graphRep.elev_in[2], 0.01);
 		} catch (IOException e) {
 			fail(e.getMessage());
 		}

@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Sascha Meusel
  *
  */
-public class UsersDBRow {
+public class UserDataset {
 
 	public int id = 0;
 	public String email = "";
@@ -26,7 +26,7 @@ public class UsersDBRow {
 	public Date verifiedDate = null;
 	public Date deleteRequestDate = null;
 	
-	public UsersDBRow(int id, String email, String passwordhash, String salt, 
+	public UserDataset(int id, String email, String passwordhash, String salt, 
 			boolean isAdmin, UserStatusEnum status, 
 			String firstName, String lastName, String address, 
 			Date registrationDate, Date verifiedDate, Date deleteRequestDate) {

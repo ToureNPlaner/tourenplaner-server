@@ -42,11 +42,11 @@ public class GraphRepTextReaderTest {
 			assertEquals(1, graphRep.src[2]);
 			assertEquals(1, graphRep.src[3]);
 			assertEquals(2, graphRep.src[4]);
-			assertEquals(1, graphRep.dest[0]);
-			assertEquals(2, graphRep.dest[1]);
-			assertEquals(0, graphRep.dest[2]);
-			assertEquals(2, graphRep.dest[3]);
-			assertEquals(0, graphRep.dest[4]);
+			assertEquals(1, graphRep.trgt[0]);
+			assertEquals(2, graphRep.trgt[1]);
+			assertEquals(0, graphRep.trgt[2]);
+			assertEquals(2, graphRep.trgt[3]);
+			assertEquals(0, graphRep.trgt[4]);
 			
 			// TODO Rework test case, adjust to changed graphrep
 			

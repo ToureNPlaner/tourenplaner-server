@@ -6,6 +6,7 @@ package database;
 import static org.junit.Assert.*;
 
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -47,7 +48,7 @@ public class DatabaseManagerTest {
 		}
 		if (dbm != null) {
 			try {
-				UsersDBRow user = dbm.addNewUser("1337testuser@tourenplaner", 
+				UserDataset user = dbm.addNewUser("1337testuser@tourenplaner", 
 						"DmGT9B354DFasH673aGFBM3", 
 						"hmAhgAN68sdKNfdA9sd876k0", "John", "Doe", 
 						"Musterstraße 42", false);
@@ -106,9 +107,12 @@ public class DatabaseManagerTest {
 	@Test
 	public final void testAddNewRequest() {
 		try {
-			RequestsDBRow request =  dbm.addNewRequest(testUserID, "jsonRequestTestBlob".getBytes());
+			RequestDataset request =  dbm.addNewRequest(testUserID, "jsonRequestTestBlob".getBytes());
 			assertFalse("dbm is null", dbm == null);
 			assertFalse("returned object should never be null", request == null);
+		} catch (SQLFeatureNotSupportedException e) {
+			e.printStackTrace();
+			fail(e.getLocalizedMessage());
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -135,7 +139,7 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#updateRequest(database.RequestsDBRow)}.
+	 * Test method for {@link database.DatabaseManager#updateRequest(database.RequestDataset)}.
 	 */
 	@Test
 	public final void testUpdateRequest() {
@@ -143,7 +147,7 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#updateUser(database.UsersDBRow)}.
+	 * Test method for {@link database.DatabaseManager#updateUser(database.UserDataset)}.
 	 */
 	@Test
 	public final void testUpdateUser() {
