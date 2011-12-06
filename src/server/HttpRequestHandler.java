@@ -237,8 +237,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				RequestDataset requestDataset = null;
 				
 				if (isPrivate) {
-					requestDataset = dbm.addNewRequest(userDataset.id, request.getContent().array());
-					req.setRequestDataset(requestDataset);
+					//TODO optimize getting json object
+					byte[] jsonRequest = new byte[request.getContent().readableBytes()];
+					request.getContent().readBytes(jsonRequest, 0, 
+							request.getContent().readableBytes());
+					
+					requestDataset = dbm.addNewRequest(userDataset.id, jsonRequest);
+					req.setRequestID(requestDataset.id);
 				}
 
 				final boolean success = computer.submit(req);

@@ -3,11 +3,13 @@
  */
 package computecore;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Map;
 
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
-
-import database.RequestDataset;
 
 import server.Responder;
 import algorithms.Points;
@@ -32,12 +34,13 @@ public class ComputeRequest {
 	private Map<String, Object> misc;
 	private String algName;
 	private Responder responder;
-	private RequestDataset requestDataset;
+	private int requestID;
 
 	/**
 	 * Constructs a new ComputeRequest using the given Responder, Points and
-	 * Constraints. The corresponding RequestDataset is null, should be set 
-	 * with {@link #setRequestDataset(RequestDataset)} if server is private.
+	 * Constraints. The requestID of the constructed ComputeRequest object is -1, 
+	 * must be set with {@link #setRequestID(int)} if server is private.
+	 * If server is not private the requestID must remain -1.
 	 * 
 	 * @param responder
 	 * @param algName
@@ -51,7 +54,7 @@ public class ComputeRequest {
 		this.constraints = constraints;
 		this.responder = responder;
 		this.misc = null;
-		this.requestDataset = null;
+		this.requestID = -1;
 	}
 
 	/**
@@ -113,25 +116,56 @@ public class ComputeRequest {
 	public void setMisc(Map<String, Object> misc) {
 		this.misc = misc;
 	}
+		
 	
 	/**
-	 * Sets the corresponding RequestDataset, should be null if server is
-	 * not in private mode.
+	 * Sets the requestID. The requestID must be -1 if server is
+	 * not in private mode. If the requestID is not explicitly set,
+	 * it is -1. </br>
+	 * This attribute should cointain the requestID of the corresponding 
+	 * RequestDataset within the database. Must be set after construction
+	 * of the ComputeRequest object if server is in private mode.
 	 * @param requestDataset
 	 */
-	public void setRequestDataset(RequestDataset requestDataset) {
-		this.requestDataset = requestDataset;
+	public void setRequestID(int requestID) {
+		this.requestID = requestID;
 	}
 	
 	/**
-	 * Gets the corresponding RequestDataset, should be null if server is
-	 * not in private mode. The RequestDataset is not synchronized with
-	 * the database. So if you need the up-to-date corresponding RequestDataset,
-	 * you have to use the attribute id of this RequestDataset and get the
-	 * up-to-date RequestDataset from the database yourself.
+	 * Gets the requestID, should be -1 if server is not in private mode. 
+	 * This attribute should cointain the requestID of the corresponding 
+	 * RequestDataset within the database.
 	 * @return
 	 */
-	public RequestDataset getRequestDataset() {
-		return this.requestDataset;
+	public int getRequestID() {
+		return this.requestID;
 	}
+
+
+	/**
+	 * Writes a json representation of the result of this request to the given stream
+	 * 
+	 * @param mapper
+	 * @param stream
+	 * @throws IOException
+	 */
+	public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
+		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(
+				stream);
+		gen.setCodec(mapper);
+		gen.writeStartObject();
+		gen.writeArrayFieldStart("points");
+		Points points = this.getResultPoints();
+		for (int i = 0; i < points.size(); i++) {
+			gen.writeStartObject();
+			gen.writeNumberField("lt", points.getPointLat(i));
+			gen.writeNumberField("ln", points.getPointLon(i));
+			gen.writeEndObject();
+		}
+		gen.writeEndArray();
+		gen.writeObjectField("misc", this.getMisc());
+		gen.writeEndObject();
+		gen.close();
+	}	
+	
 }

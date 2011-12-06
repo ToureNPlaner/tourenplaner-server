@@ -33,6 +33,7 @@ public class DatabaseManager {
 	private final PreparedStatement pstGetUserWithEmail;
 	private final PreparedStatement pstGetUserWithId;
 	private final PreparedStatement pstUpdateRequest;
+	private final PreparedStatement pstUpdateRequestWithComputeResult;
 	private final PreparedStatement pstUpdateUser;
 	private final PreparedStatement pstDeleteRequestWithRequestId;
 	private final PreparedStatement pstDeleteRequestsOfUserWithUserId;
@@ -75,6 +76,12 @@ public class DatabaseManager {
 	private final static String updateRequestString = "UPDATE Requests SET "
 			+ "UserID = ?, JSONRequest = ?, JSONResponse = ?, "
 			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, RequestDate = ?, "
+			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
+			+ "FailDescription = ? WHERE id = ?";
+	
+	private final static String updateRequestWithComputeResultString = 
+			"UPDATE Requests SET JSONResponse = ?, "
+			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
 
@@ -143,6 +150,8 @@ public class DatabaseManager {
 		pstGetUserWithEmail = con.prepareStatement(getUserStringWithEmail);
 		pstGetUserWithId = con.prepareStatement(getUserStringWithId);
 		pstUpdateRequest = con.prepareStatement(updateRequestString);
+		pstUpdateRequestWithComputeResult = con.
+				prepareStatement(updateRequestWithComputeResultString);
 		pstUpdateUser = con.prepareStatement(updateUserString);
 		pstDeleteRequestWithRequestId = con
 				.prepareStatement(deleteRequestWithRequestIdString);
@@ -250,7 +259,7 @@ public class DatabaseManager {
 	 * @param firstName
 	 *            First name of the user. Parameter will be trimmed from this
 	 *            method.
-	 * @param lastName
+	 * @param lastNameRequestDataset 
 	 *            Last Name of the user. Parameter will be trimmed from this
 	 *            method.
 	 * @param address
@@ -443,6 +452,45 @@ public class DatabaseManager {
 		pstUpdateRequest.setInt(12, request.id);
 
 		pstUpdateRequest.executeUpdate();
+	}
+	
+	
+	/**
+	 * Updates the Requests table row with the id given through the parameter
+	 * (<b><code>requestID</code></b>). The given parameters will overwrite
+	 * the old values in the database row. FinishedDate will be set to the
+	 * current timestamp.
+	 * <b><code>requestID</code></b> has to be > 0 and must exists
+	 * within the database table. </br>SQL command:
+	 * {@value #updateRequestWithComputeResultString}
+	 * 
+	 * @param requestID
+	 * @param jsonResponse
+	 * @param isPending
+	 * @param costs
+	 * @param cpuTime
+	 * @param hasFailed
+	 * @param failDescription
+	 * @throws SQLException
+	 *             Thrown if update fails.
+	 */
+	public void updateRequestWithComputeResult(int requestID, 
+			byte[] jsonResponse, boolean isPending, int costs, 
+			long cpuTime, boolean hasFailed, String failDescription) 
+					throws SQLException {
+		
+		Timestamp stamp = new Timestamp(System.currentTimeMillis());
+		
+		pstUpdateRequestWithComputeResult.setBytes(1, jsonResponse);
+		pstUpdateRequestWithComputeResult.setBoolean(2, isPending);
+		pstUpdateRequestWithComputeResult.setInt(3, costs);
+		pstUpdateRequestWithComputeResult.setTimestamp(4, stamp);
+		pstUpdateRequestWithComputeResult.setLong(5, cpuTime);
+		pstUpdateRequestWithComputeResult.setBoolean(6, hasFailed);
+		pstUpdateRequestWithComputeResult.setString(7, failDescription);
+		pstUpdateRequestWithComputeResult.setInt(8, requestID);
+
+		pstUpdateRequestWithComputeResult.executeUpdate();
 	}
 
 	/**

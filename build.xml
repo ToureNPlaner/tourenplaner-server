@@ -99,7 +99,7 @@
 	</target>
 	
 	
-	<target name="junit" depends="junit-compile">
+	<target name="junit-only" depends="junit-compile">
 		<junit haltonfailure="off" printsummary="withOutAndErr">
 			<classpath>
 				<pathelement path="${classpath}"/>
@@ -123,4 +123,5 @@
 	</target>
 	
     <target name="main" depends="clean,jar"/>
+	<target name="junit" depends="jar, junit-only"/>
 </project>

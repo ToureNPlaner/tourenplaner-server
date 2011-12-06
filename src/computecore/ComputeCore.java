@@ -3,6 +3,7 @@
  */
 package computecore;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -41,16 +42,21 @@ public class ComputeCore {
 
 	/**
 	 * Starts the ComputeThreads
+	 * @throws SQLException Thrown only in private mode, and only if 
+	 * 				database connection could not be established.
 	 * 
 	 */
-	public void start() {
+	public void start() throws SQLException {
 		ComputeThread curr;
-
+		
+		System.out.print("Start " + numThreads + "ComputeThreads: [");
 		for (int i = 0; i < numThreads; i++) {
 			curr = new ComputeThread(registry.getAlgorithmManager(), reqQueue);
 			curr.start();
 			threads.add(curr);
+			System.out.print("+");
 		}
+		System.out.println("]");
 	}
 
 	/**

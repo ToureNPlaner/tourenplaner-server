@@ -8,12 +8,12 @@ import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -26,8 +26,6 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
-
-import algorithms.Points;
 
 import computecore.ComputeRequest;
 
@@ -174,7 +172,17 @@ public class Responder {
 
 	}
 
-	public void writeComputeResult(ComputeRequest work,
+	/**
+	 * Creates the response for the ComputeResult.
+	 * Returns a ByteArrayOutputStream which contains the json object
+	 * of this response.
+	 * 
+	 * @param work
+	 * @param status
+	 * @return
+	 * @throws IOException
+	 */
+	public ByteArrayOutputStream writeComputeResult(ComputeRequest work,
 			HttpResponseStatus status) throws IOException {
 		// Build the response object.
 		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
@@ -183,24 +191,10 @@ public class Responder {
 		response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
 
 		outputBuffer.clear();
-		OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
-
-		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(
-				resultStream);
-		gen.setCodec(mapper);
-		gen.writeStartObject();
-		gen.writeArrayFieldStart("points");
-		Points points = work.getResultPoints();
-		for (int i = 0; i < points.size(); i++) {
-			gen.writeStartObject();
-			gen.writeNumberField("lt", points.getPointLat(i));
-			gen.writeNumberField("ln", points.getPointLon(i));
-			gen.writeEndObject();
-		}
-		gen.writeEndArray();
-		gen.writeObjectField("misc", work.getMisc());
-		gen.writeEndObject();
-		gen.close();
+		ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
+		work.writeToStream(mapper, resultStream);
+		resultStream.writeTo(new ChannelBufferOutputStream(outputBuffer));
+		
 		response.setContent(outputBuffer);
 		if (keepAlive) {
 			// Add 'Content-Length' header only for a keep-alive connection.
@@ -216,6 +210,9 @@ public class Responder {
 		if (!keepAlive) {
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
+		
+		return resultStream;
 
 	}
+
 }

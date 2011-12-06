@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InvalidClassException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -189,7 +190,14 @@ public class TourenPlaner {
 		ComputeCore comCore = new ComputeCore(reg,
 				cm.getEntryInt("threads", 16),
 				cm.getEntryInt("queuelength", 32));
-		comCore.start();
+		try {
+			comCore.start();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			System.err.println("Could not establish database connections for ComputeThreads.");
+			e.printStackTrace();
+			// TODO switch from private to public, but ConfigManager doesn't support this yet
+		}
 
 		// Create ServerInfo object
 		Map<String, Object> serverInfo = getServerInfo(reg);
