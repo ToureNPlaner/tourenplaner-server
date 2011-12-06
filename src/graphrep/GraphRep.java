@@ -185,17 +185,17 @@ public class GraphRep implements Serializable {
 	 * Set the data filed of the edge given by it's id
 	 * 
 	 * @param index
-	 * @param src
-	 * @param trgt
+	 * @param source
+	 * @param target
 	 * @param dist
 	 * @param multipliedDist
 	 */
-	protected final void setEdgeData(int index, int src, int dest, int dist,
-			int euclidianDist) {
+	protected final void setEdgeData(int index, int source, int target,
+			int dist, int euclidianDist) {
 		this.mapping_InToOut[index] = index;
 
-		this.src[index] = src;
-		this.trgt[index] = dest;
+		this.src[index] = source;
+		this.trgt[index] = target;
 		this.dist[index] = dist;
 		this.euclidianDist[index] = euclidianDist;
 
@@ -328,9 +328,10 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the distance in shortest path form that is multiplied for travel
-	 * time of the in going edge identified by it's target node and edgeNum the
-	 * edgeNum is between 0 and getInEdgeCount(nodeId)-1
+	 * Gets the distance in shortest path form that is multiplied for travel time
+    *  of the in going edge identified by it's
+	 * target node and edgeNum the edgeNum is between 0 and
+	 * getInEdgeCount(nodeId)-1
 	 * 
 	 * @return int
 	 * @param nodeID

@@ -106,6 +106,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		int srcId = 0;
 		int destId = 0;
 		int distance = 0;
+		int nodeLat, nodeLon;
 		// in meters
 		double directDistance;
 		for (int pointIndex = 0; pointIndex < (points.size() - 1); pointIndex++) {
@@ -239,10 +240,11 @@ public class ShortestPathCH extends GraphAlgorithm {
 					deque.addFirst(shortedEdge1);
 				} else {
 					// No shortcut remember it
-					distance += graph.getDist(edgeId);
 					currNode = graph.getSource(edgeId);
-					resultPoints.addPoint(graph.getNodeLat(currNode),
-							graph.getNodeLon(currNode));
+					nodeLat = graph.getNodeLat(currNode);
+					nodeLon = graph.getNodeLon(currNode);
+					resultPoints.addPoint(nodeLat, nodeLon);
+					distance += graph.getDist(edgeId);
 
 				}
 			}
