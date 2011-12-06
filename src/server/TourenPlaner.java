@@ -194,7 +194,7 @@ public class TourenPlaner {
 			comCore.start();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			System.err.println("Could not establish database connections for ComputeThreads.");
+			System.err.println("\nCould not establish database connections for ComputeThreads.");
 			e.printStackTrace();
 			// TODO switch from private to public, but ConfigManager doesn't support this yet
 		}

@@ -265,9 +265,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 			System.out.println("Backtracking: "
 					+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
-
-			System.out.println("Super Node: lat: " + graph.getNodeLat(555578)
-					+ " lon: " + graph.getNodeLon(555578));
 		}
 
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);

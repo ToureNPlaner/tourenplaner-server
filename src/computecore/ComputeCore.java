@@ -49,7 +49,7 @@ public class ComputeCore {
 	public void start() throws SQLException {
 		ComputeThread curr;
 		
-		System.out.print("Start " + numThreads + "ComputeThreads: [");
+		System.out.print("Start " + numThreads + " ComputeThreads: [");
 		for (int i = 0; i < numThreads; i++) {
 			curr = new ComputeThread(registry.getAlgorithmManager(), reqQueue);
 			curr.start();

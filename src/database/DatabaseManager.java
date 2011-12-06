@@ -81,7 +81,7 @@ public class DatabaseManager {
 	
 	private final static String updateRequestWithComputeResultString = 
 			"UPDATE Requests SET JSONResponse = ?, "
-			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, "
+			+ "PendingFlag = ?, Costs = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
 
