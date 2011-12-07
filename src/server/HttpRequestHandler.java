@@ -143,8 +143,14 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			return;
 		}
 
+		// Get the Requeststring e.g. /info
+		final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
+				request.getUri());
+
+		final String path = queryStringDecoder.getPath();
+
 		// DEBUG
-		System.out.println("Request: ");
+		System.out.println("Request for: " + path);
 		request.getContent().readBytes(System.out,
 				request.getContent().readableBytes());
 		request.getContent().readerIndex(0);
@@ -152,12 +158,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (responder == null) {
 			responder = new Responder(mapper, channel, isKeepAlive(request));
 		}
-
-		// Get the Requeststring e.g. /info
-		final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(
-				request.getUri());
-
-		final String path = queryStringDecoder.getPath();
 
 		try {
 			if ("/info".equals(path)) {
