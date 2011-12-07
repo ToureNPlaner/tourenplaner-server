@@ -226,6 +226,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			userDataset = auth(request);
 			if (userDataset == null) {
 				responder.writeUnauthorizedClose();
+				System.out.println("HandleAlg " + algName + " failed, authorization header has no valid login credentials");
 				return;
 			}
 		}
@@ -251,6 +252,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					requestDataset = dbm.addNewRequest(userDataset.id,
 							jsonRequest);
 					req.setRequestID(requestDataset.id);
+					System.out.println("HandleAlg " + algName + ": Request successful logged into database");
 
 				}
 
@@ -263,6 +265,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 									"This server is currently too busy to fullfill the request",
 									null,
 									HttpResponseStatus.SERVICE_UNAVAILABLE);
+					System.out.println("HandleAlg " + algName + " failed: Server is to busy to fullfill request");
 					// Log failed requests because of full queue as failed, as
 					// not pending and as paid
 					// TODO specify this case clearly, maybe behavior should be
@@ -272,12 +275,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					requestDataset.isPending = true;
 					requestDataset.isPaid = true;
 					dbm.updateRequest(requestDataset);
+					System.out.println("HandleAlg " + algName + " failed: Server is to busy to fullfill request, " +
+							"but request and failure information successful logged into database");
 				}
 			}
 		} catch (JsonParseException e) {
 			responder.writeErrorMessage("EBADJSON",
 					"Could not parse supplied JSON", e.getMessage(),
 					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HandleAlg " + algName + " failed: Could not parse supplied JSON");
 		}
 
 	}
@@ -427,7 +433,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	private void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException, IOException {
+	private void handleAuthUser(final HttpRequest request) {
 		UserDataset user = null;
 
 		try {
@@ -439,9 +445,20 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (user == null) {
 			return;
 		}
-
-		responder.writeJSON(user.getSmallUserHashMap(),
-				HttpResponseStatus.OK);
+		
+		try {
+			responder.writeJSON(user.getSmallUserHashMap(),
+					HttpResponseStatus.OK);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 
