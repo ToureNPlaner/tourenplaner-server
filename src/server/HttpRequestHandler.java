@@ -110,8 +110,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				this.dbm = new DatabaseManager(cm.getEntryString("dburi",
 						"jdbc:mysql://localhost:3306/"), cm.getEntryString(
 						"dbname", "tourenplaner"), cm.getEntryString("dbuser",
-						"tnpuser"), cm.getEntryString("dbpw",
-						"toureNPlaner"));
+						"tnpuser"), cm.getEntryString("dbpw", "toureNPlaner"));
 				digester = MessageDigest.getInstance("SHA-1");
 			} catch (SQLException e) {
 				System.err
@@ -171,32 +170,30 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						.substring(4);
 				handleAlg(request, algName);
 
-			} else if (isPrivate) {
-				if ("/registeruser".equals(path)) {
+			} else if (isPrivate && "/registeruser".equals(path)) {
 
-					handleRegisterUser(request);
+				handleRegisterUser(request);
 
-				} else if ("/authuser".equals(path)) {
+			} else if (isPrivate && "/authuser".equals(path)) {
 
-					handleAuthUser(request);
+				handleAuthUser(request);
 
-				} else if ("/getuser".equals(path)) {
+			} else if (isPrivate && "/getuser".equals(path)) {
 
-					handleGetUser(request);
+				handleGetUser(request);
 
-				} else if ("/updateuser".equals(path)) {
+			} else if (isPrivate && "/updateuser".equals(path)) {
 
-					handleUpdateUser(request);
+				handleUpdateUser(request);
 
-				} else if ("/listrequests".equals(path)) {
+			} else if (isPrivate && "/listrequests".equals(path)) {
 
-					handleListRequests(request);
+				handleListRequests(request);
 
-				} else if ("/listusers".equals(path)) {
+			} else if (isPrivate && "/listusers".equals(path)) {
 
-					handleListUsers(request);
+				handleListUsers(request);
 
-				}
 			} else {
 				// Unknown request, close connection
 				responder.writeErrorMessage("EUNKNOWNURL",
@@ -215,12 +212,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * @param request
 	 * @param algName
 	 * @throws IOException
-	 * @throws SQLException Thrown if auth fails or logging of request fails
+	 * @throws SQLException
+	 *             Thrown if auth fails or logging of request fails
 	 */
 	private void handleAlg(final HttpRequest request, final String algName)
 			throws IOException, SQLException {
 		UserDataset userDataset = null;
-		
+
 		if (isPrivate) {
 			userDataset = auth(request);
 			if (userDataset == null) {
@@ -228,26 +226,29 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				return;
 			}
 		}
-		
+
 		try {
 			final ComputeRequest req = readComputeRequest(algName, responder,
 					request);
 			if (req != null) {
-				
+
 				RequestDataset requestDataset = null;
-				
+
 				if (isPrivate) {
-					//TODO optimize getting json object
-					/*int readableBytes = request.getContent().readableBytes();
-					int readerIndex = request.getContent().readerIndex());
-					byte[] jsonRequest = new byte[readableBytes];
-					request.getContent().readBytes(jsonRequest, 0, readableBytes);
-					request.getContent().readerIndex(readerIndex);
-					*/
+					// TODO optimize getting json object
+					/*
+					 * int readableBytes = request.getContent().readableBytes();
+					 * int readerIndex = request.getContent().readerIndex());
+					 * byte[] jsonRequest = new byte[readableBytes];
+					 * request.getContent().readBytes(jsonRequest, 0,
+					 * readableBytes);
+					 * request.getContent().readerIndex(readerIndex);
+					 */
 					byte[] jsonRequest = request.getContent().array();
-					requestDataset = dbm.addNewRequest(userDataset.id, jsonRequest);
+					requestDataset = dbm.addNewRequest(userDataset.id,
+							jsonRequest);
 					req.setRequestID(requestDataset.id);
-										
+
 				}
 
 				final boolean success = computer.submit(req);
@@ -259,8 +260,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 									"This server is currently too busy to fullfill the request",
 									null,
 									HttpResponseStatus.SERVICE_UNAVAILABLE);
-					// Log failed requests because of full queue as failed, as not pending and as paid
-					// TODO specify this case clearly, maybe behavior should be another
+					// Log failed requests because of full queue as failed, as
+					// not pending and as paid
+					// TODO specify this case clearly, maybe behavior should be
+					// another
 					requestDataset.failDescription = "This server is currently too busy to fullfill the request";
 					requestDataset.hasFailed = true;
 					requestDataset.isPending = true;
