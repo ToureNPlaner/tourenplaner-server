@@ -16,6 +16,7 @@ import java.nio.channels.ClosedChannelException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Random;
@@ -203,10 +204,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						"An unknown URL was requested", null,
 						HttpResponseStatus.NOT_FOUND);
 			}
-		} catch (SQLException ex) {
+		} catch (SQLException exSQL) {
 			responder.writeErrorMessage("EDATABASE",
 					"The server can't contact it's database", null,
 					HttpResponseStatus.NOT_FOUND);
+			exSQL.printStackTrace();
+			System.out.println(path + " failed: The server can't contact it's database");
 		}
 	}
 
@@ -421,7 +424,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	private void handleAuthUser(final HttpRequest request) {
+	private void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException, IOException {
 		UserDataset user = null;
 
 		try {
@@ -434,19 +437,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			return;
 		}
 
-		try {
-			responder.writeJSON(user.getSmallUserHashMap(),
-					HttpResponseStatus.OK);
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		responder.writeJSON(user.getSmallUserHashMap(),
+				HttpResponseStatus.OK);
 
 	}
 
@@ -455,9 +447,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * authorization as admin, the new registered user will not be registered as
 	 * admin, even if json admin flag is true.
 	 * 
-	 * @param request
+	 * @param request 
+	 * @throws SQLFeatureNotSupportedException 
+	 * @throws SQLException 
 	 */
-	private void handleRegisterUser(final HttpRequest request) {
+	private void handleRegisterUser(final HttpRequest request) throws SQLFeatureNotSupportedException, SQLException {
 		try {
 			UserDataset user = null;
 			UserDataset authUser = null;
@@ -466,10 +460,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			if (request.getHeader("Authorization") != null) {
 				authUser = auth(request);
 				if (authUser == null) {
+					//auth(request) has already closed connection with error message
+					System.out.println("RegisterUser failed, authorization header has no valid login credentials.");
 					return;
 				}
 				if (authUser != null && !authUser.isAdmin) {
 					responder.writeUnauthorizedClose();
+					System.out.println("RegisterUser failed, a logged in user has to be admin to register users.");
 					return;
 				}
 			}
@@ -487,6 +484,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			// if json object is bad or if there is no json object
 			// so no further handling needed if objmap == null
 			if (objmap == null) {
+				System.out.println("RegisterUser failed, bad json object.");
 				return;
 			}
 
@@ -506,12 +504,14 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 								"JSON user object was not correct "
 										+ "(needs email, password, firstname, lastname, address)",
 								HttpResponseStatus.UNAUTHORIZED);
+				System.out.println("RegisterUser failed, json object do not have needed fields.");
+				return;
 			}
 
 			// TODO optimize salt-generation
 			final Random rand = new Random();
-			final StringBuilder saltBuilder = new StringBuilder(100);
-			for (int i = 0; i < 10; i++) {
+			final StringBuilder saltBuilder = new StringBuilder(64);
+			for (int i = 0; i < 4; i++) {
 				saltBuilder.append(Long.toHexString(rand.nextLong()));
 			}
 
@@ -521,8 +521,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			// if no authorization add not verified user
 			if (authUser == null) {
-				// if no authorization as admin, the new registered user will
-				// not be registered as admin, even if json admin flag is true
+				// if there is no authorization as admin, the new registered user will
+				// never be registered as admin, even if json admin flag is true
 				user = dbm.addNewUser(email, toHash, salt, firstName, lastName,
 						address, false);
 			} else {
@@ -541,15 +541,13 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				responder.writeErrorMessage("EREGISTERED",
 						"This email is already registered", null,
 						HttpResponseStatus.FORBIDDEN);
+				System.out.println("RegisterUser failed, email is already registered.");
 				return;
 			} else {
 				responder.writeJSON(user.getSmallUserHashMap(),
 						HttpResponseStatus.OK);
+				System.out.println("RegisterUser successed.");
 			}
-
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 
 		} catch (JsonGenerationException e) {
 			// TODO Auto-generated catch block
