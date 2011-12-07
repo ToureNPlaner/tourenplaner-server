@@ -8,4 +8,4 @@ fi
 
 #curl -i  -s -H 'Content-Type: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
 
-curl  -s -H 'Content-Type: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
+curl  -k -s -H 'Content-Type: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
