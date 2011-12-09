@@ -100,10 +100,13 @@ public class ComputeThread extends Thread {
 						} else {
 							alg.compute(work);
 						}
+						System.out.println("Algorithm "+ work.getAlgorithmURLSuffix() + " successful computed.");
 						
 						try {
 							baOutputStream = work.getResponder().writeComputeResult(work,
 									HttpResponseStatus.OK);
+							System.out.println("Algorithm "+ work.getAlgorithmURLSuffix() 
+									+ "compute result successful written into response.");
 						} catch (IOException e) {
 							if (isPrivate) {
 								try {
@@ -140,6 +143,8 @@ public class ComputeThread extends Thread {
 										cpuTime, 
 										false, //hasFailed
 										null); //failDescription
+								System.out.println("Algorithm "+ work.getAlgorithmURLSuffix() 
+										+ "compute result successful written into database.");
 							} catch (SQLException sqlE) {
 								System.err.println("Could not log ComputeResult into DB " +
 										"within ComputeThread: " + sqlE.getMessage());
@@ -185,6 +190,13 @@ public class ComputeThread extends Thread {
 			} catch (Exception e) {
 				System.err.println("Exception in ComputeThread: "
 						+ e.getMessage());
+				if (baOutputStream != null) {
+					System.err.println("Size of the ByteArrayStream: " + baOutputStream.size());
+					System.err.println("Content of the ByteArrayStream: " + baOutputStream.toString());
+				} else {
+					System.err.println("ByteArrayStream is null");
+				}
+				
 				e.printStackTrace();
 			}
 		}
