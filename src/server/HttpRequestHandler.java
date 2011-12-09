@@ -171,6 +171,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						.substring(4);
 				handleAlg(request, algName);
 
+			} else if (path.startsWith("/nns")) {
+				//TODO temporary hotfix for nearest neighbour search
+				handleAlg(request, "nns");
+
 			} else if (isPrivate && "/registeruser".equals(path)) {
 
 				handleRegisterUser(request);
@@ -197,6 +201,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			} else {
 				// Unknown request, close connection
+				System.out.println("An unknown URL was requested: " + path);
 				responder.writeErrorMessage("EUNKNOWNURL",
 						"An unknown URL was requested", null,
 						HttpResponseStatus.NOT_FOUND);
