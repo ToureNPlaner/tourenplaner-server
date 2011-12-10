@@ -186,7 +186,7 @@ public class DatabaseManager {
 	 *         from the database and the insert was successful, else an
 	 *         exception will be thrown.
 	 * @throws SQLFeatureNotSupportedException
-	 *             Thrown if the id could not received.
+	 *             Thrown if the id could not received or another function is not supported by driver.
 	 * @throws SQLException
 	 *             Thrown if the insertion failed.
 	 */
@@ -272,7 +272,7 @@ public class DatabaseManager {
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
 	 * @throws SQLFeatureNotSupportedException
-	 *             Thrown if the id could not received.
+	 *             Thrown if the id could not received or another function is not supported by driver.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */
@@ -315,7 +315,7 @@ public class DatabaseManager {
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
 	 * @throws SQLFeatureNotSupportedException
-	 *             Thrown if the id could not received.
+	 *             Thrown if the id could not received or another function is not supported by driver.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */

@@ -147,7 +147,7 @@ public class ComputeThread extends Thread {
 										false, //hasFailed
 										null); //failDescription
 								System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
-										+ "compute result successful written into database.");
+										+ " compute result successful written into database.");
 							} catch (SQLException sqlE) {
 								System.err.println("ComputeThread: Could not log ComputeResult into DB: " 
 										+ sqlE.getMessage());
