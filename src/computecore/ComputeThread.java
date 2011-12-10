@@ -23,7 +23,7 @@ import algorithms.ComputeException;
  * queue of it's associated ComputeCore using Algorithms known to it's
  * AlgorithmManager
  * 
- * @author Niklas Schnelle, Peter Vollmer
+ * @author Niklas Schnelle, Peter Vollmer, Sascha Meusel
  * 
  */
 public class ComputeThread extends Thread {
@@ -100,13 +100,14 @@ public class ComputeThread extends Thread {
 						} else {
 							alg.compute(work);
 						}
-						System.out.println("Algorithm "+ work.getAlgorithmURLSuffix() + " successful computed.");
+						System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
+								+ " successful computed.");
 						
 						try {
 							baOutputStream = work.getResponder().writeComputeResult(work,
 									HttpResponseStatus.OK);
-							System.out.println("Algorithm "+ work.getAlgorithmURLSuffix() 
-									+ "compute result successful written into response.");
+							System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
+									+ " compute result successful written into response.");
 						} catch (IOException e) {
 							if (isPrivate) {
 								try {
@@ -119,9 +120,11 @@ public class ComputeThread extends Thread {
 											cpuTime, 
 											true, //hasFailed
 											"IOException: " + e.getMessage()); //failDescription
+									System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
+											+ " IOException successful written into database.");
 								} catch (SQLException sqlE) {
-									System.err.println("Could not log IOException into DB " +
-											"within ComputeThread: " + sqlE.getMessage());
+									System.err.println("ComputeThread: Could not log IOException into DB: " 
+											+ sqlE.getMessage());
 									sqlE.printStackTrace();
 								}
 								
@@ -143,16 +146,16 @@ public class ComputeThread extends Thread {
 										cpuTime, 
 										false, //hasFailed
 										null); //failDescription
-								System.out.println("Algorithm "+ work.getAlgorithmURLSuffix() 
+								System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
 										+ "compute result successful written into database.");
 							} catch (SQLException sqlE) {
-								System.err.println("Could not log ComputeResult into DB " +
-										"within ComputeThread: " + sqlE.getMessage());
+								System.err.println("ComputeThread: Could not log ComputeResult into DB: " 
+										+ sqlE.getMessage());
 								sqlE.printStackTrace();
 							} 
 						}
 					} catch (ComputeException e) {
-						System.err.println("There was a ComputeException: "
+						System.err.println("ComputeThread: There was a ComputeException: "
 								+ e.getMessage());
 						work.getResponder().writeErrorMessage("ECOMPUTE",
 								e.getMessage(), "",
@@ -169,15 +172,15 @@ public class ComputeThread extends Thread {
 										true, //hasFailed
 										"ComputeException: " + e.getMessage()); //failDescription
 							} catch (SQLException sqlE) {
-								System.err.println("Could not log ComputeException into DB " +
-										"within ComputeThread: " + sqlE.getMessage());
+								System.err.println("ComputeThread: Could not log ComputeException into DB : " 
+										+ sqlE.getMessage());
 								sqlE.printStackTrace();
 							}
 							
 						}
 					}
 				} else {
-					System.err.println("Unsupported algorithm "
+					System.err.println("ComputeThread: Unsupported algorithm "
 							+ work.getAlgorithmURLSuffix() + " requested");
 					work.getResponder().writeErrorMessage("EUNKNOWNALG",
 							"An unknown algorithm was requested", null,
@@ -191,10 +194,12 @@ public class ComputeThread extends Thread {
 				System.err.println("Exception in ComputeThread: "
 						+ e.getMessage());
 				if (baOutputStream != null) {
-					System.err.println("Size of the ByteArrayStream: " + baOutputStream.size());
-					System.err.println("Content of the ByteArrayStream: " + baOutputStream.toString());
+					System.err.println("ComputeThread: Size of the ByteArrayStream: " 
+							+ baOutputStream.size());
+					System.err.println("ComputeThread: Content of the ByteArrayStream: " 
+							+ baOutputStream.toString());
 				} else {
-					System.err.println("ByteArrayStream is null");
+					System.err.println("ComputeThread: ByteArrayStream is null");
 				}
 				
 				e.printStackTrace();
