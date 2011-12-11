@@ -20,7 +20,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import algorithms.AlgorithmFactory;
 import algorithms.GraphAlgorithmFactory;
-import algorithms.NNLookupFactory;
+import algorithms.NNSearchFactory;
 import algorithms.ShortestPathCHFactory;
 import algorithms.ShortestPathFactory;
 
@@ -184,7 +184,7 @@ public class TourenPlaner {
 		AlgorithmRegistry reg = new AlgorithmRegistry();
 		reg.registerAlgorithm(new ShortestPathFactory(graph));
 		reg.registerAlgorithm(new ShortestPathCHFactory(graph));
-		reg.registerAlgorithm(new NNLookupFactory(graph));
+		reg.registerAlgorithm(new NNSearchFactory(graph));
 
 		// Create our ComputeCore that manages all ComputeThreads
 		ComputeCore comCore = new ComputeCore(reg,
@@ -194,9 +194,11 @@ public class TourenPlaner {
 			comCore.start();
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
-			System.err.println("\nCould not establish database connections for ComputeThreads.");
+			System.err
+					.println("\nCould not establish database connections for ComputeThreads.");
 			e.printStackTrace();
-			// TODO switch from private to public, but ConfigManager doesn't support this yet
+			// TODO switch from private to public, but ConfigManager doesn't
+			// support this yet
 		}
 
 		// Create ServerInfo object

@@ -57,4 +57,9 @@ public class ShortestPathCHFactory extends GraphAlgorithmFactory {
 		return map;
 	}
 
+	@Override
+	public boolean hidden() {
+		return false;
+	}
+
 }

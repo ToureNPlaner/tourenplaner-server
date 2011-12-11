@@ -4,9 +4,9 @@ import graphrep.GraphRep;
 
 import computecore.ComputeRequest;
 
-public class NNLookup extends GraphAlgorithm {
+public class NNSearch extends GraphAlgorithm {
 
-	public NNLookup(GraphRep graph) {
+	public NNSearch(GraphRep graph) {
 		super(graph);
 	}
 

@@ -6,9 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NNLookupFactory extends GraphAlgorithmFactory {
+public class NNSearchFactory extends GraphAlgorithmFactory {
 
-	public NNLookupFactory(GraphRep graph) {
+	public NNSearchFactory(GraphRep graph) {
 		super(graph);
 	}
 
@@ -21,7 +21,7 @@ public class NNLookupFactory extends GraphAlgorithmFactory {
 	public Map<String, Object> getConstraints() {
 		Map<String, Object> map = new HashMap<String, Object>(2);
 		map.put("minPoints", Integer.valueOf(1));
-      map.put("sourceIsTarget", Boolean.FALSE);
+		map.put("sourceIsTarget", Boolean.FALSE);
 		return map;
 	}
 
@@ -32,22 +32,27 @@ public class NNLookupFactory extends GraphAlgorithmFactory {
 	 */
 	@Override
 	public Algorithm createAlgorithm() {
-		return new NNLookup(graph);
+		return new NNSearch(graph);
 	}
 
 	@Override
 	public String getURLSuffix() {
-		return "nnl";
+		return "nns";
 	}
 
 	@Override
 	public String getAlgName() {
-		return "Nearest Neighbor Lookup";
+		return "Nearest Neighbor Search";
 	}
 
 	@Override
 	public int getVersion() {
 		return 1;
+	}
+
+	@Override
+	public boolean hidden() {
+		return true;
 	}
 
 }
