@@ -57,6 +57,7 @@ public class TourenPlaner {
 			algInfo.put("version", alg.getVersion());
 			algInfo.put("name", alg.getAlgName());
 			algInfo.put("urlsuffix", alg.getURLSuffix());
+			algInfo.put("hidden", alg.hidden());
 			if (alg instanceof GraphAlgorithmFactory) {
 				algInfo.put("pointconstraints",
 						((GraphAlgorithmFactory) alg).getPointConstraints());
