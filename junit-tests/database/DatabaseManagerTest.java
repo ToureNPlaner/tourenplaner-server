@@ -102,12 +102,12 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#addNewRequest(int, byte[])}.
+	 * Test method for {@link database.DatabaseManager#addNewRequest(int, String, byte[])}.
 	 */
 	@Test
 	public final void testAddNewRequest() {
 		try {
-			RequestDataset request =  dbm.addNewRequest(testUserID, "jsonRequestTestBlob".getBytes());
+			RequestDataset request =  dbm.addNewRequest(testUserID, "testRequest", "jsonRequestTestBlob".getBytes());
 			assertFalse("dbm is null", dbm == null);
 			assertFalse("returned object should never be null", request == null);
 		} catch (SQLFeatureNotSupportedException e) {

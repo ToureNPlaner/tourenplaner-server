@@ -153,6 +153,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		final String path = queryStringDecoder.getPath();
 
 		// DEBUG
+		System.out.println();
 		System.out.println("Request for: " + path);
 		request.getContent().readBytes(System.out,
 				request.getContent().readableBytes());
@@ -259,7 +260,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					 */
 					byte[] jsonRequest = request.getContent().array();
 					requestDataset = dbm.addNewRequest(userDataset.id,
-							jsonRequest);
+							algName, jsonRequest);
 					req.setRequestID(requestDataset.id);
 					System.out.println("HttpRequestHandler: HandleAlg "
 							+ algName
