@@ -93,9 +93,9 @@ public class ComputeThread extends Thread {
 							alg.compute(work);
 						
 							if (tmxbSupport) {
-								cpuTime = cpuTime - tmxb.getCurrentThreadCpuTime();
+								cpuTime = tmxb.getCurrentThreadCpuTime() - cpuTime;
 							} else {
-								cpuTime = cpuTime - System.nanoTime();
+								cpuTime = System.nanoTime() - cpuTime;
 							}
 							// convert to milliseconds
 							cpuTime = cpuTime / 1000000;

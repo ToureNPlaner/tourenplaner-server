@@ -18,6 +18,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
@@ -190,7 +192,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			} else if (isPrivate && "/listrequests".equals(path)) {
 
-				handleListRequests(request);
+				handleListRequests(request, queryStringDecoder.getParameters());
 
 			} else if (isPrivate && "/listusers".equals(path)) {
 
@@ -424,9 +426,175 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	private void handleListRequests(final HttpRequest request) {
-		// TODO Auto-generated method stub
+	private void handleListRequests(final HttpRequest request, Map<String, List<String>> parameters) throws SQLException {
+		
+		UserDataset user = null;
+		try {
+			user = auth(request);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// authentication needed, auth(request) responses with error if auth fails
+		if (user == null) {
+			return;
+		}
+		
+		int userID = -1;
+		
+		if (parameters.containsKey("ID")) {
+			if (!user.isAdmin) {
+				responder.writeErrorMessage(
+						"ENOTADMIN",
+						"You are not an admin",
+						"You must be admin if you want to use the ID parameter",
+						HttpResponseStatus.FORBIDDEN);
+				System.out.println("HttpRequestHandler: ListRequests failed, " +
+						"a logged in user has to be admin to register users.");
+				return;
+			}
+			
 
+			if (parameters.get("ID").size() != 1) {
+				responder.writeErrorMessage(
+						"ENOID",
+						"The given user id is unknown to this server",
+						"You must send exactly one ID parameter",
+						HttpResponseStatus.UNAUTHORIZED);
+				System.out.println("HttpRequestHandler: ListRequests failed, there are " 
+						+ parameters.get("ID").size() + "ID parameters.");
+				return;
+			}
+			
+			try {
+				userID = Integer.parseInt(parameters.get("ID").get(0));
+			} catch(NumberFormatException e) {
+				userID = -1;
+			}
+			
+			if (userID < 0) {
+				responder.writeErrorMessage(
+						"ENOID",
+						"The given user id is unknown to this server",
+						"The given ID is not an allowed number (positive or zero)",
+						HttpResponseStatus.UNAUTHORIZED);
+				System.out.println("HttpRequestHandler: ListRequests failed, " +
+						"the given ID parameter is not an allowed number (positive or zero).");
+				return;
+			}
+			
+		}
+
+		
+		if (!parameters.containsKey("Limit")) {
+			responder.writeErrorMessage(
+					"ELIMIT",
+					"The given limit is invalid",
+					"You must send a limit parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"the parameter limit is missing.");
+			return;
+		}
+		if (!parameters.containsKey("Offset")) {
+			responder.writeErrorMessage(
+					"EOFFSET",
+					"The given offset is invalid",
+					"You must send an offset parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"the parameter offset is missing.");
+			return;
+		}
+		
+		if (parameters.get("Limit").size() != 1) {
+			responder.writeErrorMessage(
+					"ELIMIT",
+					"The given limit is invalid",
+					"You must send exactly one limit parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, there are " 
+					+ parameters.get("Limit").size() + "limit parameters given.");
+			return;
+		}
+		
+		if (parameters.get("Offset").size() != 1) {
+			responder.writeErrorMessage(
+					"EOFFSET",
+					"The given offset is invalid",
+					"You must send exactly one offset parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, there are " 
+					+ parameters.get("Offset").size() + "offset parameters given.");
+			return;
+		}
+		
+		int limit = -1;
+		int offset = -1;
+		
+		try {
+			limit = Integer.parseInt(parameters.get("Limit").get(0));
+		} catch(NumberFormatException e) {
+			limit = -1;
+		}
+		
+		try {
+			offset = Integer.parseInt(parameters.get("Offset").get(0));
+		} catch(NumberFormatException e) {
+			offset = -1;
+		}
+		
+		if (limit < 0) {
+			responder.writeErrorMessage(
+					"ELIMIT",
+					"The given limit is invalid",
+					"The given limit is not an allowed number (positive or zero)",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"given the limit parameter is not an allowed number (positive or zero).");
+			return;
+		}
+		
+		if (offset < 0) {
+			responder.writeErrorMessage(
+					"EOFFSET",
+					"The given offset is invalid",
+					"The given offset is not an allowed number (positive or zero)",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"given the offset parameter is not an allowed number (positive or zero).");
+			return;
+		}
+		
+		if (userID < 0) {
+			userID = user.id;
+		}
+		
+		List<RequestDataset> requestDatasetList = null;
+		requestDatasetList = dbm.getRequests(userID, limit, offset);
+		
+		List<Map<String, Object>> requestObjectList = new ArrayList<Map<String, Object>>();
+		for (int i=0; i<requestDatasetList.size(); i++) {
+			requestObjectList.add(requestDatasetList.get(i).getSmallRequestDatasetHashMap());
+		}
+		
+		Map<String, Object> responseMap = new HashMap<String, Object>(2);
+		responseMap.put("number", requestDatasetList.size());
+		responseMap.put("requests", requestObjectList);
+		
+		try {
+			responder.writeJSON(responseMap,
+					HttpResponseStatus.OK);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void handleUpdateUser(final HttpRequest request) {
@@ -453,7 +621,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		}
 		
 		try {
-			responder.writeJSON(user.getSmallUserHashMap(),
+			responder.writeJSON(user.getSmallUserDatasetHashMap(),
 					HttpResponseStatus.OK);
 		} catch (JsonGenerationException e) {
 			// TODO Auto-generated catch block
@@ -570,7 +738,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				System.out.println("HttpRequestHandler: RegisterUser failed, email is already registered.");
 				return;
 			} else {
-				responder.writeJSON(user.getSmallUserHashMap(),
+				responder.writeJSON(user.getSmallUserDatasetHashMap(),
 						HttpResponseStatus.OK);
 				System.out.println("HttpRequestHandler: RegisterUser successed.");
 			}

@@ -49,17 +49,19 @@ public class UserDataset {
 	/**
 	 * Returns a HashMap with following structure and without password:<br>
 	 * <pre>
+	 * "userid" : "...",
 	 * "email" : "...",
 	 * "firstname" : "...",
 	 * "lastname" : "...",
 	 * "address" : "...",
-	 * "admin" : false,
+	 * "admin" : true/false,
 	 * "status" : "..."</pre>
 	 * 
 	 * @return
 	 */
-	public Map<String,Object> getSmallUserHashMap() {
-		Map<String, Object> user = new HashMap<String, Object>(6);
+	public Map<String,Object> getSmallUserDatasetHashMap() {
+		Map<String, Object> user = new HashMap<String, Object>(7);
+		user.put("userid", id);
 		user.put("email", email);
 		user.put("firstname", firstName);
 		user.put("lastname", lastName);

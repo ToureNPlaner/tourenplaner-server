@@ -4,6 +4,8 @@
 package database;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Sascha Meusel
@@ -43,6 +45,40 @@ public class RequestDataset {
 		this.cpuTime = cpuTime;
 		this.hasFailed = hasFailed;
 		this.failDescription = failDescription;
+	}
+	
+	/**
+	 * Returns a HashMap with following structure and without json data:<br>
+	 * <pre>
+	 * "requestid" : "...",
+	 * "userid" : "...",
+	 * "algorithm" : "...",
+	 * "ispending" : true/false,
+	 * "cost" : "...",
+	 * "ispaid" : true/false,
+	 * "requestdate" : "...", 
+	 * "finisheddate" : "...",
+	 * "duration" : "...",
+	 * "hasfailed" : true/false,
+	 * "faildescription" : "..."</pre>
+	 * 
+	 * @return
+	 */
+	public Map<String,Object> getSmallRequestDatasetHashMap() {
+		Map<String, Object> request = new HashMap<String, Object>(11);
+		request.put("requestid", id);
+		request.put("userid", userID);
+		request.put("algorithm", algorithm);
+		request.put("ispending", isPending);
+		request.put("cost", costs);
+		request.put("ispaid", isPaid);
+		request.put("requestdate", requestDate); 
+		request.put("finisheddate", finishedDate);
+		request.put("duration", cpuTime);
+		request.put("hasfailed", hasFailed);
+		request.put("faildescription", failDescription);
+		
+		return request;
 	}
 	
 }
