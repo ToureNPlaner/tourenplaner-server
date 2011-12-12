@@ -3,6 +3,7 @@ package algorithms;
 import graphrep.GraphRep;
 
 import computecore.ComputeRequest;
+import computecore.Points;
 
 public class NNSearch extends GraphAlgorithm {
 
@@ -20,7 +21,7 @@ public class NNSearch extends GraphAlgorithm {
 		if (points.size() < 1) {
 			throw new ComputeException("Not enough points, need at least 1");
 		}
-		Points resultPoints = req.getResultPoints();
+		Points resultPoints = req.getResulWay();
 		nearestNeighbourLookup(points, resultPoints);
 	}
 
