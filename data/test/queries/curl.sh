@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 if [ $# -ne 6 ]
 then
    echo "Usage: curl.sh <URL> <file: jsonrequest> <RequestType> <user> <secret> <HTTP/HTTPS>"
@@ -8,7 +8,7 @@ fi
 
 #curl -i  -s -H 'Content-Type: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
 
-if [ "HTTPS" == $6 ]
+if [ "HTTPS" == "$6" ]
 then
 	curl  -s --insecure --ssl -H 'Content-Type: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
 else

@@ -13,6 +13,7 @@ public class RequestDataset {
 	
 	public int id = 0;
 	public int userID = 0;
+	public String algorithm = null;
 	public byte[] jsonRequest = null;
 	public byte[] jsonResponse = null;
 	public boolean isPending = true;
@@ -24,13 +25,14 @@ public class RequestDataset {
 	public boolean hasFailed = false;
 	public String failDescription = null;
 	
-	public RequestDataset(int id, int userID, byte[] jsonRequest, 
+	public RequestDataset(int id, int userID, String algorithm, byte[] jsonRequest, 
 			byte[] jsonResponse, boolean isPending, int costs, boolean isPaid, 
 			Date requestDate, Date finishedDate, long cpuTime, 
 			boolean hasFailed, String failDescription) {
 		
 		this.id = id;
 		this.userID = userID;
+		this.algorithm = algorithm;
 		this.jsonRequest = jsonRequest;
 		this.jsonResponse = jsonResponse;
 		this.isPending = isPending;

@@ -24,6 +24,7 @@ CREATE TABLE Users (
 CREATE TABLE Requests (
   id              INT           NOT NULL AUTO_INCREMENT,
   UserID          INT           NOT NULL REFERENCES Users (id),
+  Algorithm       VARCHAR(255)  NOT NULL,
   JSONRequest     LONGBLOB,
   JSONResponse    LONGBLOB               DEFAULT NULL,
   PendingFlag     BOOL          NOT NULL DEFAULT 1,

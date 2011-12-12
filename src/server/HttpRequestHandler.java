@@ -252,7 +252,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					 */
 					byte[] jsonRequest = request.getContent().array();
 					requestDataset = dbm.addNewRequest(userDataset.id,
-							jsonRequest);
+							algName, jsonRequest);
 					req.setRequestID(requestDataset.id);
 					System.out.println("HttpRequestHandler: HandleAlg " + algName 
 							+ ": Request successful logged into database");

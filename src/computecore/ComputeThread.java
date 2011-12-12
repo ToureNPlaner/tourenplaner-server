@@ -98,7 +98,7 @@ public class ComputeThread extends Thread {
 								cpuTime = cpuTime - System.nanoTime();
 							}
 							// convert to milliseconds
-							cpuTime *= 1000000;
+							cpuTime = cpuTime / 1000000;
 							
 						} else {
 							alg.compute(work);
