@@ -1,7 +1,7 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package algorithms;
+package computecore;
 
 import com.carrotsearch.hppc.IntArrayList;
 

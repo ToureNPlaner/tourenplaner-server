@@ -6,13 +6,13 @@ package computecore;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 import server.Responder;
-import algorithms.Points;
 
 /**
  * This class is used to represent a request for computation
@@ -22,35 +22,29 @@ import algorithms.Points;
  */
 public class ComputeRequest {
 
-	private static final class MapType extends
-			TypeReference<Map<String, Object>> {
-	};
-
-	@SuppressWarnings("unused")
-	private static final MapType JSONOBJECT = new MapType();
-	private Points points;
-	private Points resultPoints;
-	private Map<String, Object> constraints;
+	private final RequestPoints points;
+	private final Points resultWay;
+	private final Map<String, Object> constraints;
 	private Map<String, Object> misc;
-	private String algName;
-	private Responder responder;
+	private final String algName;
+	private final Responder responder;
 	private int requestID;
 
 	/**
 	 * Constructs a new ComputeRequest using the given Responder, Points and
-	 * Constraints. The requestID of the constructed ComputeRequest object is -1, 
-	 * must be set with {@link #setRequestID(int)} if server is private.
-	 * If server is not private the requestID must remain -1.
+	 * Constraints. The requestID of the constructed ComputeRequest object is
+	 * -1, must be set with {@link #setRequestID(int)} if server is private. If
+	 * server is not private the requestID must remain -1.
 	 * 
 	 * @param responder
 	 * @param algName
 	 * @param request
 	 */
-	public ComputeRequest(Responder responder, String algName, Points points,
-			Map<String, Object> constraints) {
+	public ComputeRequest(Responder responder, String algName,
+			RequestPoints points, Map<String, Object> constraints) {
 		this.algName = algName;
 		this.points = points;
-		this.resultPoints = new Points();
+		this.resultWay = new Points();
 		this.constraints = constraints;
 		this.responder = responder;
 		this.misc = null;
@@ -82,7 +76,7 @@ public class ComputeRequest {
 	 * 
 	 * @return
 	 */
-	public Points getPoints() {
+	public RequestPoints getPoints() {
 		return points;
 	}
 
@@ -91,8 +85,8 @@ public class ComputeRequest {
 	 * 
 	 * @return
 	 */
-	public Points getResultPoints() {
-		return resultPoints;
+	public Points getResulWay() {
+		return resultWay;
 	}
 
 	/**
@@ -116,56 +110,76 @@ public class ComputeRequest {
 	public void setMisc(Map<String, Object> misc) {
 		this.misc = misc;
 	}
-		
-	
+
 	/**
-	 * Sets the requestID. The requestID must be -1 if server is
-	 * not in private mode. If the requestID is not explicitly set,
-	 * it is -1. </br>
-	 * This attribute should cointain the requestID of the corresponding 
-	 * RequestDataset within the database. Must be set after construction
-	 * of the ComputeRequest object if server is in private mode.
+	 * Sets the requestID. The requestID must be -1 if server is not in private
+	 * mode. If the requestID is not explicitly set, it is -1. </br> This
+	 * attribute should cointain the requestID of the corresponding
+	 * RequestDataset within the database. Must be set after construction of the
+	 * ComputeRequest object if server is in private mode.
+	 * 
 	 * @param requestDataset
 	 */
 	public void setRequestID(int requestID) {
 		this.requestID = requestID;
 	}
-	
+
 	/**
-	 * Gets the requestID, should be -1 if server is not in private mode. 
-	 * This attribute should cointain the requestID of the corresponding 
+	 * Gets the requestID, should be -1 if server is not in private mode. This
+	 * attribute should cointain the requestID of the corresponding
 	 * RequestDataset within the database.
+	 * 
 	 * @return
 	 */
 	public int getRequestID() {
 		return this.requestID;
 	}
 
-
 	/**
-	 * Writes a json representation of the result of this request to the given stream
+	 * Writes a json representation of the result of this request to the given
+	 * stream
 	 * 
 	 * @param mapper
 	 * @param stream
 	 * @throws IOException
 	 */
-	public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
-		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(
-				stream);
+	public void writeToStream(ObjectMapper mapper, OutputStream stream)
+			throws IOException {
+
+		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
+		Map<String, JsonNode> pconsts;
+
 		gen.setCodec(mapper);
 		gen.writeStartObject();
+
 		gen.writeArrayFieldStart("points");
-		Points points = this.getResultPoints();
+		RequestPoints points = this.getPoints();
 		for (int i = 0; i < points.size(); i++) {
+			pconsts = points.getConstraints(i);
 			gen.writeStartObject();
 			gen.writeNumberField("lt", points.getPointLat(i));
 			gen.writeNumberField("ln", points.getPointLon(i));
+			if (pconsts != null) {
+				for (Entry<String, JsonNode> entry : pconsts.entrySet()) {
+					gen.writeFieldName(entry.getKey());
+					gen.writeTree(entry.getValue());
+				}
+			}
+			gen.writeEndObject();
+		}
+		gen.writeEndArray();
+
+		gen.writeArrayFieldStart("way");
+		Points way = this.getResulWay();
+		for (int i = 0; i < way.size(); i++) {
+			gen.writeStartObject();
+			gen.writeNumberField("lt", way.getPointLat(i));
+			gen.writeNumberField("ln", way.getPointLon(i));
 			gen.writeEndObject();
 		}
 		gen.writeEndArray();
 		gen.writeObjectField("misc", this.getMisc());
 		gen.writeEndObject();
 		gen.close();
-	}	
-	
+	}
 }

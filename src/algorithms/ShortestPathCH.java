@@ -12,6 +12,7 @@ import java.util.Map;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import computecore.ComputeRequest;
+import computecore.Points;
 
 public class ShortestPathCH extends GraphAlgorithm {
 
@@ -78,7 +79,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			throw new ComputeException("Not enough points, need at least 2");
 		}
 
-		Points resultPoints = req.getResultPoints();
+		Points resultPoints = req.getResulWay();
 		int distance = 0;
 		distance = shortestPath(points, resultPoints);
 
