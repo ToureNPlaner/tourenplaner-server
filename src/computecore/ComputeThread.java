@@ -93,10 +93,13 @@ public class ComputeThread extends Thread {
 							alg.compute(work);
 						
 							if (tmxbSupport) {
-								cpuTime =- tmxb.getCurrentThreadCpuTime();
+								cpuTime = cpuTime - tmxb.getCurrentThreadCpuTime();
 							} else {
-								cpuTime =- System.nanoTime();
+								cpuTime = cpuTime - System.nanoTime();
 							}
+							// convert to milliseconds
+							cpuTime *= 1000000;
+							
 						} else {
 							alg.compute(work);
 						}
@@ -135,6 +138,9 @@ public class ComputeThread extends Thread {
 							
 							// TODO get algorithm specific costs
 							try {
+								System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
+										+ ": trying to write compute result into database, length of ByteArrayStream: " 
+										+ baOutputStream.toByteArray().length);
 								// baOutputStream is not null because else
 								// writeComputeResult would throw an
 								// IOException
@@ -194,10 +200,16 @@ public class ComputeThread extends Thread {
 				System.err.println("Exception in ComputeThread: "
 						+ e.getMessage());
 				if (baOutputStream != null) {
-					System.err.println("ComputeThread: Size of the ByteArrayStream: " 
+					System.err.println("Exception in ComputeThread - debug information: Size of the ByteArrayStream: " 
 							+ baOutputStream.size());
-					System.err.println("ComputeThread: Content of the ByteArrayStream: " 
-							+ baOutputStream.toString());
+					if (baOutputStream.toString().length() > 200) {
+						System.err.println("Exception in ComputeThread - debug information: Content of the ByteArrayStream: " 
+								+ baOutputStream.toString().substring(0, 100) + "\n ### SKIP BYTES ### \n"
+								+ baOutputStream.toString().substring(baOutputStream.toString().length() - 100));
+					} else {
+						System.err.println("ComputeThread - debug information: Content of the ByteArrayStream: " 
+								+ baOutputStream.toString());
+					}
 				} else {
 					System.err.println("ComputeThread: ByteArrayStream is null");
 				}

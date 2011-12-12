@@ -151,6 +151,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		final String path = queryStringDecoder.getPath();
 
 		// DEBUG
+		System.out.println();
 		System.out.println("Request for: " + path);
 		request.getContent().readBytes(System.out,
 				request.getContent().readableBytes());
@@ -170,10 +171,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				final String algName = queryStringDecoder.getPath()
 						.substring(4);
 				handleAlg(request, algName);
-
-			} else if (path.startsWith("/nns")) {
-				//TODO temporary hotfix for nearest neighbour lookup
-				handleAlg(request, "nnl");
 
 			} else if (isPrivate && "/registeruser".equals(path)) {
 
