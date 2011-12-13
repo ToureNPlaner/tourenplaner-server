@@ -328,10 +328,9 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the distance in shortest path form that is multiplied for travel time
-    *  of the in going edge identified by it's
-	 * target node and edgeNum the edgeNum is between 0 and
-	 * getInEdgeCount(nodeId)-1
+	 * Gets the distance in shortest path form that is multiplied for travel
+	 * time of the in going edge identified by it's target node and edgeNum the
+	 * edgeNum is between 0 and getInEdgeCount(nodeId)-1
 	 * 
 	 * @return int
 	 * @param nodeID
@@ -452,8 +451,8 @@ public class GraphRep implements Serializable {
 	}
 
 	/**
-	 * Gets the distance (in meters) of the out going edge identified by it's
-	 * source node and edgeNum the edgeNum is between 0 and
+	 * Gets the multiplied distance (in meters) of the out going edge identified
+	 * by it's source node and edgeNum the edgeNum is between 0 and
 	 * getOutEdgeCount(nodeId)-1
 	 * 
 	 * @return int
@@ -462,6 +461,19 @@ public class GraphRep implements Serializable {
 	 */
 	public final int getOutDist(int nodeID, int edgeNum) {
 		return dist[offsetOut[nodeID] + edgeNum];
+	}
+
+	/**
+	 * Gets the euclidian distance (in meters) of the out going edge identified
+	 * by it's source node and edgeNum the edgeNum is between 0 and
+	 * getOutEdgeCount(nodeId)-1
+	 * 
+	 * @return int
+	 * @param nodeID
+	 * @param edgeNum
+	 */
+	public final int getOutEuclidianDist(int nodeID, int edgeNum) {
+		return euclidianDist[offsetOut[nodeID] + edgeNum];
 	}
 
 	/**
