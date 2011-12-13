@@ -13,9 +13,9 @@ then
 
 	if [ "HTTPS" == "$6" ]
 	then
-		curl  -s --insecure --ssl -H 'Content-Type: application/json' -u "$4:$5" "$1/$3"
+		curl  -s --insecure --ssl -u "$4:$5" "$1/$3"
 	else
-		curl  -s -H 'Content-Type: application/json' -u "$4:$5" "$1/$3"
+		curl  -s -u "$4:$5" "$1/$3"
 	fi
 
 else
