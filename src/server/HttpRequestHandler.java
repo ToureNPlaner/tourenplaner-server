@@ -191,7 +191,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 				handleUpdateUser(request);
 
-			} else if (isPrivate && "/listrequests".equals(path)) {
+			} else if (isPrivate && path.startsWith("/listrequests")) {
 
 				handleListRequests(request, queryStringDecoder.getParameters());
 
@@ -888,6 +888,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (user == null) {
 			responder.writeErrorMessage("EAUTH", "Wrong username or password",
 					null, HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: authentication failed, response: Wrong username or password.");
 			return null;
 		}
 
@@ -898,6 +899,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (!user.passwordhash.equals(toHash)) {
 			responder.writeErrorMessage("EAUTH", "Wrong username or password",
 					null, HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: authentication failed, response: Wrong username or password.");
 			return null;
 		}
 
