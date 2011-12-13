@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import server.Responder;
@@ -147,7 +146,7 @@ public class ComputeRequest {
 			throws IOException {
 
 		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
-		Map<String, JsonNode> pconsts;
+		Map<String, Object> pconsts;
 
 		gen.setCodec(mapper);
 		gen.writeStartObject();
@@ -160,9 +159,8 @@ public class ComputeRequest {
 			gen.writeNumberField("lt", points.getPointLat(i));
 			gen.writeNumberField("ln", points.getPointLon(i));
 			if (pconsts != null) {
-				for (Entry<String, JsonNode> entry : pconsts.entrySet()) {
-					gen.writeFieldName(entry.getKey());
-					gen.writeTree(entry.getValue());
+				for (Entry<String, Object> entry : pconsts.entrySet()) {
+					gen.writeObjectField(entry.getKey(), entry.getValue());
 				}
 			}
 			gen.writeEndObject();

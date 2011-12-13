@@ -6,21 +6,19 @@ package computecore;
 import java.util.ArrayList;
 import java.util.Map;
 
-import org.codehaus.jackson.JsonNode;
-
 /**
  * @author Niklas Schnelle
  * 
  */
 public class RequestPoints extends Points {
-	private final ArrayList<Map<String, JsonNode>> pConstraints;
+	private final ArrayList<Map<String, Object>> pConstraints;
 
 	public RequestPoints() {
 		super();
-		pConstraints = new ArrayList<Map<String, JsonNode>>();
+		pConstraints = new ArrayList<Map<String, Object>>();
 	}
 
-	public void addPoint(int lat, int lon, Map<String, JsonNode> pconst) {
+	public void addPoint(int lat, int lon, Map<String, Object> pconst) {
 		super.addPoint(lat, lon);
 		pConstraints.add(pconst);
 	}
@@ -32,7 +30,7 @@ public class RequestPoints extends Points {
 	 * @param conName
 	 * @return
 	 */
-	public JsonNode getConstraint(int i, String conName) {
+	public Object getConstraint(int i, String conName) {
 		return (pConstraints.get(i) != null) ? pConstraints.get(i).get(conName)
 				: null;
 	}
@@ -43,7 +41,7 @@ public class RequestPoints extends Points {
 	 * @param i
 	 * @return
 	 */
-	public Map<String, JsonNode> getConstraints(int i) {
+	public Map<String, Object> getConstraints(int i) {
 		return (pConstraints.get(i) != null) ? pConstraints.get(i) : null;
 	}
 
