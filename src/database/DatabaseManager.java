@@ -46,7 +46,7 @@ public class DatabaseManager {
 	private final PreparedStatement pstGetAllUsersWithLimitOffset;
 
 	private final static String addNewRequestString = "INSERT INTO Requests "
-			+ "(UserID, JSONRequest, RequestDate) VALUES(?, ?, ?)";
+			+ "(UserID, Algorithm, JSONRequest, RequestDate) VALUES(?, ?, ?, ?)";
 
 	private final static String addNewUserString = "INSERT INTO Users "
 			+ "(Email, Passwordhash, Salt, FirstName, LastName, Address, "
@@ -54,7 +54,7 @@ public class DatabaseManager {
 			+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
 	private final static String getAllRequestsString = "SELECT id, UserID, "
-			+ "JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag, "
+			+ "Algorithm, JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag, "
 			+ "RequestDate, FinishedDate, CPUTime, FailedFlag, "
 			+ "FailDescription FROM Requests";
 
@@ -74,7 +74,7 @@ public class DatabaseManager {
 			+ "FROM Users WHERE id = ?";
 
 	private final static String updateRequestString = "UPDATE Requests SET "
-			+ "UserID = ?, JSONRequest = ?, JSONResponse = ?, "
+			+ "UserID = ?, Algorithm, JSONRequest = ?, JSONResponse = ?, "
 			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, RequestDate = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
@@ -180,6 +180,7 @@ public class DatabaseManager {
 	 * 
 	 * @param userID
 	 *            The id of the user, who has sent the request
+	 * @param algorithm The algorithm name
 	 * @param jsonRequest
 	 *            The request encoded as byte array
 	 * @return Returns the inserted request object only if the id could received
@@ -190,12 +191,13 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if the insertion failed.
 	 */
-	public RequestDataset addNewRequest(int userID, byte[] jsonRequest)
+	public RequestDataset addNewRequest(int userID, String algorithm, byte[] jsonRequest)
 			throws SQLFeatureNotSupportedException, SQLException {
 
 		/*
 		  id              INT           NOT NULL AUTO_INCREMENT,
 		  UserID          INT           NOT NULL REFERENCES Users (id),
+          Algorithm       VARCHAR(255)  NOT NULL,
 		  JSONRequest     LONGBLOB,
 		  JSONResponse    LONGBLOB               DEFAULT NULL,
 		  PendingFlag     BOOL          NOT NULL DEFAULT 1,
@@ -216,12 +218,13 @@ public class DatabaseManager {
 		Timestamp stamp = new Timestamp(System.currentTimeMillis());
 
 		pstAddNewRequest.setInt(1, userID);
-		pstAddNewRequest.setBytes(2, jsonRequest);
-		pstAddNewRequest.setTimestamp(3, stamp);
+		pstAddNewRequest.setString(2, algorithm);
+		pstAddNewRequest.setBytes(3, jsonRequest);
+		pstAddNewRequest.setTimestamp(4, stamp);
 
 		pstAddNewRequest.executeUpdate();
 
-		request = new RequestDataset(-1, userID, jsonRequest, null, true, 0,
+		request = new RequestDataset(-1, userID, algorithm, jsonRequest, null, true, 0,
 				false, new Date(stamp.getTime()), null, 0, false, null);
 
 		boolean hasKey = false;
@@ -602,14 +605,20 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(resultSet.getInt(1),
-					resultSet.getInt(2), resultSet.getBytes(3), resultSet
-							.getBytes(4), resultSet.getBoolean(5), resultSet
-							.getInt(6), resultSet.getBoolean(7),
-					timestampToDate(resultSet.getTimestamp(8)),
-					timestampToDate(resultSet.getTimestamp(9)), resultSet
-							.getLong(10), resultSet.getBoolean(11), resultSet
-							.getString(12)));
+			list.add(new RequestDataset(
+					resultSet.getInt(1),
+					resultSet.getInt(2), 
+					resultSet.getString(3), 
+					resultSet.getBytes(4), 
+					resultSet.getBytes(5), 
+					resultSet.getBoolean(6), 
+					resultSet.getInt(7), 
+					resultSet.getBoolean(8),
+					timestampToDate(resultSet.getTimestamp(9)),
+					timestampToDate(resultSet.getTimestamp(10)), 
+					resultSet.getLong(11), 
+					resultSet.getBoolean(12), 
+					resultSet.getString(13)));
 		}
 		
 		resultSet.close();
@@ -643,14 +652,20 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(resultSet.getInt(1),
-					resultSet.getInt(2), resultSet.getBytes(3), resultSet
-							.getBytes(4), resultSet.getBoolean(5), resultSet
-							.getInt(6), resultSet.getBoolean(7),
-					timestampToDate(resultSet.getTimestamp(8)),
-					timestampToDate(resultSet.getTimestamp(9)), resultSet
-							.getLong(10), resultSet.getBoolean(11), resultSet
-							.getString(12)));
+			list.add(new RequestDataset(
+					resultSet.getInt(1),
+					resultSet.getInt(2), 
+					resultSet.getString(3), 
+					resultSet.getBytes(4), 
+					resultSet.getBytes(5), 
+					resultSet.getBoolean(6), 
+					resultSet.getInt(7), 
+					resultSet.getBoolean(8),
+					timestampToDate(resultSet.getTimestamp(9)),
+					timestampToDate(resultSet.getTimestamp(10)), 
+					resultSet.getLong(11), 
+					resultSet.getBoolean(12), 
+					resultSet.getString(13)));
 		}
 		resultSet.close();
 
@@ -675,14 +690,20 @@ public class DatabaseManager {
 		RequestDataset request = null;
 
 		while (resultSet.next()) {
-			request = new RequestDataset(resultSet.getInt(1),
-					resultSet.getInt(2), resultSet.getBytes(3),
-					resultSet.getBytes(4), resultSet.getBoolean(5),
-					resultSet.getInt(6), resultSet.getBoolean(7),
-					timestampToDate(resultSet.getTimestamp(8)),
+			request = new RequestDataset(
+					resultSet.getInt(1),
+					resultSet.getInt(2), 
+					resultSet.getString(3), 
+					resultSet.getBytes(4), 
+					resultSet.getBytes(5), 
+					resultSet.getBoolean(6), 
+					resultSet.getInt(7), 
+					resultSet.getBoolean(8),
 					timestampToDate(resultSet.getTimestamp(9)),
-					resultSet.getLong(10), resultSet.getBoolean(11),
-					resultSet.getString(12));
+					timestampToDate(resultSet.getTimestamp(10)), 
+					resultSet.getLong(11), 
+					resultSet.getBoolean(12), 
+					resultSet.getString(13));
 		}
 		resultSet.close();
 
@@ -709,14 +730,20 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(resultSet.getInt(1),
-					resultSet.getInt(2), resultSet.getBytes(3), resultSet
-							.getBytes(4), resultSet.getBoolean(5), resultSet
-							.getInt(6), resultSet.getBoolean(7),
-					timestampToDate(resultSet.getTimestamp(8)),
-					timestampToDate(resultSet.getTimestamp(9)), resultSet
-							.getLong(10), resultSet.getBoolean(11), resultSet
-							.getString(12)));
+			list.add(new RequestDataset(
+					resultSet.getInt(1),
+					resultSet.getInt(2), 
+					resultSet.getString(3), 
+					resultSet.getBytes(4), 
+					resultSet.getBytes(5), 
+					resultSet.getBoolean(6), 
+					resultSet.getInt(7), 
+					resultSet.getBoolean(8),
+					timestampToDate(resultSet.getTimestamp(9)),
+					timestampToDate(resultSet.getTimestamp(10)), 
+					resultSet.getLong(11), 
+					resultSet.getBoolean(12), 
+					resultSet.getString(13)));
 		}
 		resultSet.close();
 
@@ -753,14 +780,20 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(resultSet.getInt(1),
-					resultSet.getInt(2), resultSet.getBytes(3), resultSet
-							.getBytes(4), resultSet.getBoolean(5), resultSet
-							.getInt(6), resultSet.getBoolean(7),
-					timestampToDate(resultSet.getTimestamp(8)),
-					timestampToDate(resultSet.getTimestamp(9)), resultSet
-							.getLong(10), resultSet.getBoolean(11), resultSet
-							.getString(12)));
+			list.add(new RequestDataset(
+					resultSet.getInt(1),
+					resultSet.getInt(2), 
+					resultSet.getString(3), 
+					resultSet.getBytes(4), 
+					resultSet.getBytes(5), 
+					resultSet.getBoolean(6), 
+					resultSet.getInt(7), 
+					resultSet.getBoolean(8),
+					timestampToDate(resultSet.getTimestamp(9)),
+					timestampToDate(resultSet.getTimestamp(10)), 
+					resultSet.getLong(11), 
+					resultSet.getBoolean(12), 
+					resultSet.getString(13)));
 		}
 		resultSet.close();
 

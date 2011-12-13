@@ -18,10 +18,13 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
@@ -47,10 +50,10 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.handler.codec.http.QueryStringDecoder;
 import org.jboss.netty.util.CharsetUtil;
 
-import algorithms.Points;
 
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
+import computecore.RequestPoints;
 
 import config.ConfigManager;
 import database.DatabaseManager;
@@ -151,6 +154,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		final String path = queryStringDecoder.getPath();
 
 		// DEBUG
+		System.out.println();
 		System.out.println("Request for: " + path);
 		request.getContent().readBytes(System.out,
 				request.getContent().readableBytes());
@@ -171,10 +175,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						.substring(4);
 				handleAlg(request, algName);
 
-			} else if (path.startsWith("/nns")) {
-				//TODO temporary hotfix for nearest neighbour lookup
-				handleAlg(request, "nnl");
-
 			} else if (isPrivate && "/registeruser".equals(path)) {
 
 				handleRegisterUser(request);
@@ -191,9 +191,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 				handleUpdateUser(request);
 
-			} else if (isPrivate && "/listrequests".equals(path)) {
+			} else if (isPrivate && path.startsWith("/listrequests")) {
 
-				handleListRequests(request);
+				handleListRequests(request, queryStringDecoder.getParameters());
 
 			} else if (isPrivate && "/listusers".equals(path)) {
 
@@ -201,7 +201,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			} else {
 				// Unknown request, close connection
-				System.out.println("HttpRequestHandler: An unknown URL was requested: " + path);
+				System.out
+						.println("HttpRequestHandler: An unknown URL was requested: "
+								+ path);
 				responder.writeErrorMessage("EUNKNOWNURL",
 						"An unknown URL was requested", null,
 						HttpResponseStatus.NOT_FOUND);
@@ -211,7 +213,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					"The server can't contact it's database", null,
 					HttpResponseStatus.NOT_FOUND);
 			exSQL.printStackTrace();
-			System.out.println("HttpRequestHandler: " + path + " failed: The server can't contact it's database");
+			System.out.println("HttpRequestHandler: " + path
+					+ " failed: The server can't contact it's database");
 		}
 	}
 
@@ -231,7 +234,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			userDataset = auth(request);
 			if (userDataset == null) {
 				responder.writeUnauthorizedClose();
-				System.out.println("HttpRequestHandler: HandleAlg " + algName + " failed, authorization header has no valid login credentials");
+				System.out
+						.println("HttpRequestHandler: HandleAlg "
+								+ algName
+								+ " failed, authorization header has no valid login credentials");
 				return;
 			}
 		}
@@ -255,9 +261,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					 */
 					byte[] jsonRequest = request.getContent().array();
 					requestDataset = dbm.addNewRequest(userDataset.id,
-							jsonRequest);
+							algName, jsonRequest);
 					req.setRequestID(requestDataset.id);
-					System.out.println("HttpRequestHandler: HandleAlg " + algName 
+					System.out.println("HttpRequestHandler: HandleAlg "
+							+ algName
 							+ ": Request successful logged into database");
 
 				}
@@ -271,7 +278,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 									"This server is currently too busy to fullfill the request",
 									null,
 									HttpResponseStatus.SERVICE_UNAVAILABLE);
-					System.out.println("HttpRequestHandler: HandleAlg " + algName 
+					System.out.println("HttpRequestHandler: HandleAlg "
+							+ algName
 							+ " failed: Server is to busy to fullfill request");
 					// Log failed requests because of full queue as failed, as
 					// not pending and as paid
@@ -282,15 +290,19 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					requestDataset.isPending = true;
 					requestDataset.isPaid = true;
 					dbm.updateRequest(requestDataset);
-					System.out.println("HttpRequestHandler: HandleAlg " + algName + " failed: Server is to busy to fullfill request, " +
-							"but request and failure information successful logged into database");
+					System.out
+							.println("HttpRequestHandler: HandleAlg "
+									+ algName
+									+ " failed: Server is to busy to fullfill request, "
+									+ "but request and failure information successful logged into database");
 				}
 			}
 		} catch (JsonParseException e) {
 			responder.writeErrorMessage("EBADJSON",
 					"Could not parse supplied JSON", e.getMessage(),
 					HttpResponseStatus.UNAUTHORIZED);
-			System.out.println("HttpRequestHandler: HandleAlg " + algName + " failed: Could not parse supplied JSON");
+			System.out.println("HttpRequestHandler: HandleAlg " + algName
+					+ " failed: Could not parse supplied JSON");
 		}
 
 	}
@@ -351,7 +363,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			throws IOException, JsonParseException {
 
 		Map<String, Object> constraints = null;
-		final Points points = new Points();
+		final RequestPoints points = new RequestPoints();
 		final ChannelBuffer content = request.getContent();
 		if (content.readableBytes() > 0) {
 
@@ -366,6 +378,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			String fieldname;
 			JsonToken token;
+			Map<String, JsonNode> pconsts;
 			int lat = 0, lon = 0;
 			while (jp.nextToken() != JsonToken.END_OBJECT) {
 				fieldname = jp.getCurrentName();
@@ -379,6 +392,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					}
 					// Read array elements
 					while (jp.nextToken() != JsonToken.END_ARRAY) {
+						pconsts = new HashMap<String, JsonNode>();
 						while (jp.nextToken() != JsonToken.END_OBJECT) {
 							fieldname = jp.getCurrentName();
 							token = jp.nextToken();
@@ -388,13 +402,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 							} else if ("ln".equals(fieldname)) {
 								lon = jp.getIntValue();
 							} else {
-								if ((token == JsonToken.START_ARRAY)
-										|| (token == JsonToken.START_OBJECT)) {
-									jp.skipChildren();
-								}
+								pconsts.put(fieldname, jp.readValueAsTree());
 							}
 						}
-						points.addPoint(lat, lon);
+						points.addPoint(lat, lon, pconsts);
 					}
 
 				} else if ("constraints".equals(fieldname)) {
@@ -415,7 +426,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			// Write the response.
 			final ChannelFuture future = responder.getChannel().write(response);
 			future.addListener(ChannelFutureListener.CLOSE);
-			System.out.println("HttpRequestHandler: Closed Connection because no Content");
+			System.out
+					.println("HttpRequestHandler: Closed Connection because no Content");
 			return null;
 		}
 
@@ -427,9 +439,175 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	}
 
-	private void handleListRequests(final HttpRequest request) {
-		// TODO Auto-generated method stub
+	private void handleListRequests(final HttpRequest request, Map<String, List<String>> parameters) throws SQLException {
+		
+		UserDataset user = null;
+		try {
+			user = auth(request);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// authentication needed, auth(request) responses with error if auth fails
+		if (user == null) {
+			return;
+		}
+		
+		int userID = -1;
+		
+		if (parameters.containsKey("ID")) {
+			if (!user.isAdmin) {
+				responder.writeErrorMessage(
+						"ENOTADMIN",
+						"You are not an admin",
+						"You must be admin if you want to use the ID parameter",
+						HttpResponseStatus.FORBIDDEN);
+				System.out.println("HttpRequestHandler: ListRequests failed, " +
+						"a logged in user has to be admin to register users.");
+				return;
+			}
+			
 
+			if (parameters.get("ID").size() != 1) {
+				responder.writeErrorMessage(
+						"ENOID",
+						"The given user id is unknown to this server",
+						"You must send exactly one ID parameter",
+						HttpResponseStatus.UNAUTHORIZED);
+				System.out.println("HttpRequestHandler: ListRequests failed, there are " 
+						+ parameters.get("ID").size() + "ID parameters.");
+				return;
+			}
+			
+			try {
+				userID = Integer.parseInt(parameters.get("ID").get(0));
+			} catch(NumberFormatException e) {
+				userID = -1;
+			}
+			
+			if (userID < 0) {
+				responder.writeErrorMessage(
+						"ENOID",
+						"The given user id is unknown to this server",
+						"The given ID is not an allowed number (positive or zero)",
+						HttpResponseStatus.UNAUTHORIZED);
+				System.out.println("HttpRequestHandler: ListRequests failed, " +
+						"the given ID parameter is not an allowed number (positive or zero).");
+				return;
+			}
+			
+		}
+
+		
+		if (!parameters.containsKey("Limit")) {
+			responder.writeErrorMessage(
+					"ELIMIT",
+					"The given limit is invalid",
+					"You must send a limit parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"the parameter limit is missing.");
+			return;
+		}
+		if (!parameters.containsKey("Offset")) {
+			responder.writeErrorMessage(
+					"EOFFSET",
+					"The given offset is invalid",
+					"You must send an offset parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"the parameter offset is missing.");
+			return;
+		}
+		
+		if (parameters.get("Limit").size() != 1) {
+			responder.writeErrorMessage(
+					"ELIMIT",
+					"The given limit is invalid",
+					"You must send exactly one limit parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, there are " 
+					+ parameters.get("Limit").size() + "limit parameters given.");
+			return;
+		}
+		
+		if (parameters.get("Offset").size() != 1) {
+			responder.writeErrorMessage(
+					"EOFFSET",
+					"The given offset is invalid",
+					"You must send exactly one offset parameter",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, there are " 
+					+ parameters.get("Offset").size() + "offset parameters given.");
+			return;
+		}
+		
+		int limit = -1;
+		int offset = -1;
+		
+		try {
+			limit = Integer.parseInt(parameters.get("Limit").get(0));
+		} catch(NumberFormatException e) {
+			limit = -1;
+		}
+		
+		try {
+			offset = Integer.parseInt(parameters.get("Offset").get(0));
+		} catch(NumberFormatException e) {
+			offset = -1;
+		}
+		
+		if (limit < 0) {
+			responder.writeErrorMessage(
+					"ELIMIT",
+					"The given limit is invalid",
+					"The given limit is not an allowed number (positive or zero)",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"given the limit parameter is not an allowed number (positive or zero).");
+			return;
+		}
+		
+		if (offset < 0) {
+			responder.writeErrorMessage(
+					"EOFFSET",
+					"The given offset is invalid",
+					"The given offset is not an allowed number (positive or zero)",
+					HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: ListRequests failed, " +
+					"given the offset parameter is not an allowed number (positive or zero).");
+			return;
+		}
+		
+		if (userID < 0) {
+			userID = user.id;
+		}
+		
+		List<RequestDataset> requestDatasetList = null;
+		requestDatasetList = dbm.getRequests(userID, limit, offset);
+		
+		List<Map<String, Object>> requestObjectList = new ArrayList<Map<String, Object>>();
+		for (int i=0; i<requestDatasetList.size(); i++) {
+			requestObjectList.add(requestDatasetList.get(i).getSmallRequestDatasetHashMap());
+		}
+		
+		Map<String, Object> responseMap = new HashMap<String, Object>(2);
+		responseMap.put("number", requestDatasetList.size());
+		responseMap.put("requests", requestObjectList);
+		
+		try {
+			responder.writeJSON(responseMap,
+					HttpResponseStatus.OK);
+		} catch (JsonGenerationException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	private void handleUpdateUser(final HttpRequest request) {
@@ -454,9 +632,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (user == null) {
 			return;
 		}
-		
+
 		try {
-			responder.writeJSON(user.getSmallUserHashMap(),
+			responder.writeJSON(user.getSmallUserDatasetHashMap(),
 					HttpResponseStatus.OK);
 		} catch (JsonGenerationException e) {
 			// TODO Auto-generated catch block
@@ -476,11 +654,12 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * authorization as admin, the new registered user will not be registered as
 	 * admin, even if json admin flag is true.
 	 * 
-	 * @param request 
-	 * @throws SQLFeatureNotSupportedException 
-	 * @throws SQLException 
+	 * @param request
+	 * @throws SQLFeatureNotSupportedException
+	 * @throws SQLException
 	 */
-	private void handleRegisterUser(final HttpRequest request) throws SQLFeatureNotSupportedException, SQLException {
+	private void handleRegisterUser(final HttpRequest request)
+			throws SQLFeatureNotSupportedException, SQLException {
 		try {
 			UserDataset user = null;
 			UserDataset authUser = null;
@@ -489,13 +668,16 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			if (request.getHeader("Authorization") != null) {
 				authUser = auth(request);
 				if (authUser == null) {
-					//auth(request) has already closed connection with error message
-					System.out.println("HttpRequestHandler: RegisterUser failed, authorization header has no valid login credentials.");
+					// auth(request) has already closed connection with error
+					// message
+					System.out
+							.println("HttpRequestHandler: RegisterUser failed, authorization header has no valid login credentials.");
 					return;
 				}
 				if (authUser != null && !authUser.isAdmin) {
 					responder.writeUnauthorizedClose();
-					System.out.println("HttpRequestHandler: RegisterUser failed, a logged in user has to be admin to register users.");
+					System.out
+							.println("HttpRequestHandler: RegisterUser failed, a logged in user has to be admin to register users.");
 					return;
 				}
 			}
@@ -513,7 +695,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			// if json object is bad or if there is no json object
 			// so no further handling needed if objmap == null
 			if (objmap == null) {
-				System.out.println("HttpRequestHandler: RegisterUser failed, bad json object.");
+				System.out
+						.println("HttpRequestHandler: RegisterUser failed, bad json object.");
 				return;
 			}
 
@@ -533,7 +716,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 								"JSON user object was not correct "
 										+ "(needs email, password, firstname, lastname, address)",
 								HttpResponseStatus.UNAUTHORIZED);
-				System.out.println("HttpRequestHandler: RegisterUser failed, json object do not have needed fields.");
+				System.out
+						.println("HttpRequestHandler: RegisterUser failed, json object do not have needed fields.");
 				return;
 			}
 
@@ -550,7 +734,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			// if no authorization add not verified user
 			if (authUser == null) {
-				// if there is no authorization as admin, the new registered user will
+				// if there is no authorization as admin, the new registered
+				// user will
 				// never be registered as admin, even if json admin flag is true
 				user = dbm.addNewUser(email, toHash, salt, firstName, lastName,
 						address, false);
@@ -570,12 +755,14 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				responder.writeErrorMessage("EREGISTERED",
 						"This email is already registered", null,
 						HttpResponseStatus.FORBIDDEN);
-				System.out.println("HttpRequestHandler: RegisterUser failed, email is already registered.");
+				System.out
+						.println("HttpRequestHandler: RegisterUser failed, email is already registered.");
 				return;
 			} else {
-				responder.writeJSON(user.getSmallUserHashMap(),
+				responder.writeJSON(user.getSmallUserDatasetHashMap(),
 						HttpResponseStatus.OK);
-				System.out.println("HttpRequestHandler: RegisterUser successed.");
+				System.out
+						.println("HttpRequestHandler: RegisterUser successed.");
 			}
 
 		} catch (JsonGenerationException e) {
@@ -701,6 +888,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (user == null) {
 			responder.writeErrorMessage("EAUTH", "Wrong username or password",
 					null, HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: authentication failed, response: Wrong username or password.");
 			return null;
 		}
 
@@ -711,6 +899,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (!user.passwordhash.equals(toHash)) {
 			responder.writeErrorMessage("EAUTH", "Wrong username or password",
 					null, HttpResponseStatus.UNAUTHORIZED);
+			System.out.println("HttpRequestHandler: authentication failed, response: Wrong username or password.");
 			return null;
 		}
 

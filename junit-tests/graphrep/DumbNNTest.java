@@ -1,5 +1,7 @@
 package graphrep;
 
+import static org.junit.Assert.*;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
@@ -19,11 +21,16 @@ public class DumbNNTest {
 
 		// TODO Rework test case, adjust to changed graphrep, maybe no try/catch
 		// here
+		GraphRep graphRep = null;
 		try {
-			GraphRep graphRep = graphRepTextReader
+			graphRep = graphRepTextReader
 					.createGraphRep(testFileByteArrayStream);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
+			if (graphRep == null) {
+				fail("graphRep is null");
+			}
+			fail("creatingGraphRep failed");
 		}
 
 	}

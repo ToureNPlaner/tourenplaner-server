@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import computecore.ComputeRequest;
+import computecore.Points;
 
 public class ShortestPath extends GraphAlgorithm {
 
@@ -61,7 +62,7 @@ public class ShortestPath extends GraphAlgorithm {
 			throw new ComputeException("Not enough points, need at least 2");
 		}
 
-		Points resultPoints = req.getResultPoints();
+		Points resultPoints = req.getResulWay();
 		int distance = 0;
 		int srclat, srclon;
 		int destlat, destlon;
