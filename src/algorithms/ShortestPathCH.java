@@ -16,14 +16,27 @@ import computecore.Points;
 
 public class ShortestPathCH extends GraphAlgorithm {
 
+	// Variables used for debugging/diagnosing
+	int bfsNodes = 0;
+	int bfsEdges = 0;
+
+	// Heap used as priority queue in Dijkstra
 	private final Heap heap;
 
 	// Used to mark nodes with BFS
 	private final BitSet marked;
 	private final BitSet visited;
 
-	// TODO: Replace with int array based fifo
+	// Dequeue used as fifo and stack
 	private final IntArrayDeque deque;
+
+	// dists in this array are stored with the multiplier applied. They also are
+	// rounded and are stored as integers
+	private final int[] dists;
+
+	// Stores at position i the edge leading to the node i in the shortest path
+	// tree
+	private final int[] prevEdges;
 
 	public ShortestPathCH(GraphRep graph) {
 		super(graph);
@@ -43,15 +56,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 		Arrays.fill(dists, Integer.MAX_VALUE);
 		heap.resetHeap();
 	}
-
-	// dists in this array are stored with the multiplier applied. They also are
-	// rounded and are stored as integers
-	private final int[] dists;
-
-	/**
-	 * edge id
-	 */
-	private final int[] prevEdges;
 
 	// maybe use http://code.google.com/p/simplelatlng/ instead
 	private final double calcDirectDistance(double lat1, double lng1,
@@ -138,8 +142,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			 * |nodes| length
 			 */
 			long setuptime = System.nanoTime();
-			int bfsNodes = 0;
-			int bfsEdges = 0;
+
 			deque.clear();
 			deque.addLast(destId);
 			// visited[destid] = true;
