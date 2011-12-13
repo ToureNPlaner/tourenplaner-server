@@ -11,7 +11,7 @@ case "$1" in
       stat_fail
     else
       sleep 1
-      pgrep -of "/usr/share/java/tourenplaner/tourenplaner-server.jar" > /var/run/tourenplaner-server.pid
+      pgrep -on "/usr/share/java/tourenplaner/tourenplaner-server.jar" > /var/run/tourenplaner-server.pid
       add_daemon tourenplanerd
       stat_done
     fi
