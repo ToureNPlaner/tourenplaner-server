@@ -11,7 +11,6 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -84,8 +83,8 @@ public class Responder {
 	}
 
 	/**
-	 * Translates a given Map<String, Object> (must be json compatible see
-	 * simple_json) to JSON and writes it onto the wire
+	 * Translates a given json compatible object (see simple_json) to JSON and
+	 * writes it onto the wire
 	 * 
 	 * @param toWrite
 	 * @param status
@@ -93,7 +92,7 @@ public class Responder {
 	 * @throws JsonMappingException
 	 * @throws JsonGenerationException
 	 */
-	public void writeJSON(Map<String, Object> toWrite, HttpResponseStatus status)
+	public void writeJSON(Object toWrite, HttpResponseStatus status)
 			throws JsonGenerationException, JsonMappingException, IOException {
 
 		// Build the response object.
@@ -104,7 +103,20 @@ public class Responder {
 		outputBuffer.clear();
 		OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
 
-		mapper.writeValue(resultStream, toWrite);
+		// let's hope that the mapper can actually transform our object to
+		// something that makes sense
+		try {
+			mapper.writeValue(resultStream, toWrite);
+		} catch (JsonGenerationException e) {
+			System.out.println("Couldn't generate json from object: "
+					+ toWrite.toString());
+			throw e;
+		} catch (JsonMappingException e) {
+			System.out.println("Couldn't map object to json: "
+					+ toWrite.toString());
+			throw e;
+		}
+
 		resultStream.flush();
 		response.setContent(outputBuffer);
 
@@ -173,9 +185,8 @@ public class Responder {
 	}
 
 	/**
-	 * Creates the response for the ComputeResult.
-	 * Returns a ByteArrayOutputStream which contains the json object
-	 * of this response.
+	 * Creates the response for the ComputeResult. Returns a
+	 * ByteArrayOutputStream which contains the json object of this response.
 	 * 
 	 * @param work
 	 * @param status
@@ -194,7 +205,7 @@ public class Responder {
 		ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
 		work.writeToStream(mapper, resultStream);
 		resultStream.writeTo(new ChannelBufferOutputStream(outputBuffer));
-		
+
 		response.setContent(outputBuffer);
 		if (keepAlive) {
 			// Add 'Content-Length' header only for a keep-alive connection.
@@ -210,7 +221,7 @@ public class Responder {
 		if (!keepAlive) {
 			future.addListener(ChannelFutureListener.CLOSE);
 		}
-		
+
 		return resultStream;
 
 	}
