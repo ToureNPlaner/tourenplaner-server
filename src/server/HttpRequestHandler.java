@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Random;
 
 import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
@@ -196,7 +195,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			} else if (isPrivate && "/listusers".equals(path)) {
 
-				handleListUsers(request, queryStringDecoder.getParameters());
+				handleListUsers(request);
 
 			} else {
 				// Unknown request, close connection
@@ -259,8 +258,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					 * request.getContent().readerIndex(readerIndex);
 					 */
 					byte[] jsonRequest = request.getContent().array();
-					requestDataset = dbm.addNewRequest(userDataset.id, algName,
-							jsonRequest);
+					requestDataset = dbm.addNewRequest(userDataset.id,
+							algName, jsonRequest);
 					req.setRequestID(requestDataset.id);
 					System.out.println("HttpRequestHandler: HandleAlg "
 							+ algName
@@ -377,7 +376,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			String fieldname;
 			JsonToken token;
-			Map<String, JsonNode> pconsts;
+			Map<String, Object> pconsts;
 			int lat = 0, lon = 0;
 			while (jp.nextToken() != JsonToken.END_OBJECT) {
 				fieldname = jp.getCurrentName();
@@ -391,7 +390,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					}
 					// Read array elements
 					while (jp.nextToken() != JsonToken.END_ARRAY) {
-						pconsts = new HashMap<String, JsonNode>();
+						pconsts = new HashMap<String, Object>();
 						while (jp.nextToken() != JsonToken.END_OBJECT) {
 							fieldname = jp.getCurrentName();
 							token = jp.nextToken();
@@ -401,7 +400,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 							} else if ("ln".equals(fieldname)) {
 								lon = jp.getIntValue();
 							} else {
-								pconsts.put(fieldname, jp.readValueAsTree());
+								pconsts.put(fieldname,
+										jp.readValueAs(Object.class));
 							}
 						}
 						points.addPoint(lat, lon, pconsts);
@@ -433,68 +433,8 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		return new ComputeRequest(responder, algName, points, constraints);
 	}
 
-	private void handleListUsers(final HttpRequest request,
-			Map<String, List<String>> parameters) throws SQLException {
-		UserDataset user = null;
-		try {
-			user = auth(request);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// authentication needed, auth(request) responses with error if auth
-		// fails
-		if (user == null) {
-			return;
-		}
-
-		if (!user.admin) {
-			responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
-					"You must be admin to list users",
-					HttpResponseStatus.FORBIDDEN);
-			System.out.println("HttpRequestHandler: ListUsers failed, "
-					+ "you must be admin to list users.");
-			return;
-		}
-
-		int limit = extractLimitParameter(parameters);
-		int offset = extractOffsetParameter(parameters);
-
-		if ((limit < 0) || (offset < 0)) {
-			return;
-		}
-
-		List<UserDataset> userDatasetList = null;
-		userDatasetList = dbm.getAllUsers(limit, offset);
-
-		List<UserDataset> userObjectList = new ArrayList<UserDataset>();
-		for (int i = 0; i < userDatasetList.size(); i++) {
-			userObjectList.add(userDatasetList.get(i));
-		}
-
-		Map<String, Object> responseMap = new HashMap<String, Object>(2);
-		responseMap.put("number", userDatasetList.size());
-		responseMap.put("users", userObjectList);
-
-		try {
-			responder.writeJSON(responseMap, HttpResponseStatus.OK);
-			System.out.println("HttpRequestHandler: ListUsers successful.");
-		} catch (JsonGenerationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out
-					.println("HttpRequestHandler: ListUsers response failed.");
-		} catch (JsonMappingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out
-					.println("HttpRequestHandler: ListUsers response failed.");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out
-					.println("HttpRequestHandler: ListUsers response failed.");
-		}
+	private void handleListUsers(final HttpRequest request) {
+		// TODO Auto-generated method stub
 
 	}
 

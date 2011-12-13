@@ -13,6 +13,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import computecore.ComputeRequest;
 import computecore.Points;
+import computecore.RequestPoints;
 
 public class ShortestPathCH extends GraphAlgorithm {
 
@@ -77,7 +78,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		assert (req != null) : "We ended up without a request object in run";
 
 		// TODO: send error messages to client
-		Points points = req.getPoints();
+		RequestPoints points = req.getPoints();
 		// Check if we have enough points to do something useful
 		if (points.size() < 2) {
 			throw new ComputeException("Not enough points, need at least 2");
@@ -101,7 +102,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @return
 	 * @throws Exception
 	 */
-	public int shortestPath(Points points, Points resultPoints)
+	public int shortestPath(RequestPoints points, Points resultPoints)
 			throws ComputeException {
 		int srclat;
 		int srclon;
@@ -111,6 +112,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		int srcId = 0;
 		int destId = 0;
 		int distance = 0;
+		int oldDistance = 0;
 		int nodeLat, nodeLon;
 		// in meters
 		double directDistance;
@@ -254,6 +256,12 @@ public class ShortestPathCH extends GraphAlgorithm {
 			}
 
 			long backtracktime = System.nanoTime();
+
+			// Save the distance to the last point at the target
+			points.getConstraints(pointIndex + 1).put("distToPrev",
+					distance - oldDistance);
+
+			oldDistance = distance;
 			System.out.println("found sp with dist = " + (distance / 1000.0)
 					+ " km (direct distance: " + (directDistance / 1000.0)
 					+ " dist[destid] = " + dists[destId]);
