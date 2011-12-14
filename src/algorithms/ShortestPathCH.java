@@ -259,8 +259,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 			destlat = points.getPointLat(pointIndex + 1);
 			destlon = points.getPointLon(pointIndex + 1);
 			reset();
-			srcId = graph.getIDForCoordinates(srclat, srclon);
-			destId = graph.getIDForCoordinates(destlat, destlon);
+			srcId = graph.getIdForCoordinates(srclat, srclon);
+			destId = graph.getIdForCoordinates(destlat, destlon);
 
 			directDistance = calcDirectDistance(srclat / 10000000.0,
 					((double) srclon) / 10000000,
