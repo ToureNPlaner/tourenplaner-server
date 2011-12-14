@@ -14,6 +14,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import com.mysql.jdbc.Statement;
@@ -23,6 +24,12 @@ import com.mysql.jdbc.Statement;
  * 
  */
 public class DatabaseManager {
+
+	private static final int maxCacheSize = 20;
+	private static final HashMap<String, UserDataset> userDatasetCache_mail = new HashMap<String, UserDataset>(
+			maxCacheSize);
+	private static final HashMap<Integer, UserDataset> userDatasetCache_id = new HashMap<Integer, UserDataset>(
+			maxCacheSize);
 
 	private Connection con = null;
 
@@ -78,9 +85,8 @@ public class DatabaseManager {
 			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, RequestDate = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
-	
-	private final static String updateRequestWithComputeResultString = 
-			"UPDATE Requests SET JSONResponse = ?, "
+
+	private final static String updateRequestWithComputeResultString = "UPDATE Requests SET JSONResponse = ?, "
 			+ "PendingFlag = ?, Costs = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
@@ -150,8 +156,8 @@ public class DatabaseManager {
 		pstGetUserWithEmail = con.prepareStatement(getUserStringWithEmail);
 		pstGetUserWithId = con.prepareStatement(getUserStringWithId);
 		pstUpdateRequest = con.prepareStatement(updateRequestString);
-		pstUpdateRequestWithComputeResult = con.
-				prepareStatement(updateRequestWithComputeResultString);
+		pstUpdateRequestWithComputeResult = con
+				.prepareStatement(updateRequestWithComputeResultString);
 		pstUpdateUser = con.prepareStatement(updateUserString);
 		pstDeleteRequestWithRequestId = con
 				.prepareStatement(deleteRequestWithRequestIdString);
@@ -180,38 +186,34 @@ public class DatabaseManager {
 	 * 
 	 * @param userID
 	 *            The id of the user, who has sent the request
-	 * @param algorithm The algorithm name
+	 * @param algorithm
+	 *            The algorithm name
 	 * @param jsonRequest
 	 *            The request encoded as byte array
 	 * @return Returns the inserted request object only if the id could received
 	 *         from the database and the insert was successful, else an
 	 *         exception will be thrown.
 	 * @throws SQLFeatureNotSupportedException
-	 *             Thrown if the id could not received or another function is not supported by driver.
+	 *             Thrown if the id could not received or another function is
+	 *             not supported by driver.
 	 * @throws SQLException
 	 *             Thrown if the insertion failed.
 	 */
-	public RequestDataset addNewRequest(int userID, String algorithm, byte[] jsonRequest)
-			throws SQLFeatureNotSupportedException, SQLException {
+	public RequestDataset addNewRequest(int userID, String algorithm,
+			byte[] jsonRequest) throws SQLFeatureNotSupportedException,
+			SQLException {
 
 		/*
-		  id              INT           NOT NULL AUTO_INCREMENT,
-		  UserID          INT           NOT NULL REFERENCES Users (id),
-          Algorithm       VARCHAR(255)  NOT NULL,
-		  JSONRequest     LONGBLOB,
-		  JSONResponse    LONGBLOB               DEFAULT NULL,
-		  PendingFlag     BOOL          NOT NULL DEFAULT 1,
-		  Costs           INT           NOT NULL DEFAULT 0,
-		  PaidFlag        BOOL          NOT NULL DEFAULT 0,
-		  RequestDate     DATETIME      NOT NULL,
-		  FinishedDate    DATETIME               DEFAULT NULL,
-		  CPUTime         BIGINT        NOT NULL DEFAULT 0,
-		  FailedFlag      BOOL          NOT NULL DEFAULT 0,
-		  FailDescription TEXT                   DEFAULT NULL,
-		  PRIMARY KEY (ID),
-		  FOREIGN KEY (UserID) REFERENCES Users (id)
-		*/
-		
+		 * id INT NOT NULL AUTO_INCREMENT, UserID INT NOT NULL REFERENCES Users
+		 * (id), Algorithm VARCHAR(255) NOT NULL, JSONRequest LONGBLOB,
+		 * JSONResponse LONGBLOB DEFAULT NULL, PendingFlag BOOL NOT NULL DEFAULT
+		 * 1, Costs INT NOT NULL DEFAULT 0, PaidFlag BOOL NOT NULL DEFAULT 0,
+		 * RequestDate DATETIME NOT NULL, FinishedDate DATETIME DEFAULT NULL,
+		 * CPUTime BIGINT NOT NULL DEFAULT 0, FailedFlag BOOL NOT NULL DEFAULT
+		 * 0, FailDescription TEXT DEFAULT NULL, PRIMARY KEY (ID), FOREIGN KEY
+		 * (UserID) REFERENCES Users (id)
+		 */
+
 		RequestDataset request = null;
 		ResultSet generatedKeyResultSet = null;
 
@@ -224,8 +226,8 @@ public class DatabaseManager {
 
 		pstAddNewRequest.executeUpdate();
 
-		request = new RequestDataset(-1, userID, algorithm, jsonRequest, null, true, 0,
-				false, new Date(stamp.getTime()), null, 0, false, null);
+		request = new RequestDataset(-1, userID, algorithm, jsonRequest, null,
+				true, 0, false, new Date(stamp.getTime()), null, 0, false, null);
 
 		boolean hasKey = false;
 		generatedKeyResultSet = pstAddNewRequest.getGeneratedKeys();
@@ -234,15 +236,15 @@ public class DatabaseManager {
 			hasKey = true;
 		}
 		generatedKeyResultSet.close();
-		
+
 		if (!hasKey) {
-			System.err.println("Current database doesn't support " +
-					"java.sql.Statement.getGeneratedKeys()");
+			System.err.println("Current database doesn't support "
+					+ "java.sql.Statement.getGeneratedKeys()");
 			throw new SQLFeatureNotSupportedException(
-					"Current database doesn't support " +
-					"java.sql.Statement.getGeneratedKeys()");
+					"Current database doesn't support "
+							+ "java.sql.Statement.getGeneratedKeys()");
 		}
-		
+
 		return request;
 	}
 
@@ -262,7 +264,7 @@ public class DatabaseManager {
 	 * @param firstName
 	 *            First name of the user. Parameter will be trimmed from this
 	 *            method.
-	 * @param lastNameRequestDataset 
+	 * @param lastNameRequestDataset
 	 *            Last Name of the user. Parameter will be trimmed from this
 	 *            method.
 	 * @param address
@@ -275,14 +277,15 @@ public class DatabaseManager {
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
 	 * @throws SQLFeatureNotSupportedException
-	 *             Thrown if the id could not received or another function is not supported by driver.
+	 *             Thrown if the id could not received or another function is
+	 *             not supported by driver.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */
 	public UserDataset addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) 
-					throws SQLFeatureNotSupportedException, SQLException {
+			boolean isAdmin) throws SQLFeatureNotSupportedException,
+			SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.NeedsVerification, false);
@@ -318,14 +321,15 @@ public class DatabaseManager {
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
 	 * @throws SQLFeatureNotSupportedException
-	 *             Thrown if the id could not received or another function is not supported by driver.
+	 *             Thrown if the id could not received or another function is
+	 *             not supported by driver.
 	 * @throws SQLException
 	 *             Thrown if other errors occurred than a duplicate email.
 	 */
 	public UserDataset addNewVerifiedUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) 
-					throws SQLFeatureNotSupportedException, SQLException {
+			boolean isAdmin) throws SQLFeatureNotSupportedException,
+			SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.Verified, true);
@@ -337,25 +341,16 @@ public class DatabaseManager {
 			throws SQLFeatureNotSupportedException, SQLException {
 
 		/*
-		  id                INT           NOT NULL AUTO_INCREMENT,
-  		  Email             VARCHAR(255)  NOT NULL UNIQUE,
-  		  Passwordhash      TEXT          NOT NULL,
-  		  Salt              TEXT          NOT NULL,
-  		  AdminFlag         BOOL          NOT NULL DEFAULT 0,
-  		  Status            ENUM ('NeedsVerification', 
-                          		  'VerificationFailed', 
-                          		  'Verified', 
-                                  'Delete') 
-                                  NOT NULL DEFAULT 'NeedsVerification',
-  		  FirstName         TEXT          NOT NULL,
-  		  LastName          TEXT          NOT NULL,
-  		  Address           TEXT          NOT NULL,
-  		  RegistrationDate  DATETIME      NOT NULL,
-  		  VerifiedDate      DATETIME               DEFAULT NULL,
-  		  DeleteRequestDate DATETIME               DEFAULT NULL,
-  		  PRIMARY KEY (ID)
-		*/
-		
+		 * id INT NOT NULL AUTO_INCREMENT, Email VARCHAR(255) NOT NULL UNIQUE,
+		 * Passwordhash TEXT NOT NULL, Salt TEXT NOT NULL, AdminFlag BOOL NOT
+		 * NULL DEFAULT 0, Status ENUM ('NeedsVerification',
+		 * 'VerificationFailed', 'Verified', 'Delete') NOT NULL DEFAULT
+		 * 'NeedsVerification', FirstName TEXT NOT NULL, LastName TEXT NOT NULL,
+		 * Address TEXT NOT NULL, RegistrationDate DATETIME NOT NULL,
+		 * VerifiedDate DATETIME DEFAULT NULL, DeleteRequestDate DATETIME
+		 * DEFAULT NULL, PRIMARY KEY (ID)
+		 */
+
 		UserDataset user = null;
 
 		email = email.trim();
@@ -397,26 +392,26 @@ public class DatabaseManager {
 
 			// try {
 			ResultSet generatedKeyResultSet = null;
-			
+
 			generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
-			
+
 			boolean hasKey = false;
 			if (generatedKeyResultSet.next()) {
 				user.id = generatedKeyResultSet.getInt(1);
 				hasKey = true;
 			}
 			generatedKeyResultSet.close();
-			
+
 			if (!hasKey) {
-				System.err.println("Current database doesn't support " +
-						"java.sql.Statement.getGeneratedKeys()");
+				System.err.println("Current database doesn't support "
+						+ "java.sql.Statement.getGeneratedKeys()");
 				user = this.getUser(email);
 			}
 			/*
 			 * } catch (SQLFeatureNotSupportedException ex) { if
 			 * (ex.getNextException() != null) { throw ex; } }
 			 */
-		// catch if duplicate key error
+			// catch if duplicate key error
 		} catch (SQLIntegrityConstraintViolationException ex) {
 			if (ex.getNextException() == null) {
 				return null;
@@ -456,14 +451,12 @@ public class DatabaseManager {
 
 		pstUpdateRequest.executeUpdate();
 	}
-	
-	
+
 	/**
 	 * Updates the Requests table row with the id given through the parameter
-	 * (<b><code>requestID</code></b>). The given parameters will overwrite
-	 * the old values in the database row. FinishedDate will be set to the
-	 * current timestamp.
-	 * <b><code>requestID</code></b> has to be > 0 and must exists
+	 * (<b><code>requestID</code></b>). The given parameters will overwrite the
+	 * old values in the database row. FinishedDate will be set to the current
+	 * timestamp. <b><code>requestID</code></b> has to be > 0 and must exists
 	 * within the database table. </br>SQL command:
 	 * {@value #updateRequestWithComputeResultString}
 	 * 
@@ -477,13 +470,12 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if update fails.
 	 */
-	public void updateRequestWithComputeResult(int requestID, 
-			byte[] jsonResponse, boolean isPending, int costs, 
-			long cpuTime, boolean hasFailed, String failDescription) 
-					throws SQLException {
-		
+	public void updateRequestWithComputeResult(int requestID,
+			byte[] jsonResponse, boolean isPending, int costs, long cpuTime,
+			boolean hasFailed, String failDescription) throws SQLException {
+
 		Timestamp stamp = new Timestamp(System.currentTimeMillis());
-		
+
 		pstUpdateRequestWithComputeResult.setBytes(1, jsonResponse);
 		pstUpdateRequestWithComputeResult.setBoolean(2, isPending);
 		pstUpdateRequestWithComputeResult.setInt(3, costs);
@@ -523,6 +515,13 @@ public class DatabaseManager {
 		pstUpdateUser.setInt(12, user.id);
 
 		pstUpdateUser.executeUpdate();
+
+		// do this only if database command succeeds (sql exception throws us
+		// out before this block)
+		if (user != null) {
+			userDatasetCache_mail.put(user.email, user);
+			userDatasetCache_id.put(user.id, user);
+		}
 	}
 
 	/**
@@ -605,22 +604,16 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(
-					resultSet.getInt(1),
-					resultSet.getInt(2), 
-					resultSet.getString(3), 
-					resultSet.getBytes(4), 
-					resultSet.getBytes(5), 
-					resultSet.getBoolean(6), 
-					resultSet.getInt(7), 
-					resultSet.getBoolean(8),
+			list.add(new RequestDataset(resultSet.getInt(1), resultSet
+					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
+					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
+							.getInt(7), resultSet.getBoolean(8),
 					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), 
-					resultSet.getLong(11), 
-					resultSet.getBoolean(12), 
-					resultSet.getString(13)));
+					timestampToDate(resultSet.getTimestamp(10)), resultSet
+							.getLong(11), resultSet.getBoolean(12), resultSet
+							.getString(13)));
 		}
-		
+
 		resultSet.close();
 
 		return list;
@@ -652,20 +645,14 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(
-					resultSet.getInt(1),
-					resultSet.getInt(2), 
-					resultSet.getString(3), 
-					resultSet.getBytes(4), 
-					resultSet.getBytes(5), 
-					resultSet.getBoolean(6), 
-					resultSet.getInt(7), 
-					resultSet.getBoolean(8),
+			list.add(new RequestDataset(resultSet.getInt(1), resultSet
+					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
+					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
+							.getInt(7), resultSet.getBoolean(8),
 					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), 
-					resultSet.getLong(11), 
-					resultSet.getBoolean(12), 
-					resultSet.getString(13)));
+					timestampToDate(resultSet.getTimestamp(10)), resultSet
+							.getLong(11), resultSet.getBoolean(12), resultSet
+							.getString(13)));
 		}
 		resultSet.close();
 
@@ -690,19 +677,14 @@ public class DatabaseManager {
 		RequestDataset request = null;
 
 		while (resultSet.next()) {
-			request = new RequestDataset(
-					resultSet.getInt(1),
-					resultSet.getInt(2), 
-					resultSet.getString(3), 
-					resultSet.getBytes(4), 
-					resultSet.getBytes(5), 
-					resultSet.getBoolean(6), 
-					resultSet.getInt(7), 
+			request = new RequestDataset(resultSet.getInt(1),
+					resultSet.getInt(2), resultSet.getString(3),
+					resultSet.getBytes(4), resultSet.getBytes(5),
+					resultSet.getBoolean(6), resultSet.getInt(7),
 					resultSet.getBoolean(8),
 					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), 
-					resultSet.getLong(11), 
-					resultSet.getBoolean(12), 
+					timestampToDate(resultSet.getTimestamp(10)),
+					resultSet.getLong(11), resultSet.getBoolean(12),
 					resultSet.getString(13));
 		}
 		resultSet.close();
@@ -730,20 +712,14 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(
-					resultSet.getInt(1),
-					resultSet.getInt(2), 
-					resultSet.getString(3), 
-					resultSet.getBytes(4), 
-					resultSet.getBytes(5), 
-					resultSet.getBoolean(6), 
-					resultSet.getInt(7), 
-					resultSet.getBoolean(8),
+			list.add(new RequestDataset(resultSet.getInt(1), resultSet
+					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
+					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
+							.getInt(7), resultSet.getBoolean(8),
 					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), 
-					resultSet.getLong(11), 
-					resultSet.getBoolean(12), 
-					resultSet.getString(13)));
+					timestampToDate(resultSet.getTimestamp(10)), resultSet
+							.getLong(11), resultSet.getBoolean(12), resultSet
+							.getString(13)));
 		}
 		resultSet.close();
 
@@ -780,20 +756,14 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new RequestDataset(
-					resultSet.getInt(1),
-					resultSet.getInt(2), 
-					resultSet.getString(3), 
-					resultSet.getBytes(4), 
-					resultSet.getBytes(5), 
-					resultSet.getBoolean(6), 
-					resultSet.getInt(7), 
-					resultSet.getBoolean(8),
+			list.add(new RequestDataset(resultSet.getInt(1), resultSet
+					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
+					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
+							.getInt(7), resultSet.getBoolean(8),
 					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), 
-					resultSet.getLong(11), 
-					resultSet.getBoolean(12), 
-					resultSet.getString(13)));
+					timestampToDate(resultSet.getTimestamp(10)), resultSet
+							.getLong(11), resultSet.getBoolean(12), resultSet
+							.getString(13)));
 		}
 		resultSet.close();
 
@@ -801,12 +771,12 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Gets a list with all users within the Users table. If the table is
-	 * empty, an empty list will be returned. </br>SQL command:
+	 * Gets a list with all users within the Users table. If the table is empty,
+	 * an empty list will be returned. </br>SQL command:
 	 * {@value #getAllUsersString}
 	 * 
-	 * @return A list with all selected users. If no users selected, the list
-	 *         is empty, but not null.
+	 * @return A list with all selected users. If no users selected, the list is
+	 *         empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
@@ -816,15 +786,14 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new UserDataset(resultSet.getInt(1),
-					resultSet.getString(2), resultSet.getString(3), resultSet
-							.getString(4), resultSet.getBoolean(5),
-					UserStatusEnum.valueOf(resultSet.getString(6)), resultSet
-							.getString(7), resultSet.getString(8), resultSet
-							.getString(9), timestampToDate(resultSet
-							.getTimestamp(10)), timestampToDate(resultSet
-							.getTimestamp(11)), timestampToDate(resultSet
-							.getTimestamp(12))));
+			list.add(new UserDataset(resultSet.getInt(1), resultSet
+					.getString(2), resultSet.getString(3), resultSet
+					.getString(4), resultSet.getBoolean(5), UserStatusEnum
+					.valueOf(resultSet.getString(6)), resultSet.getString(7),
+					resultSet.getString(8), resultSet.getString(9),
+					timestampToDate(resultSet.getTimestamp(10)),
+					timestampToDate(resultSet.getTimestamp(11)),
+					timestampToDate(resultSet.getTimestamp(12))));
 		}
 		resultSet.close();
 
@@ -841,12 +810,13 @@ public class DatabaseManager {
 	 *            How many rows should maximal selected.
 	 * @param offset
 	 *            How many rows should be skimmed.
-	 * @return A list with all selected users. If no users selected, the list
-	 *         is empty, but not null.
+	 * @return A list with all selected users. If no users selected, the list is
+	 *         empty, but not null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
-	public List<UserDataset> getAllUsers(int limit, int offset) throws SQLException {
+	public List<UserDataset> getAllUsers(int limit, int offset)
+			throws SQLException {
 		pstGetAllUsersWithLimitOffset.setInt(1, limit);
 		pstGetAllUsersWithLimitOffset.setInt(2, offset);
 
@@ -855,15 +825,14 @@ public class DatabaseManager {
 
 		while (resultSet.next()) {
 
-			list.add(new UserDataset(resultSet.getInt(1),
-					resultSet.getString(2), resultSet.getString(3), resultSet
-							.getString(4), resultSet.getBoolean(5),
-					UserStatusEnum.valueOf(resultSet.getString(6)), resultSet
-							.getString(7), resultSet.getString(8), resultSet
-							.getString(9), timestampToDate(resultSet
-							.getTimestamp(10)), timestampToDate(resultSet
-							.getTimestamp(11)), timestampToDate(resultSet
-							.getTimestamp(12))));
+			list.add(new UserDataset(resultSet.getInt(1), resultSet
+					.getString(2), resultSet.getString(3), resultSet
+					.getString(4), resultSet.getBoolean(5), UserStatusEnum
+					.valueOf(resultSet.getString(6)), resultSet.getString(7),
+					resultSet.getString(8), resultSet.getString(9),
+					timestampToDate(resultSet.getTimestamp(10)),
+					timestampToDate(resultSet.getTimestamp(11)),
+					timestampToDate(resultSet.getTimestamp(12))));
 		}
 		resultSet.close();
 
@@ -880,9 +849,17 @@ public class DatabaseManager {
 	 *             Thrown if select fails.
 	 */
 	public UserDataset getUser(String email) throws SQLException {
+		UserDataset user = null;
+
+		if ((user = userDatasetCache_mail.get(email)) != null) {
+			// TODO: debug output
+			System.out.println("Retrieved user " + user.email + " with id "
+					+ user.id + " from cache");
+			return user;
+		}
+
 		pstGetUserWithEmail.setString(1, email);
 		ResultSet resultSet = pstGetUserWithEmail.executeQuery();
-		UserDataset user = null;
 
 		while (resultSet.next()) {
 
@@ -896,6 +873,11 @@ public class DatabaseManager {
 					timestampToDate(resultSet.getTimestamp(12)));
 		}
 		resultSet.close();
+
+		if (user != null) {
+			userDatasetCache_mail.put(email, user);
+			userDatasetCache_id.put(user.id, user);
+		}
 
 		return user;
 	}
@@ -911,9 +893,17 @@ public class DatabaseManager {
 	 *             Thrown if select fails.
 	 */
 	public UserDataset getUser(int id) throws SQLException {
+		UserDataset user = null;
+
+		if ((user = userDatasetCache_mail.get(id)) != null) {
+			// TODO: debug output
+			System.out.println("Retrieved user " + user.email + " with id "
+					+ user.id + " from cache");
+			return user;
+		}
+
 		pstGetUserWithId.setInt(1, id);
 		ResultSet resultSet = pstGetUserWithId.executeQuery();
-		UserDataset user = null;
 
 		while (resultSet.next()) {
 
@@ -927,6 +917,11 @@ public class DatabaseManager {
 					timestampToDate(resultSet.getTimestamp(12)));
 		}
 		resultSet.close();
+
+		if (user != null) {
+			userDatasetCache_mail.put(user.email, user);
+			userDatasetCache_id.put(id, user);
+		}
 
 		return user;
 	}
