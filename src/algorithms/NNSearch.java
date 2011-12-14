@@ -29,7 +29,7 @@ public class NNSearch extends GraphAlgorithm {
 		int nodeID;
 
 		for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
-			nodeID = graph.getIDForCoordinates(points.getPointLat(pointIndex),
+			nodeID = graph.getIdForCoordinates(points.getPointLat(pointIndex),
 					points.getPointLon(pointIndex));
 			resultPoints.addPoint(graph.getNodeLat(nodeID),
 					graph.getNodeLon(nodeID));

@@ -119,8 +119,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 			destlat = points.getPointLat(pointIndex + 1);
 			destlon = points.getPointLon(pointIndex + 1);
 			reset();
-			srcId = graph.getIDForCoordinates(srclat, srclon);
-			destId = graph.getIDForCoordinates(destlat, destlon);
+			srcId = graph.getIdForCoordinates(srclat, srclon);
+			destId = graph.getIdForCoordinates(destlat, destlon);
 
 			directDistance = calcDirectDistance(srclat / 10000000.0,
 					((double) srclon) / 10000000,
@@ -150,7 +150,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				Inner: for (int i = 0; i < graph.getInEdgeCount(nodeId); i++) {
 					bfsEdges++;
 
-					edgeId = graph.getInEdgeID(nodeId, i);
+					edgeId = graph.getInEdgeId(nodeId, i);
 					sourceNode = graph.getSource(edgeId);
 					if (graph.getRank(sourceNode) >= graph.getRank(nodeId)) {
 						// Mark the edge
@@ -184,7 +184,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 					continue;
 				}
 				for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
-					edgeId = graph.getOutEdgeID(nodeId, i);
+					edgeId = graph.getOutEdgeId(nodeId, i);
 					targetNode = graph.getTarget(edgeId);
 
 					// Either marked (by BFS) or G_up edge
