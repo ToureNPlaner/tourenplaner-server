@@ -3,7 +3,9 @@
  */
 package database;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -16,7 +18,7 @@ import config.ConfigManager;
 
 /**
  * @author Sascha Meusel
- *
+ * 
  */
 public class DatabaseManagerTest {
 
@@ -24,7 +26,7 @@ public class DatabaseManagerTest {
 	static String dbmFailureMessage = null;
 	static int testUserID = -1;
 	static String userFailureMessage = null;
-	
+
 	/**
 	 * Prepares test run.
 	 */
@@ -32,38 +34,38 @@ public class DatabaseManagerTest {
 	public final static void prepareTestRun() {
 		final ConfigManager cm = ConfigManager.getInstance();
 		try {
-			dbm = new DatabaseManager(
-				cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/"), 
-				cm.getEntryString("dbname", "tourenplaner"), 
-				cm.getEntryString("dbuser","tnpuser"), 
-				cm.getEntryString("dbpw","toureNPlaner"));
+			dbm = new DatabaseManager(cm.getEntryString("dburi",
+					"jdbc:mysql://gerbera.informatik.uni-stuttgart.de:3306/"),
+					cm.getEntryString("dbname", "tourenplaner"),
+					cm.getEntryString("dbuser", "tnpuser"), cm.getEntryString(
+							"dbpw", "toureNPlaner"));
 		} catch (SQLException e) {
-			dbmFailureMessage = "No Database Connection established. " +
-				"Connection parameter:\n" +
-				cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/") +
-				"\ndbname: " + cm.getEntryString("dbname", "tourenplaner") +
-				"\ndbuser: " + cm.getEntryString("dbuser","tnpuser") +
-				"\ndbpw: " + cm.getEntryString("dbpw","toureNPlaner") +
-				"\n" + e.getMessage();
+			dbmFailureMessage = "No Database Connection established. "
+					+ "Connection parameter:\n"
+					+ cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/")
+					+ "\ndbname: "
+					+ cm.getEntryString("dbname", "tourenplaner")
+					+ "\ndbuser: " + cm.getEntryString("dbuser", "tnpuser")
+					+ "\ndbpw: " + cm.getEntryString("dbpw", "toureNPlaner")
+					+ "\n" + e.getMessage();
 		}
 		if (dbm != null) {
 			try {
-				UserDataset user = dbm.addNewUser("1337testuser@tourenplaner", 
-						"DmGT9B354DFasH673aGFBM3", 
-						"hmAhgAN68sdKNfdA9sd876k0", "John", "Doe", 
-						"Musterstraße 42", false);
+				UserDataset user = dbm.addNewUser("1337testuser@tourenplaner",
+						"DmGT9B354DFasH673aGFBM3", "hmAhgAN68sdKNfdA9sd876k0",
+						"John", "Doe", "Musterstraße 42", false);
 				if (user != null) {
 					testUserID = user.id;
 				} else {
 					userFailureMessage = "TestUser existed before test run.";
 				}
 			} catch (SQLException e) {
-				userFailureMessage = "\nSQL error while inserting TestUser." +
-						"\n" + e.getMessage();
+				userFailureMessage = "\nSQL error while inserting TestUser."
+						+ "\n" + e.getMessage();
 			}
-			
+
 		}
-		if (dbm != null && dbmFailureMessage == null) {
+		if ((dbm != null) && (dbmFailureMessage == null)) {
 			System.out.println("Database successful connected.");
 		} else {
 			System.out.println(dbmFailureMessage);
@@ -73,9 +75,9 @@ public class DatabaseManagerTest {
 		} else {
 			System.out.println(userFailureMessage);
 		}
-		
+
 	}
-	
+
 	/**
 	 * Cleaning up after test run.
 	 */
@@ -90,24 +92,27 @@ public class DatabaseManagerTest {
 			}
 		}
 	}
-	
-	
+
 	/**
-	 * Test method for {@link database.DatabaseManager#DatabaseManager(java.lang.String, java.lang.String, java.lang.String, java.lang.String)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#DatabaseManager(java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
+	 * .
 	 */
 	@Test
 	public final void testDatabaseManager() {
-		assertTrue(dbmFailureMessage, 
-				dbm != null && dbmFailureMessage == null);
+		assertTrue(dbmFailureMessage, (dbm != null)
+				&& (dbmFailureMessage == null));
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#addNewRequest(int, String, byte[])}.
+	 * Test method for
+	 * {@link database.DatabaseManager#addNewRequest(int, String, byte[])}.
 	 */
 	@Test
 	public final void testAddNewRequest() {
 		try {
-			RequestDataset request =  dbm.addNewRequest(testUserID, "testRequest", "jsonRequestTestBlob".getBytes());
+			RequestDataset request = dbm.addNewRequest(testUserID,
+					"testRequest", "jsonRequestTestBlob".getBytes());
 			assertFalse("dbm is null", dbm == null);
 			assertFalse("returned object should never be null", request == null);
 		} catch (SQLFeatureNotSupportedException e) {
@@ -118,11 +123,13 @@ public class DatabaseManagerTest {
 			e.printStackTrace();
 			fail("Not yet implemented"); // TODO
 		}
-		
+
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#addNewUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#addNewUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)}
+	 * .
 	 */
 	@Test
 	public final void testAddNewUser() {
@@ -131,7 +138,9 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#addNewVerifiedUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#addNewVerifiedUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)}
+	 * .
 	 */
 	@Test
 	public final void testAddNewVerifiedUser() {
@@ -139,7 +148,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#updateRequest(database.RequestDataset)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#updateRequest(database.RequestDataset)}.
 	 */
 	@Test
 	public final void testUpdateRequest() {
@@ -147,7 +157,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#updateUser(database.UserDataset)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#updateUser(database.UserDataset)}.
 	 */
 	@Test
 	public final void testUpdateUser() {
@@ -163,7 +174,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#deleteRequestsOfUser(int)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#deleteRequestsOfUser(int)}.
 	 */
 	@Test
 	public final void testDeleteRequestsOfUser() {
@@ -179,7 +191,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#deleteUser(java.lang.String)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#deleteUser(java.lang.String)}.
 	 */
 	@Test
 	public final void testDeleteUserString() {
@@ -195,7 +208,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#getAllRequests(int, int)}.
+	 * Test method for {@link database.DatabaseManager#getAllRequests(int, int)}
+	 * .
 	 */
 	@Test
 	public final void testGetAllRequestsIntInt() {
@@ -219,7 +233,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#getRequests(int, int, int)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#getRequests(int, int, int)}.
 	 */
 	@Test
 	public final void testGetRequestsIntIntInt() {
@@ -243,7 +258,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#getUser(java.lang.String)}.
+	 * Test method for
+	 * {@link database.DatabaseManager#getUser(java.lang.String)}.
 	 */
 	@Test
 	public final void testGetUserString() {
@@ -259,7 +275,8 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#printDatabaseInformation()}.
+	 * Test method for
+	 * {@link database.DatabaseManager#printDatabaseInformation()}.
 	 */
 	@Test
 	public final void testPrintDatabaseInformation() {
