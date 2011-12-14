@@ -512,7 +512,7 @@ public class DatabaseManager {
 		pstUpdateUser.setString(1, user.email);
 		pstUpdateUser.setString(2, user.passwordhash);
 		pstUpdateUser.setString(3, user.salt);
-		pstUpdateUser.setBoolean(4, user.isAdmin);
+		pstUpdateUser.setBoolean(4, user.admin);
 		pstUpdateUser.setString(5, user.status.toString());
 		pstUpdateUser.setString(6, user.firstName);
 		pstUpdateUser.setString(7, user.lastName);
