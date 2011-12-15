@@ -12,16 +12,28 @@ license=('GPL')
 depends=('java-runtime')
 backup=('etc/tourenplaner.conf')
 license=('BSD')
-install=install
+install=tourenplaner.install
 
-source=(https://gerbera.informatik.uni-stuttgart.de/wwwfiles/tourenplaner-server.jar \
-        https://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar)
+# TODO: on the final release don't download with wget in build() but enable the source=() function of the PKGBUILD and put the appropriate md5sums in
+#source=(https://gerbera.informatik.uni-stuttgart.de/wwwfiles/tourenplaner-server.jar \
+#        https://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar)
 
 build() {
   cd ${srcdir}
+
+  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/tourenplaner-server.jar
+  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar
+  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/db_init_script
+  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/db_init.sh
+
   install -d ${pkgdir}/usr/share/java/tourenplaner/
   install -m644 ${srcdir}/tourenplaner-server.jar ${pkgdir}/usr/share/java/tourenplaner/tourenplaner-server.jar
   install -d ${pkgdir}/usr/bin
+
+  install -d ${pkgdir}/usr/share/tourenplaner/
+  install -m644 ${srcdir}/db_init_script ${pkgdir}/usr/share/tourenplaner/
+  install -m644 ${srcdir}/db_init.sh ${pkgdir}/usr/share/tourenplaner/
+  chmod +x ${pkgdir}/usr/share/tourenplaner/db_init.sh 
 
   install -m 755 ${startdir}/tourenplaner-server ${pkgdir}/usr/bin/tourenplaner-server
 
@@ -31,10 +43,7 @@ build() {
   install -d ${pkgdir}/etc/rc.d
   install -m 755 ${startdir}/tourenplanerd ${pkgdir}/etc/rc.d/tourenplanerd
 
-# maybe i needing later
-# http://thedailywtf.com/Articles/Maybe-I-Needing-Later.aspx
-# install -d ${pkgdir}/etc/conf.d
-
+  install -d /var/tourenplaner
 }
 
 package_sptogpx() {
@@ -44,5 +53,3 @@ package_sptogpx() {
   install -m 755 ${startdir}/sptogpx ${pkgdir}/usr/bin/sptogpx
 }
 
-md5sums=('bc98dda320732aaeda6297da2cd05955'
-         '1e9c8797aa2f4b442647a82e5f5373e5')
