@@ -3,15 +3,14 @@
  */
 package computecore;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import algorithms.AlgorithmFactory;
 
 /**
  * An AlgorithmRegistry is used to register available Algorithms represented by
- * there specific Factory Objects. Evert registered Algorithm will be available
+ * there specific Factory Objects. Every registered Algorithm will be available
  * to ComputeThreads through their AlgorithmManagers and will be listed as
  * available Algorithm in the ServerInfo
  * 
@@ -20,14 +19,14 @@ import algorithms.AlgorithmFactory;
  */
 public class AlgorithmRegistry {
 
-	private final ConcurrentHashMap<String, AlgorithmFactory> registry;
+	private final ArrayList<AlgorithmFactory> registry;
 
 	/**
 	 * Constructs a new empty AlgorithmRegistry
 	 * 
 	 */
 	public AlgorithmRegistry() {
-		registry = new ConcurrentHashMap<String, AlgorithmFactory>();
+		registry = new ArrayList<AlgorithmFactory>();
 	};
 
 	/**
@@ -36,7 +35,7 @@ public class AlgorithmRegistry {
 	 * @param algFac
 	 */
 	public void registerAlgorithm(AlgorithmFactory algFac) {
-		registry.putIfAbsent(algFac.getURLSuffix(), algFac);
+		registry.add(algFac);
 	}
 
 	/**
@@ -45,13 +44,11 @@ public class AlgorithmRegistry {
 	 * 
 	 * @return
 	 */
-	public AlgorithmManager getAlgorithmManager() {
-		AlgorithmManager m = new AlgorithmManager();
+	public AlgorithmManager getAlgorithmManager(AlgorithmManagerFactory amFac) {
+		AlgorithmManager m = amFac.createAlgorithmManager();
 
-		for (Map.Entry<String, AlgorithmFactory> registered : registry
-				.entrySet()) {
-			m.addAlgorithm(registered.getKey(), registered.getValue()
-					.createAlgorithm());
+		for (AlgorithmFactory algFac : registry) {
+			m.addAlgorithm(algFac);
 		}
 
 		return m;
@@ -64,6 +61,6 @@ public class AlgorithmRegistry {
 	 * @return collection of registred Factories
 	 */
 	public Collection<AlgorithmFactory> getAlgorithms() {
-		return registry.values();
+		return registry;
 	}
 }

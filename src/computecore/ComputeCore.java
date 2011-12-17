@@ -42,16 +42,26 @@ public class ComputeCore {
 
 	/**
 	 * Starts the ComputeThreads
-	 * @throws SQLException Thrown only in private mode, and only if 
-	 * 				database connection could not be established.
+	 * 
+	 * @throws SQLException
+	 *             Thrown only in private mode, and only if database connection
+	 *             could not be established.
 	 * 
 	 */
 	public void start() throws SQLException {
 		ComputeThread curr;
-		
+		AlgorithmManagerFactory amFac = new AlgorithmManagerFactory() {
+
+			@Override
+			public AlgorithmManager createAlgorithmManager() {
+				return new ShareEnabledAM();
+			}
+		};
+
 		System.out.print("Start " + numThreads + " ComputeThreads: [");
 		for (int i = 0; i < numThreads; i++) {
-			curr = new ComputeThread(registry.getAlgorithmManager(), reqQueue);
+			curr = new ComputeThread(registry.getAlgorithmManager(amFac),
+					reqQueue);
 			curr.start();
 			threads.add(curr);
 			System.out.print("+");

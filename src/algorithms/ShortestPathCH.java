@@ -39,7 +39,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	// tree
 	private final int[] prevEdges;
 
-	public ShortestPathCH(GraphRep graph) {
+	public ShortestPathCH(GraphRep graph, DijkstraStructs resourceSharer) {
 		super(graph);
 		heap = new algorithms.Heap();
 		dists = new int[graph.getNodeCount()];

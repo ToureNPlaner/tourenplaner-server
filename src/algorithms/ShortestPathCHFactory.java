@@ -13,10 +13,15 @@ import java.util.Map;
  * @author Niklas Schnelle, Peter Vollmer
  * 
  */
-public class ShortestPathCHFactory extends GraphAlgorithmFactory {
+public class ShortestPathCHFactory extends SharingAlgorithmFactory {
 
 	public ShortestPathCHFactory(GraphRep graph) {
 		super(graph);
+	}
+
+	@Override
+	public Algorithm createAlgorithm(DijkstraStructs rs) {
+		return new ShortestPathCH(graph, rs);
 	}
 
 	/*
@@ -26,7 +31,7 @@ public class ShortestPathCHFactory extends GraphAlgorithmFactory {
 	 */
 	@Override
 	public Algorithm createAlgorithm() {
-		return new ShortestPathCH(graph);
+		return new ShortestPathCH(graph, new DijkstraStructs());
 	}
 
 	@Override

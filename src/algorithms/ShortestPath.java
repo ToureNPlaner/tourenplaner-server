@@ -12,7 +12,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 	private final Heap heap;
 
-	public ShortestPath(GraphRep graph) {
+	public ShortestPath(GraphRep graph, DijkstraStructs rs) {
 		super(graph);
 		heap = new algorithms.Heap(10000);
 		dists = new int[graph.getNodeCount()];
