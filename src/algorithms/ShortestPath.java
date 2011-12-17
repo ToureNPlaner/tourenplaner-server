@@ -75,8 +75,8 @@ public class ShortestPath extends GraphAlgorithm {
 			destlat = points.getPointLat(pointIndex + 1);
 			destlon = points.getPointLon(pointIndex + 1);
 
-			srcId = graph.getIDForCoordinates(srclat, srclon);
-			destId = graph.getIDForCoordinates(destlat, destlon);
+			srcId = graph.getIdForCoordinates(srclat, srclon);
+			destId = graph.getIdForCoordinates(destlat, destlon);
 			directDistance = calcDirectDistance(srclat, srclon, destlat,
 					destlon);
 			dists[srcId] = 0;
@@ -116,7 +116,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 					if (tempDist < dists[targetNode]) {
 						dists[targetNode] = tempDist;
-						prevEdges[targetNode] = graph.getOutEdgeID(nodeId, i);
+						prevEdges[targetNode] = graph.getOutEdgeId(nodeId, i);
 						heap.insert(targetNode, dists[targetNode]);
 					}
 				}

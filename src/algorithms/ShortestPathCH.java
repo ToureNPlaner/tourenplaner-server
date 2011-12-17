@@ -64,10 +64,10 @@ public class ShortestPathCH extends GraphAlgorithm {
 		double earthRadius = 6370.97327862;
 		double dLat = Math.toRadians(lat2 - lat1);
 		double dLng = Math.toRadians(lng2 - lng1);
-		double a = (Math.sin(dLat / 2) * Math.sin(dLat / 2))
-				+ (Math.cos(Math.toRadians(lat1))
-						* Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2) * Math
-							.sin(dLng / 2));
+		double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+				+ Math.cos(Math.toRadians(lat1))
+				* Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2)
+				* Math.sin(dLng / 2);
 		double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double dist = earthRadius * c;
 		return dist * 1000;
@@ -75,7 +75,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 	@Override
 	public void compute(ComputeRequest req) throws ComputeException {
-		assert (req != null) : "We ended up without a request object in run";
+		assert req != null : "We ended up without a request object in run";
 
 		RequestPoints points = req.getPoints();
 		// Check if we have enough points to do something useful
@@ -111,7 +111,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			bfsNodes++;
 			Inner: for (int i = 0; i < graph.getInEdgeCount(currNode); i++) {
 				bfsEdges++;
-				edgeId = graph.getInEdgeID(currNode, i);
+				edgeId = graph.getInEdgeId(currNode, i);
 				sourceNode = graph.getSource(edgeId);
 				if (graph.getRank(sourceNode) >= graph.getRank(currNode)) {
 					// Mark the edge
@@ -154,12 +154,12 @@ public class ShortestPathCH extends GraphAlgorithm {
 				continue;
 			}
 			for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
-				edgeId = graph.getOutEdgeID(nodeId, i);
+				edgeId = graph.getOutEdgeId(nodeId, i);
 				targetNode = graph.getTarget(edgeId);
 
 				// Either marked (by BFS) or G_up edge
 				if (marked.get(edgeId)
-						|| (graph.getRank(nodeId) <= graph.getRank(targetNode))) {
+						|| graph.getRank(nodeId) <= graph.getRank(targetNode)) {
 
 					tempDist = dists[nodeId] + graph.getDist(edgeId);
 
@@ -250,7 +250,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		int distance = 0;
 		// in meters
 		double directDistance;
-		for (int pointIndex = 0; pointIndex < (points.size() - 1); pointIndex++) {
+		for (int pointIndex = 0; pointIndex < points.size() - 1; pointIndex++) {
 
 			// New Dijkstra need to reset
 			long starttime = System.nanoTime();
@@ -259,13 +259,12 @@ public class ShortestPathCH extends GraphAlgorithm {
 			destlat = points.getPointLat(pointIndex + 1);
 			destlon = points.getPointLon(pointIndex + 1);
 			reset();
-			srcId = graph.getIDForCoordinates(srclat, srclon);
-			destId = graph.getIDForCoordinates(destlat, destlon);
+			srcId = graph.getIdForCoordinates(srclat, srclon);
+			destId = graph.getIdForCoordinates(destlat, destlon);
 
 			directDistance = calcDirectDistance(srclat / 10000000.0,
-					((double) srclon) / 10000000,
-					((double) destlat) / 10000000,
-					((double) destlon) / 10000000);
+					(double) srclon / 10000000, (double) destlat / 10000000,
+					(double) destlon / 10000000);
 
 			/*
 			 * Start BFS on G_down beginning at destination and marking edges
@@ -295,21 +294,21 @@ public class ShortestPathCH extends GraphAlgorithm {
 					distance - oldDistance);
 
 			oldDistance = distance;
-			System.out.println("found sp with dist = " + (distance / 1000.0)
-					+ " km (direct distance: " + (directDistance / 1000.0)
+			System.out.println("found sp with dist = " + distance / 1000.0
+					+ " km (direct distance: " + directDistance / 1000.0
 					+ " dist[destid] = " + dists[destId]);
-			System.out.println("Setup: "
-					+ ((setuptime - starttime) / 1000000.0) + " ms");
+			System.out.println("Setup: " + (setuptime - starttime) / 1000000.0
+					+ " ms");
 
-			System.out.println("BFS: "
-					+ ((bfsdonetime - setuptime) / 1000000.0) + " ms with "
-					+ bfsNodes + " nodes and " + bfsEdges + " edges");
+			System.out.println("BFS: " + (bfsdonetime - setuptime) / 1000000.0
+					+ " ms with " + bfsNodes + " nodes and " + bfsEdges
+					+ " edges");
 
-			System.out.println("Dijkstra: "
-					+ ((dijkstratime - bfsdonetime) / 1000000.0) + " ms");
+			System.out.println("Dijkstra: " + (dijkstratime - bfsdonetime)
+					/ 1000000.0 + " ms");
 
 			System.out.println("Backtracking: "
-					+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
+					+ (backtracktime - dijkstratime) / 1000000.0 + " ms");
 		}
 
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);

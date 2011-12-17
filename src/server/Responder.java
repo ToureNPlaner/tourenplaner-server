@@ -109,11 +109,11 @@ public class Responder {
 			mapper.writeValue(resultStream, toWrite);
 		} catch (JsonGenerationException e) {
 			System.out.println("Couldn't generate json from object: "
-					+ toWrite.toString());
+					+ e.getMessage() + "; " + toWrite.toString());
 			throw e;
 		} catch (JsonMappingException e) {
-			System.out.println("Couldn't map object to json: "
-					+ toWrite.toString());
+			System.out.println("Couldn't map object to json: " + e.getMessage()
+					+ "; " + toWrite.toString());
 			throw e;
 		}
 

@@ -1,0 +1,5 @@
+tourenplanerdir=/var/tourenplaner
+
+post_install() {
+	chown $(id -u http):nobody ${tourenplanerdir}
+}
