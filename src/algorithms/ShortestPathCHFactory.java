@@ -31,7 +31,8 @@ public class ShortestPathCHFactory extends SharingAlgorithmFactory {
 	 */
 	@Override
 	public Algorithm createAlgorithm() {
-		return new ShortestPathCH(graph, new DijkstraStructs());
+		return new ShortestPath(graph, new DijkstraStructs(
+				graph.getNodeCount(), graph.getEdgeCount()));
 	}
 
 	@Override

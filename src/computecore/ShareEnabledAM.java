@@ -3,6 +3,7 @@
  */
 package computecore;
 
+import graphrep.GraphRep;
 import algorithms.AlgorithmFactory;
 import algorithms.DijkstraStructs;
 import algorithms.SharingAlgorithmFactory;
@@ -14,8 +15,8 @@ import algorithms.SharingAlgorithmFactory;
 public class ShareEnabledAM extends AlgorithmManager {
 	private final DijkstraStructs rs;
 
-	public ShareEnabledAM() {
-		rs = new DijkstraStructs();
+	public ShareEnabledAM(GraphRep graph) {
+		rs = new DijkstraStructs(graph.getNodeCount(), graph.getEdgeCount());
 	}
 
 	/**

@@ -48,16 +48,8 @@ public class ComputeCore {
 	 *             could not be established.
 	 * 
 	 */
-	public void start() throws SQLException {
+	public void start(AlgorithmManagerFactory amFac) throws SQLException {
 		ComputeThread curr;
-		AlgorithmManagerFactory amFac = new AlgorithmManagerFactory() {
-
-			@Override
-			public AlgorithmManager createAlgorithmManager() {
-				return new ShareEnabledAM();
-			}
-		};
-
 		System.out.print("Start " + numThreads + " ComputeThreads: [");
 		for (int i = 0; i < numThreads; i++) {
 			curr = new ComputeThread(registry.getAlgorithmManager(amFac),

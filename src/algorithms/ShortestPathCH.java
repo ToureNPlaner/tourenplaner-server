@@ -5,7 +5,6 @@ package algorithms;
 
 import graphrep.GraphRep;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,41 +20,12 @@ public class ShortestPathCH extends GraphAlgorithm {
 	int bfsNodes = 0;
 	int bfsEdges = 0;
 
-	// Heap used as priority queue in Dijkstra
-	private final Heap heap;
-
-	// Used to mark nodes with BFS
-	private final BitSet marked;
-	private final BitSet visited;
-
-	// Dequeue used as fifo and stack
-	private final IntArrayDeque deque;
-
-	// dists in this array are stored with the multiplier applied. They also are
-	// rounded and are stored as integers
-	private final int[] dists;
-
-	// Stores at position i the edge leading to the node i in the shortest path
-	// tree
-	private final int[] prevEdges;
+	// DijkstraStructs used by the ShortestPathCH
+	private final DijkstraStructs ds;
 
 	public ShortestPathCH(GraphRep graph, DijkstraStructs resourceSharer) {
 		super(graph);
-		heap = new algorithms.Heap();
-		dists = new int[graph.getNodeCount()];
-		prevEdges = new int[graph.getNodeCount()];
-		marked = new BitSet(graph.getEdgeCount());
-		visited = new BitSet(graph.getNodeCount());
-		deque = new IntArrayDeque();
-	}
-
-	private void reset() {
-		// reset dists
-		visited.clear();
-		marked.clear();
-
-		Arrays.fill(dists, Integer.MAX_VALUE);
-		heap.resetHeap();
+		ds = resourceSharer;
 	}
 
 	// maybe use http://code.google.com/p/simplelatlng/ instead
@@ -85,7 +55,12 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 		Points resultPoints = req.getResulWay();
 		int distance = 0;
-		distance = shortestPath(points, resultPoints);
+		try {
+			distance = shortestPath(points, resultPoints);
+		} catch (IllegalAccessException e) {
+			// If this happens there likely is a programming error
+			e.printStackTrace();
+		}
 
 		Map<String, Object> misc = new HashMap<String, Object>(1);
 		misc.put("distance", distance);
@@ -97,13 +72,18 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * consideration !G_down edges are always before G_up edges! That's why we
 	 * can break the inner loop early
 	 * 
+	 * @param markedEdges
+	 * 
 	 * @param targetId
+	 * @throws IllegalAccessException
 	 */
-	public final void bfsMark(int targetId) {
+	public final void bfsMark(BitSet markedEdges, int targetId)
+			throws IllegalAccessException {
 		int edgeId;
 		int currNode;
 		int sourceNode;
-		deque.clear();
+		IntArrayDeque deque = ds.borrowDeque();
+		BitSet visited = ds.borrowVisitedSet();
 		deque.addLast(targetId);
 		visited.set(targetId);
 		while (!deque.isEmpty()) {
@@ -115,7 +95,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				sourceNode = graph.getSource(edgeId);
 				if (graph.getRank(sourceNode) >= graph.getRank(currNode)) {
 					// Mark the edge
-					marked.set(edgeId);
+					markedEdges.set(edgeId);
 					if (!visited.get(sourceNode)) {
 						visited.set(sourceNode);
 						// Add source for exploration
@@ -126,17 +106,26 @@ public class ShortestPathCH extends GraphAlgorithm {
 				}
 			}
 		}
+		ds.returnDeque();
+		ds.returnVisitedSet();
 	}
 
 	/**
 	 * Performs the Dijkstra Search on E_up U E_marked
 	 * 
+	 * @param markedEdges
+	 * @param dists
+	 * 
 	 * @param srcId
 	 * @param destId
 	 * @return
+	 * @throws IllegalAccessException
 	 */
-	public final boolean dijkstraOneToOne(int srcId, int destId) {
+	public final boolean dijkstraOneToOne(int[] dists, int[] prevEdges,
+			BitSet markedEdges, int srcId, int destId)
+			throws IllegalAccessException {
 		dists[srcId] = 0;
+		Heap heap = ds.borrowHeap();
 		heap.insert(srcId, dists[srcId]);
 
 		int nodeDist;
@@ -158,7 +147,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				targetNode = graph.getTarget(edgeId);
 
 				// Either marked (by BFS) or G_up edge
-				if (marked.get(edgeId)
+				if (markedEdges.get(edgeId)
 						|| graph.getRank(nodeId) <= graph.getRank(targetNode)) {
 
 					tempDist = dists[nodeId] + graph.getDist(edgeId);
@@ -173,6 +162,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				}
 			}
 		}
+		ds.returnHeap();
 		return nodeId == destId;
 	}
 
@@ -180,17 +170,24 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * Backtracks the prevEdges Array and calculates the actual path length
 	 * returns the length of the found path in meters
 	 * 
+	 * @param prevEdges
+	 * @param dists
+	 * 
 	 * @param resultPoints
 	 * @param srcId
 	 * @param destId
+	 * @throws IllegalAccessException
 	 */
-	public final int backtrack(Points resultPoints, int srcId, int destId) {
+	public final int backtrack(int[] dists, int[] prevEdges,
+			Points resultPoints, int srcId, int destId)
+			throws IllegalAccessException {
 		int nodeLat;
 		int nodeLon;
 		int edgeId;
 		int length = 0;
 		// backtracking and shortcut unpacking use dequeue as stack
-		deque.clear();
+		IntArrayDeque deque = ds.borrowDeque();
+
 		// Add the edges to our unpacking stack we
 		// go from destination to start so add at the end of the deque
 		int currNode = destId;
@@ -224,6 +221,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				length += graph.getDist(edgeId);
 			}
 		}
+		ds.returnDeque();
 		return length;
 	}
 
@@ -234,10 +232,11 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @param points
 	 * @param resultPoints
 	 * @return
+	 * @throws IllegalAccessException
 	 * @throws Exception
 	 */
 	public int shortestPath(RequestPoints points, Points resultPoints)
-			throws ComputeException {
+			throws ComputeException, IllegalAccessException {
 		int srclat;
 		int srclon;
 		int destlat;
@@ -248,9 +247,14 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 		int oldDistance = 0;
 		int distance = 0;
+
 		// in meters
 		double directDistance;
 		for (int pointIndex = 0; pointIndex < points.size() - 1; pointIndex++) {
+			// get data structures used by Dijkstra
+			int[] dists = ds.borrowDistArray();
+			int[] prevEdges = ds.borrowPrevArray();
+			BitSet markedEdges = ds.borrowMarkedSet();
 
 			// New Dijkstra need to reset
 			long starttime = System.nanoTime();
@@ -258,7 +262,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 			srclon = points.getPointLon(pointIndex);
 			destlat = points.getPointLat(pointIndex + 1);
 			destlon = points.getPointLon(pointIndex + 1);
-			reset();
 			srcId = graph.getIdForCoordinates(srclat, srclon);
 			destId = graph.getIdForCoordinates(destlat, destlon);
 
@@ -274,10 +277,11 @@ public class ShortestPathCH extends GraphAlgorithm {
 			 * |nodes| length
 			 */
 			long setuptime = System.nanoTime();
-			bfsMark(destId);
+			bfsMark(markedEdges, destId);
 			long bfsdonetime = System.nanoTime();
 
-			boolean found = dijkstraOneToOne(srcId, destId);
+			boolean found = dijkstraOneToOne(dists, prevEdges, markedEdges,
+					srcId, destId);
 			long dijkstratime = System.nanoTime();
 
 			if (!found) {
@@ -285,7 +289,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				throw new ComputeException("No Path found");
 			}
 
-			distance += backtrack(resultPoints, srcId, destId);
+			distance += backtrack(dists, prevEdges, resultPoints, srcId, destId);
 
 			long backtracktime = System.nanoTime();
 
@@ -294,6 +298,12 @@ public class ShortestPathCH extends GraphAlgorithm {
 					distance - oldDistance);
 
 			oldDistance = distance;
+
+			// Return/Reset the data structures
+			ds.returnDistArray(false);
+			ds.returnPrevArray();
+			ds.returnMarkedSet();
+
 			System.out.println("found sp with dist = " + distance / 1000.0
 					+ " km (direct distance: " + directDistance / 1000.0
 					+ " dist[destid] = " + dists[destId]);

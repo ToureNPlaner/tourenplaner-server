@@ -1,3 +1,6 @@
+/**
+ * $$\\ToureNPlaner\\$$
+ */
 package server;
 
 import graphrep.GraphRep;
@@ -24,8 +27,10 @@ import algorithms.NNSearchFactory;
 import algorithms.ShortestPathCHFactory;
 import algorithms.ShortestPathFactory;
 
+import computecore.AlgorithmManagerFactory;
 import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
+import computecore.SharingAMFactory;
 
 import config.ConfigManager;
 
@@ -192,7 +197,8 @@ public class TourenPlaner {
 				cm.getEntryInt("threads", 16),
 				cm.getEntryInt("queuelength", 32));
 		try {
-			comCore.start();
+			AlgorithmManagerFactory amFac = new SharingAMFactory(graph);
+			comCore.start(amFac);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			System.err
