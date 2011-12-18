@@ -201,12 +201,12 @@ public class Responder {
 		response.setHeader("Access-Control-Allow-Origin", "*");
 		response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
 
-		outputBuffer.clear();
 		ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
 		work.writeToStream(mapper, resultStream);
-		resultStream.writeTo(new ChannelBufferOutputStream(outputBuffer));
+		resultStream.flush();
 
-		response.setContent(outputBuffer);
+		response.setContent(ChannelBuffers.wrappedBuffer(resultStream
+				.toByteArray()));
 		if (keepAlive) {
 			// Add 'Content-Length' header only for a keep-alive connection.
 			response.setHeader(CONTENT_LENGTH, response.getContent()
