@@ -45,7 +45,7 @@ public class SPtoGPX {
 					});
 			@SuppressWarnings("unchecked")
 			ArrayList<Map<String, Object>> points = (ArrayList<Map<String, Object>>) requestJSON
-					.get("points");
+					.get("way");
 
 			System.out
 					.println("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\" ?>");
