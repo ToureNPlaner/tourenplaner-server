@@ -21,18 +21,17 @@ public class NNSearch extends GraphAlgorithm {
 		if (points.size() < 1) {
 			throw new ComputeException("Not enough points, need at least 1");
 		}
-		Points resultPoints = req.getResulWay();
-		nearestNeighbourLookup(points, resultPoints);
+		nearestNeighbourLookup(points);
 	}
 
-	public void nearestNeighbourLookup(Points points, Points resultPoints) {
+	public void nearestNeighbourLookup(Points points) {
 		int nodeID;
 
 		for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
 			nodeID = graph.getIdForCoordinates(points.getPointLat(pointIndex),
 					points.getPointLon(pointIndex));
-			resultPoints.addPoint(graph.getNodeLat(nodeID),
-					graph.getNodeLon(nodeID));
+			points.setPointLat(pointIndex, graph.getNodeLat(nodeID));
+			points.setPointLon(pointIndex, graph.getNodeLon(nodeID));
 		}
 	}
 
