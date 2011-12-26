@@ -3,15 +3,7 @@
  */
 package server;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
+import computecore.ComputeRequest;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -26,7 +18,15 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 
-import computecore.ComputeRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.logging.Logger;
+
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
+import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * This class encapsulates the translation from Map<String, Object> to JSON and
@@ -37,6 +37,8 @@ import computecore.ComputeRequest;
  * 
  */
 public class Responder {
+    
+    private static Logger log = Logger.getLogger("server");
 
 	private final Channel replyChannel;
 	private final boolean keepAlive;
@@ -73,6 +75,7 @@ public class Responder {
 	 * 
 	 */
 	public void writeUnauthorizedClose() {
+        log.info("Writing unauthorized close");
 		// Respond with Unauthorized Access
 		HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
 		// Send the client the realm so it knows we want Basic Access Auth.
@@ -108,11 +111,11 @@ public class Responder {
 		try {
 			mapper.writeValue(resultStream, toWrite);
 		} catch (JsonGenerationException e) {
-			System.out.println("Couldn't generate json from object: "
+			log.severe("Couldn't generate json from object: "
 					+ e.getMessage() + "; " + toWrite.toString());
 			throw e;
 		} catch (JsonMappingException e) {
-			System.out.println("Couldn't map object to json: " + e.getMessage()
+			log.severe("Couldn't map object to json: " + e.getMessage()
 					+ "; " + toWrite.toString());
 			throw e;
 		}
@@ -146,6 +149,7 @@ public class Responder {
 	 */
 	public void writeErrorMessage(String errorId, String message,
 			String details, HttpResponseStatus status) {
+        log.info("Writing Error Message: "+message+" --- "+details);
 		sb.delete(0, sb.length());
 		sb.append("{\"errorid\":");
 		sb.append("\"");

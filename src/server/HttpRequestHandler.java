@@ -4,25 +4,13 @@
 
 package server;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.FORBIDDEN;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.OK;
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
-
-import java.io.IOException;
-import java.nio.channels.ClosedChannelException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-
+import computecore.ComputeCore;
+import computecore.ComputeRequest;
+import computecore.RequestPoints;
+import config.ConfigManager;
+import database.DatabaseManager;
+import database.RequestDataset;
+import database.UserDataset;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
@@ -33,30 +21,24 @@ import org.codehaus.jackson.type.TypeReference;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.channel.ChannelHandlerContext;
-import org.jboss.netty.channel.ExceptionEvent;
-import org.jboss.netty.channel.MessageEvent;
-import org.jboss.netty.channel.SimpleChannelUpstreamHandler;
+import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.base64.Base64;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpMethod;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.handler.codec.http.QueryStringDecoder;
+import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.util.CharsetUtil;
 
-import computecore.ComputeCore;
-import computecore.ComputeRequest;
-import computecore.RequestPoints;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import config.ConfigManager;
-import database.DatabaseManager;
-import database.RequestDataset;
-import database.UserDataset;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
+import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
+import static org.jboss.netty.handler.codec.http.HttpResponseStatus.*;
+import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * This handler handles HTTP Requests on the normal operation socket including *
@@ -68,6 +50,8 @@ import database.UserDataset;
  *          /org/jboss/netty/example/http/snoop/package-summary.html
  */
 public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
+    
+    private static Logger log = Logger.getLogger("server");
 
 	/** ObjectMapper we can reuse **/
 	private final ObjectMapper mapper;
@@ -116,13 +100,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 						"tnpuser"), cm.getEntryString("dbpw", "toureNPlaner"));
 				digester = MessageDigest.getInstance("SHA-1");
 			} catch (SQLException e) {
-				System.err
-						.println("HttpRequestHandler: Can't connect to database (switching to public mode) "
-								+ e.getMessage());
+				log.log(Level.SEVERE, "Can't connect to database, switching to public mode",e);
+                
 				this.isPrivate = false;
 			} catch (NoSuchAlgorithmException e) {
-				System.err
-						.println("HttpRequestHandler: Can't load SHA-1 Digester. Will now switch to public mode");
+				log.log(Level.SEVERE, "Can't load SHA-1 Digester. Will now switch to public mode",e);
 				this.isPrivate = false;
 			}
 		} else {
@@ -153,12 +135,10 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		final String path = queryStringDecoder.getPath();
 
 		// DEBUG
-		System.out.println();
-		System.out.println("Request for: " + path);
-		request.getContent().readBytes(System.out,
-				request.getContent().readableBytes());
-		request.getContent().readerIndex(0);
-		System.out.println();
+
+		log.fine("Request for: " + path);
+		log.finer("Request: " + request.getContent().toString(CharsetUtil.UTF_8));
+
 		if (responder == null) {
 			responder = new Responder(mapper, channel, isKeepAlive(request));
 		}
@@ -200,20 +180,15 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			} else {
 				// Unknown request, close connection
-				System.out
-						.println("HttpRequestHandler: An unknown URL was requested: "
+				log.warning("An unknown URL was requested: "
 								+ path);
 				responder.writeErrorMessage("EUNKNOWNURL",
 						"An unknown URL was requested", null,
 						HttpResponseStatus.NOT_FOUND);
 			}
 		} catch (SQLException exSQL) {
-			responder.writeErrorMessage("EDATABASE",
-					"The server can't contact it's database", null,
-					HttpResponseStatus.NOT_FOUND);
+			responder.writeErrorMessage("EDATABASE", "The server can't contact it's database", null, HttpResponseStatus.NOT_FOUND);
 			exSQL.printStackTrace();
-			System.out.println("HttpRequestHandler: " + path
-					+ " failed: The server can't contact it's database");
 		}
 	}
 
@@ -233,10 +208,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			userDataset = auth(request);
 			if (userDataset == null) {
 				responder.writeUnauthorizedClose();
-				System.out
-						.println("HttpRequestHandler: HandleAlg "
-								+ algName
-								+ " failed, authorization header has no valid login credentials");
 				return;
 			}
 		}
@@ -253,9 +224,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					requestDataset = dbm.addNewRequest(userDataset.id, algName,
 							jsonRequest);
 					req.setRequestID(requestDataset.id);
-					System.out.println("HttpRequestHandler: HandleAlg "
-							+ algName
-							+ ": Request successful logged into database");
+
 
 				}
 
@@ -268,9 +237,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 									"This server is currently too busy to fullfill the request",
 									null,
 									HttpResponseStatus.SERVICE_UNAVAILABLE);
-					System.out.println("HttpRequestHandler: HandleAlg "
-							+ algName
-							+ " failed: Server is to busy to fullfill request");
+					log.warning("Server had to deny algorithm request because of OVERLOAD");
 					// Log failed requests because of full queue as failed, as
 					// not pending and as paid
 					// TODO specify this case clearly, maybe behavior should be
@@ -280,19 +247,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 					requestDataset.isPending = true;
 					requestDataset.isPaid = true;
 					dbm.updateRequest(requestDataset);
-					System.out
-							.println("HttpRequestHandler: HandleAlg "
-									+ algName
-									+ " failed: Server is to busy to fullfill request, "
-									+ "but request and failure information successful logged into database");
+
 				}
 			}
 		} catch (JsonParseException e) {
-			responder.writeErrorMessage("EBADJSON",
-					"Could not parse supplied JSON", e.getMessage(),
-					HttpResponseStatus.UNAUTHORIZED);
-			System.out.println("HttpRequestHandler: HandleAlg " + algName
-					+ " failed: Could not parse supplied JSON");
+			responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", e.getMessage(), HttpResponseStatus.UNAUTHORIZED);
 		}
 
 	}
@@ -339,8 +298,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	/**
 	 * Reads a JSON encoded compute request from the content field of the given
 	 * request
-	 * 
-	 * @param mapper
+	 *
 	 * @param algName
 	 * @param responder
 	 * @param request
@@ -417,8 +375,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			// Write the response.
 			final ChannelFuture future = responder.getChannel().write(response);
 			future.addListener(ChannelFutureListener.CLOSE);
-			System.out
-					.println("HttpRequestHandler: Closed Connection because no Content");
+			log.warning("No Content");
 			return null;
 		}
 
@@ -447,14 +404,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (parameters.containsKey("id")) {
 			if (!user.admin) {
 				responder
-						.writeErrorMessage(
-								"ENOTADMIN",
-								"You are not an admin",
-								"You must be admin if you want to use the id parameter",
-								HttpResponseStatus.FORBIDDEN);
-				System.out
-						.println("HttpRequestHandler: ListRequests failed, "
-								+ "you must be admin if you want to use the id parameter.");
+						.writeErrorMessage("ENOTADMIN", "You are not an admin", "You must be admin if you want to use the id parameter", HttpResponseStatus.FORBIDDEN);
 				return;
 			}
 
@@ -466,14 +416,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 			if (userID < 0) {
 				responder
-						.writeErrorMessage(
-								"ENOID",
-								"The given user id is unknown to this server",
-								"The given id is not an allowed number (positive or zero)",
-								HttpResponseStatus.UNAUTHORIZED);
-				System.out
-						.println("HttpRequestHandler: ListRequests failed, "
-								+ "the given id parameter is not an allowed number (positive or zero).");
+						.writeErrorMessage("ENOID", "The given user id is unknown to this server", "The given id is not an allowed number (positive or zero)", HttpResponseStatus.UNAUTHORIZED);
 				return;
 			}
 
@@ -504,7 +447,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		responseMap.put("requests", requestObjectList);
 
 		responder.writeJSON(responseMap, HttpResponseStatus.OK);
-		System.out.println("HttpRequestHandler: ListRequests successful.");
+		log.finest("ListRequests successful.");
 
 	}
 
@@ -513,11 +456,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		int param = -1;
 
 		if (!parameters.containsKey(name)) {
-			responder.writeErrorMessage("E" + name.toUpperCase(), "The given "
-					+ name + " is invalid", "You must send a " + name
-					+ " parameter", HttpResponseStatus.NOT_ACCEPTABLE);
-			System.out.println("HttpRequestHandler: Request failed, "
-					+ "the parameter " + name + " is missing.");
+			responder.writeErrorMessage("E" + name.toUpperCase(), "The given " + name + " is invalid", "You must send a " + name + " parameter", HttpResponseStatus.NOT_ACCEPTABLE);
 			return -1;
 		}
 
@@ -531,8 +470,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			responder.writeErrorMessage("E" + name.toUpperCase(), "The given "
 					+ name + " is invalid", "You must send a " + name
 					+ " parameter", HttpResponseStatus.NOT_ACCEPTABLE);
-			System.out.println("HttpRequestHandler: Request failed, "
-					+ "the parameter " + name + " is invalid.");
+
 			return -1;
 		}
 
@@ -576,16 +514,9 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		// if no authorization header keep on with adding not verified user
 		if (request.getHeader("Authorization") != null) {
 			authUser = auth(request);
-			if (authUser == null) {
-				// auth(request) has already closed connection with error
-				// message
-				System.out
-						.println("HttpRequestHandler: RegisterUser failed, authorization header has no valid login credentials.");
-				return;
-			} else if (!authUser.admin) {
+		     if (!authUser.admin) {
 				responder.writeUnauthorizedClose();
-				System.out
-						.println("HttpRequestHandler: RegisterUser failed, a logged in user has to be admin to register users.");
+				log.warning("RegisterUser failed, a logged in user has to be admin to register users.");
 				return;
 			}
 		}
@@ -596,8 +527,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		// if json object is bad or if there is no json object
 		// so no further handling needed if objmap == null
 		if (objmap == null) {
-			System.out
-					.println("HttpRequestHandler: RegisterUser failed, bad json object.");
+			log.warning("RegisterUser failed, bad json object.");
 			return;
 		}
 
@@ -611,14 +541,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 				|| (lastName == null) || (address == null)) {
 			// TODO maybe change error id and message
 			responder
-					.writeErrorMessage(
-							"EBADJSON",
-							"Could not parse supplied JSON",
-							"JSON user object was not correct "
-									+ "(needs email, password, firstname, lastname, address)",
-							HttpResponseStatus.UNAUTHORIZED);
-			System.out
-					.println("HttpRequestHandler: RegisterUser failed, json object does not have needed fields.");
+					.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", "JSON user object was not correct " + "(needs email, password, firstname, lastname, address)", HttpResponseStatus.UNAUTHORIZED);
 			return;
 		}
 
@@ -650,12 +573,11 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 			responder.writeErrorMessage("EREGISTERED",
 					"This email is already registered", null,
 					HttpResponseStatus.FORBIDDEN);
-			System.out
-					.println("HttpRequestHandler: RegisterUser failed, email is already registered.");
+			log.warning("RegisterUser failed, email is already registered.");
 			return;
 		} else {
 			responder.writeJSON(user, HttpResponseStatus.OK);
-			System.out.println("HttpRequestHandler: RegisterUser succseeded.");
+			log.finest("HttpRequestHandler: RegisterUser succseeded.");
 		}
 
 	}
@@ -731,8 +653,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	 * failed. Errors will be sent to the client as error messages see protocol
 	 * specification for details. The connection will get closed after the error
 	 * has been sent
-	 * 
-	 * @param request
+	 *
 	 * @return the UserDataset object of the user or null if auth failed
 	 * @throws SQLException
 	 */
@@ -769,8 +690,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (user == null) {
 			responder.writeErrorMessage("EAUTH", "Wrong username or password",
 					null, HttpResponseStatus.UNAUTHORIZED);
-			System.out
-					.println("HttpRequestHandler: authentication failed, response: Wrong username or password.");
+
 			return null;
 		}
 
@@ -781,8 +701,6 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 		if (!user.passwordhash.equals(toHash)) {
 			responder.writeErrorMessage("EAUTH", "Wrong username or password",
 					null, HttpResponseStatus.UNAUTHORIZED);
-			System.out
-					.println("HttpRequestHandler: authentication failed, response: Wrong username or password.");
 			return null;
 		}
 
@@ -795,9 +713,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 	@Override
 	public void exceptionCaught(final ChannelHandlerContext ctx,
 			final ExceptionEvent e) throws Exception {
-		if (!(e instanceof ClosedChannelException)) {
-			e.getCause().printStackTrace();
-		}
+		log.log(Level.WARNING, "Uhh, ohh", e);
 		e.getChannel().close();
 	}
 }
