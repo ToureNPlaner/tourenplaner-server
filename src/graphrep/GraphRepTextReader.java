@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.logging.Logger;
 
 public class GraphRepTextReader extends GraphRepFactory {
+    private static Logger log = Logger.getLogger("tourenplaner");
 
 	// new fileformat is probably:
 	// nodecount
@@ -46,7 +48,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 		// used for splitted lines in 1. nodes 2. edges
 		String[] splittedLine;
 
-		System.out.println("Reading " + nodeCount + " nodes and " + edgeCount
+		log.info("Reading " + nodeCount + " nodes and " + edgeCount
 				+ " edges ...");
 		int lat, lon;
 		int height;
@@ -87,16 +89,17 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		}
 		in.close();
-		System.out.println("Start generating offsets");
+		log.info("Start generating offsets");
 		graphRep.generateOffsets();
-		System.out.println("successfully created offset of InEdges");
+		log.info("successfully created offset of InEdges");
 
 		// choose the NNSearcher here
 		// DumbNN uses linear search and is slow.
 		// HashNN should be faster but needs more RAM
+        log.info("Start creating NNSearcher");
 		graphRep.searcher = new HashNN(graphRep);
 		System.gc();
-		System.out.println("... success!");
+		log.info("Graph loaded");
 		return graphRep;
 	}
 }
