@@ -87,7 +87,7 @@ public class HttpRequestHandler extends SimpleChannelUpstreamHandler {
 
 	private static final class MapType extends
 			TypeReference<Map<String, Object>> {
-	};
+	}
 
 	private static final MapType JSONOBJECT = new MapType();
 
