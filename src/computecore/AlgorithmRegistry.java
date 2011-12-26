@@ -3,10 +3,10 @@
  */
 package computecore;
 
+import algorithms.AlgorithmFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import algorithms.AlgorithmFactory;
 
 /**
  * An AlgorithmRegistry is used to register available Algorithms represented by
@@ -27,7 +27,7 @@ public class AlgorithmRegistry {
 	 */
 	public AlgorithmRegistry() {
 		registry = new ArrayList<AlgorithmFactory>();
-	};
+	}
 
 	/**
 	 * Registers a new AlgorithmFactory in this registry
