@@ -1,8 +1,10 @@
 package algorithms;
 
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 public class Heap {
+    private static Logger log = Logger.getLogger("algorithms");
 
 	// 1) the heaplength is the number of elements in the
 	// heap, not the real number of ints in the array. For example heaplength =
@@ -130,7 +132,7 @@ public class Heap {
 
 	private final void checkHeapArray() {
 		if (((heaplength * 2) + 1) >= heaparr.length) {
-			System.out.println("Increased Heap size from " + heaparr.length
+			log.finer("Increased Heap size from " + heaparr.length
 					+ " to " + (heaparr.length + arrayGrowthSum));
 			heaparr = Arrays.copyOf(heaparr, heaparr.length + arrayGrowthSum);
 		}
