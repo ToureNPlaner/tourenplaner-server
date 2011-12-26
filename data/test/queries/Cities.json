@@ -1,0 +1,8 @@
+{
+   "points" : [
+		{ "lt": 487786110, "ln": 91794440, "name" : "Stuttgart", "small" : true},
+		{ "lt": 535652780, "ln": 100013890, "name" : "Hamburg", "small" : false},
+      { "lt": 525005560, "ln": 133988890, "name" : "Berlin", "small" : false},
+      { "lt": 481333330, "ln": 115666670, "name" : "Munich", "small" : false}
+	]
+}
