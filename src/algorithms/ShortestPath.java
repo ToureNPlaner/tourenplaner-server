@@ -1,12 +1,12 @@
 package algorithms;
 
+import computecore.ComputeRequest;
+import computecore.Points;
+import computecore.RequestPoints;
 import graphrep.GraphRep;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import computecore.ComputeRequest;
-import computecore.Points;
 
 public class ShortestPath extends GraphAlgorithm {
 
@@ -39,7 +39,7 @@ public class ShortestPath extends GraphAlgorithm {
 	public void compute(ComputeRequest req) throws ComputeException {
 		assert (req != null) : "We ended up without a request object in run";
 
-		Points points = req.getPoints();
+		RequestPoints points = req.getPoints();
 
 		// Check if we have enough points to do something useful
 		if (points.size() < 2) {
