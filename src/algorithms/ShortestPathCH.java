@@ -76,7 +76,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @param targetId
 	 * @throws IllegalAccessException
 	 */
-	public final void bfsMark(BitSet markedEdges, int targetId)
+	protected final void bfsMark(BitSet markedEdges, int targetId)
 			throws IllegalAccessException {
 		int edgeId;
 		int currNode;
@@ -121,7 +121,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public final boolean dijkstraStopAtDest(int[] dists, int[] prevEdges, BitSet markedEdges, int srcId, int destId)
+	protected final boolean dijkstraStopAtDest(int[] dists, int[] prevEdges, BitSet markedEdges, int srcId, int destId)
 			throws IllegalAccessException {
 		dists[srcId] = 0;
 		Heap heap = ds.borrowHeap();
@@ -167,7 +167,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
     /**
      * Performs the Dijkstra Search on E_up U E_marked stopping when the pq is
-     * empty
+     * empty without setting predecessor edges
      *
      * @param markedEdges
      * @param dists
@@ -175,7 +175,7 @@ public class ShortestPathCH extends GraphAlgorithm {
      * @return
      * @throws IllegalAccessException
      */
-    public final void dijkstraStopAtEmpty(int[] dists, int[] prevEdges, BitSet markedEdges, int srcId) throws IllegalAccessException {
+    protected final void dijkstraStopAtEmptyDistOnly(int[] dists, BitSet markedEdges, int srcId) throws IllegalAccessException {
         dists[srcId] = 0;
         Heap heap = ds.borrowHeap();
         heap.insert(srcId, dists[srcId]);
@@ -203,8 +203,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 
                     if (tempDist < dists[targetNode]) {
                         dists[targetNode] = tempDist;
-
-                        prevEdges[targetNode] = edgeId;
                         heap.insert(targetNode, tempDist);
                     }
 
@@ -227,7 +225,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @param destId
 	 * @throws IllegalAccessException
 	 */
-	public final int backtrack(int[] dists, int[] prevEdges,
+	protected final int backtrack(int[] dists, int[] prevEdges,
 			Points resultPoints, int srcId, int destId)
 			throws IllegalAccessException {
 		int nodeLat;
@@ -284,7 +282,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @throws IllegalAccessException
 	 * @throws Exception
 	 */
-	public int shortestPath(RequestPoints points, Points resultPoints)
+	protected int shortestPath(RequestPoints points, Points resultPoints)
 			throws ComputeException, IllegalAccessException {
 		int srclat;
 		int srclon;
