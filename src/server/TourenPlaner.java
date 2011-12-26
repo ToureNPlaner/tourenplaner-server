@@ -67,6 +67,9 @@ public class TourenPlaner {
 	public static void main(String[] args) {
 		// Create globally shared ObjectMapper so we reuse it's data structures
 		ObjectMapper mapper = new ObjectMapper();
+        // make all property names in sent json lowercase
+        // http://wiki.fasterxml.com/JacksonFeaturePropertyNamingStrategy
+        mapper.setPropertyNamingStrategy(new JSONLowerCaseStrategy());
 
 		/**
 		 * inits config manager if config file is provided; also prints usage
@@ -198,4 +201,5 @@ public class TourenPlaner {
 
 		new HttpServer(mapper, cm, reg, serverInfo, comCore);
 	}
+
 }
