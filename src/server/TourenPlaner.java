@@ -3,36 +3,20 @@
  */
 package server;
 
-import graphrep.GraphRep;
-import graphrep.GraphRepDumpReader;
-import graphrep.GraphRepTextReader;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InvalidClassException;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.codehaus.jackson.map.ObjectMapper;
-
-import algorithms.AlgorithmFactory;
-import algorithms.GraphAlgorithmFactory;
-import algorithms.NNSearchFactory;
-import algorithms.ShortestPathCHFactory;
-import algorithms.ShortestPathFactory;
-
+import algorithms.*;
 import computecore.AlgorithmManagerFactory;
 import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 import computecore.SharingAMFactory;
-
 import config.ConfigManager;
+import graphrep.GraphRep;
+import graphrep.GraphRepDumpReader;
+import graphrep.GraphRepTextReader;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.*;
+import java.sql.SQLException;
+import java.util.*;
 
 public class TourenPlaner {
 	/**
@@ -188,9 +172,10 @@ public class TourenPlaner {
 
 		// Register Algorithms
 		AlgorithmRegistry reg = new AlgorithmRegistry();
-		reg.registerAlgorithm(new ShortestPathFactory(graph));
+		//reg.registerAlgorithm(new ShortestPathFactory(graph));
 		reg.registerAlgorithm(new ShortestPathCHFactory(graph));
-		reg.registerAlgorithm(new NNSearchFactory(graph));
+		reg.registerAlgorithm(new TravelingSalesmenFactory(graph));
+        reg.registerAlgorithm(new NNSearchFactory(graph));
 
 		// Create our ComputeCore that manages all ComputeThreads
 		ComputeCore comCore = new ComputeCore(reg,
