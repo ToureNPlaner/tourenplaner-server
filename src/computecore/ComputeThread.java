@@ -3,20 +3,19 @@
  */
 package computecore;
 
+import algorithms.Algorithm;
+import algorithms.ComputeException;
+import config.ConfigManager;
+import database.DatabaseManager;
+import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
 import java.util.concurrent.BlockingQueue;
-
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-
-import config.ConfigManager;
-import database.DatabaseManager;
-
-import algorithms.Algorithm;
-import algorithms.ComputeException;
+import java.util.logging.Logger;
 
 /**
  * A ComputeThread computes the results of ComputeRequests it gets from the
@@ -27,6 +26,8 @@ import algorithms.ComputeException;
  * 
  */
 public class ComputeThread extends Thread {
+    
+    private static Logger log = Logger.getLogger("tourenplaner");
 
 	private final AlgorithmManager alm;
 	private final BlockingQueue<ComputeRequest> reqQueue;
@@ -43,19 +44,24 @@ public class ComputeThread extends Thread {
 	 * @throws SQLException Thrown only in private mode, and only if 
 	 * 				database connection could not be established.
 	 */
-	public ComputeThread(AlgorithmManager am, BlockingQueue<ComputeRequest> rq) 
-			throws SQLException {
+	public ComputeThread(AlgorithmManager am, BlockingQueue<ComputeRequest> rq) {
 		alm = am;
 		reqQueue = rq;
 		ConfigManager cm = ConfigManager.getInstance();
 		isPrivate = cm.getEntryBool("private", false);
 		tmxb = ManagementFactory.getThreadMXBean();
 		if (isPrivate) {
-			this.dbm = new DatabaseManager(cm.getEntryString("dburi",
-					"jdbc:mysql://localhost:3306/"), cm.getEntryString(
-					"dbname", "tourenplaner"), cm.getEntryString("dbuser",
-					"tnpuser"), cm.getEntryString("dbpw",
-					"toureNPlaner"));
+            try {
+                this.dbm = new DatabaseManager(cm.getEntryString("dburi",
+                        "jdbc:mysql://localhost:3306/"), cm.getEntryString(
+                        "dbname", "tourenplaner"), cm.getEntryString("dbuser",
+                        "tnpuser"), cm.getEntryString("dbpw",
+                        "toureNPlaner"));
+            } catch(SQLException e){
+                log.severe("Couldn't establish database connection");
+                System.exit(1);
+            }
+
 		}
 		this.setDaemon(true);
 	}
@@ -103,14 +109,14 @@ public class ComputeThread extends Thread {
 						} else {
 							alg.compute(work);
 						}
-						System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
-								+ " successful computed.");
+						log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
+								+ " successfully computed.");
 						
 						try {
 							baOutputStream = work.getResponder().writeComputeResult(work,
 									HttpResponseStatus.OK);
-							System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
-									+ " compute result successful written into response.");
+							log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
+									+ " compute result successfully written into response.");
 						} catch (IOException e) {
 							if (isPrivate) {
 								try {
@@ -123,12 +129,11 @@ public class ComputeThread extends Thread {
 											cpuTime, 
 											true, //hasFailed
 											"IOException: " + e.getMessage()); //failDescription
-									System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
+									log.finest("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix()
 											+ " IOException successful written into database.");
 								} catch (SQLException sqlE) {
-									System.err.println("ComputeThread: Could not log IOException into DB: " 
+									log.warning("Could not log IOException into DB "
 											+ sqlE.getMessage());
-									sqlE.printStackTrace();
 								}
 								
 							}
@@ -138,7 +143,7 @@ public class ComputeThread extends Thread {
 							
 							// TODO get algorithm specific costs
 							try {
-								System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
+								log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
 										+ ": trying to write compute result into database, length of ByteArrayStream: " 
 										+ baOutputStream.toByteArray().length);
 								// baOutputStream is not null because else
@@ -152,16 +157,15 @@ public class ComputeThread extends Thread {
 										cpuTime, 
 										false, //hasFailed
 										null); //failDescription
-								System.out.println("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix() 
+								log.finest("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix()
 										+ " compute result successful written into database.");
 							} catch (SQLException sqlE) {
-								System.err.println("ComputeThread: Could not log ComputeResult into DB: " 
+								log.warning("ComputeThread: Could not log ComputeResult into DB: "
 										+ sqlE.getMessage());
-								sqlE.printStackTrace();
 							} 
 						}
 					} catch (ComputeException e) {
-						System.err.println("ComputeThread: There was a ComputeException: "
+						log.warning("There was a ComputeException: "
 								+ e.getMessage());
 						work.getResponder().writeErrorMessage("ECOMPUTE",
 								e.getMessage(), "",
@@ -178,15 +182,14 @@ public class ComputeThread extends Thread {
 										true, //hasFailed
 										"ComputeException: " + e.getMessage()); //failDescription
 							} catch (SQLException sqlE) {
-								System.err.println("ComputeThread: Could not log ComputeException into DB : " 
+								log.warning("ComputeThread: Could not log ComputeException into DB : "
 										+ sqlE.getMessage());
-								sqlE.printStackTrace();
 							}
 							
 						}
 					}
 				} else {
-					System.err.println("ComputeThread: Unsupported algorithm "
+					log.warning("Unsupported algorithm "
 							+ work.getAlgorithmURLSuffix() + " requested");
 					work.getResponder().writeErrorMessage("EUNKNOWNALG",
 							"An unknown algorithm was requested", null,
@@ -194,11 +197,12 @@ public class ComputeThread extends Thread {
 				}
 
 			} catch (InterruptedException e) {
-				System.err.println("ComputeThread interrupted");
+				log.warning("ComputeThread interrupted");
 				return;
 			} catch (Exception e) {
-				System.err.println("Exception in ComputeThread: "
+				log.warning("Exception in ComputeThread: "
 						+ e.getMessage());
+                // TODO: Remove DEBUG Only Code
 				if (baOutputStream != null) {
 					System.err.println("Exception in ComputeThread - debug information: Size of the ByteArrayStream: " 
 							+ baOutputStream.size());
