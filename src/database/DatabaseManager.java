@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import com.mysql.jdbc.Statement;
 
@@ -24,6 +25,8 @@ import com.mysql.jdbc.Statement;
  * 
  */
 public class DatabaseManager {
+    
+    private static Logger log = Logger.getLogger("database");
 
 	private static final int maxCacheSize = 20;
 	private static final HashMap<String, UserDataset> userDatasetCache_mail = new HashMap<String, UserDataset>(
@@ -238,8 +241,7 @@ public class DatabaseManager {
 		generatedKeyResultSet.close();
 
 		if (!hasKey) {
-			System.err.println("Current database doesn't support "
-					+ "java.sql.Statement.getGeneratedKeys()");
+			log.severe("Current database doesn't support java.sql.Statement.getGeneratedKeys()");
 			throw new SQLFeatureNotSupportedException(
 					"Current database doesn't support "
 							+ "java.sql.Statement.getGeneratedKeys()");
@@ -263,9 +265,6 @@ public class DatabaseManager {
 	 *            from this method.
 	 * @param firstName
 	 *            First name of the user. Parameter will be trimmed from this
-	 *            method.
-	 * @param lastNameRequestDataset
-	 *            Last Name of the user. Parameter will be trimmed from this
 	 *            method.
 	 * @param address
 	 *            Address of the user. Parameter will be trimmed from this
@@ -403,8 +402,7 @@ public class DatabaseManager {
 			generatedKeyResultSet.close();
 
 			if (!hasKey) {
-				System.err.println("Current database doesn't support "
-						+ "java.sql.Statement.getGeneratedKeys()");
+                log.severe("Current database doesn't support java.sql.Statement.getGeneratedKeys()");
 				user = this.getUser(email);
 			}
 			/*
@@ -852,8 +850,7 @@ public class DatabaseManager {
 		UserDataset user = null;
 
 		if ((user = userDatasetCache_mail.get(email)) != null) {
-			// TODO: debug output
-			System.out.println("Retrieved user " + user.email + " with id "
+			log.fine("Retrieved user " + user.email + " with id "
 					+ user.id + " from cache");
 			return user;
 		}
@@ -897,7 +894,7 @@ public class DatabaseManager {
 
 		if ((user = userDatasetCache_mail.get(id)) != null) {
 			// TODO: debug output
-			System.out.println("Retrieved user " + user.email + " with id "
+			log.fine("Retrieved user " + user.email + " with id "
 					+ user.id + " from cache");
 			return user;
 		}
