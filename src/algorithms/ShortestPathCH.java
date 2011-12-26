@@ -92,7 +92,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 				bfsEdges++;
 				edgeId = graph.getInEdgeId(currNode, i);
 				sourceNode = graph.getSource(edgeId);
-				if (graph.getRank(sourceNode) >= graph.getRank(currNode)) {
+                // Check if G_down
+				if (graph.getRankSlope(edgeId) <= 0) {
 					// Mark the edge
 					markedEdges.set(edgeId);
 					if (!visited.get(sourceNode)) {
@@ -147,7 +148,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 				// Either marked (by BFS) or G_up edge
 				if (markedEdges.get(edgeId)
-						|| graph.getRank(nodeId) <= graph.getRank(targetNode)) {
+						|| graph.getRankSlope(edgeId) >= 0) {
 
 					tempDist = dists[nodeId] + graph.getDist(edgeId);
 
@@ -197,7 +198,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 targetNode = graph.getTarget(edgeId);
 
                 // Either marked (by BFS) or G_up edge
-                if (markedEdges.get(edgeId) || graph.getRank(nodeId) <= graph.getRank(targetNode)) {
+                if (markedEdges.get(edgeId) || graph.getRankSlope(edgeId) >= 0) {
 
                     tempDist = dists[nodeId] + graph.getDist(edgeId);
 
