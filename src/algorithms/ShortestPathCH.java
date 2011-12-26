@@ -3,16 +3,15 @@
  */
 package algorithms;
 
-import graphrep.GraphRep;
-
-import java.util.HashMap;
-import java.util.Map;
-
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import computecore.ComputeRequest;
 import computecore.Points;
 import computecore.RequestPoints;
+import graphrep.GraphRep;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class ShortestPathCH extends GraphAlgorithm {
 
@@ -111,7 +110,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 	}
 
 	/**
-	 * Performs the Dijkstra Search on E_up U E_marked
+	 * Performs the Dijkstra Search on E_up U E_marked stopping when
+     * the destination point is removed from the pq
 	 * 
 	 * @param markedEdges
 	 * @param dists
@@ -121,8 +121,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public final boolean dijkstraOneToOne(int[] dists, int[] prevEdges,
-			BitSet markedEdges, int srcId, int destId)
+	public final boolean dijkstraStopAtDest(int[] dists, int[] prevEdges, BitSet markedEdges, int srcId, int destId)
 			throws IllegalAccessException {
 		dists[srcId] = 0;
 		Heap heap = ds.borrowHeap();
@@ -165,6 +164,56 @@ public class ShortestPathCH extends GraphAlgorithm {
 		ds.returnHeap();
 		return nodeId == destId;
 	}
+
+    /**
+     * Performs the Dijkstra Search on E_up U E_marked stopping when the pq is
+     * empty
+     *
+     * @param markedEdges
+     * @param dists
+     * @param srcId
+     * @return
+     * @throws IllegalAccessException
+     */
+    public final void dijkstraStopAtEmpty(int[] dists, int[] prevEdges, BitSet markedEdges, int srcId) throws IllegalAccessException {
+        dists[srcId] = 0;
+        Heap heap = ds.borrowHeap();
+        heap.insert(srcId, dists[srcId]);
+
+        int nodeDist;
+        int edgeId;
+        int tempDist;
+        int targetNode;
+        int nodeId = srcId;
+        while (!heap.isEmpty()) {
+            nodeId = heap.peekMinId();
+            nodeDist = heap.peekMinDist();
+            heap.removeMin();
+            if (nodeDist > dists[nodeId]) {
+                continue;
+            }
+            for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
+                edgeId = graph.getOutEdgeId(nodeId, i);
+                targetNode = graph.getTarget(edgeId);
+
+                // Either marked (by BFS) or G_up edge
+                if (markedEdges.get(edgeId) || graph.getRank(nodeId) <= graph.getRank(targetNode)) {
+
+                    tempDist = dists[nodeId] + graph.getDist(edgeId);
+
+                    if (tempDist < dists[targetNode]) {
+                        dists[targetNode] = tempDist;
+
+                        prevEdges[targetNode] = edgeId;
+                        heap.insert(targetNode, tempDist);
+                    }
+
+                }
+            }
+        }
+        ds.returnHeap();
+        return;
+    }
 
 	/**
 	 * Backtracks the prevEdges Array and calculates the actual path length
@@ -280,8 +329,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			bfsMark(markedEdges, destId);
 			long bfsdonetime = System.nanoTime();
 
-			boolean found = dijkstraOneToOne(dists, prevEdges, markedEdges,
-					srcId, destId);
+			boolean found = dijkstraStopAtDest(dists, prevEdges, markedEdges, srcId, destId);
 			long dijkstratime = System.nanoTime();
 
 			if (!found) {
