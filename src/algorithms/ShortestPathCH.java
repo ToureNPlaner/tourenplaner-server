@@ -12,8 +12,11 @@ import graphrep.GraphRep;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ShortestPathCH extends GraphAlgorithm {
+    
+    private static Logger log = Logger.getLogger("algorithms");
 
 	// Variables used for debugging/diagnosing
 	int bfsNodes = 0;
@@ -248,7 +251,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 		}
 
 		// Unpack shortcuts "recursively"
-		System.out.println("Start backtrack with " + deque.size() + " edges");
+		log.fine("Start backtrack with " + deque.size() + " edges");
 		while (!deque.isEmpty()) {
 			// Get the top edge and check if it's a shortcut that needs
 			// further
@@ -332,7 +335,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 			long dijkstratime = System.nanoTime();
 
 			if (!found) {
-				System.err.println("There is no path from src to trgt");
+				log.info("There is no path from src to trgt ("+srcId+" to "+destId+")");
 				throw new ComputeException("No Path found");
 			}
 
@@ -351,20 +354,17 @@ public class ShortestPathCH extends GraphAlgorithm {
 			ds.returnPrevArray();
 			ds.returnMarkedSet();
 
-			System.out.println("found sp with dist = " + distance / 1000.0
+			log.fine("found sp with dist = " + distance / 1000.0
 					+ " km (direct distance: " + directDistance / 1000.0
-					+ " dist[destid] = " + dists[destId]);
-			System.out.println("Setup: " + (setuptime - starttime) / 1000000.0
-					+ " ms");
-
-			System.out.println("BFS: " + (bfsdonetime - setuptime) / 1000000.0
+					+ " dist[destid] = " + dists[destId]+"\n"+
+                    "Setup: " + (setuptime - starttime) / 1000000.0
+					+ " ms\n"
+                    +"BFS: " + (bfsdonetime - setuptime) / 1000000.0
 					+ " ms with " + bfsNodes + " nodes and " + bfsEdges
-					+ " edges");
-
-			System.out.println("Dijkstra: " + (dijkstratime - bfsdonetime)
-					/ 1000000.0 + " ms");
-
-			System.out.println("Backtracking: "
+					+ " edges\n"
+                    +"Dijkstra: " + (dijkstratime - bfsdonetime)
+					/ 1000000.0 + " ms\n"
+                    +"Backtracking: "
 					+ (backtracktime - dijkstratime) / 1000000.0 + " ms");
 		}
 
