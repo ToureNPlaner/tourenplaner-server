@@ -164,8 +164,6 @@ public class AlgorithmHandler extends RequestHandler {
                     byte[] jsonRequest = request.getContent().array();
                     requestDataset = dbm.addNewRequest(userDataset.id, algName, jsonRequest);
                     req.setRequestID(requestDataset.id);
-
-
                 }
 
                 final boolean success = computer.submit(req);
@@ -173,15 +171,17 @@ public class AlgorithmHandler extends RequestHandler {
                 if (!success) {
                     responder.writeErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
-                    // Log failed requests because of full queue as failed, as
-                    // not pending and as paid
-                    // TODO specify this case clearly, maybe behavior should be
-                    // another
-                    requestDataset.failDescription = "This server is currently too busy to fullfill the request";
-                    requestDataset.hasFailed = true;
-                    requestDataset.isPending = true;
-                    requestDataset.isPaid = true;
-                    dbm.updateRequest(requestDataset);
+                    if(isPrivate){
+                        // Log failed requests because of full queue as failed, as
+                        // not pending and as paid
+                        // TODO specify this case clearly, maybe behavior should be
+                        // another
+                        requestDataset.failDescription = "This server is currently too busy to fullfill the request";
+                        requestDataset.hasFailed = true;
+                        requestDataset.isPending = true;
+                        requestDataset.isPaid = true;
+                        dbm.updateRequest(requestDataset);
+                    }
 
                 }
             }
