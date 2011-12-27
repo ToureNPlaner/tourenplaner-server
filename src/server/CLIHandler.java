@@ -27,7 +27,7 @@ class CLIHandler {
 
 	private boolean hasConfigFile = false;
 	private String configFilePath;
-	private boolean textGraph = true;;
+	private boolean textGraph = true;
 	private boolean dumpgraph = false;
 	private boolean parametersProvided;
 

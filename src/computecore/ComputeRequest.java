@@ -3,15 +3,14 @@
  */
 package computecore;
 
+import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.map.ObjectMapper;
+import server.Responder;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
-
-import server.Responder;
 
 /**
  * This class is used to represent a request for computation
@@ -37,7 +36,6 @@ public class ComputeRequest {
 	 * 
 	 * @param responder
 	 * @param algName
-	 * @param request
 	 */
 	public ComputeRequest(Responder responder, String algName,
 			RequestPoints points, Map<String, Object> constraints) {
@@ -116,8 +114,7 @@ public class ComputeRequest {
 	 * attribute should cointain the requestID of the corresponding
 	 * RequestDataset within the database. Must be set after construction of the
 	 * ComputeRequest object if server is in private mode.
-	 * 
-	 * @param requestDataset
+	 *
 	 */
 	public void setRequestID(int requestID) {
 		this.requestID = requestID;

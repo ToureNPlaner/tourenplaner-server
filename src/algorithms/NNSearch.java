@@ -1,9 +1,8 @@
 package algorithms;
 
-import graphrep.GraphRep;
-
 import computecore.ComputeRequest;
-import computecore.Points;
+import computecore.RequestPoints;
+import graphrep.GraphRep;
 
 public class NNSearch extends GraphAlgorithm {
 
@@ -16,7 +15,7 @@ public class NNSearch extends GraphAlgorithm {
 		assert req != null : "We ended up without a request object in run";
 
 		// TODO: send error messages to client
-		Points points = req.getPoints();
+		RequestPoints points = req.getPoints();
 		// Check if we have enough points to do something useful
 		if (points.size() < 1) {
 			throw new ComputeException("Not enough points, need at least 1");
@@ -24,7 +23,7 @@ public class NNSearch extends GraphAlgorithm {
 		nearestNeighbourLookup(points);
 	}
 
-	public void nearestNeighbourLookup(Points points) {
+	public void nearestNeighbourLookup(RequestPoints points) {
 		int nodeID;
 
 		for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {

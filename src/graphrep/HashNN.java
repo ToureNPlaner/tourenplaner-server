@@ -3,9 +3,9 @@
  */
 package graphrep;
 
-import java.util.HashMap;
-
 import com.carrotsearch.hppc.IntArrayList;
+
+import java.util.HashMap;
 
 /**
  * @author nino
@@ -141,7 +141,7 @@ public class HashNN implements NNSearcher {
 			 * 
 			 * } found = true; } } }
 			 */
-			if (found != true && hops <= maxHopLimit) {
+			if (!found && hops <= maxHopLimit) {
 				hops++;
 			} else if (found && !finished) {
 				finished = true;

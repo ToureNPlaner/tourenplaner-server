@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
 /**
  * The ComputeCore keeps a thread pool of ComputeThreads and allows new
@@ -17,6 +18,8 @@ import java.util.concurrent.LinkedBlockingQueue;
  * 
  */
 public class ComputeCore {
+    
+    private static Logger log = Logger.getLogger(ComputeCore.class.getName());
 
 	private final List<Thread> threads;
 	private final int numThreads;
@@ -48,17 +51,16 @@ public class ComputeCore {
 	 *             could not be established.
 	 * 
 	 */
-	public void start(AlgorithmManagerFactory amFac) throws SQLException {
+	public void start(AlgorithmManagerFactory amFac) {
 		ComputeThread curr;
-		System.out.print("Start " + numThreads + " ComputeThreads: [");
+		log.info("Starting " + numThreads + " ComputeThreads");
 		for (int i = 0; i < numThreads; i++) {
 			curr = new ComputeThread(registry.getAlgorithmManager(amFac),
 					reqQueue);
 			curr.start();
 			threads.add(curr);
-			System.out.print("+");
 		}
-		System.out.println("]");
+		log.info(numThreads+" ComputeThreads started");
 	}
 
 	/**

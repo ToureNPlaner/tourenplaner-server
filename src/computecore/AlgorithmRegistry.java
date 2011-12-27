@@ -3,10 +3,11 @@
  */
 package computecore;
 
+import algorithms.AlgorithmFactory;
+
 import java.util.ArrayList;
 import java.util.Collection;
-
-import algorithms.AlgorithmFactory;
+import java.util.logging.Logger;
 
 /**
  * An AlgorithmRegistry is used to register available Algorithms represented by
@@ -18,6 +19,7 @@ import algorithms.AlgorithmFactory;
  * 
  */
 public class AlgorithmRegistry {
+    private static Logger log = Logger.getLogger("tourenplaner");
 
 	private final ArrayList<AlgorithmFactory> registry;
 
@@ -27,7 +29,7 @@ public class AlgorithmRegistry {
 	 */
 	public AlgorithmRegistry() {
 		registry = new ArrayList<AlgorithmFactory>();
-	};
+	}
 
 	/**
 	 * Registers a new AlgorithmFactory in this registry
@@ -35,6 +37,7 @@ public class AlgorithmRegistry {
 	 * @param algFac
 	 */
 	public void registerAlgorithm(AlgorithmFactory algFac) {
+        log.fine("AlgorithmFactory for "+algFac.getAlgName()+" registered");
 		registry.add(algFac);
 	}
 
