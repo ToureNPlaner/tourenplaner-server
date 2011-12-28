@@ -119,7 +119,7 @@ public class TourenPlaner {
                 } catch (IOException e) {
                     log.log(Level.WARNING, "loading text graph failed", e);
                     log.info("Falling back to text reading from file " + graphfilename + " (path provided by config file)");
-       er/TourenPlaner.java.LOCAL.6044.java             graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
+                    graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
                     log.info("Graph successfully read. Now dumping graph");
                     utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
                 }
