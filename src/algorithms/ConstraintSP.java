@@ -2,6 +2,7 @@ package algorithms;
 
 import computecore.ComputeRequest;
 import computecore.Points;
+import computecore.RequestPoints;
 import graphrep.GraphRep;
 
 import java.util.HashMap;
@@ -126,7 +127,7 @@ public class ConstraintSP extends GraphAlgorithm {
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
         assert req != null : "We ended up without a request object in run";
-        Points points = req.getPoints();
+        RequestPoints points = req.getPoints();
 
         // Check if we have enough points to do something useful
         if (points.size() < 2 && points.size() > 2) {
@@ -196,7 +197,6 @@ public class ConstraintSP extends GraphAlgorithm {
                     lengthOfGood = length;
                 } else {
                     lamdaOfBad = lamda - 0.001;
-
                 }
                 System.out.println(altitudeDiff + "und" + maxAltitudeDifference + "und" + oldLength + "und" + lengthOfGood);
             } while (altitudeDiff > maxAltitudeDifference || oldLength != lengthOfGood);
