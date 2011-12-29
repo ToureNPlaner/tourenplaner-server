@@ -294,11 +294,6 @@ public class ShortestPathCH extends GraphAlgorithm {
         }
 
         for (int pointIndex = 0; pointIndex < pointIds.length; pointIndex++) {
-            // get data structures used by Dijkstra
-            int[] dists = ds.borrowDistArray();
-            int[] prevEdges = ds.borrowPrevArray();
-            BitSet markedEdges = ds.borrowMarkedSet();
-
             // New Dijkstra need to reset
             long starttime = System.nanoTime();
             srcId = pointIds[pointIndex];
@@ -311,6 +306,10 @@ public class ShortestPathCH extends GraphAlgorithm {
                 resultPoints.addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
                 break;
             }
+            // get data structures used by Dijkstra
+            int[] dists = ds.borrowDistArray();
+            int[] prevEdges = ds.borrowPrevArray();
+            BitSet markedEdges = ds.borrowMarkedSet();
 
             directDistance += calcDirectDistance(graph.getNodeLat(srcId) / 10000000.0, (double) graph.getNodeLon(srcId) / 10000000, (double) graph.getNodeLat(destId) / 10000000, (double) graph.getNodeLon(destId) / 10000000);
 
