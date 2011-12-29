@@ -269,7 +269,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 				nodeLat = graph.getNodeLat(currNode);
 				nodeLon = graph.getNodeLon(currNode);
 				resultPoints.addPoint(nodeLat, nodeLon);
-				length += graph.getDist(edgeId);
+				length += graph.getEuclidianDist(edgeId);
 			}
 		}
 		ds.returnDeque();
@@ -349,10 +349,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
 			oldDistance = distance;
 
-			// Return/Reset the data structures
-			ds.returnDistArray(false);
-			ds.returnPrevArray();
-			ds.returnMarkedSet();
+
 
 			log.fine("found sp with dist = " + distance / 1000.0
 					+ " km (direct distance: " + directDistance / 1000.0
@@ -366,6 +363,11 @@ public class ShortestPathCH extends GraphAlgorithm {
 					/ 1000000.0 + " ms\n"
                     +"Backtracking: "
 					+ (backtracktime - dijkstratime) / 1000000.0 + " ms");
+
+            // Return/Reset the data structures
+            ds.returnDistArray(false);
+            ds.returnPrevArray();
+            ds.returnMarkedSet();
 		}
 
 		Map<String, Integer> misc = new HashMap<String, Integer>(2);
