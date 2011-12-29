@@ -4,13 +4,14 @@
 package computecore;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author Niklas Schnelle
  */
 public class RequestPoints {
-    private final ArrayList<RequestPoint> points;
+    private List<RequestPoint> points;
 
     public RequestPoints() {
         super();
@@ -95,11 +96,20 @@ public class RequestPoints {
     }
 
     /**
-     * Gets the List of Points
+     * Gets the List of Points i.e. this RequestPoints backing store
      *
      * @return
      */
-    public ArrayList<RequestPoint> getPoints() {
+    public List<RequestPoint> getStore() {
         return points;
+    }
+
+    /**
+     * Sets the List of Points i.e. this RequestPoints backing store
+     *
+     * @param newPoints
+     */
+    public void setStore(List<RequestPoint> newPoints){
+        this.points = newPoints;
     }
 }
