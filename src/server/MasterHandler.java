@@ -150,7 +150,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
             } else if (isPrivate && "/listusers".equals(path)) {
 
-                privateHandler.handleListUsers(request);
+                privateHandler.handleListUsers(request, queryStringDecoder.getParameters());
 
             } else {
                 // Unknown request, close connection
