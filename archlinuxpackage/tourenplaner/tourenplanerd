@@ -10,8 +10,7 @@ case "$1" in
     if [ $? -gt 0 ]; then
       stat_fail
     else
-      sleep 1
-      pgrep -on "/usr/share/java/tourenplaner/tourenplaner-server.jar" > /var/run/tourenplaner-server.pid
+      echo $! > /var/run/tourenplaner-server.pid
       add_daemon tourenplanerd
       stat_done
     fi
@@ -24,7 +23,7 @@ case "$1" in
       rm_daemon tourenplanerd
       stat_fail
     else
-      rm_daemon tourenplanerd
+      # rm_daemon tourenplanerd
       stat_done
     fi
     ;;
@@ -32,6 +31,13 @@ case "$1" in
     $0 stop
     sleep 1
     $0 start
+    ;;
+  force-stop)
+    rm_daemon tourenplanerd
+    rm /var/run/tourenplaner-server.pid
+    pkill -u http -f "/usr/share/java/tourenplaner/tourenplaner-server.jar"
+    sleep 2
+    pkill -9 -u http -f "/usr/share/java/tourenplaner/tourenplaner-server.jar"
     ;;
   *)
     echo "usage: $0 {start|stop|restart}"
