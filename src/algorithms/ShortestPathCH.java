@@ -345,9 +345,6 @@ public class ShortestPathCH extends GraphAlgorithm {
             ds.returnMarkedSet();
         }
 
-        Map<String, Integer> misc = new HashMap<String, Integer>(2);
-        misc.put("distance", distance);
-
         return distance;
     }
 
