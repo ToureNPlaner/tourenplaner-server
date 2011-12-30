@@ -3,6 +3,8 @@
  */
 package computecore;
 
+import graphrep.GraphRep;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +24,39 @@ public class RequestPoints {
         return points.size();
     }
 
+    /**
+     * Sets the ids for all points from the given graph
+     * please only call this method in the compute thread
+     * as depending on the NNSearcher used it can be quite expensive
+     *
+     * @param graph
+     */
+    public void setIdsFromGraph(GraphRep graph){
+        for (RequestPoint p: points){
+            p.setId(graph.getIdForCoordinates(p.getLat(), p.getLon()));
+        }
+    }
+
+    /** grap
+     * 
+     * Gets the id for point with index i
+     *
+     * @param i
+     * @return
+     */
+    public int getPointId(int i){
+        return points.get(i).getId();
+    }
+
+    /**
+     * Sets the id for point with index i
+     *
+     * @param i
+     * @param id
+     */
+    public void setPointId(int i, int id){
+        points.get(i).setId(id);
+    }
     /**
      * Gets the latitude for point with index i
      *
