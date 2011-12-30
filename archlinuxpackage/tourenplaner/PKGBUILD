@@ -16,15 +16,20 @@ install=tourenplaner.install
 
 # TODO: on the final release don't download with wget in build() but enable the source=() function of the PKGBUILD and put the appropriate md5sums in
 #source=(https://gerbera.informatik.uni-stuttgart.de/wwwfiles/tourenplaner-server.jar \
-#        https://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar)
+#        https://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar \
+#	http://gerbera.informatik.uni-stuttgart.de/wwwfiles/db_init_script \
+#	http://gerbera.informatik.uni-stuttgart.de/wwwfiles/db_init.sh
+#)
 
 build() {
   cd ${srcdir}
 
-  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/tourenplaner-server.jar
-  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/sptogpx.jar
-  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/db_init_script
-  wget http://gerbera.informatik.uni-stuttgart.de/wwwfiles/db_init.sh
+  # TODO: also delete this
+  msg "Please make sure you have the most recent tourenplaner-server.jar and sptogpx.jar in your directory"
+  cp ${startdir}/tourenplaner-server.jar .
+  cp ${startdir}/sptogpx.jar .
+  cp ${startdir}/db_init_script .
+  cp ${startdir}/db_init.sh .
 
   install -d ${pkgdir}/usr/share/java/tourenplaner/
   install -m644 ${srcdir}/tourenplaner-server.jar ${pkgdir}/usr/share/java/tourenplaner/tourenplaner-server.jar
