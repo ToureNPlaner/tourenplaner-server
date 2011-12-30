@@ -29,22 +29,22 @@ public class TravelingSalesman extends GraphAlgorithm {
     }
 
 
-    private int[][] computeDistMatrix(int[] points) throws IllegalAccessException {
-        int[][] distmat = new int[points.length][points.length];
+    private int[][] computeDistMatrix(RequestPoints points) throws IllegalAccessException {
+        int[][] distmat = new int[points.size()][points.size()];
         BitSet markedEdges = ds.borrowMarkedSet();
 
         // BfsMark all points
-        for (int i = 0; i < points.length; i++) {
-            chdijks.bfsMark(markedEdges, points[i]);
+        for (int i = 0; i < points.size(); i++) {
+            chdijks.bfsMark(markedEdges, points.getPointId(i));
         }
 
         // Calculate the distance matrix rows
-        for (int i = 0; i < points.length; i++) {
+        for (int i = 0; i < points.size(); i++) {
             int[] dists = ds.borrowDistArray();
             // Dijkstra sets dist labels
-            chdijks.dijkstraStopAtEmptyDistOnly(dists, markedEdges, points[i]);
-            for (int j = 0; j < points.length; j++) {
-                distmat[i][j] = dists[points[j]];
+            chdijks.dijkstraStopAtEmptyDistOnly(dists, markedEdges, points.getPointId(i));
+            for (int j = 0; j < points.size(); j++) {
+                distmat[i][j] = dists[points.getPointId(j)];
             }
             ds.returnDistArray(false);
         }
@@ -56,37 +56,37 @@ public class TravelingSalesman extends GraphAlgorithm {
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
         // Map points to ids
-        RequestPoints requestPoints = req.getPoints();
+        RequestPoints points = req.getPoints();
         int[][] distmat;
 
         // DEBUG:
         Map<String, Object> debugMat = new HashMap<String, Object>();
 
-        int[] points = new int[requestPoints.size()];
-        for (int i = 0; i < points.length; i++) {
-            points[i] = graph.getIdForCoordinates(requestPoints.getPointLat(i), requestPoints.getPointLon(i));
-        }
+
         try {
+            // Map our requested points to ids
+            points.setIdsFromGraph(graph);
+
             // Looks cheap but computes the n^2 matrix of distances for the given points
             distmat = computeDistMatrix(points);
 
 
 
-            IntOpenHashSet visited = new IntOpenHashSet(points.length);
+            IntOpenHashSet visited = new IntOpenHashSet(points.size());
             int currIndex = 0;
             int minValue;
             int minIndex;
             List<RequestPoint> requestPointList = req.getPoints().getStore();
-            List<RequestPoint> pointStore = new ArrayList<RequestPoint>(points.length);
+            List<RequestPoint> pointStore = new ArrayList<RequestPoint>(points.size());
             // add the initial point
             pointStore.add(requestPointList.get(currIndex));
             
-            for (int nextIndex = 1; nextIndex < points.length; nextIndex++) {
+            for (int nextIndex = 1; nextIndex < points.size(); nextIndex++) {
                 visited.add(currIndex);
 
                 minValue = Integer.MAX_VALUE;
                 minIndex = 0;
-                for (int i = 0; i < points.length; i++) {
+                for (int i = 0; i < points.size(); i++) {
                     if (minValue > distmat[currIndex][i] && i != currIndex && !visited.contains(i)) {
                         minValue = distmat[currIndex][i];
                         minIndex = i;
@@ -98,7 +98,7 @@ public class TravelingSalesman extends GraphAlgorithm {
             
             req.getPoints().setStore(pointStore);
             // Now build real paths
-            chdijks.shortestPath(requestPoints, req.getResulWay(), true);
+            chdijks.shortestPath(points, req.getResulWay(), true);
 
 
             debugMat.put("distMat", distmat);
