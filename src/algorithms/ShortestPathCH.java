@@ -51,10 +51,13 @@ public class ShortestPathCH extends GraphAlgorithm {
             throw new ComputeException("Not enough points, need at least 2");
         }
 
-        Points resultPoints = req.getResulWay();
+        Points resultWay = req.getResulWay();
         int distance = 0;
         try {
-            distance = shortestPath(points, resultPoints, false);
+            // First let's map the RequestPoints to Ids
+            points.setIdsFromGraph(graph);
+            // Then compute the multi hop shortest path of them
+            distance = shortestPath(points, resultWay, false);
         } catch (IllegalAccessException e) {
             // If this happens there likely is a programming error
             e.printStackTrace();
@@ -268,16 +271,16 @@ public class ShortestPathCH extends GraphAlgorithm {
 
     /**
      * Computes the shortest path over points[0] -> points[1] -> points[2]...
-     * and stores all points on the path in resultPoints
+     * and stores all points on the path in resultWay
      *
-     * @param points
-     * @param resultPoints
+     * @param points    The points the route should span, the id's must have been set
+     * @param resultWay
      * @param tour         Specifies whether this is a tour and points[n]->points[0]
      * @return
      * @throws IllegalAccessException
      * @throws Exception
      */
-    protected int shortestPath(RequestPoints points, Points resultPoints, boolean tour) throws ComputeException, IllegalAccessException {
+    protected int shortestPath(RequestPoints points, Points resultWay, boolean tour) throws ComputeException, IllegalAccessException {
 
         int srcId = 0;
         int destId = 0;
@@ -287,23 +290,18 @@ public class ShortestPathCH extends GraphAlgorithm {
 
         // in meters
         double directDistance = 0.0;
-        // First map points to ids
-        int[] pointIds = new int[points.size()];
-        for (int i = 0; i < points.size(); i++) {
-            pointIds[i] = graph.getIdForCoordinates(points.getPointLat(i), points.getPointLon(i));
-        }
 
-        for (int pointIndex = 0; pointIndex < pointIds.length; pointIndex++) {
+        for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
             // New Dijkstra need to reset
             long starttime = System.nanoTime();
-            srcId = pointIds[pointIndex];
+            srcId = points.getPointId(pointIndex);
             if (pointIndex < points.size() - 1) {
-                destId = pointIds[pointIndex + 1];
+                destId = points.getPointId(pointIndex + 1);
             } else if (tour) {
-                destId = pointIds[0];
+                destId = points.getPointId(0);
             } else {
                 // Don't forget to add destination (destId is still the last one)
-                resultPoints.addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
+                resultWay.addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
                 break;
             }
             // get data structures used by Dijkstra
@@ -326,13 +324,13 @@ public class ShortestPathCH extends GraphAlgorithm {
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            distance += backtrack(dists, prevEdges, resultPoints, srcId, destId);
+            distance += backtrack(dists, prevEdges, resultWay, srcId, destId);
 
             long backtracktime = System.nanoTime();
 
             // Save the distance to the last point at the target
             // wrap around at tour
-            points.getConstraints((pointIndex + 1) % (pointIds.length - 1)).put("distToPrev", distance - oldDistance);
+            points.getConstraints((pointIndex + 1) % (points.size() - 1)).put("distToPrev", distance - oldDistance);
 
             oldDistance = distance;
 
