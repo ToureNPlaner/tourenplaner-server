@@ -29,22 +29,26 @@ public class ConstraintSP extends GraphAlgorithm {
     private final int[] prevEdges;
 
     private int dijkstra(int srcId, int trgtId, double lamda) throws ComputeException {
+        System.out.println("lamda" + lamda);
         // reset dists
         for (int i = 0; i < dists.length; i++) {
             dists[i] = Integer.MAX_VALUE;
         }
-        double edgeAltDiffMultiplied;
-        int srcHeight;
-        int trgtHeight;
-        heap.resetHeap();
-
         dists[srcId] = 0;
+        heap.resetHeap();
         heap.insert(srcId, dists[srcId]);
+
         int nodeId = -1;
         int nodeDist;
-        int targetNode = 0;
+
+        double edgeAltDiffMultiplied;
+        int targetNode;
+        int srcHeight;
+        int trgtHeight;
         int tempDist;
         int tempAltitudeDiff;
+        int edgeLength;
+        int edgeId;
         DIJKSTRA:
         while (!heap.isEmpty()) {
             nodeId = heap.peekMinId();
@@ -55,8 +59,6 @@ public class ConstraintSP extends GraphAlgorithm {
             } else if (nodeDist > dists[nodeId]) {
                 continue;
             }
-            int edgeLength;
-            int edgeId;
             for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
                 edgeId = graph.getOutEdgeId(nodeId,i);
                 // Ignore Shortcuts
@@ -70,12 +72,11 @@ public class ConstraintSP extends GraphAlgorithm {
                 tempAltitudeDiff = trgtHeight - srcHeight;
                 // if only positive altitude differences of edges are allowed,
                 // negative edges have only euclidian distance.
-                if (tempAltitudeDiff < 0) {
-                    edgeLength = graph.getEuclidianDist(edgeId);
+                if (tempAltitudeDiff > 0) {
+                    edgeAltDiffMultiplied = ((double) tempAltitudeDiff) * (1.0 - lamda);
+                    edgeLength = (int) (((double) (graph.getEuclidianDist(edgeId))) * lamda + edgeAltDiffMultiplied);
                 } else {
-                    edgeAltDiffMultiplied = tempAltitudeDiff * (1.0 - lamda);
-
-                    edgeLength = (int) ((double)(graph.getEuclidianDist(edgeId)) * lamda + edgeAltDiffMultiplied);
+                    edgeLength = graph.getEuclidianDist(edgeId);
                 }
 
                 // without multiplier = shortest path + constraints weights
@@ -83,7 +84,7 @@ public class ConstraintSP extends GraphAlgorithm {
 
                 if (tempDist < dists[targetNode]) {
                     dists[targetNode] = tempDist;
-                    prevEdges[targetNode] = graph.getOutEdgeId(nodeId, i);
+                    prevEdges[targetNode] = edgeId;
                     heap.insert(targetNode, dists[targetNode]);
                 }
             }
@@ -93,8 +94,10 @@ public class ConstraintSP extends GraphAlgorithm {
                     "There is no path from src: " + srcId + " to trgt: " + trgtId + "Dijkstra does not found the " +
                     "target"
                               );
+
             throw new ComputeException("No path found");
         }
+
         int currNode = trgtId;
         int routeElements = 0;
 
@@ -102,7 +105,6 @@ public class ConstraintSP extends GraphAlgorithm {
             routeElements++;
             currNode = graph.getSource(prevEdges[currNode]);
         }
-        currNode = trgtId;
         currNode = trgtId;
         int prevNode;
         int currNodeHeight;
@@ -115,9 +117,8 @@ public class ConstraintSP extends GraphAlgorithm {
             currNodeHeight = graph.getNodeHeight(currNode);
             prevNodeHeight = graph.getNodeHeight(prevNode);
             tempAltitudeDiff = currNodeHeight - prevNodeHeight;
-            if (tempAltitudeDiff >= 0) {
+            if (tempAltitudeDiff > 0) {
                 altitudeDiff = altitudeDiff + tempAltitudeDiff;
-
             }
             currNode = graph.getSource(prevEdges[currNode]);
         }
@@ -144,7 +145,6 @@ public class ConstraintSP extends GraphAlgorithm {
         int resultAddIndex = 0;
 
         int maxAltitudeDifference = (Integer) req.getConstraints().get("maxAltitudeDifference");
-        System.out.println(maxAltitudeDifference);
         srclat = points.getPointLat(0);
         srclon = points.getPointLon(0);
         destlat = points.getPointLat(1);
@@ -161,6 +161,7 @@ public class ConstraintSP extends GraphAlgorithm {
 
         // shortest path's difference of altitude
         altitudeDiff = dijkstra(srcId, trgtId, lamda);
+        System.out.println("bad" + altitudeDiff);
         // shortest path serves not the constraint
         if (altitudeDiff > maxAltitudeDifference) {
             System.err.println(
@@ -171,7 +172,7 @@ public class ConstraintSP extends GraphAlgorithm {
             lamda = 0.0;
             // exists there a path that serves the constraint
             altitudeDiff = dijkstra(srcId, trgtId, lamda);
-            System.out.println(altitudeDiff);
+            System.out.println("good" + altitudeDiff);
             if (altitudeDiff > maxAltitudeDifference) {
                 System.err.println(
                         "There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
@@ -181,28 +182,26 @@ public class ConstraintSP extends GraphAlgorithm {
             }
             lamdaOfGood = lamda;
             lengthOfGood = dists[trgtId];
-            System.out.println("test 1");
             long oldLength = Integer.MAX_VALUE;
-            System.out.println("test 2");
-            do {
-                System.out.println("schleife ?");
-                lamda = (lamdaOfGood + lamdaOfBad) / 2;
-                System.out.println("lamda: " + lamda);
-                altitudeDiff = dijkstra(srcId, trgtId, lamda);
-                length = dists[trgtId];
+            lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
+            altitudeDiff = dijkstra(srcId, trgtId, lamda);
+            length = dists[trgtId];
+            while (lamda < Double.MIN_VALUE || oldLength != lengthOfGood) {
+
                 if (altitudeDiff <= maxAltitudeDifference && length < lengthOfGood) {
-                    System.out.println("test 3");
                     lamdaOfGood = lamda;
                     oldLength = lengthOfGood;
                     lengthOfGood = length;
                 } else {
-                    lamdaOfBad = lamda - 0.001;
+                    lamdaOfBad = lamda;
                 }
-                System.out.println(altitudeDiff + "und" + maxAltitudeDifference + "und" + oldLength + "und" + lengthOfGood);
-            } while (altitudeDiff > maxAltitudeDifference || oldLength != lengthOfGood);
+                lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
+                altitudeDiff = dijkstra(srcId, trgtId, lamda);
+                length = dists[trgtId];
+                System.out.println("Höhenunterschied " + altitudeDiff + " mit gewichteter Länge " + length );
+            }
             altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
         }
-
         // Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 0;
