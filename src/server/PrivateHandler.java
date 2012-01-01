@@ -56,6 +56,7 @@ public class PrivateHandler extends RequestHandler {
      *
      * @param responder
      * @param request
+     * @return
      * @throws java.io.IOException
      */
     private Map<String, Object> getJSONContent(final Responder responder, final HttpRequest request) throws IOException {
@@ -82,9 +83,42 @@ public class PrivateHandler extends RequestHandler {
         return objmap;
     }
 
+    public void handleListUsers(final HttpRequest request, Map<String, List<String>> parameters) throws SQLException, JsonGenerationException, JsonMappingException, IOException {
+        UserDataset user = null;
+        user = authorizer.auth(request);
 
-    public void handleListUsers(final HttpRequest request) {
-        // TODO Auto-generated method stub
+        // authentication needed, auth(request) responses with error if auth fails
+        if (user == null) {
+            return;
+        }
+
+        if (!user.admin) {
+            responder.writeErrorMessage(
+                    "ENOTADMIN",
+                    "You are not an admin",
+                    "You must be admin to list users",
+                    HttpResponseStatus.FORBIDDEN);
+            System.out.println("HttpRequestHandler: ListUsers failed, " +
+                    "you must be admin to list users.");
+            return;
+        }
+
+        int limit = extractPosIntParameter(parameters, "limit");
+        int offset = extractPosIntParameter(parameters, "offset");
+
+        if ((limit < 0) || (offset < 0)) {
+            return;
+        }
+
+        List<UserDataset> userDatasetList = null;
+        userDatasetList = dbm.getAllUsers(limit, offset);
+
+        Map<String, Object> responseMap = new HashMap<String, Object>(2);
+        responseMap.put("number", userDatasetList.size());
+        responseMap.put("users", userDatasetList);
+
+        responder.writeJSON(responseMap, HttpResponseStatus.OK);
+        log.finest("ListUsers successful.");
 
     }
 
@@ -147,6 +181,12 @@ public class PrivateHandler extends RequestHandler {
 
     }
 
+    /**
+     * Returns -1 if parameter is invalid (missing or not a natural number) and will then response to request
+     * with error message.
+     * @param parameters
+     * @return
+     */
     private int extractPosIntParameter(Map<String, List<String>> parameters, String name) {
         int param = -1;
 

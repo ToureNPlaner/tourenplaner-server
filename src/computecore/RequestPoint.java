@@ -11,11 +11,13 @@ public class RequestPoint {
     private int lat;
     private int lon;
     private Map<String, Object> constraints;
+    private int id;
 
     public RequestPoint(int lat, int lon, Map<String, Object> constraints) {
         this.lat = lat;
         this.lon = lon;
         this.constraints = constraints;
+        this.setId(-1);
     }
 
     public int getLat() {
@@ -40,5 +42,13 @@ public class RequestPoint {
 
     public void setConstraints(Map<String, Object> constraints) {
         this.constraints = constraints;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 }
