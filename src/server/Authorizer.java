@@ -9,6 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -73,7 +74,7 @@ public class Authorizer extends RequestHandler {
      * @return the UserDataset object of the user or null if auth failed
      * @throws java.sql.SQLException
      */
-    public UserDataset auth(final HttpRequest myReq) throws SQLException {
+    public UserDataset auth(final HttpRequest myReq) throws SQLException, IOException {
         String email, emailandpw, pw;
         UserDataset user = null;
         int index = 0;

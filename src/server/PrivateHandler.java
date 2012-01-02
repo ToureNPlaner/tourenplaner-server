@@ -187,7 +187,7 @@ public class PrivateHandler extends RequestHandler {
      * @param parameters
      * @return
      */
-    private int extractPosIntParameter(Map<String, List<String>> parameters, String name) {
+    private int extractPosIntParameter(Map<String, List<String>> parameters, String name) throws IOException{
         int param = -1;
 
         if (!parameters.containsKey(name)) {

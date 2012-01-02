@@ -5,6 +5,7 @@ package server;
 
 import computecore.ComputeRequest;
 import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.buffer.ChannelBuffer;
@@ -16,7 +17,6 @@ import org.jboss.netty.channel.ChannelFutureListener;
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
-import org.jboss.netty.util.CharsetUtil;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -42,7 +42,6 @@ public class Responder {
     private final Channel replyChannel;
     private boolean keepAlive;
     private final ObjectMapper mapper;
-    private final StringBuilder sb;
     private ChannelBuffer outputBuffer;
 
     /**
@@ -54,7 +53,6 @@ public class Responder {
         this.mapper = mapper;
         this.replyChannel = replyChan;
         this.keepAlive = false;
-        this.sb = new StringBuilder();
         this.outputBuffer = null;
     }
 
@@ -164,27 +162,27 @@ public class Responder {
      * @param details
      * @param status
      */
-    public void writeErrorMessage(String errorId, String message, String details, HttpResponseStatus status) {
+    public void writeErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
+        throws IOException
+    {
         log.info("Writing Error Message: " + message + " --- " + details);
-        sb.delete(0, sb.length());
-        sb.append("{\"errorid\":");
-        sb.append("\"");
-        sb.append(errorId);
-        sb.append("\",");
 
-        sb.append("\"message\":");
-        sb.append("\"");
-        sb.append(message);
-        sb.append("\"");
-
-        if (details != null) {
-            sb.append(",\"details\":");
-            sb.append("\"");
-            sb.append(details);
-            sb.append("\"}");
-        } else {
-            sb.append("}");
+        // Allocate buffer if not already done
+        // do this here because we are in a worker thread
+        if (outputBuffer == null) {
+            outputBuffer = ChannelBuffers.dynamicBuffer(4096);
         }
+
+        outputBuffer.clear();
+        OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+        JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(resultStream);
+        gen.writeStartObject();
+        gen.writeStringField("errorid", errorId);
+        gen.writeStringField("message", message);
+        gen.writeStringField("details", details);
+        gen.writeEndObject();
+        gen.close();
+        resultStream.flush();
 
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
@@ -192,8 +190,7 @@ public class Responder {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
 
-        response.setContent(ChannelBuffers.copiedBuffer(sb.toString(), CharsetUtil.UTF_8));
-
+        response.setContent(outputBuffer);
         // Write the response.
         ChannelFuture future = replyChannel.write(response);
 
