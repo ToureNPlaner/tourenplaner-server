@@ -292,11 +292,13 @@ public class DatabaseManager {
                     hasKey = true;
                 }
                 generatedKeyResultSet.close();
+
                 tryAgain = 0;
+                log.fine("Database query successful");
 
 
             } catch (Exception e) {
-                if (tryAgain >= 0) {
+                if (tryAgain > 0) {
                     log.log(Level.WARNING, "Before last try", e);
                     try {
                         Thread.sleep(3000);
@@ -528,9 +530,10 @@ public class DatabaseManager {
                 pstUpdateRequest.executeUpdate();
 
                 tryAgain = 0;
+                log.fine("Database query successful");
 
             } catch (Exception e) {
-                if (tryAgain >= 0) {
+                if (tryAgain > 0) {
                     log.log(Level.WARNING, "Before last try", e);
                     try {
                         Thread.sleep(3000);
@@ -590,9 +593,10 @@ public class DatabaseManager {
                 pstUpdateRequestWithComputeResult.executeUpdate();
 
                 tryAgain = 0;
+                log.fine("Database query successful");
 
             } catch (Exception e) {
-                if (tryAgain >= 0) {
+                if (tryAgain > 0) {
                     log.log(Level.WARNING, "Before last try", e);
                     try {
                         Thread.sleep(3000);
