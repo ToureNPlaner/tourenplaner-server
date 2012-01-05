@@ -27,7 +27,7 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * User: Niklas Schnelle
+ * User: Niklas Schnelle, Sascha Meusel
  * Date: 12/26/11
  * Time: 11:33 PM
  */
@@ -104,17 +104,27 @@ public class PrivateHandler extends RequestHandler {
         }
 
         int limit = extractPosIntParameter(parameters, "limit");
-        int offset = extractPosIntParameter(parameters, "offset");
+        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        // the if and return is needed exactly here, because following methods could send more responses,
+        // but only one response per http request is allowed (else Exceptions will be thrown)
+        if (limit < 0) {
+            return;
+        }
 
-        if ((limit < 0) || (offset < 0)) {
+        int offset = extractPosIntParameter(parameters, "offset");
+        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        // the if and return is needed exactly here, because following methods could send more responses,
+        // but only one response per http request is allowed (else Exceptions will be thrown)
+        if (offset < 0) {
             return;
         }
 
         List<UserDataset> userDatasetList = null;
         userDatasetList = dbm.getAllUsers(limit, offset);
+        int count = dbm.getNumberOfUsers();
 
         Map<String, Object> responseMap = new HashMap<String, Object>(2);
-        responseMap.put("number", userDatasetList.size());
+        responseMap.put("number", count);
         responseMap.put("users", userDatasetList);
 
         responder.writeJSON(responseMap, HttpResponseStatus.OK);
@@ -134,29 +144,49 @@ public class PrivateHandler extends RequestHandler {
         }
 
         int userID = -1;
+        boolean allRequests = false;
         if (parameters.containsKey("id")) {
             if (!user.admin) {
                 responder.writeErrorMessage("ENOTADMIN", "You are not an admin", "You must be admin if you want to use the id parameter", HttpResponseStatus.FORBIDDEN);
                 return;
             }
 
-            try {
-                userID = Integer.parseInt(parameters.get("id").get(0));
-            } catch (NumberFormatException e) {
-                userID = -1;
-            }
+            String idParameter = parameters.get("id").get(0);
 
-            if (userID < 0) {
-                responder.writeErrorMessage("ENOID", "The given user id is unknown to this server", "The given id is not an allowed number (positive or zero)", HttpResponseStatus.UNAUTHORIZED);
+            if (idParameter != null) {
+                responder.writeErrorMessage("ENOID", "The given user id is unknown to this server", "The given id is null", HttpResponseStatus.UNAUTHORIZED);
                 return;
             }
 
+            if ("all".equals(idParameter)) {
+                allRequests = true;
+            } else {
+                try {
+                    userID = Integer.parseInt(idParameter);
+                } catch (NumberFormatException e) {
+                    userID = -1;
+                }
+            }
+
+            if (userID < 0 && !allRequests) {
+                responder.writeErrorMessage("ENOID", "The given user id is unknown to this server", "The given id is not an allowed number (positive or zero)", HttpResponseStatus.UNAUTHORIZED);
+                return;
+            }
         }
 
         int limit = extractPosIntParameter(parameters, "limit");
-        int offset = extractPosIntParameter(parameters, "offset");
+        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        // the if and return is needed exactly here, because following methods could send more responses,
+        // but only one response per http request is allowed (else Exceptions will be thrown)
+        if (limit < 0) {
+            return;
+        }
 
-        if ((limit < 0) || (offset < 0)) {
+        int offset = extractPosIntParameter(parameters, "offset");
+        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        // the if and return is needed exactly here, because following methods could send more responses,
+        // but only one response per http request is allowed (else Exceptions will be thrown)
+        if (offset < 0) {
             return;
         }
 
@@ -165,7 +195,15 @@ public class PrivateHandler extends RequestHandler {
         }
 
         List<RequestDataset> requestDatasetList = null;
-        requestDatasetList = dbm.getRequests(userID, limit, offset);
+        int count = 0;
+        if (allRequests) {
+            requestDatasetList = dbm.getAllRequests(limit, offset);
+            count = dbm.getNumberOfRequests();
+
+        } else {
+            requestDatasetList = dbm.getRequests(userID, limit, offset);
+            count = dbm.getNumberOfRequestsWithUserId(userID);
+        }
 
         List<Map<String, Object>> requestObjectList = new ArrayList<Map<String, Object>>();
         for (int i = 0; i < requestDatasetList.size(); i++) {
@@ -173,7 +211,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         Map<String, Object> responseMap = new HashMap<String, Object>(2);
-        responseMap.put("number", requestDatasetList.size());
+        responseMap.put("number", count);
         responseMap.put("requests", requestObjectList);
 
         responder.writeJSON(responseMap, HttpResponseStatus.OK);
@@ -244,6 +282,11 @@ public class PrivateHandler extends RequestHandler {
         // if no authorization header keep on with adding not verified user
         if (request.getHeader("Authorization") != null) {
             authUser = authorizer.auth(request);
+            if (authUser == null) {
+                // auth(request) sent error response
+                return;
+            }
+
             if (!authUser.admin) {
                 responder.writeUnauthorizedClose();
                 log.warning("RegisterUser failed, a logged in user has to be admin to register users.");

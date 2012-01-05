@@ -966,7 +966,7 @@ public class DatabaseManager {
      * @return Number of data sets
      * @throws SQLException Thrown if sql query fails
      */
-    public int getRequestsCount() throws SQLException {
+    public int getNumberOfRequests() throws SQLException {
         ResultSet resultSet = pstCountAllRequests.executeQuery();
 
         if (resultSet.next()) {
@@ -986,7 +986,7 @@ public class DatabaseManager {
      * @return Number of data sets
      * @throws SQLException Thrown if sql query fails
      */
-    public int getRequestsWithUserIDCount(int userId) throws SQLException {
+    public int getNumberOfRequestsWithUserId(int userId) throws SQLException {
 
         pstCountRequestsWithUserId.setInt(1, userId);
         ResultSet resultSet = pstCountRequestsWithUserId.executeQuery();
@@ -1007,7 +1007,7 @@ public class DatabaseManager {
      * @return Number of data sets
      * @throws SQLException Thrown if sql query fails
      */
-    public int getUserssCount() throws SQLException {
+    public int getNumberOfUsers() throws SQLException {
         ResultSet resultSet = pstCountAllUsers.executeQuery();
 
         if (resultSet.next()) {
