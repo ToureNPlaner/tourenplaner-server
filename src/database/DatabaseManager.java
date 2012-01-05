@@ -27,28 +27,33 @@ public class DatabaseManager {
 			maxCacheSize);
 
 	private Connection con = null;
-
-	private final PreparedStatement pstAddNewRequest;
-	private final PreparedStatement pstAddNewUser;
-	private final PreparedStatement pstGetAllRequests;
-	private final PreparedStatement pstGetAllUsers;
-	private final PreparedStatement pstGetUserWithEmail;
-	private final PreparedStatement pstGetUserWithId;
-	private final PreparedStatement pstUpdateRequest;
-	private final PreparedStatement pstUpdateRequestWithComputeResult;
-	private final PreparedStatement pstUpdateUser;
-	private final PreparedStatement pstDeleteRequestWithRequestId;
-	private final PreparedStatement pstDeleteRequestsOfUserWithUserId;
-	private final PreparedStatement pstDeleteUserWithUserId;
-	private final PreparedStatement pstDeleteUserWithEmail;
-	private final PreparedStatement pstGetAllRequestsWithLimitOffset;
-	private final PreparedStatement pstGetRequestWithRequestId;
-	private final PreparedStatement pstGetRequestsWithUserId;
-	private final PreparedStatement pstGetRequestsWithUserIdLimitOffset;
-	private final PreparedStatement pstGetAllUsersWithLimitOffset;
-    private final PreparedStatement pstCountAllRequests;
-    private final PreparedStatement pstCountRequestsWithUserId;
-    private final PreparedStatement pstCountAllUsers;
+    
+    private final String url;
+    private final String dbName;
+    private final String userName;
+    private final String password;
+    
+	private PreparedStatement pstAddNewRequest;
+	private PreparedStatement pstAddNewUser;
+	private PreparedStatement pstGetAllRequests;
+	private PreparedStatement pstGetAllUsers;
+	private PreparedStatement pstGetUserWithEmail;
+	private PreparedStatement pstGetUserWithId;
+	private PreparedStatement pstUpdateRequest;
+	private PreparedStatement pstUpdateRequestWithComputeResult;
+	private PreparedStatement pstUpdateUser;
+	private PreparedStatement pstDeleteRequestWithRequestId;
+	private PreparedStatement pstDeleteRequestsOfUserWithUserId;
+	private PreparedStatement pstDeleteUserWithUserId;
+	private PreparedStatement pstDeleteUserWithEmail;
+	private PreparedStatement pstGetAllRequestsWithLimitOffset;
+	private PreparedStatement pstGetRequestWithRequestId;
+	private PreparedStatement pstGetRequestsWithUserId;
+	private PreparedStatement pstGetRequestsWithUserIdLimitOffset;
+	private PreparedStatement pstGetAllUsersWithLimitOffset;
+    private PreparedStatement pstCountAllRequests;
+    private PreparedStatement pstCountRequestsWithUserId;
+    private PreparedStatement pstCountAllUsers;
 
 
     /*
@@ -173,43 +178,52 @@ public class DatabaseManager {
 	 */
 	public DatabaseManager(String url, String dbName, String userName,
 			String password) throws SQLException {
+        this.url = url;
+        this.dbName = dbName;
+        this.userName = userName;
+        this.password = password;
+        
+		this.init();
+	}
 
-		con = DriverManager.getConnection(url + dbName, userName, password);
 
-		pstAddNewRequest = con.prepareStatement(strAddNewRequest,
-				Statement.RETURN_GENERATED_KEYS);
-		pstAddNewUser = con.prepareStatement(strAddNewUser,
-				Statement.RETURN_GENERATED_KEYS);
-		pstGetAllRequests = con.prepareStatement(strGetAllRequests);
-		pstGetAllUsers = con.prepareStatement(strGetAllUsers);
-		pstGetUserWithEmail = con.prepareStatement(strGetUserWithEmail);
-		pstGetUserWithId = con.prepareStatement(strGetUserWithId);
-		pstUpdateRequest = con.prepareStatement(strUpdateRequest);
-		pstUpdateRequestWithComputeResult = con
-				.prepareStatement(strUpdateRequestWithComputeResult);
-		pstUpdateUser = con.prepareStatement(strUpdateUser);
-		pstDeleteRequestWithRequestId = con
-				.prepareStatement(strDeleteRequestWithRequestId);
-		pstDeleteRequestsOfUserWithUserId = con
-				.prepareStatement(strDeleteRequestsOfUserWithUserId);
-		pstDeleteUserWithUserId = con
-				.prepareStatement(strDeleteUserWithUserId);
-		pstDeleteUserWithEmail = con
-				.prepareStatement(strDeleteUserWithEmail);
-		pstGetAllRequestsWithLimitOffset = con
-				.prepareStatement(strGetAllRequestsWithLimitOffset);
-		pstGetRequestWithRequestId = con
-				.prepareStatement(strGetRequestWithRequestId);
-		pstGetRequestsWithUserId = con
-				.prepareStatement(strGetRequestsWithUserId);
-		pstGetRequestsWithUserIdLimitOffset = con
-				.prepareStatement(strGetRequestsWithUserIdLimitOffset);
-		pstGetAllUsersWithLimitOffset = con
-				.prepareStatement(strGetAllUsersWithLimitOffset);
+    private void init() throws SQLException {
+        con = DriverManager.getConnection(url + dbName, userName, password);
+
+        pstAddNewRequest = con.prepareStatement(strAddNewRequest,
+                Statement.RETURN_GENERATED_KEYS);
+        pstAddNewUser = con.prepareStatement(strAddNewUser,
+                Statement.RETURN_GENERATED_KEYS);
+        pstGetAllRequests = con.prepareStatement(strGetAllRequests);
+        pstGetAllUsers = con.prepareStatement(strGetAllUsers);
+        pstGetUserWithEmail = con.prepareStatement(strGetUserWithEmail);
+        pstGetUserWithId = con.prepareStatement(strGetUserWithId);
+        pstUpdateRequest = con.prepareStatement(strUpdateRequest);
+        pstUpdateRequestWithComputeResult = con
+                .prepareStatement(strUpdateRequestWithComputeResult);
+        pstUpdateUser = con.prepareStatement(strUpdateUser);
+        pstDeleteRequestWithRequestId = con
+                .prepareStatement(strDeleteRequestWithRequestId);
+        pstDeleteRequestsOfUserWithUserId = con
+                .prepareStatement(strDeleteRequestsOfUserWithUserId);
+        pstDeleteUserWithUserId = con
+                .prepareStatement(strDeleteUserWithUserId);
+        pstDeleteUserWithEmail = con
+                .prepareStatement(strDeleteUserWithEmail);
+        pstGetAllRequestsWithLimitOffset = con
+                .prepareStatement(strGetAllRequestsWithLimitOffset);
+        pstGetRequestWithRequestId = con
+                .prepareStatement(strGetRequestWithRequestId);
+        pstGetRequestsWithUserId = con
+                .prepareStatement(strGetRequestsWithUserId);
+        pstGetRequestsWithUserIdLimitOffset = con
+                .prepareStatement(strGetRequestsWithUserIdLimitOffset);
+        pstGetAllUsersWithLimitOffset = con
+                .prepareStatement(strGetAllUsersWithLimitOffset);
         pstCountAllRequests = con.prepareStatement(strCountAllRequests);
         pstCountRequestsWithUserId = con.prepareStatement(strCountRequestsWithUserId);
         pstCountAllUsers = con.prepareStatement(strCountAllUsers);
-	}
+    }
 
 	/**
 	 * Tries to insert a new request dataset into the database. The inserted
@@ -249,32 +263,55 @@ public class DatabaseManager {
 		RequestDataset request = null;
 		ResultSet generatedKeyResultSet = null;
 
-		Timestamp stamp = new Timestamp(System.currentTimeMillis());
+        boolean hasKey = false;
 
-		pstAddNewRequest.setInt(1, userID);
-		pstAddNewRequest.setString(2, algorithm);
-		pstAddNewRequest.setBytes(3, jsonRequest);
-		pstAddNewRequest.setTimestamp(4, stamp);
+        int tryAgain = 2;
 
-		pstAddNewRequest.executeUpdate();
+        while (tryAgain > 0) {
+            tryAgain--;
 
-		request = new RequestDataset(-1, userID, algorithm, jsonRequest, null,
-				true, 0, false, new Date(stamp.getTime()), null, 0, false, null);
+            try {
 
-		boolean hasKey = false;
-		generatedKeyResultSet = pstAddNewRequest.getGeneratedKeys();
-		if (generatedKeyResultSet.next()) {
-			request.requestID = generatedKeyResultSet.getInt(1);
-			hasKey = true;
-		}
-		generatedKeyResultSet.close();
+                Timestamp stamp = new Timestamp(System.currentTimeMillis());
 
-		if (!hasKey) {
-			log.severe("Current database doesn't support java.sql.Statement.getGeneratedKeys()");
-			throw new SQLFeatureNotSupportedException(
-					"Current database doesn't support "
-							+ "java.sql.Statement.getGeneratedKeys()");
-		}
+                pstAddNewRequest.setInt(1, userID);
+                pstAddNewRequest.setString(2, algorithm);
+                pstAddNewRequest.setBytes(3, jsonRequest);
+                pstAddNewRequest.setTimestamp(4, stamp);
+
+                pstAddNewRequest.executeUpdate();
+
+                request = new RequestDataset(-1, userID, algorithm, jsonRequest, null,
+                        true, 0, false, new Date(stamp.getTime()), null, 0, false, null);
+
+                hasKey = false;
+                generatedKeyResultSet = pstAddNewRequest.getGeneratedKeys();
+                if (generatedKeyResultSet.next()) {
+                    request.requestID = generatedKeyResultSet.getInt(1);
+                    hasKey = true;
+                }
+                generatedKeyResultSet.close();
+                tryAgain = 0;
+
+
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(3000);
+                    con.close();
+                    init();
+                } catch (InterruptedException e1) {
+                }
+            }
+
+        }
+
+
+        if (!hasKey) {
+            log.severe("Current database doesn't support java.sql.Statement.getGeneratedKeys()");
+            throw new SQLFeatureNotSupportedException(
+                    "Current database doesn't support "
+                            + "java.sql.Statement.getGeneratedKeys()");
+        }
 
 		return request;
 	}
@@ -462,21 +499,41 @@ public class DatabaseManager {
 	 *             Thrown if update fails.
 	 */
 	public void updateRequest(RequestDataset request) throws SQLException {
+        int tryAgain = 2;
 
-		pstUpdateRequest.setInt(1, request.userID);
-		pstUpdateRequest.setBytes(2, request.jsonRequest);
-		pstUpdateRequest.setBytes(3, request.jsonResponse);
-		pstUpdateRequest.setBoolean(4, request.isPending);
-		pstUpdateRequest.setInt(5, request.costs);
-		pstUpdateRequest.setBoolean(6, request.isPaid);
-		pstUpdateRequest.setTimestamp(7, dateToTimestamp(request.requestDate));
-		pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.finishedDate));
-		pstUpdateRequest.setLong(9, request.duration);
-		pstUpdateRequest.setBoolean(10, request.hasFailed);
-		pstUpdateRequest.setString(11, request.failDescription);
-		pstUpdateRequest.setInt(12, request.requestID);
+        while (tryAgain > 0) {
+            tryAgain--;
 
-		pstUpdateRequest.executeUpdate();
+            try {
+
+                pstUpdateRequest.setInt(1, request.userID);
+                pstUpdateRequest.setBytes(2, request.jsonRequest);
+                pstUpdateRequest.setBytes(3, request.jsonResponse);
+                pstUpdateRequest.setBoolean(4, request.isPending);
+                pstUpdateRequest.setInt(5, request.costs);
+                pstUpdateRequest.setBoolean(6, request.isPaid);
+                pstUpdateRequest.setTimestamp(7, dateToTimestamp(request.requestDate));
+                pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.finishedDate));
+                pstUpdateRequest.setLong(9, request.duration);
+                pstUpdateRequest.setBoolean(10, request.hasFailed);
+                pstUpdateRequest.setString(11, request.failDescription);
+                pstUpdateRequest.setInt(12, request.requestID);
+
+                pstUpdateRequest.executeUpdate();
+
+                tryAgain = 0;
+
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(3000);
+                    con.close();
+                    init();
+                } catch (InterruptedException e1) {
+                }
+            }
+
+        }
+
 	}
 
 	/**
@@ -501,18 +558,38 @@ public class DatabaseManager {
 			byte[] jsonResponse, boolean isPending, int costs, long cpuTime,
 			boolean hasFailed, String failDescription) throws SQLException {
 
-		Timestamp stamp = new Timestamp(System.currentTimeMillis());
+        int tryAgain = 2;
 
-		pstUpdateRequestWithComputeResult.setBytes(1, jsonResponse);
-		pstUpdateRequestWithComputeResult.setBoolean(2, isPending);
-		pstUpdateRequestWithComputeResult.setInt(3, costs);
-		pstUpdateRequestWithComputeResult.setTimestamp(4, stamp);
-		pstUpdateRequestWithComputeResult.setLong(5, cpuTime);
-		pstUpdateRequestWithComputeResult.setBoolean(6, hasFailed);
-		pstUpdateRequestWithComputeResult.setString(7, failDescription);
-		pstUpdateRequestWithComputeResult.setInt(8, requestID);
+        while (tryAgain > 0) {
+            tryAgain--;
 
-		pstUpdateRequestWithComputeResult.executeUpdate();
+            try {
+
+                Timestamp stamp = new Timestamp(System.currentTimeMillis());
+
+                pstUpdateRequestWithComputeResult.setBytes(1, jsonResponse);
+                pstUpdateRequestWithComputeResult.setBoolean(2, isPending);
+                pstUpdateRequestWithComputeResult.setInt(3, costs);
+                pstUpdateRequestWithComputeResult.setTimestamp(4, stamp);
+                pstUpdateRequestWithComputeResult.setLong(5, cpuTime);
+                pstUpdateRequestWithComputeResult.setBoolean(6, hasFailed);
+                pstUpdateRequestWithComputeResult.setString(7, failDescription);
+                pstUpdateRequestWithComputeResult.setInt(8, requestID);
+
+                pstUpdateRequestWithComputeResult.executeUpdate();
+
+                tryAgain = 0;
+
+            } catch (Exception e) {
+                try {
+                    Thread.sleep(3000);
+                    con.close();
+                    init();
+                } catch (InterruptedException e1) {
+                }
+            }
+
+        }
 	}
 
 	/**
