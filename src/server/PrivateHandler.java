@@ -205,14 +205,9 @@ public class PrivateHandler extends RequestHandler {
             count = dbm.getNumberOfRequestsWithUserId(userID);
         }
 
-        List<Map<String, Object>> requestObjectList = new ArrayList<Map<String, Object>>();
-        for (int i = 0; i < requestDatasetList.size(); i++) {
-            requestObjectList.add(requestDatasetList.get(i).getSmallRequestDatasetHashMap());
-        }
-
         Map<String, Object> responseMap = new HashMap<String, Object>(2);
         responseMap.put("number", count);
-        responseMap.put("requests", requestObjectList);
+        responseMap.put("requests", requestDatasetList);
 
         responder.writeJSON(responseMap, HttpResponseStatus.OK);
         log.finest("ListRequests successful.");

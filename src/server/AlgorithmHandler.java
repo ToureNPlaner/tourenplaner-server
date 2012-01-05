@@ -163,7 +163,7 @@ public class AlgorithmHandler extends RequestHandler {
                 if (isPrivate) {
                     byte[] jsonRequest = request.getContent().array();
                     requestDataset = dbm.addNewRequest(userDataset.id, algName, jsonRequest);
-                    req.setRequestID(requestDataset.id);
+                    req.setRequestID(requestDataset.requestID);
                 }
 
                 final boolean success = computer.submit(req);

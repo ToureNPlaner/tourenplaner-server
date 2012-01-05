@@ -3,22 +3,14 @@
  */
 package database;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.sql.Timestamp;
+import com.mysql.jdbc.Statement;
+
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
-
-import com.mysql.jdbc.Statement;
 
 /**
  * @author Sascha Meusel
@@ -272,7 +264,7 @@ public class DatabaseManager {
 		boolean hasKey = false;
 		generatedKeyResultSet = pstAddNewRequest.getGeneratedKeys();
 		if (generatedKeyResultSet.next()) {
-			request.id = generatedKeyResultSet.getInt(1);
+			request.requestID = generatedKeyResultSet.getInt(1);
 			hasKey = true;
 		}
 		generatedKeyResultSet.close();
@@ -479,10 +471,10 @@ public class DatabaseManager {
 		pstUpdateRequest.setBoolean(6, request.isPaid);
 		pstUpdateRequest.setTimestamp(7, dateToTimestamp(request.requestDate));
 		pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.finishedDate));
-		pstUpdateRequest.setLong(9, request.cpuTime);
+		pstUpdateRequest.setLong(9, request.duration);
 		pstUpdateRequest.setBoolean(10, request.hasFailed);
 		pstUpdateRequest.setString(11, request.failDescription);
-		pstUpdateRequest.setInt(12, request.id);
+		pstUpdateRequest.setInt(12, request.requestID);
 
 		pstUpdateRequest.executeUpdate();
 	}
