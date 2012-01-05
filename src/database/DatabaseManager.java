@@ -54,73 +54,108 @@ public class DatabaseManager {
 	private final PreparedStatement pstGetRequestsWithUserId;
 	private final PreparedStatement pstGetRequestsWithUserIdLimitOffset;
 	private final PreparedStatement pstGetAllUsersWithLimitOffset;
+    private final PreparedStatement pstCountAllRequests;
+    private final PreparedStatement pstCountRequestsWithUserId;
+    private final PreparedStatement pstCountAllUsers;
 
-	private final static String addNewRequestString = "INSERT INTO Requests "
+
+    /*
+       INSERT statements
+     */
+	private final static String strAddNewRequest = "INSERT INTO Requests "
 			+ "(UserID, Algorithm, JSONRequest, RequestDate) VALUES(?, ?, ?, ?)";
 
-	private final static String addNewUserString = "INSERT INTO Users "
+	private final static String strAddNewUser = "INSERT INTO Users "
 			+ "(Email, Passwordhash, Salt, FirstName, LastName, Address, "
 			+ "AdminFlag, Status, RegistrationDate, VerifiedDate)"
 			+ " VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-	private final static String getAllRequestsString = "SELECT id, UserID, "
-			+ "Algorithm, JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag, "
-			+ "RequestDate, FinishedDate, CPUTime, FailedFlag, "
-			+ "FailDescription FROM Requests";
 
-	private final static String getAllUsersString = "SELECT id, Email, "
+    /*
+       SELECT COUNT(*) statements
+     */
+    private final static String strCountAllRequests = "SELECT COUNT(*) FROM Requests";
+
+    private final static String strCountRequestsWithUserId = "SELECT COUNT(*) FROM Requests WHERE UserID = ?";
+
+    private final static String strCountAllUsers = "SELECT COUNT(*) FROM Users";
+
+
+    /*
+       SELECT statements for table Requests
+     */
+    
+	private final static String strGetAllRequests = "SELECT id, UserID, "
+            + "Algorithm, JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag, "
+            + "RequestDate, FinishedDate, CPUTime, FailedFlag, "
+            + "FailDescription FROM Requests";
+
+    private final static String strGetAllRequestsWithLimitOffset = strGetAllRequests
+            + " LIMIT ? OFFSET ?";
+
+    private final static String strGetRequestsWithUserId = strGetAllRequests
+            + " WHERE UserID = ?";
+
+    private final static String strGetRequestsWithUserIdLimitOffset = strGetRequestsWithUserId
+            + " LIMIT ? OFFSET ?";
+
+    // single result
+    private final static String strGetRequestWithRequestId = strGetAllRequests
+            + " WHERE id = ?";
+
+
+    /*
+       SELECT statements for table Users
+     */
+	private final static String strGetAllUsers = "SELECT id, Email, "
 			+ "Passwordhash, Salt, AdminFlag, Status, FirstName, LastName, "
 			+ "Address, RegistrationDate, VerifiedDate, DeleteRequestDate "
 			+ "FROM Users";
 
-	private final static String getUserStringWithEmail = "SELECT id, Email, "
-			+ "Passwordhash, Salt, AdminFlag, Status, FirstName, LastName, "
-			+ "Address, RegistrationDate, VerifiedDate, DeleteRequestDate "
-			+ "FROM Users WHERE Email = ?";
+    private final static String strGetAllUsersWithLimitOffset = strGetAllUsers
+            + " LIMIT ? OFFSET ?";
 
-	private final static String getUserStringWithId = "SELECT id, Email, "
-			+ "Passwordhash, Salt, AdminFlag, Status, FirstName, LastName, "
-			+ "Address, RegistrationDate, VerifiedDate, DeleteRequestDate "
-			+ "FROM Users WHERE id = ?";
+    // single result
+	private final static String strGetUserWithEmail = strGetAllUsers + " WHERE Email = ?";
 
-	private final static String updateRequestString = "UPDATE Requests SET "
+    // single result
+	private final static String strGetUserWithId = strGetAllUsers + " WHERE id = ?";
+
+
+
+    /*
+       UPDATE statements
+     */
+	private final static String strUpdateRequest = "UPDATE Requests SET "
 			+ "UserID = ?, Algorithm, JSONRequest = ?, JSONResponse = ?, "
 			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, RequestDate = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
 
-	private final static String updateRequestWithComputeResultString = "UPDATE Requests SET JSONResponse = ?, "
+	private final static String strUpdateRequestWithComputeResult = "UPDATE Requests SET JSONResponse = ?, "
 			+ "PendingFlag = ?, Costs = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
 
-	private final static String updateUserString = "UPDATE Users SET "
+	private final static String strUpdateUser = "UPDATE Users SET "
 			+ "Email = ?, Passwordhash = ?, Salt = ?, AdminFlag = ?, "
 			+ "Status = ?, FirstName = ?, LastName = ?, Address = ?, "
 			+ "RegistrationDate = ?, VerifiedDate = ?, DeleteRequestDate = ? "
 			+ "WHERE id = ?";
 
-	private final static String deleteRequestWithRequestIdString = "DELETE FROM Requests WHERE id = ?";
 
-	private final static String deleteRequestsOfUserWithUserIdString = "DELETE FROM Requests WHERE UserID = ?";
+    /*
+       DELETE statements
+     */
+	private final static String strDeleteRequestWithRequestId = "DELETE FROM Requests WHERE id = ?";
 
-	private final static String deleteUserWithUserIdString = "DELETE FROM Users WHERE id = ?";
+	private final static String strDeleteRequestsOfUserWithUserId = "DELETE FROM Requests WHERE UserID = ?";
 
-	private final static String deleteUserWithEmailString = "DELETE FROM Users WHERE Email = ?";
+	private final static String strDeleteUserWithUserId = "DELETE FROM Users WHERE id = ?";
 
-	private final static String getAllRequestsWithLimitOffsetString = getAllRequestsString
-			+ " LIMIT ? OFFSET ?";
+	private final static String strDeleteUserWithEmail = "DELETE FROM Users WHERE Email = ?";
 
-	private final static String getRequestWithRequestIdString = getAllRequestsString
-			+ " WHERE id = ?";
 
-	private final static String getRequestsWithUserIdString = getAllRequestsString
-			+ " WHERE UserID = ?";
-
-	private final static String getRequestsWithUserIdLimitOffsetString = getRequestsWithUserIdString
-			+ " LIMIT ? OFFSET ?";
-	private final static String getAllUsersWithLimitOffsetString = getAllUsersString
-			+ " LIMIT ? OFFSET ?";
 
 	/**
 	 * Tries to establish a database connection and upholds the connection until
@@ -142,50 +177,52 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if connection could not be established or if errors
 	 *             occur while creating prepared statements
-	 * @see java.sql.DriverManager.html#getConnection(java.lang.String,
-	 *      java.lang.String, java.lang.String)
+	 * @see java.sql.DriverManager##getConnection(java.lang.String,java.lang.String, java.lang.String)
 	 */
 	public DatabaseManager(String url, String dbName, String userName,
 			String password) throws SQLException {
 
 		con = DriverManager.getConnection(url + dbName, userName, password);
 
-		pstAddNewRequest = con.prepareStatement(addNewRequestString,
+		pstAddNewRequest = con.prepareStatement(strAddNewRequest,
 				Statement.RETURN_GENERATED_KEYS);
-		pstAddNewUser = con.prepareStatement(addNewUserString,
+		pstAddNewUser = con.prepareStatement(strAddNewUser,
 				Statement.RETURN_GENERATED_KEYS);
-		pstGetAllRequests = con.prepareStatement(getAllRequestsString);
-		pstGetAllUsers = con.prepareStatement(getAllUsersString);
-		pstGetUserWithEmail = con.prepareStatement(getUserStringWithEmail);
-		pstGetUserWithId = con.prepareStatement(getUserStringWithId);
-		pstUpdateRequest = con.prepareStatement(updateRequestString);
+		pstGetAllRequests = con.prepareStatement(strGetAllRequests);
+		pstGetAllUsers = con.prepareStatement(strGetAllUsers);
+		pstGetUserWithEmail = con.prepareStatement(strGetUserWithEmail);
+		pstGetUserWithId = con.prepareStatement(strGetUserWithId);
+		pstUpdateRequest = con.prepareStatement(strUpdateRequest);
 		pstUpdateRequestWithComputeResult = con
-				.prepareStatement(updateRequestWithComputeResultString);
-		pstUpdateUser = con.prepareStatement(updateUserString);
+				.prepareStatement(strUpdateRequestWithComputeResult);
+		pstUpdateUser = con.prepareStatement(strUpdateUser);
 		pstDeleteRequestWithRequestId = con
-				.prepareStatement(deleteRequestWithRequestIdString);
+				.prepareStatement(strDeleteRequestWithRequestId);
 		pstDeleteRequestsOfUserWithUserId = con
-				.prepareStatement(deleteRequestsOfUserWithUserIdString);
+				.prepareStatement(strDeleteRequestsOfUserWithUserId);
 		pstDeleteUserWithUserId = con
-				.prepareStatement(deleteUserWithUserIdString);
+				.prepareStatement(strDeleteUserWithUserId);
 		pstDeleteUserWithEmail = con
-				.prepareStatement(deleteUserWithEmailString);
+				.prepareStatement(strDeleteUserWithEmail);
 		pstGetAllRequestsWithLimitOffset = con
-				.prepareStatement(getAllRequestsWithLimitOffsetString);
+				.prepareStatement(strGetAllRequestsWithLimitOffset);
 		pstGetRequestWithRequestId = con
-				.prepareStatement(getRequestWithRequestIdString);
+				.prepareStatement(strGetRequestWithRequestId);
 		pstGetRequestsWithUserId = con
-				.prepareStatement(getRequestsWithUserIdString);
+				.prepareStatement(strGetRequestsWithUserId);
 		pstGetRequestsWithUserIdLimitOffset = con
-				.prepareStatement(getRequestsWithUserIdLimitOffsetString);
+				.prepareStatement(strGetRequestsWithUserIdLimitOffset);
 		pstGetAllUsersWithLimitOffset = con
-				.prepareStatement(getAllUsersWithLimitOffsetString);
+				.prepareStatement(strGetAllUsersWithLimitOffset);
+        pstCountAllRequests = con.prepareStatement(strCountAllRequests);
+        pstCountRequestsWithUserId = con.prepareStatement(strCountRequestsWithUserId);
+        pstCountAllUsers = con.prepareStatement(strCountAllUsers);
 	}
 
 	/**
 	 * Tries to insert a new request dataset into the database. The inserted
 	 * dataset will be pending, have no costs and will be unpaid.</br>SQL
-	 * command: {@value #addNewRequestString}
+	 * command: {@value #strAddNewRequest}
 	 * 
 	 * @param userID
 	 *            The id of the user, who has sent the request
@@ -252,7 +289,7 @@ public class DatabaseManager {
 
 	/**
 	 * Tries to insert a new user dataset into the database. </br>SQL command:
-	 * {@value #addNewUserString}
+	 * {@value #strAddNewUser}
 	 * 
 	 * @param email
 	 *            Have to be unique, that means another user must not have the
@@ -293,7 +330,7 @@ public class DatabaseManager {
 	/**
 	 * Tries to insert a new user dataset into the database, but request should
 	 * have legit admin authentication (will not be checked within this method).
-	 * New user will be verified. </br>SQL command: {@value #addNewUserString}
+	 * New user will be verified. </br>SQL command: {@value #strAddNewUser}
 	 * 
 	 * @param email
 	 *            Have to be unique, that means another user must not have the
@@ -425,7 +462,7 @@ public class DatabaseManager {
 	 * be written into the database, so all old values within the row will be
 	 * overwritten. <b><code>request.id</code></b> has to be > 0 and must exists
 	 * within the database table. </br>SQL command:
-	 * {@value #updateRequestString}
+	 * {@value #strUpdateRequest}
 	 * 
 	 * @param request
 	 *            The request object to write into the database.
@@ -456,7 +493,7 @@ public class DatabaseManager {
 	 * old values in the database row. FinishedDate will be set to the current
 	 * timestamp. <b><code>requestID</code></b> has to be > 0 and must exists
 	 * within the database table. </br>SQL command:
-	 * {@value #updateRequestWithComputeResultString}
+	 * {@value #strUpdateRequestWithComputeResult}
 	 * 
 	 * @param requestID
 	 * @param jsonResponse
@@ -491,9 +528,9 @@ public class DatabaseManager {
 	 * <code>request.id</code></b>). All values within the given object will be
 	 * written into the database, so all old values within the row will be
 	 * overwritten. <b><code>user.id</code></b> has to be > 0 and must exists
-	 * within the database table. </br>SQL command: {@value #updateUserString}
+	 * within the database table. </br>SQL command: {@value #strUpdateUser}
 	 * 
-	 * @param request
+	 * @param user
 	 *            The user object to write into the database.
 	 * @throws SQLException
 	 *             Thrown if update fails.
@@ -524,7 +561,7 @@ public class DatabaseManager {
 
 	/**
 	 * Deletes the Requests table row with the given request id. </br>SQL
-	 * command: {@value #deleteRequestWithRequestIdString}
+	 * command: {@value #strDeleteRequestWithRequestId}
 	 * 
 	 * @param id
 	 *            Request id
@@ -539,7 +576,7 @@ public class DatabaseManager {
 
 	/**
 	 * Deletes the Requests table rows with the given user id. </br>SQL command:
-	 * {@value #deleteRequestsOfUserWithUserIdString}
+	 * {@value #strDeleteRequestsOfUserWithUserId}
 	 * 
 	 * @param userId
 	 *            User id of the user, whose requests should be deleted.
@@ -557,7 +594,7 @@ public class DatabaseManager {
 	 * database configuration(for example strict mode) maybe the according
 	 * requests could be deleted too because of the FOREIGN KEY UserId within
 	 * the Requests table. </br>SQL command:
-	 * {@value #deleteUserWithUserIdString}
+	 * {@value #strDeleteUserWithUserId}
 	 * 
 	 * @param userId
 	 *            User id
@@ -574,7 +611,7 @@ public class DatabaseManager {
 	 * Deletes the Users table row with the given user email. Depending on the
 	 * database configuration(for example strict mode) maybe the according
 	 * requests could be deleted too because of the FOREIGN KEY UserId within
-	 * the Requests table. </br>SQL command: {@value #deleteUserWithEmailString}
+	 * the Requests table. </br>SQL command: {@value #strDeleteUserWithEmail}
 	 * 
 	 * @param email
 	 * @throws SQLException
@@ -589,7 +626,7 @@ public class DatabaseManager {
 	/**
 	 * Gets a list with all requests within the Requests table. If no requests
 	 * are within the table, an empty list will be returned. </br>SQL command:
-	 * {@value #getAllRequestsString}
+	 * {@value #strGetAllRequests}
 	 * 
 	 * @return A list with all requests. If no requests exists, the list is
 	 *         empty, but not null.
@@ -621,7 +658,7 @@ public class DatabaseManager {
 	 * Gets a list with all requests within the Requests table with regard to
 	 * the limit and offset constraints. If no requests are found with the given
 	 * constraints or the table is empty, an empty list will be returned.
-	 * </br>SQL command: {@value #getAllRequestsWithLimitOffsetString}
+	 * </br>SQL command: {@value #strGetAllRequestsWithLimitOffset}
 	 * 
 	 * @param limit
 	 *            How many rows should maximal selected.
@@ -660,7 +697,7 @@ public class DatabaseManager {
 	/**
 	 * Gets a request object of the Requests table with the given request id.
 	 * 
-	 * </br>SQL command: {@value #getRequestWithRequestIdString}
+	 * </br>SQL command: {@value #strGetRequestWithRequestId}
 	 * 
 	 * @param id
 	 *            Request id
@@ -694,7 +731,7 @@ public class DatabaseManager {
 	 * Gets a list with all requests within the Requests table which have the
 	 * given user id. If no requests are found with the given user id or the
 	 * table is empty, an empty list will be returned. </br>SQL command:
-	 * {@value #getRequestsWithUserIdString}
+	 * {@value #strGetRequestsWithUserId}
 	 * 
 	 * @param userId
 	 * @return A list with all selected requests. If no requests selected, the
@@ -729,7 +766,7 @@ public class DatabaseManager {
 	 * given user id with regard to the limit and offset constraints. If no
 	 * requests are found with the given user id and given constraints or the
 	 * table is empty, an empty list will be returned. </br>SQL command:
-	 * {@value #getRequestsWithUserIdLimitOffsetString}
+	 * {@value #strGetRequestsWithUserIdLimitOffset}
 	 * 
 	 * @param userId
 	 *            User id
@@ -771,7 +808,7 @@ public class DatabaseManager {
 	/**
 	 * Gets a list with all users within the Users table. If the table is empty,
 	 * an empty list will be returned. </br>SQL command:
-	 * {@value #getAllUsersString}
+	 * {@value #strGetAllUsers}
 	 * 
 	 * @return A list with all selected users. If no users selected, the list is
 	 *         empty, but not null.
@@ -802,7 +839,7 @@ public class DatabaseManager {
 	 * Gets a list with all users within the Users table with regard to the
 	 * limit and offset constraints. If no users are found with the given
 	 * constraints or the table is empty, an empty list will be returned.
-	 * </br>SQL command: {@value #getAllUsersWithLimitOffsetString}
+	 * </br>SQL command: {@value #strGetAllUsersWithLimitOffset}
 	 * 
 	 * @param limit
 	 *            How many rows should maximal selected.
@@ -839,7 +876,7 @@ public class DatabaseManager {
 
 	/**
 	 * Gets a user object from the Users table with the given email. </br>SQL
-	 * command: {@value #getUserStringWithEmail}
+	 * command: {@value #strGetUserWithEmail}
 	 * 
 	 * @param email
 	 * @return The user object, if the user is found, else null.
@@ -881,7 +918,7 @@ public class DatabaseManager {
 
 	/**
 	 * Gets a user object from the Users table with the given user id. </br>SQL
-	 * command: {@value #getUserStringWithId}
+	 * command: {@value #strGetUserWithId}
 	 * 
 	 * @param id
 	 *            User id
@@ -922,6 +959,69 @@ public class DatabaseManager {
 
 		return user;
 	}
+
+
+    /**
+     * Returns the number of data sets within the Requests table
+     * @return Number of data sets
+     * @throws SQLException Thrown if sql query fails
+     */
+    public int getRequestsCount() throws SQLException {
+        ResultSet resultSet = pstCountAllRequests.executeQuery();
+
+        if (resultSet.next()) {
+            int count = resultSet.getInt(1);
+            resultSet.close();
+            return count;
+        }
+
+        log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
+        resultSet.close();
+        return 0;
+    }
+
+    /**
+     * Returns the number of data sets with a certain UserID within the Requests table    
+     * @param userId The UserID from the user for which you want to get the number of data sets
+     * @return Number of data sets
+     * @throws SQLException Thrown if sql query fails
+     */
+    public int getRequestsWithUserIDCount(int userId) throws SQLException {
+
+        pstCountRequestsWithUserId.setInt(1, userId);
+        ResultSet resultSet = pstCountRequestsWithUserId.executeQuery();
+
+        if (resultSet.next()) {
+            int count = resultSet.getInt(1);
+            resultSet.close();
+            return count;
+        }
+
+        log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
+        resultSet.close();
+        return 0;
+    }
+
+    /**
+     * Returns the number of data sets within the Users table
+     * @return Number of data sets
+     * @throws SQLException Thrown if sql query fails
+     */
+    public int getUserssCount() throws SQLException {
+        ResultSet resultSet = pstCountAllUsers.executeQuery();
+
+        if (resultSet.next()) {
+            int count = resultSet.getInt(1);
+            resultSet.close();
+            return count;
+        }
+
+        log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
+        resultSet.close();
+        return 0;
+    }
+
+
 
 	/**
 	 * Converts a sql timestamp to a java date
