@@ -85,17 +85,24 @@ public class Authorizer extends RequestHandler {
         if (emailandpw == null) {
             return null;
         }
+        // Basic Auth is: "realm BASE64OFPW"
+        String[] parts = emailandpw.split(" ");
+        if(parts.length != 2){
+            responder.writeErrorMessage("EAUTCH", "Wrong Basic Auth Syntax", null, HttpResponseStatus.BAD_REQUEST);
+            return null;
+        }
 
         ChannelBuffer encodeddata;
         ChannelBuffer data;
         // Base64 is always ASCII
-        encodeddata = ChannelBuffers.wrappedBuffer(emailandpw.substring(emailandpw.lastIndexOf(' ')).getBytes(CharsetUtil.US_ASCII));
+        encodeddata = ChannelBuffers.wrappedBuffer(parts[1].getBytes(CharsetUtil.US_ASCII));
 
         data = Base64.decode(encodeddata);
         // The string itself is utf-8
         emailandpw = data.toString(CharsetUtil.UTF_8);
         index = emailandpw.indexOf(':');
         if (index <= 0) {
+            responder.writeErrorMessage("EAUTCH", "Wrong Password Syntax in Basic Auth", null, HttpResponseStatus.BAD_REQUEST);
             return null;
         }
 
