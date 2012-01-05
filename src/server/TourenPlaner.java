@@ -15,6 +15,8 @@ import graphrep.GraphRepTextReader;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,6 +72,10 @@ public class TourenPlaner {
         // make all property names in sent json lowercase
         // http://wiki.fasterxml.com/JacksonFeaturePropertyNamingStrategy
         mapper.setPropertyNamingStrategy(new JSONLowerCaseStrategy());
+
+        DateFormat jacksonDateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        jacksonDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        mapper.setDateFormat(jacksonDateFormat);
 
         /**
          * inits config manager if config file is provided; also prints usage
