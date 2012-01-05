@@ -295,11 +295,18 @@ public class DatabaseManager {
 
 
             } catch (Exception e) {
-                try {
-                    Thread.sleep(3000);
-                    con.close();
-                    init();
-                } catch (InterruptedException e1) {
+                if (tryAgain > 0) {
+                    log.warning("Before last try: " + e.getMessage());
+                    e.printStackTrace();
+                    try {
+                        Thread.sleep(3000);
+                        con.close();
+                        init();
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    log.severe("After last try: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
 
@@ -524,11 +531,18 @@ public class DatabaseManager {
                 tryAgain = 0;
 
             } catch (Exception e) {
-                try {
-                    Thread.sleep(3000);
-                    con.close();
-                    init();
-                } catch (InterruptedException e1) {
+                if (tryAgain > 0) {
+                    log.warning("Before last try: " + e.getMessage());
+                    e.printStackTrace();
+                    try {
+                        Thread.sleep(3000);
+                        con.close();
+                        init();
+                    } catch (InterruptedException e1) {
+                    }   
+                } else {
+                    log.severe("After last try: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
 
@@ -581,11 +595,18 @@ public class DatabaseManager {
                 tryAgain = 0;
 
             } catch (Exception e) {
-                try {
-                    Thread.sleep(3000);
-                    con.close();
-                    init();
-                } catch (InterruptedException e1) {
+                if (tryAgain > 0) {
+                    log.warning("Before last try: " + e.getMessage());
+                    e.printStackTrace();
+                    try {
+                        Thread.sleep(3000);
+                        con.close();
+                        init();
+                    } catch (InterruptedException e1) {
+                    }
+                } else {
+                    log.severe("After last try: " + e.getMessage());
+                    e.printStackTrace();
                 }
             }
 
