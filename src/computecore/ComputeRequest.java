@@ -27,18 +27,20 @@ public class ComputeRequest {
 	private final String algName;
 	private final Responder responder;
 	private int requestID;
+    private boolean isPrivate;
 
 	/**
 	 * Constructs a new ComputeRequest using the given Responder, Points and
 	 * Constraints. The requestID of the constructed ComputeRequest object is
 	 * -1, must be set with {@link #setRequestID(int)} if server is private. If
 	 * server is not private the requestID must remain -1.
-	 * 
-	 * @param responder
-	 * @param algName
-	 */
+	 *
+     * @param responder
+     * @param algName
+     * @param isPrivate
+     */
 	public ComputeRequest(Responder responder, String algName,
-			RequestPoints points, Map<String, Object> constraints) {
+                          RequestPoints points, Map<String, Object> constraints, boolean isPrivate) {
 		this.algName = algName;
 		this.points = points;
 		this.resultWay = new Points();
@@ -46,6 +48,7 @@ public class ComputeRequest {
 		this.responder = responder;
 		this.misc = null;
 		this.requestID = -1;
+        this.isPrivate = isPrivate;
 	}
 
 	/**
@@ -130,6 +133,14 @@ public class ComputeRequest {
 	public int getRequestID() {
 		return this.requestID;
 	}
+
+    /**
+     * Returns if request was constructed in private or public mode
+     * @return true if request was constructed in private mode
+     */
+    public boolean isPrivate() {
+        return isPrivate;
+    }
 
 	/**
 	 * Writes a json representation of the result of this request to the given

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -295,9 +296,8 @@ public class DatabaseManager {
 
 
             } catch (Exception e) {
-                if (tryAgain > 0) {
-                    log.warning("Before last try: " + e.getMessage());
-                    e.printStackTrace();
+                if (tryAgain >= 0) {
+                    log.log(Level.WARNING, "Before last try", e);
                     try {
                         Thread.sleep(3000);
                         con.close();
@@ -305,8 +305,7 @@ public class DatabaseManager {
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    log.severe("After last try: " + e.getMessage());
-                    e.printStackTrace();
+                    log.log(Level.SEVERE, "After last try", e);
                 }
             }
 
@@ -531,18 +530,16 @@ public class DatabaseManager {
                 tryAgain = 0;
 
             } catch (Exception e) {
-                if (tryAgain > 0) {
-                    log.warning("Before last try: " + e.getMessage());
-                    e.printStackTrace();
+                if (tryAgain >= 0) {
+                    log.log(Level.WARNING, "Before last try", e);
                     try {
                         Thread.sleep(3000);
                         con.close();
                         init();
                     } catch (InterruptedException e1) {
-                    }   
+                    }
                 } else {
-                    log.severe("After last try: " + e.getMessage());
-                    e.printStackTrace();
+                    log.log(Level.SEVERE, "After last try", e);
                 }
             }
 
@@ -595,9 +592,8 @@ public class DatabaseManager {
                 tryAgain = 0;
 
             } catch (Exception e) {
-                if (tryAgain > 0) {
-                    log.warning("Before last try: " + e.getMessage());
-                    e.printStackTrace();
+                if (tryAgain >= 0) {
+                    log.log(Level.WARNING, "Before last try", e);
                     try {
                         Thread.sleep(3000);
                         con.close();
@@ -605,8 +601,7 @@ public class DatabaseManager {
                     } catch (InterruptedException e1) {
                     }
                 } else {
-                    log.severe("After last try: " + e.getMessage());
-                    e.printStackTrace();
+                    log.log(Level.SEVERE, "After last try", e);
                 }
             }
 

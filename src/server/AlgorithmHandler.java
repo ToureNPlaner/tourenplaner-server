@@ -134,7 +134,7 @@ public class AlgorithmHandler extends RequestHandler {
             return null;
         }
 
-        return new ComputeRequest(responder, algName, points, constraints);
+        return new ComputeRequest(responder, algName, points, constraints, this.isPrivate);
     }
 
     /**

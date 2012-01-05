@@ -83,6 +83,7 @@ public class ComputeThread extends Thread {
 			
 			try {
 				work = reqQueue.take();
+                isPrivate = work.isPrivate();
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
 					try {
