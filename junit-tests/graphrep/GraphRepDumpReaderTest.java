@@ -1,89 +1,84 @@
 package graphrep;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class GraphRepDumpReaderTest {
 
-	@Test
-	public final void testCreateGraphRep() {
+    @Test
+    public final void testCreateGraphRep() {
 
-		try {
-			// makes somthing to dump
-			GraphRepTextReader graphRepTextReader = new GraphRepTextReader();
-			String testFile = new String(
-					"3\n5\n0 25 15 5\n 50 30 4\n2 20 40 3\n0 1 5 \n0 2 2 \n1 0 5 \n1 2 3 \n2 0 2 ");
-			byte[] testFileBytes = testFile.getBytes();
-			ByteArrayInputStream testFileByteArrayStream = new ByteArrayInputStream(
-					testFileBytes);
-			GraphRep graphRep = graphRepTextReader
-					.createGraphRep(testFileByteArrayStream);
+        try {
+            GraphRep graphRep = (new TestGraphReader()).readTestGraph();
 
-			// dump
-			ByteArrayOutputStream byteArrayOutputStreamDump = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(
-					byteArrayOutputStreamDump);
-			oos.writeObject(graphRep);
-			oos.close();
+            // dump
+            ByteArrayOutputStream byteArrayOutputStreamDump = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(byteArrayOutputStreamDump);
+            oos.writeObject(graphRep);
+            oos.close();
 
-			// load dumped
-			GraphRepDumpReader graphRepDumpReader = new GraphRepDumpReader();
+            // load dumped
+            GraphRepDumpReader graphRepDumpReader = new GraphRepDumpReader();
+            ByteArrayInputStream
+                    testDumpFileByteArrayStream =
+                    new ByteArrayInputStream(byteArrayOutputStreamDump.toByteArray());
+            GraphRep graphRepDump;
+            graphRepDump = graphRepDumpReader.createGraphRep(testDumpFileByteArrayStream);
 
-			ByteArrayInputStream testDumpFileByteArrayStream = new ByteArrayInputStream(
-					byteArrayOutputStreamDump.toByteArray());
+            assertEquals(14505, graphRep.getNodeCount());
+            assertEquals(59600, graphRep.getEdgeCount());
+            assertEquals(4.84878025E8, graphRep.lat[0], 0.01);
+            assertEquals(4.84876093E8, graphRep.lat[1], 0.01);
+            assertEquals(4.84870879E8, graphRep.lat[2], 0.01);
+            assertEquals(9.1901961E7, graphRep.lon[0], 0.01);
+            assertEquals(9.1902854E7, graphRep.lon[1], 0.01);
+            assertEquals(9.1906707E7, graphRep.lon[2], 0.01);
+            assertEquals(386, graphRep.height[0]);
+            assertEquals(386, graphRep.height[1]);
+            assertEquals(377, graphRep.height[2]);
 
-			GraphRep graphRepDump;
+            assertEquals(0, graphRep.src[0]);
+            assertEquals(0, graphRep.src[1]);
+            assertEquals(0, graphRep.src[2]);
+            assertEquals(0, graphRep.src[3]);
+            assertEquals(0, graphRep.src[4]);
+            assertEquals(1, graphRep.trgt[0]);
+            assertEquals(1823, graphRep.trgt[1]);
+            assertEquals(1824, graphRep.trgt[2]);
+            assertEquals(1825, graphRep.trgt[3]);
+            assertEquals(10463, graphRep.trgt[4]);
 
-			graphRepDump = graphRepDumpReader
-					.createGraphRep(testDumpFileByteArrayStream);
-			assertEquals(3, graphRepDump.getNodeCount());
-			assertEquals(5, graphRepDump.getEdgeCount());
+            // TODO wait for changed graphrep
+            // assertEquals(13, graphRep.euklidianDist[0]);
+            // assertEquals(5, graphRep.euklidianDist[1]);
+            // assertEquals(13, graphRep.euklidianDist[2]);
+            // assertEquals(8, graphRep.euklidianDist[3]);
+            // assertEquals(5, graphRep.euklidianDist[4]);
 
-			assertEquals(25, graphRepDump.lat[0], 0.01);
-			assertEquals(50, graphRepDump.lat[1], 0.01);
-			assertEquals(20, graphRepDump.lat[2], 0.01);
-			assertEquals(15, graphRepDump.lon[0], 0.01);
-			assertEquals(30, graphRepDump.lon[1], 0.01);
-			assertEquals(40, graphRepDump.lon[2], 0.01);
-			assertEquals(5, graphRepDump.height[0]);
-			assertEquals(4, graphRepDump.height[1]);
-			assertEquals(3, graphRepDump.height[2]);
+            assertEquals(22, graphRep.dist[0]);
+            assertEquals(124, graphRep.dist[1]);
+            assertEquals(66, graphRep.dist[2]);
+            assertEquals(165, graphRep.dist[3]);
+            assertEquals(30, graphRep.dist[4]);
 
-			assertEquals(0, graphRepDump.src[0]);
-			assertEquals(0, graphRepDump.src[1]);
-			assertEquals(1, graphRepDump.src[2]);
-			assertEquals(1, graphRepDump.src[3]);
-			assertEquals(2, graphRepDump.src[4]);
-			assertEquals(1, graphRepDump.trgt[0]);
-			assertEquals(2, graphRepDump.trgt[1]);
-			assertEquals(0, graphRepDump.trgt[2]);
-			assertEquals(2, graphRepDump.trgt[3]);
-			assertEquals(0, graphRepDump.trgt[4]);
-			assertEquals(5, graphRepDump.dist[0]);
-			assertEquals(2, graphRepDump.dist[1]);
-			assertEquals(5, graphRepDump.dist[2]);
-			assertEquals(3, graphRepDump.dist[3]);
-			assertEquals(2, graphRepDump.dist[4]);
+            assertEquals(0, graphRep.offsetOut[0]);
+            assertEquals(5, graphRep.offsetOut[1]);
+            assertEquals(14, graphRep.offsetOut[2]);
 
-			assertEquals(0, graphRepDump.offsetOut[0]);
-			assertEquals(2, graphRepDump.offsetOut[1]);
-			assertEquals(4, graphRepDump.offsetOut[2]);
+            assertEquals(0, graphRep.offsetIn[0]);
+            assertEquals(5, graphRep.offsetIn[1]);
+            assertEquals(14, graphRep.offsetIn[2]);
+        } catch (IOException e) {
+            fail(e.getMessage());
+        }
 
-			assertEquals(0, graphRepDump.offsetIn[0]);
-			assertEquals(2, graphRepDump.offsetIn[1]);
-			assertEquals(3, graphRepDump.offsetIn[2]);
-
-		} catch (IOException e) {
-			fail(e.getMessage());
-		}
-
-	}
+    }
 
 }
