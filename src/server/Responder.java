@@ -8,6 +8,7 @@ import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferOutputStream;
 import org.jboss.netty.buffer.ChannelBuffers;
@@ -41,16 +42,23 @@ public class Responder {
 
     private final Channel replyChannel;
     private boolean keepAlive;
-    private final ObjectMapper mapper;
+    private static final ObjectMapper mapper;
     private ChannelBuffer outputBuffer;
 
+    static {
+        mapper = new ObjectMapper();
+        // make all property names in sent json lowercase
+        // http://wiki.fasterxml.com/JacksonFeaturePropertyNamingStrategy
+        mapper.setPropertyNamingStrategy(new JSONLowerCaseStrategy());
+        // Makes jackson use: ISO-8601
+        mapper.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
+    }
     /**
      * Constructs a new Responder from the given Channel
      *
      * @param replyChan
      */
-    public Responder(ObjectMapper mapper, Channel replyChan) {
-        this.mapper = mapper;
+    public Responder(Channel replyChan) {
         this.replyChannel = replyChan;
         this.keepAlive = false;
         this.outputBuffer = null;

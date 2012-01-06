@@ -31,14 +31,10 @@ import static org.jboss.netty.channel.Channels.pipeline;
  */
 public class ServerPipelineFactory implements ChannelPipelineFactory {
     private final ComputeCore cCore;
-    /**
-     * The globally shared ObjectMapper
-     */
-    private final ObjectMapper mapper;
+
     private final Map<String, Object> serverInfo;
 
-    public ServerPipelineFactory(ObjectMapper mapper, ComputeCore comCore, Map<String, Object> serverInfo) {
-        this.mapper = mapper;
+    public ServerPipelineFactory(ComputeCore comCore, Map<String, Object> serverInfo) {
         this.cCore = comCore;
         this.serverInfo = serverInfo;
     }
@@ -64,7 +60,7 @@ public class ServerPipelineFactory implements ChannelPipelineFactory {
         // We could add compression support by uncommenting the following line
         pipeline.addLast("deflater", new HttpContentCompressor());
 
-        pipeline.addLast("handler", new MasterHandler(mapper, cCore, serverInfo));
+        pipeline.addLast("handler", new MasterHandler(cCore, serverInfo));
         return pipeline;
     }
 }

@@ -42,17 +42,17 @@ public class AlgorithmHandler extends RequestHandler {
     }
 
     private static final MapType JSONOBJECT = new MapType();
+    private static final ObjectMapper mapper = new ObjectMapper();
     private final boolean isPrivate;
-    private final ObjectMapper mapper;
     private final DatabaseManager dbm;
     private final ComputeCore computer;
     private final Authorizer authorizer;
 
-    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ObjectMapper mapper, ComputeCore computer) {
+
+    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ComputeCore computer) {
         super(null);
         this.isPrivate = isPrivate;
         this.dbm = dbm;
-        this.mapper = mapper;
         this.computer = computer;
         this.authorizer = auth;
     }

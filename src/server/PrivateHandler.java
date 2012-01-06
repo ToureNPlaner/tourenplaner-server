@@ -39,13 +39,12 @@ public class PrivateHandler extends RequestHandler {
 
     private final Authorizer authorizer;
 
-    private final ObjectMapper mapper;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    public PrivateHandler(Authorizer authorizer, DatabaseManager dbm, ObjectMapper mapper) {
+    public PrivateHandler(Authorizer authorizer, DatabaseManager dbm) {
         super(null);
         this.dbm = dbm;
         this.authorizer = authorizer;
-        this.mapper = mapper;
     }
 
 
