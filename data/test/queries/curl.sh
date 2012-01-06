@@ -22,9 +22,9 @@ else
 
 	if [ "HTTPS" == "$6" ]
 	then
-		curl  -s --insecure --ssl -H 'Content-Type: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
+		curl  -s --insecure --ssl -H 'Accept: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
 	else
-		curl  -s -H 'Content-Type: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
+		curl  -s -H 'Accept: application/json' -u "$4:$5" --data-binary @$2 "$1/$3"
 	fi
 
 fi
