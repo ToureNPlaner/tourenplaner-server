@@ -213,6 +213,27 @@ public class Responder {
 
     }
 
+
+    /**
+     * Sends an error to the client, the connection will be closed afterwards
+     * A String representing the error response will be returned
+     *
+     * @param errorId
+     * @param message
+     * @param details
+     * @param status
+     * @return A String representing the error response 
+     */
+    public String writeAndReturnErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
+            throws IOException
+    {
+        this.writeErrorMessage(errorId, message, details, status);
+        return  "{\"errorid\":\"" + errorId +
+                "\",\"message\":\"" + message +
+                "\",\"details\":\"" + details + "\"}";
+    }
+
+
     /**
      * Creates the response for the ComputeResult. Returns a
      * ByteArrayOutputStream which contains the json object of this response.

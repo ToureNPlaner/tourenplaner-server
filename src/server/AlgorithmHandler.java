@@ -172,14 +172,16 @@ public class AlgorithmHandler extends RequestHandler {
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    responder.writeErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
+                    String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate){
                         // Log failed requests because of full queue as failed, as
                         // not pending and as paid
                         // TODO specify this case clearly, maybe behavior should be
                         // another
-                        requestDataset.failDescription = "This server is currently too busy to fullfill the request";
+                        requestDataset.failDescription = errorMessage;
+                        // TODO maybe a better method should be used to convert a string to a byte array
+                        requestDataset.jsonResponse = errorMessage.getBytes();
                         // TODO maybe another status name for fails like this
                         //requestDataset.hasFailed = true;
                         //requestDataset.isPending = true;

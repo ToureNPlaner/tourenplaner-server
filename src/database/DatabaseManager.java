@@ -175,7 +175,7 @@ public class DatabaseManager {
 	 * @throws SQLException
 	 *             Thrown if connection could not be established or if errors
 	 *             occur while creating prepared statements
-	 * @see java.sql.DriverManager##getConnection(java.lang.String,java.lang.String, java.lang.String)
+	 * @see java.sql.DriverManager#getConnection(java.lang.String,java.lang.String, java.lang.String)
 	 */
 	public DatabaseManager(String url, String dbName, String userName,
 			String password) throws SQLException {
@@ -1028,7 +1028,7 @@ public class DatabaseManager {
 	public UserDataset getUser(int id) throws SQLException {
 		UserDataset user = null;
 
-		if ((user = userDatasetCache_mail.get(id)) != null) {
+		if ((user = userDatasetCache_id.get(id)) != null) {
 			// TODO: debug output
 			log.fine("Retrieved user " + user.email + " with id "
 					+ user.id + " from cache");
