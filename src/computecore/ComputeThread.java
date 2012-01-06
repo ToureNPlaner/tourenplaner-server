@@ -84,6 +84,7 @@ public class ComputeThread extends Thread {
 			try {
 				work = reqQueue.take();
                 isPrivate = work.isPrivate();
+                // check needed if availability of algorithms changes
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
 					try {
@@ -123,7 +124,7 @@ public class ComputeThread extends Thread {
                                     + e.getMessage());
                             // TODO define error and write to protocol specification
                             String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
-                                    "The server could not send or store the compute result", "",
+                                    "The server could not send and not store the compute result", "",
                                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
 							if (isPrivate) {
 								try {

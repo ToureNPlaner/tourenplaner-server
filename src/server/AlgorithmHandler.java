@@ -160,6 +160,19 @@ public class AlgorithmHandler extends RequestHandler {
 
         try {
             final ComputeRequest req = readComputeRequest(algName, responder, request);
+
+            // TODO determine if alg is supported, maybe with AlgorithmManager(alm), then remove comment braces
+            /*
+            if (alm.getAlgByURLSuffix(req.getAlgorithmURLSuffix() == null) {
+                log.warning("Unsupported algorithm "
+                        + req.getAlgorithmURLSuffix() + " requested");
+                req.getResponder().writeErrorMessage("EUNKNOWNALG",
+                        "An unknown algorithm was requested", null,
+                        HttpResponseStatus.NOT_FOUND);
+                return;
+            }
+             */
+
             if (req != null) {
                 RequestDataset requestDataset = null;
 
