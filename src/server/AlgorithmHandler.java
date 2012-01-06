@@ -5,6 +5,7 @@ import computecore.ComputeRequest;
 import computecore.RequestPoints;
 import database.DatabaseManager;
 import database.RequestDataset;
+import database.RequestStatusEnum;
 import database.UserDataset;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
@@ -179,8 +180,10 @@ public class AlgorithmHandler extends RequestHandler {
                         // TODO specify this case clearly, maybe behavior should be
                         // another
                         requestDataset.failDescription = "This server is currently too busy to fullfill the request";
-                        requestDataset.hasFailed = true;
-                        requestDataset.isPending = true;
+                        // TODO maybe another status name for fails like this
+                        //requestDataset.hasFailed = true;
+                        //requestDataset.isPending = true;
+                        requestDataset.status = RequestStatusEnum.TryAgainLater;
                         requestDataset.isPaid = true;
                         dbm.updateRequest(requestDataset);
                     }

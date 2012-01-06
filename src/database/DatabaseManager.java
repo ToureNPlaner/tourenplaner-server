@@ -513,17 +513,27 @@ public class DatabaseManager {
             tryAgain--;
 
             try {
+                boolean hasFailed = false;
+                boolean isPending = false;
+
+                if (request.status == RequestStatusEnum.Pending) {
+                    isPending = true;
+                }
+                if (request.status == RequestStatusEnum.Failed) {
+                    hasFailed = true;
+                }
+
 
                 pstUpdateRequest.setInt(1, request.userID);
                 pstUpdateRequest.setBytes(2, request.jsonRequest);
                 pstUpdateRequest.setBytes(3, request.jsonResponse);
-                pstUpdateRequest.setBoolean(4, request.isPending);
+                pstUpdateRequest.setBoolean(4, isPending);
                 pstUpdateRequest.setInt(5, request.costs);
                 pstUpdateRequest.setBoolean(6, request.isPaid);
                 pstUpdateRequest.setTimestamp(7, dateToTimestamp(request.requestDate));
                 pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.finishedDate));
                 pstUpdateRequest.setLong(9, request.duration);
-                pstUpdateRequest.setBoolean(10, request.hasFailed);
+                pstUpdateRequest.setBoolean(10, hasFailed);
                 pstUpdateRequest.setString(11, request.failDescription);
                 pstUpdateRequest.setInt(12, request.requestID);
 

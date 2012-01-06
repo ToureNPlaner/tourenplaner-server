@@ -25,10 +25,10 @@ public class UserDataset {
 	public String passwordhash;
 	@JsonIgnore
 	public String salt;
-	@JsonIgnore
+
 	public Date registrationDate;
-	@JsonIgnore
 	public Date verifiedDate;
+
 	@JsonIgnore
 	public Date deleteRequestDate;
 

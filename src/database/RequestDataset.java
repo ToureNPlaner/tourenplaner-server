@@ -3,6 +3,9 @@
  */
 package database;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.annotate.JsonProperty;
+
 import java.util.Date;
 
 /**
@@ -14,16 +17,18 @@ public class RequestDataset {
 	public int requestID;
 	public int userID;
 	public String algorithm;
+    @JsonProperty("request")
 	public byte[] jsonRequest;
+    @JsonProperty("response")
 	public byte[] jsonResponse;
-	public boolean isPending;
 	public int costs;
 	public boolean isPaid;
 	public Date requestDate;
 	public Date finishedDate;
     public long duration;
-	public boolean hasFailed;
-	public String failDescription;
+    public RequestStatusEnum status;
+    @JsonIgnore
+    public String failDescription;
 	
 	public RequestDataset(int id, int userID, String algorithm, byte[] jsonRequest,
 			byte[] jsonResponse, boolean isPending, int costs, boolean isPaid, 
@@ -34,13 +39,22 @@ public class RequestDataset {
 		this.algorithm = algorithm;
 		this.jsonRequest = jsonRequest;
 		this.jsonResponse = jsonResponse;
-		this.isPending = isPending;
 		this.costs = costs;
 		this.isPaid = isPaid;
 		this.requestDate = requestDate;
 		this.finishedDate = finishedDate;
 		this.duration = duration;
-		this.hasFailed = hasFailed;
-		this.failDescription = failDescription;
+		if (isPending && !hasFailed) {
+            this.status = RequestStatusEnum.Pending;
+        } else if (isPending && hasFailed) {
+            this.status = RequestStatusEnum.TryAgainLater;
+        } else if (!isPending && hasFailed) {
+            this.status = RequestStatusEnum.Failed;
+        } else {
+            this.status = RequestStatusEnum.OK;
+        }
+
+        this.failDescription = failDescription;
+
 	}
 }
