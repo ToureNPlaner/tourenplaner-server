@@ -5,6 +5,7 @@ import computecore.ComputeRequest;
 import computecore.RequestPoints;
 import database.DatabaseManager;
 import database.RequestDataset;
+import database.RequestStatusEnum;
 import database.UserDataset;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
@@ -23,6 +24,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -42,17 +44,17 @@ public class AlgorithmHandler extends RequestHandler {
     }
 
     private static final MapType JSONOBJECT = new MapType();
+    private static final ObjectMapper mapper = new ObjectMapper();
     private final boolean isPrivate;
-    private final ObjectMapper mapper;
     private final DatabaseManager dbm;
     private final ComputeCore computer;
     private final Authorizer authorizer;
 
-    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ObjectMapper mapper, ComputeCore computer) {
+
+    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ComputeCore computer) {
         super(null);
         this.isPrivate = isPrivate;
         this.dbm = dbm;
-        this.mapper = mapper;
         this.computer = computer;
         this.authorizer = auth;
     }
@@ -70,6 +72,8 @@ public class AlgorithmHandler extends RequestHandler {
      * @throws JsonParseException
      */
     private ComputeRequest readComputeRequest(final String algName, final Responder responder, final HttpRequest request) throws IOException, JsonParseException {
+        // Check whether Client accepts "application/x-jackson-smile"
+        boolean acceptsSmile = request.getHeader("Accept").contains("application/x-jackson-smile");
 
         Map<String, Object> constraints = null;
         final RequestPoints points = new RequestPoints();
@@ -134,7 +138,7 @@ public class AlgorithmHandler extends RequestHandler {
             return null;
         }
 
-        return new ComputeRequest(responder, algName, points, constraints);
+        return new ComputeRequest(responder, algName, points, constraints, isPrivate, acceptsSmile);
     }
 
     /**
@@ -156,29 +160,45 @@ public class AlgorithmHandler extends RequestHandler {
 
         try {
             final ComputeRequest req = readComputeRequest(algName, responder, request);
-            if (req != null) {
 
+            // TODO determine if alg is supported, maybe with AlgorithmManager(alm), then remove comment braces
+            /*
+            if (alm.getAlgByURLSuffix(req.getAlgorithmURLSuffix() == null) {
+                log.warning("Unsupported algorithm "
+                        + req.getAlgorithmURLSuffix() + " requested");
+                req.getResponder().writeErrorMessage("EUNKNOWNALG",
+                        "An unknown algorithm was requested", null,
+                        HttpResponseStatus.NOT_FOUND);
+                return;
+            }
+             */
+
+            if (req != null) {
                 RequestDataset requestDataset = null;
 
                 if (isPrivate) {
                     byte[] jsonRequest = request.getContent().array();
                     requestDataset = dbm.addNewRequest(userDataset.id, algName, jsonRequest);
-                    req.setRequestID(requestDataset.id);
+                    req.setRequestID(requestDataset.requestID);
                 }
 
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    responder.writeErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
+                    String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate){
                         // Log failed requests because of full queue as failed, as
                         // not pending and as paid
                         // TODO specify this case clearly, maybe behavior should be
                         // another
-                        requestDataset.failDescription = "This server is currently too busy to fullfill the request";
-                        requestDataset.hasFailed = true;
-                        requestDataset.isPending = true;
+                        requestDataset.failDescription = errorMessage;
+                        // TODO maybe a better method should be used to convert a string to a byte array
+                        requestDataset.jsonResponse = errorMessage.getBytes();
+                        // TODO maybe another status name for fails like this
+                        //requestDataset.hasFailed = true;
+                        //requestDataset.isPending = true;
+                        requestDataset.status = RequestStatusEnum.TryAgainLater;
                         requestDataset.isPaid = true;
                         dbm.updateRequest(requestDataset);
                     }

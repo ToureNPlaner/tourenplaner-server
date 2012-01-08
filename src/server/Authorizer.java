@@ -9,6 +9,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -16,7 +17,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * User: Niklas Schnelle
+ * User: Niklas Schnelle, Sascha Meusel
  * Date: 12/26/11
  * Time: 11:56 PM.
  */
@@ -73,7 +74,27 @@ public class Authorizer extends RequestHandler {
      * @return the UserDataset object of the user or null if auth failed
      * @throws java.sql.SQLException
      */
-    public UserDataset auth(final HttpRequest myReq) throws SQLException {
+    public UserDataset auth(final HttpRequest myReq) throws SQLException, IOException {
+        UserDataset user = authNoResponse(myReq);
+
+        if (user == null) {
+            responder.writeErrorMessage("EAUTH", "Wrong username or password", null, HttpResponseStatus.UNAUTHORIZED);
+            return null;
+        }
+
+        return user;
+    }
+
+
+    /**
+     * Authenticates a Request using HTTP Basic Authentication and returns the
+     * UserDataset object of the authenticated user or null if authentication
+     * failed. No error responses will be sent to the client.
+     *
+     * @return the UserDataset object of the user or null if auth failed
+     * @throws java.sql.SQLException
+     */
+    public UserDataset authNoResponse(final HttpRequest myReq) throws SQLException, IOException {
         String email, emailandpw, pw;
         UserDataset user = null;
         int index = 0;
@@ -82,19 +103,27 @@ public class Authorizer extends RequestHandler {
         // several times
         emailandpw = myReq.getHeader("Authorization");
         if (emailandpw == null) {
+            log.info("Missing Authorization header");
+            return null;
+        }
+        // Basic Auth is: "realm BASE64OFPW"
+        String[] parts = emailandpw.split(" ");
+        if(parts.length != 2){
+            log.warning("Wrong Basic Auth Syntax");
             return null;
         }
 
         ChannelBuffer encodeddata;
         ChannelBuffer data;
         // Base64 is always ASCII
-        encodeddata = ChannelBuffers.wrappedBuffer(emailandpw.substring(emailandpw.lastIndexOf(' ')).getBytes(CharsetUtil.US_ASCII));
+        encodeddata = ChannelBuffers.wrappedBuffer(parts[1].getBytes(CharsetUtil.US_ASCII));
 
         data = Base64.decode(encodeddata);
         // The string itself is utf-8
         emailandpw = data.toString(CharsetUtil.UTF_8);
         index = emailandpw.indexOf(':');
         if (index <= 0) {
+            log.warning("Wrong Password Syntax in Basic Auth");
             return null;
         }
 
@@ -103,7 +132,7 @@ public class Authorizer extends RequestHandler {
         user = dbm.getUser(email);
 
         if (user == null) {
-            responder.writeErrorMessage("EAUTH", "Wrong username or password", null, HttpResponseStatus.UNAUTHORIZED);
+            log.info("Wrong username");
             return null;
         }
 
@@ -112,7 +141,7 @@ public class Authorizer extends RequestHandler {
 
         log.fine(pw + ":" + user.salt + " : " + toHash);
         if (!user.passwordhash.equals(toHash)) {
-            responder.writeErrorMessage("EAUTH", "Wrong username or password", null, HttpResponseStatus.UNAUTHORIZED);
+            log.info("Wrong username or password");
             return null;
         }
 

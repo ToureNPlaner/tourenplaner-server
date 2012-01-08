@@ -9,7 +9,7 @@ pkgdesc="A server for calculating shortest paths, TSP and CSP"
 arch=('any')
 url="http://gerbera.informatik.uni-stuttgart.de/"
 license=('GPL')
-depends=('java-runtime')
+depends=('java-runtime' 'sudo')
 backup=('etc/tourenplaner.conf')
 license=('BSD')
 install=tourenplaner.install
@@ -48,7 +48,7 @@ build() {
   install -d ${pkgdir}/etc/rc.d
   install -m 755 ${startdir}/tourenplanerd ${pkgdir}/etc/rc.d/tourenplanerd
 
-  install -d /var/tourenplaner
+  install -d ${pkgdir}/var/lib/tourenplaner
 }
 
 package_sptogpx() {

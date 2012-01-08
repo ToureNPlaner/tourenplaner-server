@@ -33,7 +33,7 @@ import config.ConfigManager;
  */
 public class HttpServer {
 
-	public HttpServer(ObjectMapper mapper, ConfigManager cm,
+	public HttpServer(ConfigManager cm,
 			AlgorithmRegistry reg, Map<String, Object> serverInfo,
 			ComputeCore comCore) {
 		// Configure the server.
@@ -54,11 +54,9 @@ public class HttpServer {
 									.newCachedThreadPool()));
 
 			// Set up the event pipeline factory with ssl
-			bootstrap.setPipelineFactory(new ServerPipelineFactory(mapper,
-					comCore, serverInfo));
+			bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore, serverInfo));
 
-			infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(
-					mapper, serverInfo));
+			infoBootstrap.setPipelineFactory(new ServerInfoOnlyPipelineFactory(serverInfo));
 			// Bind and start to accept incoming connections.
 			bootstrap.bind(new InetSocketAddress(cm
 					.getEntryInt("sslport", 8081)));
@@ -66,8 +64,7 @@ public class HttpServer {
 					8080)));
 		} else {
 			// Set up the event pipeline factory without ssl
-			bootstrap.setPipelineFactory(new ServerPipelineFactory(mapper,
-					comCore, serverInfo));
+			bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore, serverInfo));
 			// Bind and start to accept incoming connections.
 			bootstrap.bind(new InetSocketAddress(cm.getEntryInt("httpport",
 					8080)));

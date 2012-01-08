@@ -29,20 +29,18 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 
     private final InfoHandler infoHandler;
-    // The globally shared ObjectMapper
-    private final ObjectMapper mapper;
+
 
     private Responder responder;
 
-    public ServerInfoHandler(ObjectMapper mapper, Map<String, Object> sInfo) {
+    public ServerInfoHandler(Map<String, Object> sInfo) {
         super();
-        this.mapper = mapper;
-        this.infoHandler = new InfoHandler(sInfo, mapper);
+        this.infoHandler = new InfoHandler(sInfo);
     }
 
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        responder = new Responder(mapper, e.getChannel());
+        responder = new Responder(e.getChannel());
         infoHandler.setResponder(responder);
 
     }

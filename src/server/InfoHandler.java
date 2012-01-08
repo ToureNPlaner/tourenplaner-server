@@ -16,14 +16,9 @@ import java.util.Map;
  */
 public class InfoHandler {
     private final Map<String, Object> serverInfo;
-
-    private final ObjectMapper mapper;
-
-
     private Responder responder;
 
-    public InfoHandler(Map<String, Object> serverInfo, ObjectMapper mapper) {
-        this.mapper = mapper;
+    public InfoHandler(Map<String, Object> serverInfo) {
         this.serverInfo = serverInfo;
     }
 

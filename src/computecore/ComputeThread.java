@@ -83,6 +83,8 @@ public class ComputeThread extends Thread {
 			
 			try {
 				work = reqQueue.take();
+                isPrivate = work.isPrivate();
+                // check needed if availability of algorithms changes
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
 					try {
@@ -118,17 +120,24 @@ public class ComputeThread extends Thread {
 							log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
 									+ " compute result successfully written into response.");
 						} catch (IOException e) {
+                            log.warning("There was an IOException: "
+                                    + e.getMessage());
+                            // TODO define error and write to protocol specification
+                            String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
+                                    "The server could not send and not store the compute result", "",
+                                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
 							if (isPrivate) {
 								try {
 									// TODO change failDescription to user friendly message?
 									dbm.updateRequestWithComputeResult(
-											requestID, 
-											null, //jsonResponse
+											requestID,
+                                            // TODO maybe a better method should be used to convert a string to a byte array
+                                            errorMessage.getBytes(), //jsonResponse
 											false, //isPending
 											0, //costs
 											cpuTime, 
 											true, //hasFailed
-											"IOException: " + e.getMessage()); //failDescription
+											null); //failDescription
 									log.finest("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix()
 											+ " IOException successful written into database.");
 								} catch (SQLException sqlE) {
@@ -167,20 +176,21 @@ public class ComputeThread extends Thread {
 					} catch (ComputeException e) {
 						log.warning("There was a ComputeException: "
 								+ e.getMessage());
-						work.getResponder().writeErrorMessage("ECOMPUTE",
+                        String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
 								e.getMessage(), "",
-								HttpResponseStatus.PROCESSING);
+								HttpResponseStatus.PROCESSING); //TODO maybe wrong response status
 						if (isPrivate) {
 							try {
 								// TODO change failDescription to user friendly message?
 								dbm.updateRequestWithComputeResult(
-										requestID, 
-										null, //jsonResponse
+										requestID,
+                                        // TODO maybe a better method should be used to convert a string to a byte array
+                                        errorMessage.getBytes(), //jsonResponse
 										false, //isPending
 										0, //costs
-										cpuTime, 
+										cpuTime,
 										true, //hasFailed
-										"ComputeException: " + e.getMessage()); //failDescription
+										null); //failDescription
 							} catch (SQLException sqlE) {
 								log.warning("ComputeThread: Could not log ComputeException into DB : "
 										+ sqlE.getMessage());
@@ -191,9 +201,27 @@ public class ComputeThread extends Thread {
 				} else {
 					log.warning("Unsupported algorithm "
 							+ work.getAlgorithmURLSuffix() + " requested");
-					work.getResponder().writeErrorMessage("EUNKNOWNALG",
+					String errorMessage = work.getResponder().writeAndReturnErrorMessage("EUNKNOWNALG",
 							"An unknown algorithm was requested", null,
 							HttpResponseStatus.NOT_FOUND);
+                    if (isPrivate) {
+                        try {
+                            // TODO change failDescription to user friendly message?
+                            dbm.updateRequestWithComputeResult(
+                                    requestID,
+                                    // TODO maybe a better method should be used to convert a string to a byte array
+                                    errorMessage.getBytes(), //jsonResponse
+                                    false, //isPending
+                                    0, //costs
+                                    0, //cpuTime
+                                    true, //hasFailed
+                                    null); //failDescription
+                        } catch (SQLException sqlE) {
+                            log.warning("ComputeThread: Could not log EUNKNOWNALG into DB : "
+                                    + sqlE.getMessage());
+                        }
+
+                    }
 				}
 
 			} catch (InterruptedException e) {

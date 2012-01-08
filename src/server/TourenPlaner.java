@@ -13,8 +13,11 @@ import graphrep.GraphRep;
 import graphrep.GraphRepDumpReader;
 import graphrep.GraphRepTextReader;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig;
 
 import java.io.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -65,11 +68,9 @@ public class TourenPlaner {
         // TODO remove when not needed as default
         Logger.getLogger("algorithms").setLevel(Level.FINEST);
         Logger.getLogger("server").setLevel(Level.FINEST);
-        // Create globally shared ObjectMapper so we reuse it's data structures
+        // Create ObjectMapper so we reuse it's data structures
         ObjectMapper mapper = new ObjectMapper();
-        // make all property names in sent json lowercase
-        // http://wiki.fasterxml.com/JacksonFeaturePropertyNamingStrategy
-        mapper.setPropertyNamingStrategy(new JSONLowerCaseStrategy());
+
 
         /**
          * inits config manager if config file is provided; also prints usage
@@ -150,7 +151,7 @@ public class TourenPlaner {
         // Create ServerInfo object
         Map<String, Object> serverInfo = getServerInfo(reg);
 
-        new HttpServer(mapper, cm, reg, serverInfo, comCore);
+        new HttpServer(cm, reg, serverInfo, comCore);
     }
 
 }

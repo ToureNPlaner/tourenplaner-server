@@ -58,7 +58,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
      * @param cCore
      * @param serverInfo
      */
-    public MasterHandler(final ObjectMapper mapper, final ComputeCore cCore, final Map<String, Object> serverInfo) {
+    public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
         super();
         this.mapper = mapper;
         final ConfigManager cm = ConfigManager.getInstance();
@@ -74,15 +74,15 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
                 this.isPrivate = false;
             }
         }
-        this.algHandler = new AlgorithmHandler(authorizer, this.isPrivate, dbm, mapper, cCore);
-        this.privateHandler = new PrivateHandler(authorizer, dbm, mapper);
-        this.infoHandler = new InfoHandler(serverInfo, mapper);
+        this.algHandler = new AlgorithmHandler(authorizer, this.isPrivate, dbm, cCore);
+        this.privateHandler = new PrivateHandler(authorizer, dbm);
+        this.infoHandler = new InfoHandler(serverInfo);
     }
 
 
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        responder = new Responder(mapper, e.getChannel());
+        responder = new Responder(e.getChannel());
         if(authorizer != null){
             authorizer.setResponder(responder);
         }
