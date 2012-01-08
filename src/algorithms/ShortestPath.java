@@ -154,7 +154,7 @@ public class ShortestPath extends GraphAlgorithm {
                 // add source node to the result.
                 distance += graph.getDist(prevEdges[currNode]);
                 resultPoints.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-                resultPoints.setPointLon(resultAddIndex, graph.getNodeLat(currNode));
+                resultPoints.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
 
 				ds.returnDistArray(false);
 				ds.returnHeap();
