@@ -24,7 +24,6 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -73,7 +72,7 @@ public class AlgorithmHandler extends RequestHandler {
      */
     private ComputeRequest readComputeRequest(final String algName, final Responder responder, final HttpRequest request) throws IOException, JsonParseException {
         // Check whether Client accepts "application/x-jackson-smile"
-        boolean acceptsSmile = request.getHeader("Accept").contains("application/x-jackson-smile");
+        boolean acceptsSmile = (request.getHeader("Accept") != null) ? request.getHeader("Accept").contains("application/x-jackson-smile") : false;
 
         Map<String, Object> constraints = null;
         final RequestPoints points = new RequestPoints();
