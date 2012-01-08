@@ -107,8 +107,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 						if (tempDist < dists[targetNode]) {
 							dists[targetNode] = tempDist;
-							prevEdges[targetNode] = graph.getOutEdgeId(nodeId,
-									i);
+							prevEdges[targetNode] = graph.getOutEdgeId(nodeId,i);
 							heap.insert(targetNode, dists[targetNode]);
 						}
 					}
@@ -123,7 +122,7 @@ public class ShortestPath extends GraphAlgorithm {
 
 				// Find out how much space to allocate
 				int currNode = nodeId;
-				int routeElements = 0;
+				int routeElements = 1;
 
 				while (currNode != srcId) {
 					routeElements++;
@@ -141,18 +140,22 @@ public class ShortestPath extends GraphAlgorithm {
 				// Don't read distance from multipliedDist[], because there are
 				// distances with
 				// regard to the multiplier
+                // only without the first node
 				currNode = nodeId;
 				while (routeElements > 0) {
 					distance += graph.getDist(prevEdges[currNode]);
 					routeElements--;
 
-					resultPoints.setPointLat(resultAddIndex + routeElements,
-							graph.getNodeLat(currNode));
-					resultPoints.setPointLon(resultAddIndex + routeElements,
-							graph.getNodeLon(currNode));
+					resultPoints.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
+					resultPoints.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
 
 					currNode = graph.getSource(prevEdges[currNode]);
 				}
+                // add source node to the result.
+                distance += graph.getDist(prevEdges[currNode]);
+                resultPoints.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
+                resultPoints.setPointLon(resultAddIndex, graph.getNodeLat(currNode));
+
 				ds.returnDistArray(false);
 				ds.returnHeap();
 				ds.returnPrevArray();
