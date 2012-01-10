@@ -7,6 +7,8 @@ import algorithms.AlgorithmFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Logger;
 
 /**
@@ -21,14 +23,14 @@ import java.util.logging.Logger;
 public class AlgorithmRegistry {
     private static Logger log = Logger.getLogger("tourenplaner");
 
-	private final ArrayList<AlgorithmFactory> registry;
+	private final HashMap<String, AlgorithmFactory> registry;
 
 	/**
 	 * Constructs a new empty AlgorithmRegistry
 	 * 
 	 */
 	public AlgorithmRegistry() {
-		registry = new ArrayList<AlgorithmFactory>();
+		registry = new HashMap<String, AlgorithmFactory>();
 	}
 
 	/**
@@ -38,7 +40,7 @@ public class AlgorithmRegistry {
 	 */
 	public void registerAlgorithm(AlgorithmFactory algFac) {
         log.fine("AlgorithmFactory for "+algFac.getAlgName()+" registered");
-		registry.add(algFac);
+		registry.put(algFac.getURLSuffix(), algFac);
 	}
 
 	/**
@@ -50,12 +52,21 @@ public class AlgorithmRegistry {
 	public AlgorithmManager getAlgorithmManager(AlgorithmManagerFactory amFac) {
 		AlgorithmManager m = amFac.createAlgorithmManager();
 
-		for (AlgorithmFactory algFac : registry) {
+		for (AlgorithmFactory algFac : registry.values()) {
 			m.addAlgorithm(algFac);
 		}
 
 		return m;
 	}
+
+    /**
+     * Gets the AlgorithmFactory registred for the given urlSuffix
+     * @param urlSuffix
+     * @return
+     */
+    public AlgorithmFactory getAlgByURLSuffix(String urlSuffix){
+        return registry.get(urlSuffix);
+    }
 
 	/**
 	 * Gets a Collection of registered Algorithm's represented by their specific
@@ -64,6 +75,6 @@ public class AlgorithmRegistry {
 	 * @return collection of registred Factories
 	 */
 	public Collection<AlgorithmFactory> getAlgorithms() {
-		return registry;
+		return registry.values();
 	}
 }
