@@ -213,6 +213,13 @@ public class PrivateHandler extends RequestHandler {
 
     }
 
+
+    public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) {
+        // TODO Auto-generated method stub
+
+    }
+
+
     /**
      * Returns -1 if parameter is invalid (missing or not a natural number) and will then response to request
      * with error message.
@@ -242,12 +249,22 @@ public class PrivateHandler extends RequestHandler {
         return param;
     }
 
+    public void handleUpdateRequests(final HttpRequest request) {
+        // TODO Auto-generated method stub
+
+    }
+
     public void handleUpdateUser(final HttpRequest request) {
         // TODO Auto-generated method stub
 
     }
 
     public void handleGetUser(final HttpRequest request) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters) {
         // TODO Auto-generated method stub
 
     }

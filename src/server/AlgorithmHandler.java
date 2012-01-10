@@ -160,7 +160,7 @@ public class AlgorithmHandler extends RequestHandler {
         try {
             final ComputeRequest req = readComputeRequest(algName, responder, request);
 
-            // TODO determine if alg is supported, maybe with AlgorithmManager(alm), then remove comment braces
+            // TODO determine if alg is supported, but not with AlgorithmManager(alm), see following comment
             /*
             if (alm.getAlgByURLSuffix(req.getAlgorithmURLSuffix() == null) {
                 log.warning("Unsupported algorithm "
