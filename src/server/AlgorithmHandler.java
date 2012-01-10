@@ -1,5 +1,7 @@
 package server;
 
+import algorithms.AlgorithmFactory;
+import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 import computecore.ComputeRequest;
 import computecore.RequestPoints;
@@ -24,7 +26,6 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -49,14 +50,16 @@ public class AlgorithmHandler extends RequestHandler {
     private final DatabaseManager dbm;
     private final ComputeCore computer;
     private final Authorizer authorizer;
+    private final AlgorithmRegistry algReg;
 
 
-    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ComputeCore computer) {
+    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ComputeCore computer, AlgorithmRegistry algReg) {
         super(null);
         this.isPrivate = isPrivate;
         this.dbm = dbm;
         this.computer = computer;
         this.authorizer = auth;
+        this.algReg = algReg;
     }
 
 
@@ -73,7 +76,7 @@ public class AlgorithmHandler extends RequestHandler {
      */
     private ComputeRequest readComputeRequest(final String algName, final Responder responder, final HttpRequest request) throws IOException, JsonParseException {
         // Check whether Client accepts "application/x-jackson-smile"
-        boolean acceptsSmile = request.getHeader("Accept").contains("application/x-jackson-smile");
+        boolean acceptsSmile = (request.getHeader("Accept") != null) ? request.getHeader("Accept").contains("application/x-jackson-smile") : false;
 
         Map<String, Object> constraints = null;
         final RequestPoints points = new RequestPoints();
@@ -159,24 +162,20 @@ public class AlgorithmHandler extends RequestHandler {
         }
 
         try {
-            final ComputeRequest req = readComputeRequest(algName, responder, request);
-
-            // TODO determine if alg is supported, maybe with AlgorithmManager(alm), then remove comment braces
-            /*
-            if (alm.getAlgByURLSuffix(req.getAlgorithmURLSuffix() == null) {
-                log.warning("Unsupported algorithm "
-                        + req.getAlgorithmURLSuffix() + " requested");
-                req.getResponder().writeErrorMessage("EUNKNOWNALG",
-                        "An unknown algorithm was requested", null,
-                        HttpResponseStatus.NOT_FOUND);
+            // Get the AlgorithmFactory for this Alg to check if it's registered and not hidden
+            AlgorithmFactory algFac = algReg.getAlgByURLSuffix(algName);
+            if (algFac == null) {
+                log.warning("Unsupported algorithm " + algName + " requested");
+                responder.writeErrorMessage("EUNKNOWNALG", "An unknown algorithm was requested", null, HttpResponseStatus.NOT_FOUND);
                 return;
             }
-             */
+            // Only now read the request
+            final ComputeRequest req = readComputeRequest(algName, responder, request);
 
             if (req != null) {
                 RequestDataset requestDataset = null;
 
-                if (isPrivate) {
+                if (isPrivate && !algFac.hidden()) {
                     byte[] jsonRequest = request.getContent().array();
                     requestDataset = dbm.addNewRequest(userDataset.id, algName, jsonRequest);
                     req.setRequestID(requestDataset.requestID);
@@ -187,7 +186,7 @@ public class AlgorithmHandler extends RequestHandler {
                 if (!success) {
                     String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
-                    if(isPrivate){
+                    if(isPrivate && !algFac.hidden()){
                         // Log failed requests because of full queue as failed, as
                         // not pending and as paid
                         // TODO specify this case clearly, maybe behavior should be

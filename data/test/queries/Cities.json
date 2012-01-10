@@ -15,7 +15,6 @@
       { "lt": 510492590, "ln": 137383600, "name" : "Dresden", "small" : false},
       { "lt": 521333330, "ln": 116166670, "name" : "Magdeburg", "small" : false},
       { "lt": 543252780, "ln": 101405560, "name" : "Kiel", "small" : false},
-      { "lt": 509780560, "ln": 110291670, "name" : "Erfurt", "small" : false},
-      { "lt": 481333330, "ln": 115666670, "name" : "Munich", "small" : false}
+      { "lt": 509780560, "ln": 110291670, "name" : "Erfurt", "small" : false}
 	]
 }

@@ -38,11 +38,10 @@ public class ComputeRequest {
 	 *
      * @param responder
      * @param algName
-     * @param isPrivate
      * @param acceptsSmile
      */
 	public ComputeRequest(Responder responder, String algName,
-                          RequestPoints points, Map<String, Object> constraints, boolean isPrivate, boolean acceptsSmile) {
+                          RequestPoints points, Map<String, Object> constraints, boolean acceptsSmile) {
 		this.algName = algName;
 		this.points = points;
 		this.resultWay = new Points();
@@ -50,7 +49,6 @@ public class ComputeRequest {
 		this.responder = responder;
 		this.misc = null;
 		this.requestID = -1;
-        this.isPrivate = isPrivate;
         this.acceptsSmile = acceptsSmile;
 	}
 
@@ -142,7 +140,7 @@ public class ComputeRequest {
      * @return true if request was constructed in private mode
      */
     public boolean isPrivate() {
-        return isPrivate;
+        return requestID != -1;
     }
 
     /**
