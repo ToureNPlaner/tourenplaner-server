@@ -53,13 +53,13 @@ public class AlgorithmHandler extends RequestHandler {
     private final AlgorithmRegistry algReg;
 
 
-    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ComputeCore computer, AlgorithmRegistry algReg) {
+    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ComputeCore computer) {
         super(null);
         this.isPrivate = isPrivate;
         this.dbm = dbm;
         this.computer = computer;
         this.authorizer = auth;
-        this.algReg = algReg;
+        this.algReg = computer.getAlgorithmRegistry();
     }
 
 
@@ -141,7 +141,7 @@ public class AlgorithmHandler extends RequestHandler {
             return null;
         }
 
-        return new ComputeRequest(responder, algName, points, constraints, isPrivate, acceptsSmile);
+        return new ComputeRequest(responder, algName, points, constraints, acceptsSmile);
     }
 
     /**

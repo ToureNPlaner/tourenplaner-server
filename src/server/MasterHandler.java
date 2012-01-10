@@ -4,6 +4,7 @@
 
 package server;
 
+import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 import config.ConfigManager;
 import database.DatabaseManager;
@@ -60,7 +61,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
      */
     public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
         super();
-        this.mapper = mapper;
         final ConfigManager cm = ConfigManager.getInstance();
         this.isPrivate = cm.getEntryBool("private", false);
         DatabaseManager dbm = null;
