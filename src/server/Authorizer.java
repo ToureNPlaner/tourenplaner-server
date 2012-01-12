@@ -69,10 +69,12 @@ public class Authorizer extends RequestHandler {
      * UserDataset object of the authenticated user or null if authentication
      * failed. Errors will be sent to the client as error messages see protocol
      * specification for details. The connection will get closed after the error
-     * has been sent
+     * has been sent.
      *
+     * @param myReq
      * @return the UserDataset object of the user or null if auth failed
      * @throws java.sql.SQLException
+     * @throws java.io.IOException
      */
     public UserDataset auth(final HttpRequest myReq) throws SQLException, IOException {
         UserDataset user = authNoResponse(myReq);
@@ -85,14 +87,15 @@ public class Authorizer extends RequestHandler {
         return user;
     }
 
-
     /**
      * Authenticates a Request using HTTP Basic Authentication and returns the
      * UserDataset object of the authenticated user or null if authentication
      * failed. No error responses will be sent to the client.
      *
+     * @param myReq
      * @return the UserDataset object of the user or null if auth failed
      * @throws java.sql.SQLException
+     * @throws java.io.IOException
      */
     public UserDataset authNoResponse(final HttpRequest myReq) throws SQLException, IOException {
         String email, emailandpw, pw;

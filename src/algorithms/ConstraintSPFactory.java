@@ -12,13 +12,18 @@ import java.util.Map;
 /**
  * @author nino
  */
-public class ConstraintSPFactory extends GraphAlgorithmFactory {
+public class ConstraintSPFactory extends SharingAlgorithmFactory {
 
     /**
      * @param graph
      */
     public ConstraintSPFactory(GraphRep graph) {
         super(graph);
+    }
+
+    @Override
+    public Algorithm createAlgorithm(DijkstraStructs rs) {
+        return new ShortestPathCH(graph, rs);
     }
 
     /*
@@ -28,7 +33,8 @@ public class ConstraintSPFactory extends GraphAlgorithmFactory {
       */
     @Override
     public Algorithm createAlgorithm() {
-        return new ConstraintSP(graph);
+        return new ConstraintSP(graph, new DijkstraStructs(
+                graph.getNodeCount(), graph.getEdgeCount()));
     }
 
     @Override

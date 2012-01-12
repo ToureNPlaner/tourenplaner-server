@@ -1,0 +1,8 @@
+{
+   "points" : [
+		{ "lt": 487759470, "ln": 92791520, "name" : "BadUrach", "small" : false},
+		{ "lt": 487823950, "ln": 92550770, "name" : "Untertürkheim", "small" : true}
+	],
+   "constraints":{"maxAltitudeDifference":75}
+}
+

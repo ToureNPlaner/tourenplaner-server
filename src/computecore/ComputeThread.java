@@ -15,6 +15,7 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.sql.SQLException;
 import java.util.concurrent.BlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -120,8 +121,7 @@ public class ComputeThread extends Thread {
 							log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
 									+ " compute result successfully written into response.");
 						} catch (IOException e) {
-                            log.warning("There was an IOException: "
-                                    + e.getMessage());
+                            log.log(Level.WARNING, "There was an IOException", e);
                             // TODO define error and write to protocol specification
                             String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
                                     "The server could not send and not store the compute result", "",
@@ -138,11 +138,8 @@ public class ComputeThread extends Thread {
 											cpuTime, 
 											true, //hasFailed
 											null); //failDescription
-									log.finest("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix()
-											+ " IOException successful written into database.");
 								} catch (SQLException sqlE) {
-									log.warning("Could not log IOException into DB "
-											+ sqlE.getMessage());
+									log.log(Level.WARNING, "Could not log IOException into DB ", sqlE);
 								}
 								
 							}
@@ -166,16 +163,12 @@ public class ComputeThread extends Thread {
 										cpuTime, 
 										false, //hasFailed
 										null); //failDescription
-								log.finest("ComputeThread: Algorithm "+ work.getAlgorithmURLSuffix()
-										+ " compute result successful written into database.");
 							} catch (SQLException sqlE) {
-								log.warning("ComputeThread: Could not log ComputeResult into DB: "
-										+ sqlE.getMessage());
+								log.log(Level.WARNING, "Could not log ComputeResult into DB", sqlE);
 							} 
 						}
 					} catch (ComputeException e) {
-						log.warning("There was a ComputeException: "
-								+ e.getMessage());
+						log.log(Level.WARNING, "There was a ComputeException", e);
                         String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
 								e.getMessage(), "",
 								HttpResponseStatus.PROCESSING); //TODO maybe wrong response status
@@ -192,8 +185,7 @@ public class ComputeThread extends Thread {
 										true, //hasFailed
 										null); //failDescription
 							} catch (SQLException sqlE) {
-								log.warning("ComputeThread: Could not log ComputeException into DB : "
-										+ sqlE.getMessage());
+								log.log(Level.WARNING, "Could not log ComputeException into DB", sqlE);
 							}
 							
 						}
@@ -217,8 +209,7 @@ public class ComputeThread extends Thread {
                                     true, //hasFailed
                                     null); //failDescription
                         } catch (SQLException sqlE) {
-                            log.warning("ComputeThread: Could not log EUNKNOWNALG into DB : "
-                                    + sqlE.getMessage());
+                            log.log(Level.WARNING, "ComputeThread: Could not log EUNKNOWNALG into DB", sqlE);
                         }
 
                     }
@@ -228,25 +219,7 @@ public class ComputeThread extends Thread {
 				log.warning("ComputeThread interrupted");
 				return;
 			} catch (Exception e) {
-				log.warning("Exception in ComputeThread: "
-						+ e.getMessage());
-                // TODO: Remove DEBUG Only Code
-				if (baOutputStream != null) {
-					System.err.println("Exception in ComputeThread - debug information: Size of the ByteArrayStream: " 
-							+ baOutputStream.size());
-					if (baOutputStream.toString().length() > 200) {
-						System.err.println("Exception in ComputeThread - debug information: Content of the ByteArrayStream: " 
-								+ baOutputStream.toString().substring(0, 100) + "\n ### SKIP BYTES ### \n"
-								+ baOutputStream.toString().substring(baOutputStream.toString().length() - 100));
-					} else {
-						System.err.println("ComputeThread - debug information: Content of the ByteArrayStream: " 
-								+ baOutputStream.toString());
-					}
-				} else {
-					System.err.println("ComputeThread: ByteArrayStream is null");
-				}
-				
-				e.printStackTrace();
+				log.log(Level.WARNING ,"An exception occurred", e);
 			}
 		}
 	}

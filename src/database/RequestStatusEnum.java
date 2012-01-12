@@ -9,8 +9,7 @@ package database;
  */
 public enum RequestStatusEnum {
 
-	OK,
-    Failed,
-    Pending,
-    TryAgainLater
+    ok,
+    failed,
+    pending
 }

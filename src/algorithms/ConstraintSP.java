@@ -10,25 +10,27 @@ import java.util.Map;
 
 public class ConstraintSP extends GraphAlgorithm {
 
-    private final Heap heap;
+    private Heap heap;
+
+    // DijkstraStructs used by the ConstraintShortestPath
+    private final DijkstraStructs ds;
+
 
     int distance;
     
-    public ConstraintSP(GraphRep graph) {
+    public ConstraintSP(GraphRep graph, DijkstraStructs dijkstraStructs) {
         super(graph);
-        heap = new algorithms.Heap(10000);
-        dists = new int[graph.getNodeCount()];
-        prevEdges = new int[graph.getNodeCount()];
+        ds = dijkstraStructs;
     }
 
     // dists in this array are stored with the multiplier applied. They also are
     // rounded and are stored as integers
-    private final int[] dists;
+    private int[] dists;
 
     /**
      * edge id
      */
-    private final int[] prevEdges;
+    private int[] prevEdges;
 
     private int dijkstra(int srcId, int trgtId, double lamda) throws ComputeException {
         // reset dists
@@ -96,7 +98,9 @@ public class ConstraintSP extends GraphAlgorithm {
                     "There is no path from src: " + srcId + " to trgt: " + trgtId + "Dijkstra does not found the " +
                     "target"
                               );
-
+            ds.returnDistArray(false);
+            ds.returnHeap();
+            ds.returnPrevArray();
             throw new ComputeException("No path found");
         }
 
@@ -130,11 +134,21 @@ public class ConstraintSP extends GraphAlgorithm {
 
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
+        try {
+            heap = ds.borrowHeap();
+            dists = ds.borrowDistArray();
+            prevEdges = ds.borrowPrevArray();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
         assert req != null : "We ended up without a request object in run";
         RequestPoints points = req.getPoints();
 
         // Check if we have enough points to do something useful
         if (points.size() < 2 && points.size() > 2) {
+            ds.returnDistArray(false);
+            ds.returnHeap();
+            ds.returnPrevArray();
             throw new ComputeException(
                     "Not enough points or to much points, need 2"
             );
@@ -186,6 +200,9 @@ public class ConstraintSP extends GraphAlgorithm {
                         "There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                         maxAltitudeDifference
                                   );
+                ds.returnDistArray(false);
+                ds.returnHeap();
+                ds.returnPrevArray();
                 throw new ComputeException("No path found");
             }
             lamdaOfGood = lamda;
@@ -250,6 +267,9 @@ public class ConstraintSP extends GraphAlgorithm {
         Map<String, Object> misc = new HashMap<String, Object>(1);
         misc.put("distance", distance);
         req.setMisc(misc);
+        ds.returnDistArray(false);
+        ds.returnHeap();
+        ds.returnPrevArray();
 
     }
 }

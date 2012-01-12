@@ -97,8 +97,6 @@ public class PrivateHandler extends RequestHandler {
                     "You are not an admin",
                     "You must be admin to list users",
                     HttpResponseStatus.FORBIDDEN);
-            System.out.println("HttpRequestHandler: ListUsers failed, " +
-                    "you must be admin to list users.");
             return;
         }
 
@@ -213,6 +211,13 @@ public class PrivateHandler extends RequestHandler {
 
     }
 
+
+    public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) {
+        // TODO Auto-generated method stub
+
+    }
+
+
     /**
      * Returns -1 if parameter is invalid (missing or not a natural number) and will then response to request
      * with error message.
@@ -252,6 +257,11 @@ public class PrivateHandler extends RequestHandler {
 
     }
 
+    public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters) {
+        // TODO Auto-generated method stub
+
+    }
+
     public void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException, IOException, SQLException {
         UserDataset user = authorizer.auth(request);
         if (user != null) responder.writeJSON(user, HttpResponseStatus.OK);
@@ -270,20 +280,18 @@ public class PrivateHandler extends RequestHandler {
      */
     public void handleRegisterUser(final HttpRequest request) throws IOException, SQLFeatureNotSupportedException, SQLException {
 
-        UserDataset user = null;
-        UserDataset authUser = null;
+        UserDataset authenticatedUser = null;
 
         // if no authorization header keep on with adding not verified user
         if (request.getHeader("Authorization") != null) {
-            authUser = authorizer.auth(request);
-            if (authUser == null) {
+            authenticatedUser = authorizer.auth(request);
+            if (authenticatedUser == null) {
                 // auth(request) sent error response
                 return;
             }
 
-            if (!authUser.admin) {
-                responder.writeUnauthorizedClose();
-                log.warning("RegisterUser failed, a logged in user has to be admin to register users.");
+            if (!authenticatedUser.admin) {
+                responder.writeErrorMessage("ENOTADMIN", "You are not an admin", "A logged in user has to be admin to register users.", HttpResponseStatus.UNAUTHORIZED);
                 return;
             }
         }
@@ -294,7 +302,7 @@ public class PrivateHandler extends RequestHandler {
         // if json object is bad or if there is no json object
         // so no further handling needed if objmap == null
         if (objmap == null) {
-            log.warning("RegisterUser failed, bad json object.");
+            log.warning("Failed, bad json object.");
             return;
         }
 
@@ -321,25 +329,31 @@ public class PrivateHandler extends RequestHandler {
 
         final String toHash = authorizer.generateHash(salt, pw);
 
+
+        UserDataset newUser = null;
+
         // if no authorization add not verified user
-        if (authUser == null) {
-            // if there is no authorization as admin, the new registered
-            // user will
+        if (authenticatedUser == null) {
+            // if there is no authorization as admin, the new registered user will
             // never be registered as admin, even if json admin flag is true
-            user = dbm.addNewUser(email, toHash, salt, firstName, lastName, address, false);
-        } else if (objmap.get("admin") != null) {
+             newUser = dbm.addNewUser(email, toHash, salt, firstName, lastName, address, false);
+        } else if (authenticatedUser != null) {
 
-            user = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, (Boolean) objmap.get("admin"));
+            if (objmap.get("admin") != null) {
+                newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, (Boolean) objmap.get("admin"));
+            } else {
+                // TODO specify this case for protocol specification
+                newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, false);
+            }
         }
 
-        if (user == null) {
+        if ( newUser == null) {
             responder.writeErrorMessage("EREGISTERED", "This email is already registered", null, HttpResponseStatus.FORBIDDEN);
-            log.warning("RegisterUser failed, email is already registered.");
             return;
-        } else {
-            responder.writeJSON(user, HttpResponseStatus.OK);
-            log.finest("MasterHandler: RegisterUser succseeded.");
         }
+
+        responder.writeJSON(newUser, HttpResponseStatus.OK);
+        log.finest("RegisterUser successful.");
 
     }
 

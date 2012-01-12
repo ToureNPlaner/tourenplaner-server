@@ -4,6 +4,7 @@
 
 package server;
 
+import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 import config.ConfigManager;
 import database.DatabaseManager;
@@ -60,7 +61,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
      */
     public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
         super();
-        this.mapper = mapper;
         final ConfigManager cm = ConfigManager.getInstance();
         this.isPrivate = cm.getEntryBool("private", false);
         DatabaseManager dbm = null;
@@ -148,9 +148,17 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
                 privateHandler.handleListRequests(request, queryStringDecoder.getParameters());
 
+            } else if (isPrivate && "/getrequest".equals(path)) {
+
+                privateHandler.handleGetRequest(request, queryStringDecoder.getParameters());
+
             } else if (isPrivate && "/listusers".equals(path)) {
 
                 privateHandler.handleListUsers(request, queryStringDecoder.getParameters());
+
+            } else if (isPrivate && "/deleteuser".equals(path)) {
+
+                privateHandler.handleDeleteUser(request, queryStringDecoder.getParameters());
 
             } else {
                 // Unknown request, close connection

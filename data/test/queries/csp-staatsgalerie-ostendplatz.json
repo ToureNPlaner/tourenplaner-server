@@ -1,0 +1,8 @@
+{
+   "points" : [
+		{ "lt": 487812920, "ln": 91868630, "name" : "Staatsgalerie", "small" : false},
+		{ "lt": 487856190, "ln": 92076340, "name" : "Ostenplatz", "small" : true}
+	],
+   "constraints":{"maxAltitudeDifference":60}
+}
+

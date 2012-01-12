@@ -361,7 +361,7 @@ public class DatabaseManager {
 			SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
-				address, isAdmin, UserStatusEnum.NeedsVerification, false);
+				address, isAdmin, UserStatusEnum.needs_verification, false);
 	}
 
 	/**
@@ -405,7 +405,7 @@ public class DatabaseManager {
 			SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
-				address, isAdmin, UserStatusEnum.Verified, true);
+				address, isAdmin, UserStatusEnum.verified, true);
 	}
 
 	private UserDataset addNewUser(String email, String passwordhash,
@@ -416,9 +416,8 @@ public class DatabaseManager {
 		/*
 		 * id INT NOT NULL AUTO_INCREMENT, Email VARCHAR(255) NOT NULL UNIQUE,
 		 * Passwordhash TEXT NOT NULL, Salt TEXT NOT NULL, AdminFlag BOOL NOT
-		 * NULL DEFAULT 0, Status ENUM ('NeedsVerification',
-		 * 'VerificationFailed', 'Verified', 'Delete') NOT NULL DEFAULT
-		 * 'NeedsVerification', FirstName TEXT NOT NULL, LastName TEXT NOT NULL,
+		 * NULL DEFAULT 0,Status ENUM ('needs_verification','verified')
+         * NOT NULL DEFAULT 'needs_verification', FirstName TEXT NOT NULL, LastName TEXT NOT NULL,
 		 * Address TEXT NOT NULL, RegistrationDate DATETIME NOT NULL,
 		 * VerifiedDate DATETIME DEFAULT NULL, DeleteRequestDate DATETIME
 		 * DEFAULT NULL, PRIMARY KEY (ID)
@@ -516,10 +515,10 @@ public class DatabaseManager {
                 boolean hasFailed = false;
                 boolean isPending = false;
 
-                if (request.status == RequestStatusEnum.Pending) {
+                if (request.status == RequestStatusEnum.pending) {
                     isPending = true;
                 }
-                if (request.status == RequestStatusEnum.Failed) {
+                if (request.status == RequestStatusEnum.failed) {
                     hasFailed = true;
                 }
 
