@@ -9,8 +9,6 @@ package database;
  */
 public enum UserStatusEnum {
 
-	NeedsVerification,
-	VerificationFailed,
-	Verified,
-	Delete
+    needs_verification,
+    verified
 }

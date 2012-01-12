@@ -45,13 +45,11 @@ public class RequestDataset {
 		this.finishedDate = finishedDate;
 		this.duration = duration;
 		if (isPending && !hasFailed) {
-            this.status = RequestStatusEnum.Pending;
-        } else if (isPending && hasFailed) {
-            this.status = RequestStatusEnum.TryAgainLater;
-        } else if (!isPending && hasFailed) {
-            this.status = RequestStatusEnum.Failed;
+            this.status = RequestStatusEnum.pending;
+        } else if (hasFailed) {
+            this.status = RequestStatusEnum.failed;
         } else {
-            this.status = RequestStatusEnum.OK;
+            this.status = RequestStatusEnum.ok;
         }
 
         this.failDescription = failDescription;

@@ -152,10 +152,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
                 privateHandler.handleGetRequest(request, queryStringDecoder.getParameters());
 
-            } else if (isPrivate && "/updaterequests".equals(path)) {
-
-                privateHandler.handleUpdateRequests(request);
-
             } else if (isPrivate && "/listusers".equals(path)) {
 
                 privateHandler.handleListUsers(request, queryStringDecoder.getParameters());
