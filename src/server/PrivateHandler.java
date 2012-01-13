@@ -277,6 +277,7 @@ public class PrivateHandler extends RequestHandler {
      * @throws java.sql.SQLFeatureNotSupportedException
      *
      * @throws SQLException
+     * @throws java.io.IOException
      */
     public void handleRegisterUser(final HttpRequest request) throws IOException, SQLFeatureNotSupportedException, SQLException {
 
@@ -314,18 +315,13 @@ public class PrivateHandler extends RequestHandler {
 
         if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
             // TODO maybe change error id and message
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", "JSON user object was not correct " + "(needs email, password, firstname, lastname, address)", HttpResponseStatus.UNAUTHORIZED);
+            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
+                    "JSON user object was not correct " + "(needs email, password, firstname, lastname, address)",
+                    HttpResponseStatus.UNAUTHORIZED);
             return;
         }
 
-        // TODO optimize salt-generation
-        final Random rand = new Random();
-        final StringBuilder saltBuilder = new StringBuilder(64);
-        for (int i = 0; i < 4; i++) {
-            saltBuilder.append(Long.toHexString(rand.nextLong()));
-        }
-
-        final String salt = saltBuilder.toString();
+        final String salt = authorizer.generateSalt();
 
         final String toHash = authorizer.generateHash(salt, pw);
 
@@ -337,8 +333,7 @@ public class PrivateHandler extends RequestHandler {
             // if there is no authorization as admin, the new registered user will
             // never be registered as admin, even if json admin flag is true
              newUser = dbm.addNewUser(email, toHash, salt, firstName, lastName, address, false);
-        } else if (authenticatedUser != null) {
-
+        } else {
             if (objmap.get("admin") != null) {
                 newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, (Boolean) objmap.get("admin"));
             } else {
@@ -356,5 +351,7 @@ public class PrivateHandler extends RequestHandler {
         log.finest("RegisterUser successful.");
 
     }
+
+
 
 }

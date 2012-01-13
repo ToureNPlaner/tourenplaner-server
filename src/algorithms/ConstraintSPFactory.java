@@ -23,7 +23,7 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
 
     @Override
     public Algorithm createAlgorithm(DijkstraStructs rs) {
-        return new ShortestPathCH(graph, rs);
+        return new ConstraintSP(graph, rs);
     }
 
     /*

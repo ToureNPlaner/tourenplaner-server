@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -62,6 +63,22 @@ public class Authorizer extends RequestHandler {
         }
         toHash = hexbuilder.toString();
         return toHash;
+    }
+
+
+    /**
+     * Generates a Salt, necessary for hash generation
+     * @return
+     */
+    protected String generateSalt() {
+        // TODO optimize salt-generation
+        final Random rand = new Random();
+        final StringBuilder saltBuilder = new StringBuilder(64);
+        for (int i = 0; i < 4; i++) {
+            saltBuilder.append(Long.toHexString(rand.nextLong()));
+        }
+
+        return saltBuilder.toString();
     }
 
     /**
