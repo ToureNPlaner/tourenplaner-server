@@ -7,16 +7,15 @@ import graphrep.GraphRep;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ConstraintSP extends GraphAlgorithm {
-
+    private static Logger log = Logger.getLogger("algorithms");
     private Heap heap;
 
     // DijkstraStructs used by the ConstraintShortestPath
     private final DijkstraStructs ds;
 
-
-    int distance;
     
     public ConstraintSP(GraphRep graph, DijkstraStructs dijkstraStructs) {
         super(graph);
@@ -40,7 +39,6 @@ public class ConstraintSP extends GraphAlgorithm {
         dists[srcId] = 0;
         heap.resetHeap();
         heap.insert(srcId, dists[srcId]);
-        distance = 0;
 
         int nodeId = -1;
         int nodeDist;
@@ -94,7 +92,7 @@ public class ConstraintSP extends GraphAlgorithm {
             }
         }
         if (nodeId != trgtId) {
-            System.err.println(
+            log.fine(
                     "There is no path from src: " + srcId + " to trgt: " + trgtId + "Dijkstra does not found the " +
                     "target"
                               );
@@ -120,7 +118,6 @@ public class ConstraintSP extends GraphAlgorithm {
         while (routeElements > 0) {
             prevNode = graph.getSource(prevEdges[currNode]);
             routeElements--;
-            distance += graph.getEuclidianDist(prevEdges[currNode]);
             currNodeHeight = graph.getNodeHeight(currNode);
             prevNodeHeight = graph.getNodeHeight(prevNode);
             tempAltitudeDiff = currNodeHeight - prevNodeHeight;
@@ -134,6 +131,7 @@ public class ConstraintSP extends GraphAlgorithm {
 
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
+
         try {
             heap = ds.borrowHeap();
             dists = ds.borrowDistArray();
@@ -155,7 +153,6 @@ public class ConstraintSP extends GraphAlgorithm {
         }
 
         Points resultPoints = req.getResulWay();
-        int distance = 0;
         int srclat, srclon;
         int destlat, destlon;
         int srcId, trgtId;
@@ -169,6 +166,9 @@ public class ConstraintSP extends GraphAlgorithm {
         } catch (ClassCastException e){
             throw new ComputeException("Couldn't read maxAltitudeDifference, wrong type");
         }
+
+        double threshold = 1.0 / (double) ((long)graph.getNodeCount() * (long)graph.getNodeCount() * (long)maxAltitudeDifference + (long) maxAltitudeDifference);
+
         srclat = points.getPointLat(0);
         srclon = points.getPointLon(0);
         destlat = points.getPointLat(1);
@@ -177,17 +177,15 @@ public class ConstraintSP extends GraphAlgorithm {
         trgtId = graph.getIdForCoordinates(destlat, destlon);
 
         double lamdaOfGood;
-        long lengthOfGood;
         double lamdaOfBad;
         double lamda = 1.0;
         int altitudeDiff;
-        long length;
         double oldLamda;
         // shortest path's difference of altitude
         altitudeDiff = dijkstra(srcId, trgtId, lamda);
         // shortest path serves not the constraint
         if (altitudeDiff > maxAltitudeDifference) {
-            System.err.println(
+            log.fine(
                     "There is no shortest path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                     maxAltitudeDifference
                               );
@@ -196,8 +194,7 @@ public class ConstraintSP extends GraphAlgorithm {
             // exists there a path that serves the constraint
             altitudeDiff = dijkstra(srcId, trgtId, lamda);
             if (altitudeDiff > maxAltitudeDifference) {
-                System.err.println(
-                        "There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
+                log.fine("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                         maxAltitudeDifference
                                   );
                 ds.returnDistArray(false);
@@ -206,26 +203,20 @@ public class ConstraintSP extends GraphAlgorithm {
                 throw new ComputeException("No path found");
             }
             lamdaOfGood = lamda;
-            lengthOfGood = distance;
-            long oldLength = lengthOfGood;
+            long oldLength = 0;
             lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
             altitudeDiff = dijkstra(srcId, trgtId, lamda);
-            length = distance;
 
-            while (oldLength != lengthOfGood && lamda > Double.MIN_VALUE ) {
-
-                if (altitudeDiff <= maxAltitudeDifference && length < lengthOfGood) {
+            while (lamdaOfBad - lamdaOfGood >= threshold ) {
+                if (altitudeDiff <= maxAltitudeDifference) {
                     oldLamda = lamdaOfGood;
                     lamdaOfGood = lamda;
-                    oldLength = lengthOfGood;
-                    lengthOfGood = length;
                 } else {
                     oldLamda = lamdaOfBad;
                     lamdaOfBad = lamda;
                 }
                 lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
                 altitudeDiff = dijkstra(srcId, trgtId, lamda);
-                length = distance;
             }
             altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
         }
@@ -237,15 +228,14 @@ public class ConstraintSP extends GraphAlgorithm {
             routeElements++;
             currNode = graph.getSource(prevEdges[currNode]);
         }
-        System.out.println(
+        log.fine(
                 "path goes over " + routeElements + " nodes and over " + altitudeDiff +
-                " meters of altitude Difference"
-                          );
+                " meters of altitude Difference");
         // Add points to the end
         resultAddIndex = resultPoints.size();
         // Add them without values we set the values in the next step
         resultPoints.addEmptyPoints(routeElements);
-
+        int distance = 0;
         // backtracking here
         // Don't read distance from multipliedDist[], because there are
         // distances with
@@ -253,14 +243,13 @@ public class ConstraintSP extends GraphAlgorithm {
         // only to the penultimate element (srcId)
         currNode = trgtId;
         while (routeElements > 1) {
-            distance += graph.getDist(prevEdges[currNode]);
+            distance += graph.getEuclidianDist(prevEdges[currNode]);
             routeElements--;
             resultPoints.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
             resultPoints.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
-        distance += graph.getDist(prevEdges[currNode]);
         resultPoints.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
         resultPoints.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
 
