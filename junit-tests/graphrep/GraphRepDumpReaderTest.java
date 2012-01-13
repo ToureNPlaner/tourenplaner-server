@@ -55,12 +55,11 @@ public class GraphRepDumpReaderTest {
             assertEquals(1825, graphRep.trgt[3]);
             assertEquals(10463, graphRep.trgt[4]);
 
-            // TODO wait for changed graphrep
-            // assertEquals(13, graphRep.euklidianDist[0]);
-            // assertEquals(5, graphRep.euklidianDist[1]);
-            // assertEquals(13, graphRep.euklidianDist[2]);
-            // assertEquals(8, graphRep.euklidianDist[3]);
-            // assertEquals(5, graphRep.euklidianDist[4]);
+            assertEquals(22, graphRep.getEuclidianDist(0));
+            assertEquals(99, graphRep.getEuclidianDist(1));
+            assertEquals(66, graphRep.getEuclidianDist(2));
+            assertEquals(110, graphRep.getEuclidianDist(3));
+            assertEquals(30, graphRep.getEuclidianDist(4));
 
             assertEquals(22, graphRep.dist[0]);
             assertEquals(124, graphRep.dist[1]);
