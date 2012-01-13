@@ -69,33 +69,10 @@ public class TravelingSalesman extends GraphAlgorithm {
 
             // Looks cheap but computes the n^2 matrix of distances for the given points
             distmat = computeDistMatrix(points);
+            List<RequestPoint> pointStore;
 
+            pointStore = nnheuristic(distmat, points.getStore());
 
-
-            IntOpenHashSet visited = new IntOpenHashSet(points.size());
-            int currIndex = 0;
-            int minValue;
-            int minIndex;
-            List<RequestPoint> requestPointList = req.getPoints().getStore();
-            List<RequestPoint> pointStore = new ArrayList<RequestPoint>(points.size());
-            // add the initial point
-            pointStore.add(requestPointList.get(currIndex));
-            
-            for (int nextIndex = 1; nextIndex < points.size(); nextIndex++) {
-                visited.add(currIndex);
-
-                minValue = Integer.MAX_VALUE;
-                minIndex = 0;
-                for (int i = 0; i < points.size(); i++) {
-                    if (minValue > distmat[currIndex][i] && i != currIndex && !visited.contains(i)) {
-                        minValue = distmat[currIndex][i];
-                        minIndex = i;
-                    }
-                }
-                currIndex = minIndex;
-                pointStore.add(requestPointList.get(currIndex));
-            }
-            
             req.getPoints().setStore(pointStore);
             // Now build real paths
             chdijks.shortestPath(points, req.getResulWay(), true);
@@ -106,5 +83,39 @@ public class TravelingSalesman extends GraphAlgorithm {
         } catch (IllegalAccessException e) {
             throw new ComputeException("Illegal Access: " + e.getMessage());
         }
+    }
+
+    /**
+     * Computes a RequestPoint List (tour) with the Points ordered by the nearest neighbor
+     * heuristic starting at the first point successively adding the nearest unvisited point
+     *
+     *
+     * @param distmat the n^2 matrix of distance values for the given points
+     * @param requestPointList the list of points for which a tour should be computed
+     * @return
+     */
+    private List<RequestPoint> nnheuristic(int[][] distmat, List<RequestPoint> requestPointList) {
+        List<RequestPoint> pointStore = new ArrayList<RequestPoint>(requestPointList.size());
+        IntOpenHashSet visited = new IntOpenHashSet(requestPointList.size());
+        int currIndex = 0;
+        int minValue;
+        int minIndex;
+        // add the initial point
+        pointStore.add(requestPointList.get(currIndex));
+        for (int nextIndex = 1; nextIndex < requestPointList.size(); nextIndex++) {
+            visited.add(currIndex);
+
+            minValue = Integer.MAX_VALUE;
+            minIndex = 0;
+            for (int i = 0; i < requestPointList.size(); i++) {
+                if (minValue > distmat[currIndex][i] && i != currIndex && !visited.contains(i)) {
+                    minValue = distmat[currIndex][i];
+                    minIndex = i;
+                }
+            }
+            currIndex = minIndex;
+            pointStore.add(requestPointList.get(currIndex));
+        }
+        return pointStore;
     }
 }
