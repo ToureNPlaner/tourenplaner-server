@@ -6,6 +6,7 @@ import computecore.ComputeRequest;
 import computecore.RequestPoint;
 import computecore.RequestPoints;
 import graphrep.GraphRep;
+import utils.StaticMath;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import java.util.Map;
  * Time: 4:31 PM
  */
 public class TravelingSalesman extends GraphAlgorithm {
+    private static final int SMALL = 12;
 
     private final DijkstraStructs ds;
     private final ShortestPathCH chdijks;
@@ -55,8 +57,12 @@ public class TravelingSalesman extends GraphAlgorithm {
 
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
+       
         // Map points to ids
         RequestPoints points = req.getPoints();
+        if(points.size() < 1){
+            throw new ComputeException("Not enough points, need at least 1");
+        }
         int[][] distmat;
 
         // DEBUG:
@@ -70,8 +76,13 @@ public class TravelingSalesman extends GraphAlgorithm {
             // Looks cheap but computes the n^2 matrix of distances for the given points
             distmat = computeDistMatrix(points);
             List<RequestPoint> pointStore;
-
-            pointStore = nnheuristic(distmat, points.getStore());
+            if (points.size() < SMALL){
+                // It's small use the Giant Hammer Method (TM)
+                pointStore = exactSolve(distmat, points.getStore());
+            } else {
+                // To big let the Heuristics get something nice
+                pointStore = nnHeuristic(distmat, points.getStore());
+            }
 
             req.getPoints().setStore(pointStore);
             // Now build real paths
@@ -84,6 +95,41 @@ public class TravelingSalesman extends GraphAlgorithm {
             throw new ComputeException("Illegal Access: " + e.getMessage());
         }
     }
+    
+    private final List<RequestPoint> exactSolve(int[][] distmat, List<RequestPoint> requestPointList){
+        List<RequestPoint> pointStore = new ArrayList<RequestPoint>(requestPointList.size());
+        int[] currTour = new int[requestPointList.size()];
+        for(int i = 0; i < currTour.length; i++){
+            currTour[i]=i;
+        }
+        int[] bestTour = null;
+        int bestLength = Integer.MAX_VALUE;
+        int currLength;
+        do {
+            currLength = calcTourLength(distmat, currTour);
+            if(currLength < bestLength){
+                bestTour = currTour.clone();
+                bestLength = currLength;
+            }
+        } while(StaticMath.nextPerm(currTour));
+
+        // Rearrange the point store to the found bestTour
+        for(int i = 0; i < bestTour.length; i++){
+            pointStore.add(requestPointList.get(bestTour[i]));
+        }
+        return  pointStore;
+    }
+    
+    private final int calcTourLength(int[][] distmat, int[] tourPerm){
+        int length = 0;
+        for(int i = 0; i < tourPerm.length - 1; i++){
+            length += distmat[tourPerm[i]][tourPerm[i+1]];
+        }
+        // We have to make sure beforehand that there is an element
+        // because this will be called A LOT save that check
+        length +=  distmat[tourPerm.length - 1][0];
+        return length;
+    }
 
     /**
      * Computes a RequestPoint List (tour) with the Points ordered by the nearest neighbor
@@ -94,7 +140,7 @@ public class TravelingSalesman extends GraphAlgorithm {
      * @param requestPointList the list of points for which a tour should be computed
      * @return
      */
-    private List<RequestPoint> nnheuristic(int[][] distmat, List<RequestPoint> requestPointList) {
+    private final List<RequestPoint> nnHeuristic(int[][] distmat, List<RequestPoint> requestPointList) {
         List<RequestPoint> pointStore = new ArrayList<RequestPoint>(requestPointList.size());
         IntOpenHashSet visited = new IntOpenHashSet(requestPointList.size());
         int currIndex = 0;
