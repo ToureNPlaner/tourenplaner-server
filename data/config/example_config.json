@@ -10,7 +10,4 @@
 	"httpport" : 8080,
 	"sslport" : 8081,
 	"sslcert" : "/home/user/keystore.jks",
-	"sslalias" : "tourenplaner",
-	"sslpw"	: "tour3nplan3r"
-
 }
