@@ -13,6 +13,7 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.util.CharsetUtil;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
@@ -217,8 +218,11 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
      */
     @Override
     public void exceptionCaught(final ChannelHandlerContext ctx, final ExceptionEvent e) throws Exception {
-        log.log(Level.WARNING, "Exception caught", e.getCause());
-        e.getCause().printStackTrace();
+        // Ignore if it's just a client cutting the connection
+        if(!(e.getCause() instanceof IOException)){
+            log.log(Level.WARNING, "Exception caught", e.getCause());
+        }
+
         e.getChannel().close();
     }
 }
