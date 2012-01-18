@@ -83,8 +83,7 @@ public class PrivateHandler extends RequestHandler {
     }
 
     public void handleListUsers(final HttpRequest request, Map<String, List<String>> parameters) throws SQLException, JsonGenerationException, JsonMappingException, IOException {
-        UserDataset user = null;
-        user = authorizer.auth(request);
+        UserDataset user = authorizer.auth(request);
 
         // authentication needed, auth(request) responses with error if auth fails
         if (user == null) {
@@ -131,8 +130,7 @@ public class PrivateHandler extends RequestHandler {
 
     public void handleListRequests(final HttpRequest request, Map<String, List<String>> parameters) throws SQLException, JsonGenerationException, JsonMappingException, IOException {
 
-        UserDataset user = null;
-        user = authorizer.auth(request);
+        UserDataset user = authorizer.auth(request);
 
         // authentication needed, auth(request) responses with error if auth
         // fails
@@ -140,36 +138,6 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int userID = -1;
-        boolean allRequests = false;
-        if (parameters.containsKey("id")) {
-            if (!user.admin) {
-                responder.writeErrorMessage("ENOTADMIN", "You are not an admin", "You must be admin if you want to use the id parameter", HttpResponseStatus.FORBIDDEN);
-                return;
-            }
-
-            String idParameter = parameters.get("id").get(0);
-
-            if (idParameter != null) {
-                responder.writeErrorMessage("ENOID", "The given user id is unknown to this server", "The given id is null", HttpResponseStatus.UNAUTHORIZED);
-                return;
-            }
-
-            if ("all".equals(idParameter)) {
-                allRequests = true;
-            } else {
-                try {
-                    userID = Integer.parseInt(idParameter);
-                } catch (NumberFormatException e) {
-                    userID = -1;
-                }
-            }
-
-            if (userID < 0 && !allRequests) {
-                responder.writeErrorMessage("ENOID", "The given user id is unknown to this server", "The given id is not an allowed number (positive or zero)", HttpResponseStatus.UNAUTHORIZED);
-                return;
-            }
-        }
 
         int limit = extractPosIntParameter(parameters, "limit");
         // if parameter is invalid, an error response is sent from extractPosIntParameter.
@@ -187,12 +155,26 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        if (userID < 0) {
+
+        Integer userID = -1;
+        boolean allRequests = false;
+        if (parameters.containsKey("id")) {
+            userID = parseUserIdParameter(parameters.get("id").get(0), user, true);
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (userID != null && userID < 0) {
+                return;
+            }
+            if (userID == null) {
+                allRequests = true;
+            }
+        } else {
             userID = user.id;
         }
 
-        List<RequestDataset> requestDatasetList = null;
-        int count = 0;
+        List<RequestDataset> requestDatasetList;
+        int count;
         if (allRequests) {
             requestDatasetList = dbm.getAllRequests(limit, offset);
             count = dbm.getNumberOfRequests();
@@ -217,6 +199,122 @@ public class PrivateHandler extends RequestHandler {
 
     }
 
+    public void handleUpdateUser(final HttpRequest request, Map<String, List<String>> parameters) {
+        // TODO Auto-generated method stub
+
+    }
+
+    public void handleGetUser(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
+        UserDataset user = authorizer.auth(request);
+
+        // authentication needed, auth(request) responses with error if auth fails
+        if (user == null) {
+            return;
+        }
+
+        int userID = -1;
+        UserDataset selectedUser;
+
+        if (parameters.containsKey("id")) {
+            userID = parseUserIdParameter(parameters.get("id").get(0), user, false);
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (userID < 0) {
+                return;
+            }
+            selectedUser = dbm.getUser(userID);
+        } else {
+            selectedUser = user;
+        }
+
+        if (selectedUser == null) {
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server", "The user id is not in the database", HttpResponseStatus.UNAUTHORIZED);
+            return;
+        }
+
+        responder.writeJSON(selectedUser, HttpResponseStatus.OK);
+        log.finest("GetUser successful.");
+
+    }
+
+    public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
+        UserDataset user = authorizer.auth(request);
+
+        // authentication needed, auth(request) responses with error if auth fails
+        if (user == null) {
+            return;
+        }
+
+        int userID = -1;
+        if (parameters.containsKey("id")) {
+            userID = parseUserIdParameter(parameters.get("id").get(0), user, false);
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (userID < 0) {
+                return;
+            }
+        } else {
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server", "You must send an id parameter", HttpResponseStatus.UNAUTHORIZED);
+            return;
+        }
+
+        dbm.deleteRequestsOfUser(userID);
+        if (dbm.deleteUser(userID) != 1) {
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server", "The user id is not in the database", HttpResponseStatus.UNAUTHORIZED);
+            return;
+        }
+
+        responder.writeStatusResponse(HttpResponseStatus.OK);
+        log.finest("DeleteUser successful.");
+
+    }
+    
+    /**
+     * Returns -1 if parameter is invalid (not a natural number) and will then
+     * response to request with error message. But the authenticated user must be an admin (will be checked by this
+     * method) or an error message will be sent. If "id=all" is allowed and the value of the parameter is "all",
+     * this method will return null.
+     * @param parameterValue the value of the id parameter as String
+     * @param authenticatedUser UserDataset of the user who sent the request
+     * @param valueAllIsAllowed determines if id=all is allowed for the parameter
+     * @return
+     * @throws java.io.IOException
+     */
+    private Integer parseUserIdParameter(String parameterValue, UserDataset authenticatedUser,
+                                           boolean valueAllIsAllowed) throws IOException {
+
+        if (!authenticatedUser.admin) {
+            responder.writeErrorMessage("ENOTADMIN", "You are not an admin", "You must be admin if you want to use the id parameter", HttpResponseStatus.FORBIDDEN);
+            return -1;
+        }
+
+        if (parameterValue == null) {
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server", "The given id is null", HttpResponseStatus.UNAUTHORIZED);
+            return -1;
+        }
+
+        int userID = -1;
+
+        if ("all".equals(parameterValue) && valueAllIsAllowed) {
+            return null;
+        } else {
+            try {
+                userID = Integer.parseInt(parameterValue);
+            } catch (NumberFormatException e) {
+                userID = -1;
+            }
+        }
+
+        if (userID < 0) {
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server", "The given id is not an allowed number (positive or zero)", HttpResponseStatus.UNAUTHORIZED);
+            return userID;
+        }
+
+        return userID;
+        
+    }
 
     /**
      * Returns -1 if parameter is invalid (missing or not a natural number) and will then response to request
@@ -232,10 +330,12 @@ public class PrivateHandler extends RequestHandler {
             return -1;
         }
 
-        try {
-            param = Integer.parseInt(parameters.get(name).get(0));
-        } catch (NumberFormatException e) {
-            param = -1;
+        if  (parameters.get(name).get(0) != null) {
+            try {
+                param = Integer.parseInt(parameters.get(name).get(0));
+            } catch (NumberFormatException e) {
+                param = -1;
+            }
         }
 
         if (param < 0) {
@@ -245,21 +345,6 @@ public class PrivateHandler extends RequestHandler {
         }
 
         return param;
-    }
-
-    public void handleUpdateUser(final HttpRequest request) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void handleGetUser(final HttpRequest request) {
-        // TODO Auto-generated method stub
-
-    }
-
-    public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters) {
-        // TODO Auto-generated method stub
-
     }
 
     public void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException, IOException, SQLException {

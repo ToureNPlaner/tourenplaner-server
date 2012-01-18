@@ -82,9 +82,9 @@ public class Responder {
     /**
      * Sets the KeepAlive flag
      *
-     * @param keepAlive1
+     * @param keepAlive
      */
-    public void setKeepAlive(boolean keepAlive1) {
+    public void setKeepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
     }
 
@@ -110,6 +110,33 @@ public class Responder {
         ChannelFuture future = replyChannel.write(response);
         future.addListener(ChannelFutureListener.CLOSE);
     }
+
+    /**
+     * Writes a HTTP status answer to the wire and closes the connection if it is not a keep-alive connection
+     */
+    public void writeStatusResponse(HttpResponseStatus status) {
+        // TODO check if this method is a correct response
+        // Build the response object.
+        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader(CONTENT_TYPE, "text-html; charset=UTF-8");
+
+        if (keepAlive) {
+            // Add 'Content-Length' header only for a keep-alive connection.
+            response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
+        }
+
+        // Write the response.
+        ChannelFuture future = replyChannel.write(response);
+
+        // Close the non-keep-alive connection after the write operation is
+        // done.
+        if (!keepAlive) {
+            future.addListener(ChannelFutureListener.CLOSE);
+        }
+    }
+
 
     /**
      * Translates a given json compatible object (see simple_json) to JSON and
