@@ -307,6 +307,15 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
+        if ( !(objmap.get("email") instanceof String) || !(objmap.get("password") instanceof String)
+                || !(objmap.get("firstname") instanceof String) || !(objmap.get("lastname") instanceof String)
+                || !(objmap.get("address") instanceof String) ) {
+            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
+                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
+                    HttpResponseStatus.UNAUTHORIZED);
+            return;
+        }
+        
         final String email = (String) objmap.get("email");
         final String pw = (String) objmap.get("password");
         final String firstName = (String) objmap.get("firstname");
@@ -314,9 +323,8 @@ public class PrivateHandler extends RequestHandler {
         final String address = (String) objmap.get("address");
 
         if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
-            // TODO maybe change error id and message
             responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                    "JSON user object was not correct " + "(needs email, password, firstname, lastname, address)",
+                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
                     HttpResponseStatus.UNAUTHORIZED);
             return;
         }
@@ -326,20 +334,28 @@ public class PrivateHandler extends RequestHandler {
         final String toHash = authorizer.generateHash(salt, pw);
 
 
-        UserDataset newUser = null;
+        UserDataset newUser;
 
-        // if no authorization add not verified user
+        // if there is no authorization, add user but without verification
         if (authenticatedUser == null) {
             // if there is no authorization as admin, the new registered user will
             // never be registered as admin, even if json admin flag is true
-             newUser = dbm.addNewUser(email, toHash, salt, firstName, lastName, address, false);
+            newUser = dbm.addNewUser(email, toHash, salt, firstName, lastName, address, false);
         } else {
+
+            boolean adminFlag = false;
+            // TODO specify the case objmap.get("admin") == null for protocol specification: adminFlag is then false
             if (objmap.get("admin") != null) {
-                newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, (Boolean) objmap.get("admin"));
-            } else {
-                // TODO specify this case for protocol specification
-                newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, false);
+                // if (objmap.get("admin") is null, then "instanceof Boolean" would be always false
+                if ( !(objmap.get("admin") instanceof Boolean) ) {
+                    responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
+                            "JSON user object was not correct (\"admin\" should be boolean)",
+                            HttpResponseStatus.UNAUTHORIZED);
+                    return;
+                }
+                adminFlag = (Boolean) objmap.get("admin");
             }
+            newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, adminFlag);
         }
 
         if ( newUser == null) {
