@@ -320,6 +320,10 @@ public class ShortestPathCH extends GraphAlgorithm {
             long dijkstratime = System.nanoTime();
 
             if (!found) {
+                // Return/Reset the data structures
+                ds.returnDistArray(false);
+                ds.returnPrevArray();
+                ds.returnMarkedSet();
                 log.info("There is no path from src to trgt (" + srcId + " to " + destId + ")");
                 throw new ComputeException("No Path found");
             }

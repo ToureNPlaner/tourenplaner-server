@@ -107,7 +107,7 @@ public class RequestPoints {
      * @return
      */
     public Object getConstraint(int i, String conName) {
-        return (points.get(i).getConstraints() != null) ? points.get(i).getConstraints().get("conName") : null;
+        return (points.get(i).getConstraints() != null) ? points.get(i).getConstraints().get(conName) : null;
     }
 
     /**

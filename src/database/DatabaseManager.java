@@ -21,12 +21,6 @@ public class DatabaseManager {
     
     private static Logger log = Logger.getLogger("database");
 
-	private static final int maxCacheSize = 20;
-	private static final HashMap<String, UserDataset> userDatasetCache_mail = new HashMap<String, UserDataset>(
-			maxCacheSize);
-	private static final HashMap<Integer, UserDataset> userDatasetCache_id = new HashMap<Integer, UserDataset>(
-			maxCacheSize);
-
 	private Connection con = null;
     
     private final String url;
@@ -504,9 +498,11 @@ public class DatabaseManager {
 	 *            The request object to write into the database.
 	 * @throws SQLException
 	 *             Thrown if update fails.
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
-	public void updateRequest(RequestDataset request) throws SQLException {
+	public int updateRequest(RequestDataset request) throws SQLException {
         int tryAgain = 2;
+        int rowsAffected = 0;
 
         while (tryAgain > 0) {
             tryAgain--;
@@ -536,10 +532,10 @@ public class DatabaseManager {
                 pstUpdateRequest.setString(11, request.failDescription);
                 pstUpdateRequest.setInt(12, request.requestID);
 
-                pstUpdateRequest.executeUpdate();
+                rowsAffected = pstUpdateRequest.executeUpdate();
 
-                tryAgain = 0;
                 log.fine("Database query successful");
+                return rowsAffected;
 
             } catch (Exception e) {
                 if (tryAgain > 0) {
@@ -556,7 +552,7 @@ public class DatabaseManager {
             }
 
         }
-
+        return 0;
 	}
 
 	/**
@@ -576,11 +572,13 @@ public class DatabaseManager {
 	 * @param failDescription
 	 * @throws SQLException
 	 *             Thrown if update fails.
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
-	public void updateRequestWithComputeResult(int requestID,
+	public int updateRequestWithComputeResult(int requestID,
 			byte[] jsonResponse, boolean isPending, int costs, long cpuTime,
 			boolean hasFailed, String failDescription) throws SQLException {
 
+        int rowsAffected = 0;
         int tryAgain = 2;
 
         while (tryAgain > 0) {
@@ -599,10 +597,10 @@ public class DatabaseManager {
                 pstUpdateRequestWithComputeResult.setString(7, failDescription);
                 pstUpdateRequestWithComputeResult.setInt(8, requestID);
 
-                pstUpdateRequestWithComputeResult.executeUpdate();
+                rowsAffected = pstUpdateRequestWithComputeResult.executeUpdate();
 
-                tryAgain = 0;
                 log.fine("Database query successful");
+                return rowsAffected;
 
             } catch (Exception e) {
                 if (tryAgain > 0) {
@@ -619,6 +617,7 @@ public class DatabaseManager {
             }
 
         }
+        return 0;
 	}
 
 	/**
@@ -632,8 +631,9 @@ public class DatabaseManager {
 	 *            The user object to write into the database.
 	 * @throws SQLException
 	 *             Thrown if update fails.
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
-	public void updateUser(UserDataset user) throws SQLException {
+	public int  updateUser(UserDataset user) throws SQLException {
 		pstUpdateUser.setString(1, user.email);
 		pstUpdateUser.setString(2, user.passwordhash);
 		pstUpdateUser.setString(3, user.salt);
@@ -647,14 +647,7 @@ public class DatabaseManager {
 		pstUpdateUser.setTimestamp(11, dateToTimestamp(user.deleteRequestDate));
 		pstUpdateUser.setInt(12, user.id);
 
-		pstUpdateUser.executeUpdate();
-
-		// do this only if database command succeeds (sql exception throws us
-		// out before this block)
-		if (user != null) {
-			userDatasetCache_mail.put(user.email, user);
-			userDatasetCache_id.put(user.id, user);
-		}
+		return pstUpdateUser.executeUpdate();
 	}
 
 	/**
@@ -665,11 +658,12 @@ public class DatabaseManager {
 	 *            Request id
 	 * @throws SQLException
 	 *             Thrown if delete fails.
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
-	public void deleteRequest(int id) throws SQLException {
+	public int deleteRequest(int id) throws SQLException {
 		pstDeleteRequestWithRequestId.setInt(1, id);
 
-		pstDeleteRequestWithRequestId.executeUpdate();
+		return pstDeleteRequestWithRequestId.executeUpdate();
 	}
 
 	/**
@@ -680,11 +674,12 @@ public class DatabaseManager {
 	 *            User id of the user, whose requests should be deleted.
 	 * @throws SQLException
 	 *             Thrown if delete fails.
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
-	public void deleteRequestsOfUser(int userId) throws SQLException {
+	public int deleteRequestsOfUser(int userId) throws SQLException {
 		pstDeleteRequestsOfUserWithUserId.setInt(1, userId);
 
-		pstDeleteRequestsOfUserWithUserId.executeUpdate();
+		return pstDeleteRequestsOfUserWithUserId.executeUpdate();
 	}
 
 	/**
@@ -698,11 +693,12 @@ public class DatabaseManager {
 	 *            User id
 	 * @throws SQLException
 	 *             Thrown if delete fails.
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
-	public void deleteUser(int userId) throws SQLException {
+	public int deleteUser(int userId) throws SQLException {
 		pstDeleteUserWithUserId.setInt(1, userId);
 
-		pstDeleteUserWithUserId.executeUpdate();
+		return pstDeleteUserWithUserId.executeUpdate();
 	}
 
 	/**
@@ -714,11 +710,12 @@ public class DatabaseManager {
 	 * @param email
 	 * @throws SQLException
 	 *             Thrown if delete fails.
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
-	public void deleteUser(String email) throws SQLException {
+	public int deleteUser(String email) throws SQLException {
 		pstDeleteUserWithEmail.setString(1, email);
 
-		pstDeleteUserWithEmail.executeUpdate();
+		return pstDeleteUserWithEmail.executeUpdate();
 	}
 
 	/**
@@ -984,12 +981,6 @@ public class DatabaseManager {
 	public UserDataset getUser(String email) throws SQLException {
 		UserDataset user = null;
 
-		if ((user = userDatasetCache_mail.get(email)) != null) {
-			log.fine("Retrieved user " + user.email + " with id "
-					+ user.id + " from cache");
-			return user;
-		}
-
 		pstGetUserWithEmail.setString(1, email);
 		ResultSet resultSet = pstGetUserWithEmail.executeQuery();
 
@@ -1005,11 +996,6 @@ public class DatabaseManager {
 					timestampToDate(resultSet.getTimestamp(12)));
 		}
 		resultSet.close();
-
-		if (user != null) {
-			userDatasetCache_mail.put(email, user);
-			userDatasetCache_id.put(user.id, user);
-		}
 
 		return user;
 	}
@@ -1027,13 +1013,6 @@ public class DatabaseManager {
 	public UserDataset getUser(int id) throws SQLException {
 		UserDataset user = null;
 
-		if ((user = userDatasetCache_id.get(id)) != null) {
-			// TODO: debug output
-			log.fine("Retrieved user " + user.email + " with id "
-					+ user.id + " from cache");
-			return user;
-		}
-
 		pstGetUserWithId.setInt(1, id);
 		ResultSet resultSet = pstGetUserWithId.executeQuery();
 
@@ -1049,11 +1028,6 @@ public class DatabaseManager {
 					timestampToDate(resultSet.getTimestamp(12)));
 		}
 		resultSet.close();
-
-		if (user != null) {
-			userDatasetCache_mail.put(user.email, user);
-			userDatasetCache_id.put(id, user);
-		}
 
 		return user;
 	}

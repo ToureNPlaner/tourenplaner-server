@@ -127,7 +127,7 @@ public class TravelingSalesman extends GraphAlgorithm {
         }
         // We have to make sure beforehand that there is an element
         // because this will be called A LOT save that check
-        length +=  distmat[tourPerm.length - 1][0];
+        length +=  distmat[tourPerm[tourPerm.length - 1]][tourPerm[0]];
         return length;
     }
 
