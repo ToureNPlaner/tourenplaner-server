@@ -13,11 +13,8 @@ import graphrep.GraphRep;
 import graphrep.GraphRepDumpReader;
 import graphrep.GraphRepTextReader;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
 
 import java.io.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -70,37 +67,42 @@ public class TourenPlaner {
         Logger.getLogger("server").setLevel(Level.FINEST);
         // Create ObjectMapper so we reuse it's data structures
         ObjectMapper mapper = new ObjectMapper();
-
-
-        /**
-         * inits config manager if config file is provided; also prints usage
-         * information if necessary
-         */
-        CLIHandler handler = new CLIHandler(mapper, args);
-
-        // uses defaults if it was not initialized by the CLIHandler
-        ConfigManager cm = ConfigManager.getInstance();
-        String graphfilename = cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany-ch.txt");
-        // The Graph
         GraphRep graph = null;
+        String graphfilename;
 
-        // if serialize, then ignore whether to read text or dump and read
-        // text graph since it wouldn't make sense to read a serialized
-        // graph just to serialize it. Also do this before anything server
-        // related gets actually started
-        if (handler.serializegraph()) {
-            log.info("Dumping Graph");
+        CLIParser cliParser = new CLIParser(args);
+        if (cliParser.getConfigFilePath() != null) {
+            try {
+                ConfigManager.init(mapper, cliParser.getConfigFilePath());
+            } catch (Exception e) {
+                // ConfigManager either didn't like the path or the config file at the path
+                log.severe("Error reading configuration file from file: " + cliParser.getConfigFilePath() + "\n" +
+                e.getMessage() + "\n" +
+                "Using builtin configuration...");
+            }
+        } else {
+            log.severe("Usage: \n\tjava -jar tourenplaner-server.jar -c \"config file\" " +
+                       "[-f dump|text] [dumpgraph]\nDefaults are: builtin configuration, -f text");
+        }
+        ConfigManager cm = ConfigManager.getInstance();
+        graphfilename = cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany-ch.txt");
+
+        // now that we have a config (or not) we look if we only need to dump our graph and then exit
+        if (cliParser.dumpgraph()) {
+            log.info("Dumping Graph...");
             try {
                 graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
                 utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
             } catch (IOException e) {
-                log.severe("IOError: " + e.getMessage());
+                log.severe("IOError dumping graph to file: " + graphfilename + "\n" + e.getMessage());
+            } finally {
+                System.exit(0);
             }
-            System.exit(0);
         }
 
+        //TODO there's an awful lot of duplicate logic and three layers of exception throwing code wtf
         try {
-            if (handler.loadTextGraph()) {
+            if (cliParser.loadTextGraph()) {
                 graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
             } else {
                 try {
@@ -113,20 +115,22 @@ public class TourenPlaner {
 
                     if (graph != null && new File(dumpName(graphfilename)).delete()) {
                         log.info("Graph successfully read. Now replacing old dumped graph");
-                        utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
-                    } else if (graph != null) {
-                        log.warning("creating dump failed but graph loaded");
+                        try {
+                            utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
+                        }catch(IOException e1){
+                            log.warning("writing dump failed (but graph loaded):\n" + e1.getMessage());
+                        }
                     }
                 } catch (IOException e) {
-                    log.log(Level.WARNING, "loading text graph failed", e);
+                    log.log(Level.WARNING, "loading dumped graph failed", e);
                     log.info("Falling back to text reading from file " + graphfilename + " (path provided by config file)");
                     graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
-                    log.info("Graph successfully read. Now dumping graph");
+                    log.info("Graph successfully read. Now writing new dump");
                     utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
                 }
             }
         } catch (IOException e) {
-            log.log(Level.SEVERE, "Exception during graph loading", e);
+            log.log(Level.SEVERE, "loading text graph failed", e);
         }
 
         if (graph == null) {
