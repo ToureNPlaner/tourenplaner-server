@@ -7,7 +7,7 @@ class CLIParser {
 	}
 
 	public boolean loadTextGraph() {
-		return this.readFromDumpedGraph;
+		return !this.readFromDumpedGraph;
 	}
 
 	public boolean readFromDumpedGraph() {
