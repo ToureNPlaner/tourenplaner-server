@@ -7,8 +7,11 @@ import graphrep.GraphRep;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class ShortestPath extends GraphAlgorithm {
+
+    private static Logger log = Logger.getLogger("algorithms");
 
 	// DijkstraStructs used by the ShortestPathCH
 	private final DijkstraStructs ds;
@@ -35,150 +38,189 @@ public class ShortestPath extends GraphAlgorithm {
 		return dist * 1000;
 	}
 
-	@Override
-	public void compute(ComputeRequest req) throws ComputeException {
-		assert (req != null) : "We ended up without a request object in run";
+    @Override
+    public void compute(ComputeRequest req) throws ComputeException {
+        assert req != null : "We ended up without a request object in run";
 
-		RequestPoints points = req.getPoints();
+        RequestPoints points = req.getPoints();
+        // Check if we have enough points to do something useful
+        if (points.size() < 2) {
+            throw new ComputeException("Not enough points, need at least 2");
+        }
 
-		// Check if we have enough points to do something useful
-		if (points.size() < 2) {
-			throw new ComputeException("Not enough points, need at least 2");
-		}
+        Points resultWay = req.getResulWay();
+        int distance = 0;
+        try {
+            // First let's map the RequestPoints to Ids
+            points.setIdsFromGraph(graph);
+            // Then compute the multi hop shortest path of them
+            distance = shortestPath(points, resultWay, false);
+        } catch (IllegalAccessException e) {
+            // If this happens there likely is a programming error
+            e.printStackTrace();
+        }
 
-		Points resultPoints = req.getResulWay();
-		int distance = 0;
-		int srclat, srclon;
-		int destlat, destlon;
-		int srcId, destId;
-		int resultAddIndex = 0;
+        Map<String, Object> misc = new HashMap<String, Object>(1);
+        misc.put("distance", distance);
+        req.setMisc(misc);
+    }
 
-		for (int pointIndex = 0; pointIndex < points.size() - 1; pointIndex++) {
-			// get data structures to use
-			try {
-				int[] dists = ds.borrowDistArray();
-				int[] prevEdges = ds.borrowPrevArray();
-				Heap heap = ds.borrowHeap();
 
-				srclat = points.getPointLat(pointIndex);
-				srclon = points.getPointLon(pointIndex);
-				destlat = points.getPointLat(pointIndex + 1);
-				destlon = points.getPointLon(pointIndex + 1);
+    protected int shortestPath(RequestPoints points, Points resultWay, boolean tour) throws ComputeException, IllegalAccessException {
 
-				srcId = graph.getIdForCoordinates(srclat, srclon);
-				destId = graph.getIdForCoordinates(destlat, destlon);
-				directDistance = calcDirectDistance(srclat, srclon, destlat,
-						destlon);
+        int srcId = 0;
+        int trgtId = 0;
 
-				dists[srcId] = 0;
-				heap.insert(srcId, dists[srcId]);
+        int oldDistance = 0;
+        int distance = 0;
 
-				int nodeId = -1;
-				int nodeDist;
-				int targetNode = 0;
-				int tempDist;
+        // in meters
+        double directDistance = 0.0;
 
-				long starttime = System.nanoTime();
-				long dijkstratime;
-				long backtracktime;
+        for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
+            // New Dijkstra need to reset
+            long starttime = System.nanoTime();
+            srcId = points.getPointId(pointIndex);
+            if (pointIndex < points.size() - 1) {
+                trgtId = points.getPointId(pointIndex + 1);
+            } else if (tour) {
+                trgtId = points.getPointId(0);
+            } else {
+                // Don't forget to add destination (trgtId is still the last one)
+                resultWay.addPoint(graph.getNodeLat(trgtId), graph.getNodeLon(trgtId));
+                break;
+            }
+            // get data structures used by Dijkstra
+            int[] dists = ds.borrowDistArray();
+            int[] prevEdges = ds.borrowPrevArray();
 
-				DIJKSTRA: while (!heap.isEmpty()) {
-					nodeId = heap.peekMinId();
-					nodeDist = heap.peekMinDist();
-					heap.removeMin();
-					if (nodeId == destId) {
-						break DIJKSTRA;
-					} else if (nodeDist > dists[nodeId]) {
-						continue;
-					}
-					for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
-						// Ignore Shortcuts
-						if (graph.getOutFirstShortcuttedEdge(nodeId, i) != -1) {
-							continue;
-						}
-						targetNode = graph.getOutTarget(nodeId, i);
+            directDistance += calcDirectDistance(
+                    graph.getNodeLat(srcId) / 10000000.0,
+                    (double) graph.getNodeLon(srcId) / 10000000,
+                    (double) graph.getNodeLat(trgtId) / 10000000,
+                    (double) graph.getNodeLon(trgtId) / 10000000
+                                                );
 
-						// without multiplier = shortest path
-						tempDist = dists[nodeId] + graph.getOutDist(nodeId, i);
 
-						// with multiplier = fastest path
-						// tempDist = multipliedDist[nodeID]
-						// + graph.getOutMultipliedDist(nodeID, i);
+            // Run Dijkstra stopping when trgtId is removed from the pq
+            boolean found = dijkstraStopAtDest(dists, prevEdges, srcId, trgtId);
+            long dijkstratime = System.nanoTime();
 
-						if (tempDist < dists[targetNode]) {
-							dists[targetNode] = tempDist;
-							prevEdges[targetNode] = graph.getOutEdgeId(nodeId,i);
-							heap.insert(targetNode, dists[targetNode]);
-						}
-					}
-				}
-				dijkstratime = System.nanoTime();
+            if (!found) {
+                // Return/Reset the data structures
+                ds.returnDistArray(false);
+                ds.returnPrevArray();
+                log.info("There is no path from src to trgt (" + srcId + " to " + trgtId + ")");
+                throw new ComputeException("No Path found");
+            }
+            // Backtrack to get the actual path
+            distance += backtrack(dists, prevEdges, resultWay, srcId, trgtId);
 
-				if (nodeId != destId) {
-					System.err.println("There is no path from src: " + srcId
-							+ " to trgt: " + destId);
-					throw new ComputeException("No path found");
-				}
+            long backtracktime = System.nanoTime();
 
-				// Find out how much space to allocate
-				int currNode = nodeId;
-				int routeElements = 1;
+            // Save the distance to the last point at the target
+            // wrap around at tour
+            points.getConstraints((pointIndex + 1) % (points.size() - 1)).put("distToPrev", distance - oldDistance);
 
-				while (currNode != srcId) {
-					routeElements++;
-					currNode = graph.getSource(prevEdges[currNode]);
-				}
+            oldDistance = distance;
 
-				System.out
-						.println("path goes over " + routeElements + " nodes");
-				// Add points to the end
-				resultAddIndex = resultPoints.size();
-				// Add them without values we set the values in the next step
-				resultPoints.addEmptyPoints(routeElements);
+            log.fine(
+                    "found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
+                    " dist[destid] = " + dists[trgtId] + "\n" +
+                    (dijkstratime - starttime) / 1000000.0 + " ms\n" +
+                    "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms"
+                    );
 
-				// backtracking here
-				// Don't read distance from multipliedDist[], because there are
-				// distances with
-				// regard to the multiplier
-                // only without the first node
-				currNode = nodeId;
-				while (routeElements > 0) {
-					distance += graph.getDist(prevEdges[currNode]);
-					routeElements--;
+            // Return/Reset the data structures
+            ds.returnDistArray(false);
+            ds.returnPrevArray();
+        }
 
-					resultPoints.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
-					resultPoints.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
+        return distance;
+    }
 
-					currNode = graph.getSource(prevEdges[currNode]);
-				}
-                // add source node to the result.
-                distance += graph.getDist(prevEdges[currNode]);
-                resultPoints.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-                resultPoints.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+    protected final boolean dijkstraStopAtDest(int[] dists, int[] prevEdges, int srcId, int trgtId )
+            throws IllegalAccessException {
 
-				ds.returnDistArray(false);
-				ds.returnHeap();
-				ds.returnPrevArray();
-				backtracktime = System.nanoTime();
+        dists[srcId] = 0;
+        Heap heap = ds.borrowHeap();
+        heap.insert(srcId, dists[srcId]);
 
-				System.out.println("found sp with dist = "
-						+ (distance / 1000.0) + " km (direct distance: "
-						+ (directDistance / 1000.0)
-						+ " km; Distance with multiplier: "
-						+ (dists[destId] / 1000.0) + ")");
-				System.out.println("Dijkstra: "
-						+ ((dijkstratime - starttime) / 1000000.0)
-						+ " ms; Backtracking: "
-						+ ((backtracktime - dijkstratime) / 1000000.0) + " ms");
-			} catch (IllegalAccessException e) {
-				// if this happens we likely got a programming bug
-				e.printStackTrace();
-			}
+        int nodeDist;
+        int edgeId;
+        int tempDist;
+        int targetNode;
+        int nodeId = srcId;
+        DIJKSTRA:
+        while (!heap.isEmpty()) {
+            nodeId = heap.peekMinId();
+            nodeDist = heap.peekMinDist();
+            heap.removeMin();
+            if (nodeId == trgtId) {
+                break DIJKSTRA;
+            } else if (nodeDist > dists[nodeId]) {
+                continue;
+            }
+            for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
+                edgeId = graph.getOutEdgeId(nodeId, i);
+                // Ignore Shortcuts
+                if (graph.getFirstShortcuttedEdge(edgeId) != -1) {
+                    continue;
+                }
+                targetNode = graph.getTarget(edgeId);
 
-		}
+                // with multiplier = shortest path
+                tempDist = dists[nodeId] + graph.getDist(edgeId);
 
-		Map<String, Object> misc = new HashMap<String, Object>(1);
-		misc.put("distance", distance);
-		req.setMisc(misc);
-	}
+                if (tempDist < dists[targetNode]) {
+                    dists[targetNode] = tempDist;
+                    prevEdges[targetNode] = edgeId;
+                    heap.insert(targetNode, dists[targetNode]);
+                }
+            }
+        }
+        ds.returnHeap();
+        return nodeId == trgtId;
+    }
+
+    protected final int backtrack(int[] dists, int[] prevEdges, Points resultWay, int srcId, int trgtId) throws
+                                                                                                            IllegalAccessException {
+        // Find out how much space to allocate
+        int currNode = trgtId;
+        int routeElements = 1;
+
+        int length = 0;
+
+        while (currNode != srcId) {
+            routeElements++;
+            currNode = graph.getSource(prevEdges[currNode]);
+        }
+
+        // Add points to the end
+        int resultAddIndex = resultWay.size();
+        // Add them without values we set the values in the next step
+        resultWay.addEmptyPoints(routeElements);
+
+        // backtracking here
+        // Don't read distance from multipliedDist[], because there are
+        // distances with
+        // regard to the multiplier
+        // only without the first node
+        currNode = trgtId;
+        while (routeElements > 0) {
+            length += graph.getDist(prevEdges[currNode]);
+            routeElements--;
+
+            resultWay.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
+            resultWay.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
+
+            currNode = graph.getSource(prevEdges[currNode]);
+        }
+        // add source node to the result.
+        length += graph.getDist(prevEdges[currNode]);
+        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
+        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+        return length;
+    }
+
 }
