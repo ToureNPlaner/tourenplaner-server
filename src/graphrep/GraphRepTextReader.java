@@ -55,13 +55,13 @@ public class GraphRepTextReader extends GraphRepFactory {
 
 		for (int i = 0; i < nodeCount; i++) {
 			splittedLine = inb.readLine().split(" ");
-			lat = Integer.parseInt(splittedLine[1]);
-			lon = Integer.parseInt(splittedLine[2]);
-			height = Integer.parseInt(splittedLine[3]);
+			lat = Integer.parseInt(splittedLine[0]);
+			lon = Integer.parseInt(splittedLine[1]);
+			height = Integer.parseInt(splittedLine[2]);
 			graphRep.setNodeData(i, lat, lon, height);
 
-			if (splittedLine.length == 5) {
-				graphRep.setNodeRank(i, Integer.parseInt(splittedLine[4]));
+			if (splittedLine.length == 4) {
+				graphRep.setNodeRank(i, Integer.parseInt(splittedLine[3]));
 			}
 
 		}
@@ -76,7 +76,7 @@ public class GraphRepTextReader extends GraphRepFactory {
 			src = Integer.parseInt(splittedLine[0]);
 			dest = Integer.parseInt(splittedLine[1]);
 			dist = Integer.parseInt(splittedLine[2]);
-         euclidianDist = Integer.parseInt(splittedLine[3]);
+            euclidianDist = Integer.parseInt(splittedLine[3]);
 
 			graphRep.setEdgeData(i, src, dest, dist, euclidianDist);
 
