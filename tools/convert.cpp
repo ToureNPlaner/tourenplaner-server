@@ -34,17 +34,6 @@ static const double EARTH_RADIUS_IN_METERS = 6372797.560856;
 
 
 double calcDirectDistance(double lat1, double lon1, double lat2, double lon2) {
-
-        /*double latitudeArc = (lat2 - lat1)*DEG_TO_RAD;
-        double longitudeArc = (lon2 - lon1)*DEG_TO_RAD;
-        
-        double latitudeH = sin(latitudeArc * 0.5);
-        latitudeH *= latitudeH;
-        double longitudeH = sin(longitudeArc * 0.5);
-        longitudeH *= longitudeH;
-        
-        double tmp = cos(lat1*DEG_TO_RAD) * cos(lat2*DEG_TO_RAD);
-        return 2.0 * asin(sqrt(latitudeH + tmp*longitudeH)) * EARTH_RADIUS_IN_METERS;*/
         const double degTorad = 0.017453292519943;
         const double R = 6371;
         const double dLat = (lat2-lat1)*degTorad;
@@ -123,7 +112,6 @@ int main(int args, char** argv) {
     cout << ne << endl;
     // Write Nodes
     for(unsigned int i=0 ; i<n; ++i) {
-       cout << i << " ";
        cout << ((int32_t) (nodes[i].lat*10000000.0)) << " ";
        cout << ((int32_t) (nodes[i].lon*10000000.0)) << " ";
        cout << nodes[i].ele << " ";
