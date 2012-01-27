@@ -5,20 +5,33 @@ package algorithms;
 
 import graphrep.GraphRep;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer
  * 
  */
 public class ShortestPathFactory extends SharingAlgorithmFactory {
+    private final Map<String, Object> details;
+    private final List<Map<String, Object>> constraints;
+    private final List<Map<String, Object>> pointConstraints;
 
-	public ShortestPathFactory(GraphRep graph) {
+
+    public ShortestPathFactory(GraphRep graph) {
 		super(graph);
-	}
+        constraints = new ArrayList<Map<String, Object>>(0);
+        pointConstraints = new ArrayList<Map<String, Object>>(0);
+        details = new HashMap<String, Object>(3);
+        details.put("hidden", this.isHidden());
+        details.put("minpoints", 1);
+        details.put("sourceistarget", false);
 
+    }
+
+    @Override
+    public Map<String, Object> getDetails() {
+        return details;
+    }
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -57,19 +70,16 @@ public class ShortestPathFactory extends SharingAlgorithmFactory {
 
 	@Override
 	public List<Map<String, Object>> getPointConstraints() {
-		return null;
+		return pointConstraints;
 	}
 
 	@Override
-	public Map<String, Object> getConstraints() {
-		Map<String, Object> map = new HashMap<String, Object>(2);
-		map.put("minPoints", Integer.valueOf(2));
-		map.put("sourceIsTarget", Boolean.FALSE);
-		return map;
+	public List<Map<String, Object>> getConstraints() {
+		return constraints;
 	}
 
 	@Override
-	public boolean hidden() {
+	public boolean isHidden() {
 		return false;
 	}
 

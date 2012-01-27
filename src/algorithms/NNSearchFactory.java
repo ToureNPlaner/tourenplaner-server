@@ -2,34 +2,45 @@ package algorithms;
 
 import graphrep.GraphRep;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class NNSearchFactory extends GraphAlgorithmFactory {
+    private final Map<String, Object> details;
+    private final List<Map<String, Object>> constraints;
+    private final List<Map<String, Object>> pointConstraints;
+    
 
 	public NNSearchFactory(GraphRep graph) {
 		super(graph);
-	}
+        constraints = new ArrayList<Map<String, Object>> (0);
+        pointConstraints = new ArrayList<Map<String, Object>>(0);
+        details = new HashMap<String, Object>(3);
+        details.put("hidden", this.isHidden());
+        details.put("minpoints", 1);
+        details.put("sourceistarget", false);
+
+    }
 
 	@Override
 	public List<Map<String, Object>> getPointConstraints() {
-		return null;
+		return pointConstraints;
 	}
 
 	@Override
-	public Map<String, Object> getConstraints() {
-		Map<String, Object> map = new HashMap<String, Object>(2);
-		map.put("minPoints", Integer.valueOf(1));
-		map.put("sourceIsTarget", Boolean.FALSE);
-		return map;
+	public List<Map<String, Object>> getConstraints() {
+		return constraints;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see algorithms.AlgorithmFactory#createAlgorithm()
-	 */
+    @Override
+    public Map<String, Object> getDetails() {
+        return details;
+    }
+
+    /*
+      * (non-Javadoc)
+      * 
+      * @see algorithms.AlgorithmFactory#createAlgorithm()
+      */
 	@Override
 	public Algorithm createAlgorithm() {
 		return new NNSearch(graph);
@@ -51,7 +62,7 @@ public class NNSearchFactory extends GraphAlgorithmFactory {
 	}
 
 	@Override
-	public boolean hidden() {
+	public boolean isHidden() {
 		return true;
 	}
 

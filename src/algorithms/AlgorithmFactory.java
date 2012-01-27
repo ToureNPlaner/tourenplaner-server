@@ -44,8 +44,8 @@ public abstract class AlgorithmFactory {
 	public abstract int getVersion();
 
 	/**
-	 * Returns if it is an hidden algorithm
+	 * Returns if it is an isHidden algorithm
 	 * 
 	 */
-	public abstract boolean hidden();
+	public abstract boolean isHidden();
 }

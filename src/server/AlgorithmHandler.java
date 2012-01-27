@@ -162,7 +162,7 @@ public class AlgorithmHandler extends RequestHandler {
         }
 
         try {
-            // Get the AlgorithmFactory for this Alg to check if it's registered and not hidden
+            // Get the AlgorithmFactory for this Alg to check if it's registered and not isHidden
             AlgorithmFactory algFac = algReg.getAlgByURLSuffix(algName);
             if (algFac == null) {
                 log.warning("Unsupported algorithm " + algName + " requested");
@@ -175,7 +175,7 @@ public class AlgorithmHandler extends RequestHandler {
             if (req != null) {
                 RequestDataset requestDataset = null;
 
-                if (isPrivate && !algFac.hidden()) {
+                if (isPrivate && !algFac.isHidden()) {
                     byte[] jsonRequest = request.getContent().array();
                     requestDataset = dbm.addNewRequest(userDataset.id, algName, jsonRequest);
                     req.setRequestID(requestDataset.requestID);
@@ -186,7 +186,7 @@ public class AlgorithmHandler extends RequestHandler {
                 if (!success) {
                     String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
-                    if(isPrivate && !algFac.hidden()){
+                    if(isPrivate && !algFac.isHidden()){
                         // Log failed requests because of full queue as failed
                         // TODO specify this case clearly, maybe behavior should be another
                         requestDataset.failDescription = errorMessage;

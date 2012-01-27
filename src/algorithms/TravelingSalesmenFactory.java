@@ -2,9 +2,7 @@ package algorithms;
 
 import graphrep.GraphRep;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * User: Niklas Schnelle
@@ -12,8 +10,24 @@ import java.util.Map;
  * Time: 5:42 PM
  */
 public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
+    private final Map<String, Object> details;
+    private final List<Map<String, Object>> constraints;
+    private final List<Map<String, Object>> pointConstraints;
+
     public TravelingSalesmenFactory(GraphRep graph){
       super(graph);
+        constraints = new ArrayList<Map<String, Object>> (0);
+        pointConstraints = new ArrayList<Map<String, Object>>(0);
+        details = new HashMap<String, Object>(3);
+        details.put("hidden", this.isHidden());
+        details.put("minpoints", 2);
+        details.put("sourceistarget", true);
+
+    }
+
+    @Override
+    public Map<String, Object> getDetails() {
+        return details;
     }
 
     @Override
@@ -23,15 +37,12 @@ public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
 
     @Override
     public List<Map<String, Object>> getPointConstraints() {
-        return null;
+        return pointConstraints;
     }
 
     @Override
-    public Map<String, Object> getConstraints() {
-        Map<String, Object> map = new HashMap<String, Object>(2);
-        map.put("minPoints", Integer.valueOf(2));
-        map.put("sourceIsTarget", Boolean.TRUE);
-        return map;
+    public List<Map<String, Object>> getConstraints() {
+        return constraints;
     }
 
     @Override
@@ -55,7 +66,7 @@ public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
     }
 
     @Override
-    public boolean hidden() {
+    public boolean isHidden() {
         return false;
     }
 }

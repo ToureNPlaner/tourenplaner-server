@@ -5,20 +5,41 @@ package algorithms;
 
 import graphrep.GraphRep;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author nino
  */
 public class ConstraintSPFactory extends SharingAlgorithmFactory {
+    private final Map<String, Object> details;
+    private final List<Map<String, Object>> constraints;
 
     /**
      * @param graph
      */
     public ConstraintSPFactory(GraphRep graph) {
         super(graph);
+        constraints = new ArrayList<Map<String, Object>>();
+        constraints.add(new HashMap<String, Object>(4));
+        constraints.get(0).put("name", "maxAltitudeDifference");
+        constraints.get(0).put("description", "The maximum difference in altitude combined over the path");
+
+        constraints.get(0).put("type", "meter");
+        constraints.get(0).put("min", 0);
+        constraints.get(0).put("max", 2000);
+
+
+        details = new HashMap<String, Object>(3);
+        details.put("hidden", this.isHidden());
+        details.put("minpoints", 2);
+        details.put("maxpoints", 2);
+        details.put("sourceistarget", false);
+
+    }
+
+    @Override
+    public Map<String, Object> getDetails() {
+        return details;
     }
 
     @Override
@@ -58,17 +79,12 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
     }
 
     @Override
-    public Map<String, Object> getConstraints() {
-        Map<String, Object> map = new HashMap<String, Object>(2);
-        map.put("minPoints", Integer.valueOf(2));
-        map.put("maxPoints", Integer.valueOf(2));
-        map.put("sourceIsTarget", Boolean.FALSE);
-        map.put("maxAltitudeDifference", "meter");
-        return map;
+    public List<Map<String, Object>> getConstraints() {
+        return constraints;
     }
 
     @Override
-    public boolean hidden() {
+    public boolean isHidden() {
         return false;
     }
 

@@ -36,7 +36,16 @@ public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
 	 * 
 	 * @return
 	 */
-	public abstract Map<String, Object> getConstraints();
+	public abstract List<Map<String, Object>> getConstraints();
+
+    /**
+     * Gets Details for the the algorithm
+     * this includes whether the algorithm has sourceIsTarget
+     * and the minimal number of points
+     *
+     * @return
+     */
+    public abstract Map<String, Object> getDetails();
 	
 
 }
