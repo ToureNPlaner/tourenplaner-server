@@ -12,6 +12,7 @@ import config.ConfigManager;
 import graphrep.GraphRep;
 import graphrep.GraphRepDumpReader;
 import graphrep.GraphRepTextReader;
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.*;
@@ -35,7 +36,13 @@ public class TourenPlaner {
         Map<String, Object> info = new HashMap<String, Object>(4);
         info.put("version", new Float(0.1));
         info.put("servertype", ConfigManager.getInstance().getEntryBool("private", false) ? "private" : "public");
-        info.put("sslport", ConfigManager.getInstance().getEntryInt("sslport", 8081));
+
+        // when serverinfosslport is available then use that in the serverinfo, else use sslport
+        int sslport = ConfigManager.getInstance().getEntryInt("serverinfosslport", 1) == 1 ?
+                      ConfigManager.getInstance().getEntryInt("sslport", 8081) :
+                      ConfigManager.getInstance().getEntryInt("serverinfosslport", 8081);
+
+        info.put("sslport", sslport);
         // Enumerate Algorithms
         Collection<AlgorithmFactory> algs = reg.getAlgorithms();
         Map<String, Object> algInfo;
@@ -67,6 +74,8 @@ public class TourenPlaner {
         Logger.getLogger("server").setLevel(Level.FINEST);
         // Create ObjectMapper so we reuse it's data structures
         ObjectMapper mapper = new ObjectMapper();
+        // TODO: check if we really want to enable comments since it's a nonstandard feature of JSON
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         GraphRep graph = null;
         String graphfilename;
 
