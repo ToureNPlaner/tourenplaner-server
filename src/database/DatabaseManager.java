@@ -119,7 +119,7 @@ public class DatabaseManager {
        UPDATE statements
      */
 	private final static String strUpdateRequest = "UPDATE Requests SET "
-			+ "UserID = ?, Algorithm, JSONRequest = ?, JSONResponse = ?, "
+			+ "UserID = ?, Algorithm = ?, JSONRequest = ?, JSONResponse = ?, "
 			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, RequestDate = ?, "
 			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
 			+ "FailDescription = ? WHERE id = ?";
@@ -520,17 +520,18 @@ public class DatabaseManager {
 
 
                 pstUpdateRequest.setInt(1, request.userID);
-                pstUpdateRequest.setBytes(2, request.jsonRequest);
-                pstUpdateRequest.setBytes(3, request.jsonResponse);
-                pstUpdateRequest.setBoolean(4, isPending);
-                pstUpdateRequest.setInt(5, request.costs);
-                pstUpdateRequest.setBoolean(6, request.isPaid);
-                pstUpdateRequest.setTimestamp(7, dateToTimestamp(request.requestDate));
-                pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.finishedDate));
-                pstUpdateRequest.setLong(9, request.duration);
-                pstUpdateRequest.setBoolean(10, hasFailed);
-                pstUpdateRequest.setString(11, request.failDescription);
-                pstUpdateRequest.setInt(12, request.requestID);
+                pstUpdateRequest.setString(2, request.algorithm);
+                pstUpdateRequest.setBytes(3, request.jsonRequest);
+                pstUpdateRequest.setBytes(4, request.jsonResponse);
+                pstUpdateRequest.setBoolean(5, isPending);
+                pstUpdateRequest.setInt(6, request.costs);
+                pstUpdateRequest.setBoolean(7, request.isPaid);
+                pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.requestDate));
+                pstUpdateRequest.setTimestamp(9, dateToTimestamp(request.finishedDate));
+                pstUpdateRequest.setLong(10, request.duration);
+                pstUpdateRequest.setBoolean(11, hasFailed);
+                pstUpdateRequest.setString(12, request.failDescription);
+                pstUpdateRequest.setInt(13, request.requestID);
 
                 rowsAffected = pstUpdateRequest.executeUpdate();
 
