@@ -183,7 +183,7 @@ public class DatabaseManager {
 
 
     private void init() throws SQLException {
-        con = DriverManager.getConnection(url + dbName, userName, password);
+        con = DriverManager.getConnection(url + dbName + "?autoReconnect=true", userName, password);
 
         pstAddNewRequest = con.prepareStatement(strAddNewRequest,
                 Statement.RETURN_GENERATED_KEYS);
