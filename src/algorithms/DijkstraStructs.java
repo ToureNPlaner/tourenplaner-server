@@ -9,7 +9,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 
 /**
- * @author Niklas Schnelle
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  * 
  *         This class is used to share data structures used by several Dijkstra
  *         based algorithms. This helps to prevent unnecessary memory usage and

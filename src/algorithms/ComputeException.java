@@ -4,7 +4,7 @@
 package algorithms;
 
 /**
- * @author Niklas Schnelle
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  * 
  */
 public class ComputeException extends Exception {

@@ -8,7 +8,9 @@ import graphrep.GraphRep;
 import java.util.*;
 
 /**
- * @author nino
+ *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Used to create instances of ConstraintShortestPath algorithm
  */
 public class ConstraintSPFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;

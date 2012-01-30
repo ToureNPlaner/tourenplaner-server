@@ -4,6 +4,11 @@ import graphrep.GraphRep;
 
 import java.util.*;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Provides an implementation of resource NNSearch algorithm.
+ */
 public class NNSearchFactory extends GraphAlgorithmFactory {
     private final Map<String, Object> details;
     private final List<Map<String, Object>> constraints;

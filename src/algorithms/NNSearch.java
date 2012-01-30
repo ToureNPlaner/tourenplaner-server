@@ -4,6 +4,11 @@ import computecore.ComputeRequest;
 import computecore.RequestPoints;
 import graphrep.GraphRep;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Provides an implementation of NNSearch to find nearest neighbours for given points.
+ */
 public class NNSearch extends GraphAlgorithm {
 
 	public NNSearch(GraphRep graph) {
@@ -23,6 +28,12 @@ public class NNSearch extends GraphAlgorithm {
 		nearestNeighbourLookup(points);
 	}
 
+
+    /**
+     * find the nearest neighbours to the given points in the graphrep
+     *
+     * @param points
+     */
 	public void nearestNeighbourLookup(RequestPoints points) {
 		int nodeID;
 
