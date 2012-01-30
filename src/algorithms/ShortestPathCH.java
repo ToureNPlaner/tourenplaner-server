@@ -14,6 +14,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Used to create instances of ShortestPathCH algorithm
+ */
 public class ShortestPathCH extends GraphAlgorithm {
 
     private static Logger log = Logger.getLogger("algorithms");

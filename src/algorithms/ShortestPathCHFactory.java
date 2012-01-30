@@ -8,8 +8,9 @@ import graphrep.GraphRep;
 import java.util.*;
 
 /**
- * @author Niklas Schnelle, Peter Vollmer
- * 
+ *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Used to create instances of ShortestPathCH algorithm
  */
 public class ShortestPathCHFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;

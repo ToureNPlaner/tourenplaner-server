@@ -6,8 +6,9 @@ package algorithms;
 import graphrep.GraphRep;
 
 /**
- * @author Niklas Schnelle
- * 
+ *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Used to create instances of shared algorithms
  */
 public abstract class SharingAlgorithmFactory extends GraphAlgorithmFactory {
 

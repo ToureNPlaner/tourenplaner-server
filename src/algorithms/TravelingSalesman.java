@@ -14,9 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Author: Niklas Schnelle
- * Date: 12/26/11
- * Time: 4:31 PM
+ *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Used to create instances of TravelingSalesman algorithm
  */
 public class TravelingSalesman extends GraphAlgorithm {
     private static final int SMALL = 12;

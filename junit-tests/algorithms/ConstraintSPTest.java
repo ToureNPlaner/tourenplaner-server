@@ -13,11 +13,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 
 /**
- * Created by IntelliJ IDEA.
- * User: nino
- * Date: 25.01.12
- * Time: 14:10
- * To change this template use File | Settings | File Templates.
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ConstraintSPTest {
     @Test

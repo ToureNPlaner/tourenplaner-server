@@ -1,9 +1,10 @@
 package utils;
 
 /**
- * User: Niklas Schnelle
- * Date: 1/12/12
- * Time: 11:21 PM
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Class used to store static math functions for example for
+ * dealing with permutations
  */
 public class StaticMath {
     /**

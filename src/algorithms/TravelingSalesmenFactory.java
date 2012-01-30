@@ -5,9 +5,9 @@ import graphrep.GraphRep;
 import java.util.*;
 
 /**
- * User: Niklas Schnelle
- * Date: 12/26/11
- * Time: 5:42 PM
+ *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Used to create instances of TravelingSalesmen algorithm
  */
 public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
     private final Map<String, Object> details;

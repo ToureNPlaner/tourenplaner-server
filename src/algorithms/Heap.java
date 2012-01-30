@@ -3,6 +3,12 @@ package algorithms;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * provides heap structures for a minimum heap for ints
+ *
+ */
 public class Heap {
     private static Logger log = Logger.getLogger("algorithms");
 
@@ -30,10 +36,22 @@ public class Heap {
 		heaplength = 0;
 	}
 
+    /**
+     * initializes a heap with given initialSize
+     *
+     * @param initialSize
+     */
 	public Heap(int initialSize) {
 		heaparr = new int[initialSize];
 		heaplength = 0;
 	}
+
+    /**
+     * insert a element to the heap
+     *
+     * @param id
+     * @param dist
+     */
 
 	public final void insert(int id, int dist) {
 		checkHeapArray();
@@ -43,18 +61,37 @@ public class Heap {
 		bubbleUp((heaplength - 1) * 2);
 	}
 
+    /**
+     * check for empty heap
+     *
+     * @return
+     */
 	public final boolean isEmpty() {
 		return heaplength <= 0;
 	}
 
+    /**
+     * peeks the id of the minimum of the heap
+     *
+     * @return
+     */
 	public final int peekMinId() {
 		return heaparr[0];
 	}
 
+
+    /**
+     * peeks the dist of the minimum of the heap
+     *
+     * @return
+     */
 	public final int peekMinDist() {
 		return heaparr[1];
 	}
 
+    /**
+     * removes the min element of the heap
+     */
 	public final void removeMin() {
 		heaplength -= 1;
 		heaparr[0] = heaparr[heaplength * 2];
@@ -62,6 +99,11 @@ public class Heap {
 		siftDown(0);
 	}
 
+    /**
+     * implements bubble up to correct miss alignments from the button of the heap
+     *
+     * @param pos
+     */
 	private final void bubbleUp(int pos) {
 		int parent;
 		int tempid;
@@ -84,6 +126,12 @@ public class Heap {
 		}
 	}
 
+
+    /**
+     * implements sift down to correct miss alignments from the top of the heap.
+     *
+     * @param pos
+     */
 	private final void siftDown(int pos) {
 		int tempid;
 		int tempdist;
@@ -126,10 +174,16 @@ public class Heap {
 		}
 	}
 
-	public final void resetHeap() {
+    /**
+     * resets heap
+     */
+    public final void resetHeap() {
 		heaplength = 0;
 	}
 
+    /**
+     * checks heap array size and increase if needed
+     */
 	private final void checkHeapArray() {
 		if (((heaplength * 2) + 1) >= heaparr.length) {
 			log.finer("Increased Heap size from " + heaparr.length

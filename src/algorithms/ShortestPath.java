@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Provides an implementation of ShortestPath algorithm.
+ */
 public class ShortestPath extends GraphAlgorithm {
 
     private static Logger log = Logger.getLogger("algorithms");
@@ -65,7 +70,18 @@ public class ShortestPath extends GraphAlgorithm {
         req.setMisc(misc);
     }
 
-
+    /**
+     *
+     * Computes the shortest path over points[0] -> points[1] -> points[2]...
+     * and stores all points on the path in resultWay
+     *
+     * @param points
+     * @param resultWay
+     * @param tour
+     * @return
+     * @throws ComputeException
+     * @throws IllegalAccessException
+     */
     protected int shortestPath(RequestPoints points, Points resultWay, boolean tour) throws ComputeException, IllegalAccessException {
 
         int srcId = 0;
@@ -139,6 +155,19 @@ public class ShortestPath extends GraphAlgorithm {
         return distance;
     }
 
+
+
+    /**
+     * Performs the Dijkstra Search on euclidian dists stopping when
+     * the destination point is removed from the pq
+     *
+     * @param dists
+     * @param prevEdges
+     * @param srcId
+     * @param trgtId
+     * @return
+     * @throws IllegalAccessException
+     */
     protected final boolean dijkstraStopAtDest(int[] dists, int[] prevEdges, int srcId, int trgtId )
             throws IllegalAccessException {
 
@@ -183,6 +212,18 @@ public class ShortestPath extends GraphAlgorithm {
         return nodeId == trgtId;
     }
 
+    /**
+     *  Backtracks the prevEdges Array and calculates the actual path length
+     *  returns the length of the found path in meters
+     *
+     * @param dists
+     * @param prevEdges
+     * @param resultWay
+     * @param srcId
+     * @param trgtId
+     * @return
+     * @throws IllegalAccessException
+     */
     protected final int backtrack(int[] dists, int[] prevEdges, Points resultWay, int srcId, int trgtId) throws
                                                                                                             IllegalAccessException {
         // Find out how much space to allocate
