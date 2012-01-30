@@ -27,6 +27,8 @@ public class DatabaseManager {
     private final String dbName;
     private final String userName;
     private final String password;
+
+    private int maxTries = 2;
     
 	private PreparedStatement pstAddNewRequest;
 	private PreparedStatement pstAddNewUser;
@@ -260,7 +262,7 @@ public class DatabaseManager {
 
         boolean hasKey = false;
 
-        int tryAgain = 2;
+        int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
@@ -291,17 +293,20 @@ public class DatabaseManager {
                 log.fine("Database query successful");
 
 
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 if (tryAgain > 0) {
-                    log.log(Level.WARNING, "Before last try", e);
+                    log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
+                            "thread will now reconnect database and send again the sql statement");
                     try {
                         Thread.sleep(3000);
                         con.close();
                         init();
-                    } catch (InterruptedException e1) {
+                    } catch (Exception e1) {
                     }
                 } else {
-                    log.log(Level.SEVERE, "After last try", e);
+                    log.log(Level.SEVERE, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
+                            "thread will now give up executing the statement", e);
+                    throw e;
                 }
             }
 
@@ -501,7 +506,7 @@ public class DatabaseManager {
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int updateRequest(RequestDataset request) throws SQLException {
-        int tryAgain = 2;
+        int tryAgain = maxTries;
         int rowsAffected = 0;
 
         while (tryAgain > 0) {
@@ -538,17 +543,20 @@ public class DatabaseManager {
                 log.fine("Database query successful");
                 return rowsAffected;
 
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 if (tryAgain > 0) {
-                    log.log(Level.WARNING, "Before last try", e);
+                    log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
+                            "thread will now reconnect database and send again the sql statement");
                     try {
                         Thread.sleep(3000);
                         con.close();
                         init();
-                    } catch (InterruptedException e1) {
+                    } catch (Exception e1) {
                     }
                 } else {
-                    log.log(Level.SEVERE, "After last try", e);
+                    log.log(Level.SEVERE, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
+                            "thread will now give up executing the statement", e);
+                    throw e;
                 }
             }
 
@@ -580,7 +588,7 @@ public class DatabaseManager {
 			boolean hasFailed, String failDescription) throws SQLException {
 
         int rowsAffected = 0;
-        int tryAgain = 2;
+        int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
@@ -603,17 +611,20 @@ public class DatabaseManager {
                 log.fine("Database query successful");
                 return rowsAffected;
 
-            } catch (Exception e) {
+            } catch (SQLException e) {
                 if (tryAgain > 0) {
-                    log.log(Level.WARNING, "Before last try", e);
+                    log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
+                            "thread will now reconnect database and send again the sql statement");
                     try {
                         Thread.sleep(3000);
                         con.close();
                         init();
-                    } catch (InterruptedException e1) {
+                    } catch (Exception e1) {
                     }
                 } else {
-                    log.log(Level.SEVERE, "After last try", e);
+                    log.log(Level.SEVERE, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
+                            "thread will now give up executing the statement", e);
+                    throw e;
                 }
             }
 
