@@ -31,10 +31,10 @@ JSONTMP="$JSONTMP
 
 TMP="$(mktemp)"
 echo "$JSONTMP" > ${TMP}
-echo "Running ./curl.sh ${1} ${TMP} $2 root@tourenplaner.de toureNPlaner $3" 1>&2
+echo "Running ./curl.sh ${1} ${TMP} $3 root@tourenplaner.de toureNPlaner $2" 1>&2
 echo "$TMP:
 $(cat ${TMP})" 1>&2
-./curl.sh "$2" "${TMP}" "$1" root@tourenplaner.de toureNPlaner "$3" && rm ${TMP} &  # don't add response time to script wait time
+./curl.sh "$1" "${TMP}" "$3" root@tourenplaner.de toureNPlaner "$2" && rm ${TMP} &  # don't add response time to script wait time
 done
 ;;
 *)
