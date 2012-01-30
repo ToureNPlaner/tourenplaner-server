@@ -15,6 +15,8 @@ import java.util.*;
 public class ConstraintSPFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;
     private final List<Map<String, Object>> constraints;
+    private final List<Map<String, Object>> pointConstraints;
+
 
     /**
      * @param graph
@@ -25,11 +27,10 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
         constraints.add(new HashMap<String, Object>(4));
         constraints.get(0).put("name", "maxAltitudeDifference");
         constraints.get(0).put("description", "The maximum difference in altitude combined over the path");
-
         constraints.get(0).put("type", "meter");
         constraints.get(0).put("min", 0);
-        constraints.get(0).put("max", 2000);
 
+        pointConstraints = new ArrayList<Map<String, Object>>(0);
 
         details = new HashMap<String, Object>(3);
         details.put("hidden", this.isHidden());
@@ -77,7 +78,7 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
 
     @Override
     public List<Map<String, Object>> getPointConstraints() {
-        return null;
+        return pointConstraints;
     }
 
     @Override
