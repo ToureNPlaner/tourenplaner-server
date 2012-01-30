@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ * Provides an implementation of resource constraint shortest path algorithm.
+ */
 public class ConstraintSP extends GraphAlgorithm {
     private static Logger log = Logger.getLogger("algorithms");
     private Heap heap;
@@ -31,6 +36,175 @@ public class ConstraintSP extends GraphAlgorithm {
      */
     private int[] prevEdges;
 
+
+    @Override
+    public void compute(ComputeRequest req) throws ComputeException {
+
+
+        assert req != null : "We ended up without a request object in run";
+        RequestPoints points = req.getPoints();
+
+        // Check if we have enough points to do something useful
+        if (points.size() < 2 && points.size() > 2) {
+            throw new ComputeException("Not enough points or to much points, need 2");
+        }
+
+        Points resultPoints = req.getResulWay();
+
+        // Check for Constraint
+        int maxAltitudeDifference;
+
+        if (req.getConstraints() == null || req.getConstraints().get("maxAltitudeDifference") == null){
+            throw new ComputeException("Missing maxAltitudeDifference constrained");
+        }
+        try {
+            maxAltitudeDifference = (Integer) req.getConstraints().get("maxAltitudeDifference");
+        } catch (ClassCastException e){
+            throw new ComputeException("Couldn't read maxAltitudeDifference, wrong type");
+        }
+
+        int[] result = cSP(points, resultPoints, maxAltitudeDifference);
+        int altitudeDiff = result[0];
+        int distance = result[1];
+        
+        Map<String, Object> misc = new HashMap<String, Object>(1);
+        misc.put("distance", distance);
+        misc.put("altitude", altitudeDiff);
+        req.setMisc(misc);
+
+
+    }
+
+    /**
+     *  calculates resource constraint shortest path
+     *
+     * @param points
+     * @param resultPoints
+     * @param maxAltitudeDifference
+     * @return
+     * @throws ComputeException
+     */
+    protected int[] cSP (RequestPoints points, Points resultPoints, int maxAltitudeDifference) throws ComputeException {
+        int srclat, srclon;
+        int destlat, destlon;
+        int srcId, trgtId;
+        int resultAddIndex = 0;
+
+
+        try {
+            heap = ds.borrowHeap();
+            dists = ds.borrowDistArray();
+            prevEdges = ds.borrowPrevArray();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        double threshold = 1.0 / (double) ((long)graph.getNodeCount() * (long)graph.getNodeCount() * (long)maxAltitudeDifference + (long) maxAltitudeDifference);
+
+        srclat = points.getPointLat(0);
+        srclon = points.getPointLon(0);
+        destlat = points.getPointLat(1);
+        destlon = points.getPointLon(1);
+        srcId = graph.getIdForCoordinates(srclat, srclon);
+        trgtId = graph.getIdForCoordinates(destlat, destlon);
+
+        double lamdaOfGood;
+        double lamdaOfBad;
+        double lamda = 1.0;
+        int altitudeDiff;
+        double oldLamda;
+        // shortest path's difference of altitude
+        altitudeDiff = dijkstra(srcId, trgtId, lamda);
+        // shortest path serves not the constraint
+        if (altitudeDiff > maxAltitudeDifference) {
+            log.fine(
+                    "There is no shortest path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
+                            maxAltitudeDifference
+            );
+            lamdaOfBad = lamda;
+            lamda = 0.0;
+            // exists there a path that serves the constraint
+            altitudeDiff = dijkstra(srcId, trgtId, lamda);
+            if (altitudeDiff > maxAltitudeDifference) {
+                log.fine("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
+                        maxAltitudeDifference
+                );
+                ds.returnDistArray(false);
+                ds.returnHeap();
+                ds.returnPrevArray();
+                throw new ComputeException("No path found");
+            }
+            lamdaOfGood = lamda;
+            long oldLength = 0;
+            lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
+            altitudeDiff = dijkstra(srcId, trgtId, lamda);
+
+            while (lamdaOfBad - lamdaOfGood >= threshold ) {
+                if (altitudeDiff <= maxAltitudeDifference) {
+                    oldLamda = lamdaOfGood;
+                    lamdaOfGood = lamda;
+                } else {
+                    oldLamda = lamdaOfBad;
+                    lamdaOfBad = lamda;
+                }
+                lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
+                altitudeDiff = dijkstra(srcId, trgtId, lamda);
+            }
+            altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
+        }
+        // Find out how much space to allocate
+        int currNode = trgtId;
+        int routeElements = 1;
+
+        while (currNode != srcId) {
+            routeElements++;
+            currNode = graph.getSource(prevEdges[currNode]);
+        }
+        log.fine(
+                "path goes over " + routeElements + " nodes and over " + altitudeDiff +
+                        " meters of altitude Difference");
+        // Add points to the end
+        resultAddIndex = resultPoints.size();
+        // Add them without values we set the values in the next step
+        resultPoints.addEmptyPoints(routeElements);
+        int distance = 0;
+        // backtracking here
+        // Don't read distance from multipliedDist[], because there are
+        // distances with
+        // regard to the multiplier
+        // only to the penultimate element (srcId)
+        currNode = trgtId;
+        while (routeElements > 1) {
+            distance += graph.getEuclidianDist(prevEdges[currNode]);
+            routeElements--;
+            resultPoints.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
+            resultPoints.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
+            currNode = graph.getSource(prevEdges[currNode]);
+        }
+        // add source node to the result.
+        resultPoints.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
+        resultPoints.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+
+        ds.returnDistArray(false);
+        ds.returnHeap();
+        ds.returnPrevArray();
+        return new int[]{altitudeDiff,distance};
+    }
+    
+    
+    /**
+     * Performs the Dijkstra Search on edge weights with
+     * euclidian distance * lamda + altitude difference * 1-lamda
+     * for edges with positive altitude difference. For all other edges the weight will calculated only with:
+     * euclidian distance * lamda.
+     * It stopps when the target point is removed from the pq
+     *
+     * @param srcId
+     * @param trgtId
+     * @param lamda
+     * @return
+     * @throws ComputeException
+     */
     private int dijkstra(int srcId, int trgtId, double lamda) throws ComputeException {
         // reset dists
         for (int i = 0; i < dists.length; i++) {
@@ -94,8 +268,8 @@ public class ConstraintSP extends GraphAlgorithm {
         if (nodeId != trgtId) {
             log.fine(
                     "There is no path from src: " + srcId + " to trgt: " + trgtId + "Dijkstra does not found the " +
-                    "target"
-                              );
+                            "target"
+            );
             ds.returnDistArray(false);
             ds.returnHeap();
             ds.returnPrevArray();
@@ -129,142 +303,4 @@ public class ConstraintSP extends GraphAlgorithm {
         return altitudeDiff;
     }
 
-    @Override
-    public void compute(ComputeRequest req) throws ComputeException {
-
-        try {
-            heap = ds.borrowHeap();
-            dists = ds.borrowDistArray();
-            prevEdges = ds.borrowPrevArray();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        assert req != null : "We ended up without a request object in run";
-        RequestPoints points = req.getPoints();
-
-        // Check if we have enough points to do something useful
-        if (points.size() < 2 && points.size() > 2) {
-            ds.returnDistArray(false);
-            ds.returnHeap();
-            ds.returnPrevArray();
-            throw new ComputeException(
-                    "Not enough points or to much points, need 2"
-            );
-        }
-
-        Points resultPoints = req.getResulWay();
-        int srclat, srclon;
-        int destlat, destlon;
-        int srcId, trgtId;
-        int resultAddIndex = 0;
-        int maxAltitudeDifference;
-        if (req.getConstraints() == null || req.getConstraints().get("maxAltitudeDifference") == null){
-            ds.returnDistArray(false);
-            ds.returnHeap();
-            ds.returnPrevArray();
-            throw new ComputeException("Missing maxAltitudeDifference constrained");
-        } 
-        try {
-            maxAltitudeDifference = (Integer) req.getConstraints().get("maxAltitudeDifference");
-        } catch (ClassCastException e){
-            ds.returnDistArray(false);
-            ds.returnHeap();
-            ds.returnPrevArray();
-            throw new ComputeException("Couldn't read maxAltitudeDifference, wrong type");
-        }
-
-        double threshold = 1.0 / (double) ((long)graph.getNodeCount() * (long)graph.getNodeCount() * (long)maxAltitudeDifference + (long) maxAltitudeDifference);
-
-        srclat = points.getPointLat(0);
-        srclon = points.getPointLon(0);
-        destlat = points.getPointLat(1);
-        destlon = points.getPointLon(1);
-        srcId = graph.getIdForCoordinates(srclat, srclon);
-        trgtId = graph.getIdForCoordinates(destlat, destlon);
-
-        double lamdaOfGood;
-        double lamdaOfBad;
-        double lamda = 1.0;
-        int altitudeDiff;
-        double oldLamda;
-        // shortest path's difference of altitude
-        altitudeDiff = dijkstra(srcId, trgtId, lamda);
-        // shortest path serves not the constraint
-        if (altitudeDiff > maxAltitudeDifference) {
-            log.fine(
-                    "There is no shortest path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
-                    maxAltitudeDifference
-                              );
-            lamdaOfBad = lamda;
-            lamda = 0.0;
-            // exists there a path that serves the constraint
-            altitudeDiff = dijkstra(srcId, trgtId, lamda);
-            if (altitudeDiff > maxAltitudeDifference) {
-                log.fine("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
-                        maxAltitudeDifference
-                                  );
-                ds.returnDistArray(false);
-                ds.returnHeap();
-                ds.returnPrevArray();
-                throw new ComputeException("No path found");
-            }
-            lamdaOfGood = lamda;
-            long oldLength = 0;
-            lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
-            altitudeDiff = dijkstra(srcId, trgtId, lamda);
-
-            while (lamdaOfBad - lamdaOfGood >= threshold ) {
-                if (altitudeDiff <= maxAltitudeDifference) {
-                    oldLamda = lamdaOfGood;
-                    lamdaOfGood = lamda;
-                } else {
-                    oldLamda = lamdaOfBad;
-                    lamdaOfBad = lamda;
-                }
-                lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
-                altitudeDiff = dijkstra(srcId, trgtId, lamda);
-            }
-            altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
-        }
-        // Find out how much space to allocate
-        int currNode = trgtId;
-        int routeElements = 1;
-
-        while (currNode != srcId) {
-            routeElements++;
-            currNode = graph.getSource(prevEdges[currNode]);
-        }
-        log.fine(
-                "path goes over " + routeElements + " nodes and over " + altitudeDiff +
-                " meters of altitude Difference");
-        // Add points to the end
-        resultAddIndex = resultPoints.size();
-        // Add them without values we set the values in the next step
-        resultPoints.addEmptyPoints(routeElements);
-        int distance = 0;
-        // backtracking here
-        // Don't read distance from multipliedDist[], because there are
-        // distances with
-        // regard to the multiplier
-        // only to the penultimate element (srcId)
-        currNode = trgtId;
-        while (routeElements > 1) {
-            distance += graph.getEuclidianDist(prevEdges[currNode]);
-            routeElements--;
-            resultPoints.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
-            resultPoints.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
-            currNode = graph.getSource(prevEdges[currNode]);
-        }
-        // add source node to the result.
-        resultPoints.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-        resultPoints.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
-
-        Map<String, Object> misc = new HashMap<String, Object>(1);
-        misc.put("distance", distance);
-        req.setMisc(misc);
-        ds.returnDistArray(false);
-        ds.returnHeap();
-        ds.returnPrevArray();
-
-    }
 }
