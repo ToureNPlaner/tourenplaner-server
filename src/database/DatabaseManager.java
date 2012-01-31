@@ -374,10 +374,10 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 if (tryAgain > 0) {
                     log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now reconnect database and send again the sql statement");
+                            "thread will now reconnect database and send again the sql statement " +
+                            "(Exception: " + e.getMessage() + ")");
                     try {
-                        Thread.sleep(3000);
-                        con.close();
+                        this.close();
                         init();
                     } catch (Exception e1) {
                     }
@@ -502,7 +502,7 @@ public class DatabaseManager {
 
         PreparedStatement pstAddNewUser = preparedStatementMap.get(SqlStatementEnum.AddNewUser);
 
-		UserDataset user = null;
+		UserDataset user;
 
 		email = email.trim();
 		passwordhash = passwordhash.trim();
@@ -629,10 +629,10 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 if (tryAgain > 0) {
                     log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now reconnect database and send again the sql statement");
+                            "thread will now reconnect database and send again the sql statement " +
+                            "(Exception: " + e.getMessage() + ")");
                     try {
-                        Thread.sleep(3000);
-                        con.close();
+                        this.close();
                         init();
                     } catch (Exception e1) {
                     }
@@ -700,10 +700,10 @@ public class DatabaseManager {
             } catch (SQLException e) {
                 if (tryAgain > 0) {
                     log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now reconnect database and send again the sql statement");
+                            "thread will now reconnect database and send again the sql statement " +
+                            "(Exception: " + e.getMessage() + ")");
                     try {
-                        Thread.sleep(3000);
-                        con.close();
+                        this.close();
                         init();
                     } catch (Exception e1) {
                     }
