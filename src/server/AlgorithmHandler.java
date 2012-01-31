@@ -193,7 +193,12 @@ public class AlgorithmHandler extends RequestHandler {
                         // TODO maybe a better method should be used to convert a string to a byte array
                         requestDataset.jsonResponse = errorMessage.getBytes();
                         requestDataset.status = RequestStatusEnum.failed;
-                        dbm.updateRequest(requestDataset);
+
+                        // already sent error message, throw no exception
+                        try {
+                            dbm.updateRequest(requestDataset);
+                        } catch (SQLException e) {
+                        }
                     }
 
                 }
