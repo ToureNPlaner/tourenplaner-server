@@ -5,6 +5,10 @@ case $# in
 5)
 
 coordinates=( $(cat rdm-shuffled-coordinates-germany.txt) )
+coordinateslength=${#coordinates[@]}
+
+echo "looping over $coordinateslength coordinates" 1>&2
+
 currentcoordinate=0
 #cat rdm-shuffled-coordinates-germany.txt | while read i
 #do
@@ -23,7 +27,13 @@ currentcoordinate=$(( $currentcoordinate + 1 ))
 done
 JSONTMP="$JSONTMP
     { \"lt\": $(echo ${coordinates[$currentcoordinate]} | cut -f 1 -d " "), \"ln\": $(echo ${coordinates[$currentcoordinate]} | cut -f 2 -d " ") }"
+
 currentcoordinate=$(( $currentcoordinate + 1 ))
+
+if [ $currentcoordinate -ge $coordinateslength ]
+then
+  currentcoordinate=0
+fi
 
 JSONTMP="$JSONTMP
   ]
@@ -38,10 +48,10 @@ $(cat ${TMP})" 1>&2
 done
 ;;
 *)
-   echo "Usage: $0 <URL> <HTTP/HTTPS> <ALG_TYPE> <PAUSE> <POINTS_PER_REQUEST>"
-   echo "Example:"
-   echo "       $ $0 https://gerbera.informatik.uni-stuttgart.de:8081 HTTPS algsp 0.5 4 > randomtest.log	(spams 2 semirandom requests with 4 points each)"
-   echo "       $ $0 komani.ath.cx:8080 HTTP algtsp 2 6 > log.txt"
+   echo "Usage: $0 <URL> <HTTP/HTTPS> <ALG_TYPE> <PAUSE> <POINTS_PER_REQUEST>
+Example:
+       $ $0 https://gerbera.informatik.uni-stuttgart.de:8081 HTTPS algsp 0.5 4 > randomtest.log	(spams 2 semirandom request with 4 points each)
+       $ $0 komani.ath.cx:8080 HTTP algtsp 2 6 > log.txt" 1>&2
    exit 1
  ;;
 esac
