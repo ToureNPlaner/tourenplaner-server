@@ -372,20 +372,7 @@ public class DatabaseManager {
 
 
             } catch (SQLException e) {
-                if (tryAgain > 0) {
-                    log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now reconnect database and send again the sql statement " +
-                            "(Exception: " + e.getMessage() + ")");
-                    try {
-                        this.close();
-                        init();
-                    } catch (Exception e1) {
-                    }
-                } else {
-                    log.log(Level.SEVERE, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now give up executing the statement", e);
-                    throw e;
-                }
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             }
 
         }
@@ -627,20 +614,7 @@ public class DatabaseManager {
                 return rowsAffected;
 
             } catch (SQLException e) {
-                if (tryAgain > 0) {
-                    log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now reconnect database and send again the sql statement " +
-                            "(Exception: " + e.getMessage() + ")");
-                    try {
-                        this.close();
-                        init();
-                    } catch (Exception e1) {
-                    }
-                } else {
-                    log.log(Level.SEVERE, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now give up executing the statement", e);
-                    throw e;
-                }
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             }
 
         }
@@ -698,27 +672,15 @@ public class DatabaseManager {
                 return rowsAffected;
 
             } catch (SQLException e) {
-                if (tryAgain > 0) {
-                    log.log(Level.WARNING, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now reconnect database and send again the sql statement " +
-                            "(Exception: " + e.getMessage() + ")");
-                    try {
-                        this.close();
-                        init();
-                    } catch (Exception e1) {
-                    }
-                } else {
-                    log.log(Level.SEVERE, "Database exception occurred (" + (maxTries - tryAgain) + ". attempt), " +
-                            "thread will now give up executing the statement", e);
-                    throw e;
-                }
+
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             }
 
         }
         return 0;
 	}
 
-	/**
+    /**
 	 * Updates the Users table row with the id given through the parameter (<b>
 	 * <code>request.id</code></b>). All values within the given object will be
 	 * written into the database, so all old values within the row will be
@@ -1266,6 +1228,29 @@ public class DatabaseManager {
             con.close();
         } catch (SQLException e) {
         }
+    }
+
+
+    private int processTryAgainExceptionHandling(int tryAgain, SQLException sqlException) throws SQLException {
+        if (tryAgain > 0) {
+            log.log(Level.WARNING, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
+                    "thread will now reconnect database and send again the sql statement " + 
+                    "\n --- (Exception: " + sqlException.getCause().toString() + " --- " +
+                    sqlException.getMessage() + ")");
+            
+            this.close();
+            try {
+                init();
+            } catch (SQLException e) {
+                tryAgain--;
+                return processTryAgainExceptionHandling(tryAgain, e);
+            }
+        } else {
+            log.log(Level.SEVERE, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
+                    "thread will now give up executing the statement", sqlException);
+            throw sqlException;
+        }
+        return tryAgain;
     }
 
 	/**
