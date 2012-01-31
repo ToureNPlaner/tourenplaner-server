@@ -222,5 +222,9 @@ public class ComputeThread extends Thread {
 				log.log(Level.WARNING ,"An exception occurred", e);
 			}
 		}
+
+        if (this.dbm != null) {
+            dbm.close();
+        }
 	}
 }

@@ -4,11 +4,9 @@
 
 package server;
 
-import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 import config.ConfigManager;
 import database.DatabaseManager;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.util.CharsetUtil;
@@ -41,8 +39,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
     private boolean isPrivate;
 
-    private ObjectMapper mapper;
-
     private Responder responder;
 
     private Authorizer authorizer;
@@ -52,31 +48,33 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
     private PrivateHandler privateHandler;
 
     private InfoHandler infoHandler;
+    
+    private DatabaseManager dbm;
 
     /**
      * Constructs a new RequestHandler using the given ComputeCore and
      * ServerInfo
      *
-     * @param cCore
-     * @param serverInfo
+     * @param cCore ComputeCore
+     * @param serverInfo String-Object-Map
      */
     public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
         super();
         final ConfigManager cm = ConfigManager.getInstance();
         this.isPrivate = cm.getEntryBool("private", false);
-        DatabaseManager dbm = null;
+        this.dbm = null;
         authorizer = null;
         if (isPrivate){
             try {
-                dbm = new DatabaseManager(cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/"), cm.getEntryString("dbname", "tourenplaner"), cm.getEntryString("dbuser", "tnpuser"), cm.getEntryString("dbpw", "toureNPlaner"));
-                authorizer = new Authorizer(dbm);
+                this.dbm = new DatabaseManager(cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/"), cm.getEntryString("dbname", "tourenplaner"), cm.getEntryString("dbuser", "tnpuser"), cm.getEntryString("dbpw", "toureNPlaner"));
+                authorizer = new Authorizer(this.dbm);
             } catch (SQLException e) {
                 log.log(Level.SEVERE, "Can't connect to database falling back to public mode", e);
                 this.isPrivate = false;
             }
         }
-        this.algHandler = new AlgorithmHandler(authorizer, this.isPrivate, dbm, cCore);
-        this.privateHandler = new PrivateHandler(authorizer, dbm);
+        this.algHandler = new AlgorithmHandler(authorizer, this.isPrivate, this.dbm, cCore);
+        this.privateHandler = new PrivateHandler(authorizer, this.dbm);
         this.infoHandler = new InfoHandler(serverInfo);
     }
 
@@ -90,6 +88,13 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
         algHandler.setResponder(responder);
         privateHandler.setResponder(responder);
         infoHandler.setResponder(responder);
+    }
+
+    @Override
+    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
+        if (this.dbm != null) {
+            dbm.close();
+        }
     }
 
     /**
@@ -175,8 +180,8 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
     /**
      * Handles preflighted OPTION Headers
      *
-     * @param request
-     * @param channel
+     * @param request HttpRequest
+     * @param channel Channel
      */
     private void handlePreflights(final HttpRequest request, final Channel channel) {
         boolean keepAlive = isKeepAlive(request);

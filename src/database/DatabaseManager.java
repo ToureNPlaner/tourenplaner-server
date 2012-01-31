@@ -6,10 +6,8 @@ package database;
 import com.mysql.jdbc.Statement;
 
 import java.sql.*;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -29,29 +27,10 @@ public class DatabaseManager {
     private final String password;
 
     private int maxTries = 2;
-    
-	private PreparedStatement pstAddNewRequest;
-	private PreparedStatement pstAddNewUser;
-	private PreparedStatement pstGetAllRequests;
-	private PreparedStatement pstGetAllUsers;
-	private PreparedStatement pstGetUserWithEmail;
-	private PreparedStatement pstGetUserWithId;
-	private PreparedStatement pstUpdateRequest;
-	private PreparedStatement pstUpdateRequestWithComputeResult;
-	private PreparedStatement pstUpdateUser;
-	private PreparedStatement pstDeleteRequestWithRequestId;
-	private PreparedStatement pstDeleteRequestsOfUserWithUserId;
-	private PreparedStatement pstDeleteUserWithUserId;
-	private PreparedStatement pstDeleteUserWithEmail;
-	private PreparedStatement pstGetAllRequestsWithLimitOffset;
-	private PreparedStatement pstGetRequestWithRequestId;
-	private PreparedStatement pstGetRequestsWithUserId;
-	private PreparedStatement pstGetRequestsWithUserIdLimitOffset;
-	private PreparedStatement pstGetAllUsersWithLimitOffset;
-    private PreparedStatement pstCountAllRequests;
-    private PreparedStatement pstCountRequestsWithUserId;
-    private PreparedStatement pstCountAllUsers;
 
+    private static HashMap<SqlStatementEnum, SqlStatementString> sqlStatementStringMap = createSqlStatementStringMap();
+    private HashMap<SqlStatementEnum, PreparedStatement> preparedStatementMap;
+    
 
     /*
        INSERT statements
@@ -184,42 +163,139 @@ public class DatabaseManager {
 	}
 
 
+    private enum SqlStatementEnum {
+        AddNewRequest,
+        AddNewUser,
+
+        GetAllRequests,
+        GetAllUsers,
+        GetUserWithEmail,
+        GetUserWithId,
+
+        UpdateRequest,
+        UpdateRequestWithComputeResult,
+        UpdateUser,
+
+        DeleteRequestWithRequestId,
+        DeleteRequestsOfUserWithUserId,
+        DeleteUserWithUserId,
+        DeleteUserWithEmail,
+
+        GetAllRequestsWithLimitOffset,
+        GetRequestWithRequestId,
+        GetRequestsWithUserId,
+        GetRequestsWithUserIdLimitOffset,
+        GetAllUsersWithLimitOffset,
+
+        CountAllRequests,
+        CountRequestsWithUserId,
+        CountAllUsers
+    }
+
+
+
+    private static HashMap<SqlStatementEnum, SqlStatementString> createSqlStatementStringMap() {
+        HashMap<SqlStatementEnum, SqlStatementString> sqlStatementMap = new HashMap<SqlStatementEnum, SqlStatementString>(21);
+
+        // INSERT statements
+
+        sqlStatementMap.put(SqlStatementEnum.AddNewRequest,
+                new SqlStatementString(strAddNewRequest,
+                        Statement.RETURN_GENERATED_KEYS));
+
+        sqlStatementMap.put(SqlStatementEnum.AddNewUser,
+                new SqlStatementString(strAddNewUser,
+                        Statement.RETURN_GENERATED_KEYS));
+
+        // SELECT statements without limit and without offset
+
+        sqlStatementMap.put(SqlStatementEnum.GetAllRequests,
+                new SqlStatementString(strGetAllRequests));
+
+        sqlStatementMap.put(SqlStatementEnum.GetAllUsers,
+                new SqlStatementString(strGetAllUsers));
+
+        sqlStatementMap.put(SqlStatementEnum.GetUserWithEmail,
+                new SqlStatementString(strGetUserWithEmail));
+
+        sqlStatementMap.put(SqlStatementEnum.GetUserWithId,
+                new SqlStatementString(strGetUserWithId));
+
+        // UPDATE statements
+
+        sqlStatementMap.put(SqlStatementEnum.UpdateRequest,
+                new SqlStatementString(strUpdateRequest));
+
+        sqlStatementMap.put(SqlStatementEnum.UpdateRequestWithComputeResult,
+                new SqlStatementString(strUpdateRequestWithComputeResult));
+
+        sqlStatementMap.put(SqlStatementEnum.UpdateUser,
+                new SqlStatementString(strUpdateUser));
+
+        // DELETE statements
+
+        sqlStatementMap.put(SqlStatementEnum.DeleteRequestWithRequestId,
+                new SqlStatementString(strDeleteRequestWithRequestId));
+
+        sqlStatementMap.put(SqlStatementEnum.DeleteRequestsOfUserWithUserId,
+                new SqlStatementString(strDeleteRequestsOfUserWithUserId));
+
+        sqlStatementMap.put(SqlStatementEnum.DeleteUserWithUserId,
+                new SqlStatementString(strDeleteUserWithUserId));
+
+        sqlStatementMap.put(SqlStatementEnum.DeleteUserWithEmail,
+                new SqlStatementString(strDeleteUserWithEmail));
+
+        // SELECT statements with limit and offset
+
+        sqlStatementMap.put(SqlStatementEnum.GetAllRequestsWithLimitOffset,
+                new SqlStatementString(strGetAllRequestsWithLimitOffset));
+
+        sqlStatementMap.put(SqlStatementEnum.GetRequestWithRequestId,
+                new SqlStatementString(strGetRequestWithRequestId));
+
+        sqlStatementMap.put(SqlStatementEnum.GetRequestsWithUserId,
+                new SqlStatementString(strGetRequestsWithUserId));
+
+        sqlStatementMap.put(SqlStatementEnum.GetRequestsWithUserIdLimitOffset,
+                new SqlStatementString(strGetRequestsWithUserIdLimitOffset));
+
+        sqlStatementMap.put(SqlStatementEnum.GetAllUsersWithLimitOffset,
+                new SqlStatementString(strGetAllUsersWithLimitOffset));
+
+        // statements for COUNTING rows
+
+        sqlStatementMap.put(SqlStatementEnum.CountAllRequests,
+                new SqlStatementString(strCountAllRequests));
+
+        sqlStatementMap.put(SqlStatementEnum.CountRequestsWithUserId,
+                new SqlStatementString(strCountRequestsWithUserId));
+
+        sqlStatementMap.put(SqlStatementEnum.CountAllUsers,
+                new SqlStatementString(strCountAllUsers));
+
+        return sqlStatementMap;
+    }
+
+    private static HashMap<SqlStatementEnum, PreparedStatement> createPreparedStatementMap(Connection con)
+            throws SQLException {
+        HashMap<SqlStatementEnum, PreparedStatement> pstMap
+                = new HashMap<SqlStatementEnum, PreparedStatement>(sqlStatementStringMap.size());
+
+        Iterator<SqlStatementEnum> iterator = sqlStatementStringMap.keySet().iterator();
+
+        SqlStatementEnum key;
+        while (iterator.hasNext()) {
+            key = iterator.next();
+            pstMap.put(key, sqlStatementStringMap.get(key).prepareStatement(con));
+        }
+        
+        return pstMap;
+    }
+
     private void init() throws SQLException {
         con = DriverManager.getConnection(url + dbName + "?autoReconnect=true", userName, password);
-
-        pstAddNewRequest = con.prepareStatement(strAddNewRequest,
-                Statement.RETURN_GENERATED_KEYS);
-        pstAddNewUser = con.prepareStatement(strAddNewUser,
-                Statement.RETURN_GENERATED_KEYS);
-        pstGetAllRequests = con.prepareStatement(strGetAllRequests);
-        pstGetAllUsers = con.prepareStatement(strGetAllUsers);
-        pstGetUserWithEmail = con.prepareStatement(strGetUserWithEmail);
-        pstGetUserWithId = con.prepareStatement(strGetUserWithId);
-        pstUpdateRequest = con.prepareStatement(strUpdateRequest);
-        pstUpdateRequestWithComputeResult = con
-                .prepareStatement(strUpdateRequestWithComputeResult);
-        pstUpdateUser = con.prepareStatement(strUpdateUser);
-        pstDeleteRequestWithRequestId = con
-                .prepareStatement(strDeleteRequestWithRequestId);
-        pstDeleteRequestsOfUserWithUserId = con
-                .prepareStatement(strDeleteRequestsOfUserWithUserId);
-        pstDeleteUserWithUserId = con
-                .prepareStatement(strDeleteUserWithUserId);
-        pstDeleteUserWithEmail = con
-                .prepareStatement(strDeleteUserWithEmail);
-        pstGetAllRequestsWithLimitOffset = con
-                .prepareStatement(strGetAllRequestsWithLimitOffset);
-        pstGetRequestWithRequestId = con
-                .prepareStatement(strGetRequestWithRequestId);
-        pstGetRequestsWithUserId = con
-                .prepareStatement(strGetRequestsWithUserId);
-        pstGetRequestsWithUserIdLimitOffset = con
-                .prepareStatement(strGetRequestsWithUserIdLimitOffset);
-        pstGetAllUsersWithLimitOffset = con
-                .prepareStatement(strGetAllUsersWithLimitOffset);
-        pstCountAllRequests = con.prepareStatement(strCountAllRequests);
-        pstCountRequestsWithUserId = con.prepareStatement(strCountRequestsWithUserId);
-        pstCountAllUsers = con.prepareStatement(strCountAllUsers);
+        this.preparedStatementMap = createPreparedStatementMap(con);
     }
 
 	/**
@@ -257,6 +333,8 @@ public class DatabaseManager {
 		 * (UserID) REFERENCES Users (id)
 		 */
 
+        PreparedStatement pstAddNewRequest = preparedStatementMap.get(SqlStatementEnum.AddNewRequest);
+        
 		RequestDataset request = null;
 		ResultSet generatedKeyResultSet = null;
 
@@ -422,6 +500,8 @@ public class DatabaseManager {
 		 * DEFAULT NULL, PRIMARY KEY (ID)
 		 */
 
+        PreparedStatement pstAddNewUser = preparedStatementMap.get(SqlStatementEnum.AddNewUser);
+
 		UserDataset user = null;
 
 		email = email.trim();
@@ -506,6 +586,9 @@ public class DatabaseManager {
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int updateRequest(RequestDataset request) throws SQLException {
+
+        PreparedStatement pstUpdateRequest = preparedStatementMap.get(SqlStatementEnum.UpdateRequest);
+
         int tryAgain = maxTries;
         int rowsAffected = 0;
 
@@ -587,6 +670,9 @@ public class DatabaseManager {
 			byte[] jsonResponse, boolean isPending, int costs, long cpuTime,
 			boolean hasFailed, String failDescription) throws SQLException {
 
+        PreparedStatement pstUpdateRequestWithComputeResult
+                = preparedStatementMap.get(SqlStatementEnum.UpdateRequestWithComputeResult);
+
         int rowsAffected = 0;
         int tryAgain = maxTries;
 
@@ -646,6 +732,9 @@ public class DatabaseManager {
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int  updateUser(UserDataset user) throws SQLException {
+
+        PreparedStatement pstUpdateUser = preparedStatementMap.get(SqlStatementEnum.UpdateUser);
+
 		pstUpdateUser.setString(1, user.email);
 		pstUpdateUser.setString(2, user.passwordhash);
 		pstUpdateUser.setString(3, user.salt);
@@ -673,6 +762,10 @@ public class DatabaseManager {
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteRequest(int id) throws SQLException {
+
+        PreparedStatement pstDeleteRequestWithRequestId
+                = preparedStatementMap.get(SqlStatementEnum.DeleteRequestWithRequestId);
+
 		pstDeleteRequestWithRequestId.setInt(1, id);
 
 		return pstDeleteRequestWithRequestId.executeUpdate();
@@ -689,6 +782,10 @@ public class DatabaseManager {
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteRequestsOfUser(int userId) throws SQLException {
+
+        PreparedStatement pstDeleteRequestsOfUserWithUserId
+                = preparedStatementMap.get(SqlStatementEnum.DeleteRequestsOfUserWithUserId);
+
 		pstDeleteRequestsOfUserWithUserId.setInt(1, userId);
 
 		return pstDeleteRequestsOfUserWithUserId.executeUpdate();
@@ -708,6 +805,10 @@ public class DatabaseManager {
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteUser(int userId) throws SQLException {
+
+        PreparedStatement pstDeleteUserWithUserId
+                = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithUserId);
+
 		pstDeleteUserWithUserId.setInt(1, userId);
 
 		return pstDeleteUserWithUserId.executeUpdate();
@@ -725,6 +826,10 @@ public class DatabaseManager {
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteUser(String email) throws SQLException {
+
+        PreparedStatement pstDeleteUserWithEmail
+                = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithEmail);
+
 		pstDeleteUserWithEmail.setString(1, email);
 
 		return pstDeleteUserWithEmail.executeUpdate();
@@ -741,6 +846,9 @@ public class DatabaseManager {
 	 *             Thrown if select fails.
 	 */
 	public List<RequestDataset> getAllRequests() throws SQLException {
+
+        PreparedStatement pstGetAllRequests = preparedStatementMap.get(SqlStatementEnum.GetAllRequests);
+
 		ResultSet resultSet = pstGetAllRequests.executeQuery();
 		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
 
@@ -779,6 +887,9 @@ public class DatabaseManager {
 	public List<RequestDataset> getAllRequests(int limit, int offset)
 			throws SQLException {
 
+        PreparedStatement pstGetAllRequestsWithLimitOffset
+                = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsWithLimitOffset);
+
 		pstGetAllRequestsWithLimitOffset.setInt(1, limit);
 		pstGetAllRequestsWithLimitOffset.setInt(2, offset);
 
@@ -814,6 +925,9 @@ public class DatabaseManager {
 	 */
 	public RequestDataset getRequest(int id) throws SQLException {
 
+        PreparedStatement pstGetRequestWithRequestId
+                = preparedStatementMap.get(SqlStatementEnum.GetRequestWithRequestId);
+
 		pstGetRequestWithRequestId.setInt(1, id);
 		ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
 		RequestDataset request = null;
@@ -847,6 +961,10 @@ public class DatabaseManager {
 	 *             Thrown if select fails.
 	 */
 	public List<RequestDataset> getRequests(int userId) throws SQLException {
+
+        PreparedStatement pstGetRequestsWithUserId
+                = preparedStatementMap.get(SqlStatementEnum.GetRequestsWithUserId);
+
 		pstGetRequestsWithUserId.setInt(1, userId);
 
 		ResultSet resultSet = pstGetRequestsWithUserId.executeQuery();
@@ -888,6 +1006,10 @@ public class DatabaseManager {
 	 */
 	public List<RequestDataset> getRequests(int userId, int limit, int offset)
 			throws SQLException {
+
+        PreparedStatement pstGetRequestsWithUserIdLimitOffset
+                = preparedStatementMap.get(SqlStatementEnum.GetRequestsWithUserIdLimitOffset);
+
 		pstGetRequestsWithUserIdLimitOffset.setInt(1, userId);
 		pstGetRequestsWithUserIdLimitOffset.setInt(2, limit);
 		pstGetRequestsWithUserIdLimitOffset.setInt(3, offset);
@@ -923,6 +1045,9 @@ public class DatabaseManager {
 	 *             Thrown if select fails.
 	 */
 	public List<UserDataset> getAllUsers() throws SQLException {
+
+        PreparedStatement pstGetAllUsers = preparedStatementMap.get(SqlStatementEnum.GetAllUsers);
+
 		ResultSet resultSet = pstGetAllUsers.executeQuery();
 		ArrayList<UserDataset> list = new ArrayList<UserDataset>();
 
@@ -959,6 +1084,10 @@ public class DatabaseManager {
 	 */
 	public List<UserDataset> getAllUsers(int limit, int offset)
 			throws SQLException {
+
+        PreparedStatement pstGetAllUsersWithLimitOffset
+                = preparedStatementMap.get(SqlStatementEnum.GetAllUsersWithLimitOffset);
+
 		pstGetAllUsersWithLimitOffset.setInt(1, limit);
 		pstGetAllUsersWithLimitOffset.setInt(2, offset);
 
@@ -991,6 +1120,9 @@ public class DatabaseManager {
 	 *             Thrown if select fails.
 	 */
 	public UserDataset getUser(String email) throws SQLException {
+
+        PreparedStatement pstGetUserWithEmail = preparedStatementMap.get(SqlStatementEnum.GetUserWithEmail);
+
 		UserDataset user = null;
 
 		pstGetUserWithEmail.setString(1, email);
@@ -1023,6 +1155,9 @@ public class DatabaseManager {
 	 *             Thrown if select fails.
 	 */
 	public UserDataset getUser(int id) throws SQLException {
+
+        PreparedStatement pstGetUserWithId = preparedStatementMap.get(SqlStatementEnum.GetUserWithId);
+
 		UserDataset user = null;
 
 		pstGetUserWithId.setInt(1, id);
@@ -1051,6 +1186,9 @@ public class DatabaseManager {
      * @throws SQLException Thrown if sql query fails
      */
     public int getNumberOfRequests() throws SQLException {
+
+        PreparedStatement pstCountAllRequests = preparedStatementMap.get(SqlStatementEnum.CountAllRequests);
+
         ResultSet resultSet = pstCountAllRequests.executeQuery();
 
         if (resultSet.next()) {
@@ -1072,6 +1210,9 @@ public class DatabaseManager {
      */
     public int getNumberOfRequestsWithUserId(int userId) throws SQLException {
 
+        PreparedStatement pstCountRequestsWithUserId
+                = preparedStatementMap.get(SqlStatementEnum.CountRequestsWithUserId);
+
         pstCountRequestsWithUserId.setInt(1, userId);
         ResultSet resultSet = pstCountRequestsWithUserId.executeQuery();
 
@@ -1092,6 +1233,10 @@ public class DatabaseManager {
      * @throws SQLException Thrown if sql query fails
      */
     public int getNumberOfUsers() throws SQLException {
+
+        PreparedStatement pstCountAllUsers
+                = preparedStatementMap.get(SqlStatementEnum.CountAllUsers);
+
         ResultSet resultSet = pstCountAllUsers.executeQuery();
 
         if (resultSet.next()) {
@@ -1106,6 +1251,22 @@ public class DatabaseManager {
     }
 
 
+    /**
+     * Closes the database connection. Exceptions will be caught. 
+     */
+    public void close() {
+        Iterator<SqlStatementEnum> iterator = preparedStatementMap.keySet().iterator();
+        while (iterator.hasNext()) {
+            try {
+                preparedStatementMap.get(iterator.next()).close();
+            } catch (SQLException e) {
+            }
+        }
+        try {
+            con.close();
+        } catch (SQLException e) {
+        }
+    }
 
 	/**
 	 * Converts a sql timestamp to a java date
@@ -1133,46 +1294,6 @@ public class DatabaseManager {
 			return null;
 		}
 		return new Timestamp(date.getTime());
-	}
-
-	/**
-	 * Yet only for testing purpose
-	 */
-	public void printDatabaseInformation() {
-		try {
-			addNewUser("sascha@tourenplaner", "xyz", "pepper", "sascha",
-					"verratinet", "", true);
-			// addNewRequest(10,
-			// ("EinTestBlob mit falscher UserID").getBytes());
-		} catch (SQLIntegrityConstraintViolationException e) {
-
-			SQLException ex = e;
-
-			do {
-
-				System.out.println("errorcode: " + ex.getErrorCode());
-				System.out.println("sqlstate: " + ex.getSQLState());
-				try {
-					System.out.println("stateType: "
-							+ con.getMetaData().getSQLStateType());
-				} catch (SQLException e1) {
-					System.out.println("someConnectionError:");
-					e1.printStackTrace();
-				}
-				System.out.println(ex.getLocalizedMessage());
-
-				ex = ex.getNextException();
-			} while (ex != null);
-
-			System.out.println("xopen: " + DatabaseMetaData.sqlStateXOpen);
-			System.out.println("sql: " + DatabaseMetaData.sqlStateSQL);
-			System.out.println("sql99: " + DatabaseMetaData.sqlStateSQL99);
-
-		} catch (SQLException ex) {
-			System.out.println("anotherConnectionError:");
-			ex.printStackTrace();
-		}
-
 	}
 
 }
