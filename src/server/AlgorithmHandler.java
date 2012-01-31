@@ -156,7 +156,7 @@ public class AlgorithmHandler extends RequestHandler {
         if (isPrivate) {
             userDataset = authorizer.auth(request);
             if (userDataset == null) {
-                responder.writeUnauthorizedClose();
+                // auth closes connection and sends error
                 return;
             }
         }
