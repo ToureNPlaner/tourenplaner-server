@@ -10,6 +10,8 @@ import org.jboss.netty.handler.codec.http.*;
 
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
 import static org.jboss.netty.handler.codec.http.HttpHeaders.isKeepAlive;
@@ -27,6 +29,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  *          /org/jboss/netty/example/http/snoop/package-summary.html
  */
 public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
+    private static Logger log = Logger.getLogger("server");
 
     private final InfoHandler infoHandler;
 
@@ -110,7 +113,7 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception {
-        e.getCause().printStackTrace();
+        log.log(Level.WARNING,"Exception caught",e.getCause());
         e.getChannel().close();
     }
 }
