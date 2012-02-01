@@ -535,7 +535,7 @@ public class DatabaseManager {
 
 			boolean hasKey = false;
 			if (generatedKeyResultSet.next()) {
-				user.id = generatedKeyResultSet.getInt(1);
+				user.userid = generatedKeyResultSet.getInt(1);
 				hasKey = true;
 			}
 			generatedKeyResultSet.close();
@@ -599,7 +599,7 @@ public class DatabaseManager {
                 pstUpdateRequest.setBytes(3, request.jsonRequest);
                 pstUpdateRequest.setBytes(4, request.jsonResponse);
                 pstUpdateRequest.setBoolean(5, isPending);
-                pstUpdateRequest.setInt(6, request.costs);
+                pstUpdateRequest.setInt(6, request.cost);
                 pstUpdateRequest.setBoolean(7, request.isPaid);
                 pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.requestDate));
                 pstUpdateRequest.setTimestamp(9, dateToTimestamp(request.finishedDate));
@@ -684,7 +684,7 @@ public class DatabaseManager {
 	 * Updates the Users table row with the id given through the parameter (<b>
 	 * <code>request.id</code></b>). All values within the given object will be
 	 * written into the database, so all old values within the row will be
-	 * overwritten. <b><code>user.id</code></b> has to be > 0 and must exists
+	 * overwritten. <b><code>user.userid</code></b> has to be > 0 and must exists
 	 * within the database table. </br>SQL command: {@value #strUpdateUser}
 	 * 
 	 * @param user
@@ -708,7 +708,7 @@ public class DatabaseManager {
 		pstUpdateUser.setTimestamp(9, dateToTimestamp(user.registrationDate));
 		pstUpdateUser.setTimestamp(10, dateToTimestamp(user.verifiedDate));
 		pstUpdateUser.setTimestamp(11, dateToTimestamp(user.deleteRequestDate));
-		pstUpdateUser.setInt(12, user.id);
+		pstUpdateUser.setInt(12, user.userid);
 
 		return pstUpdateUser.executeUpdate();
 	}

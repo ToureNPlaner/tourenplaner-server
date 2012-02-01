@@ -177,7 +177,7 @@ public class AlgorithmHandler extends RequestHandler {
 
                 if (isPrivate && !algFac.isHidden()) {
                     byte[] jsonRequest = request.getContent().array();
-                    requestDataset = dbm.addNewRequest(userDataset.id, algName, jsonRequest);
+                    requestDataset = dbm.addNewRequest(userDataset.userid, algName, jsonRequest);
                     req.setRequestID(requestDataset.requestID);
                 }
 

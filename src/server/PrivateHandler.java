@@ -173,7 +173,7 @@ public class PrivateHandler extends RequestHandler {
                 allRequests = true;
             }
         } else {
-            userID = user.id;
+            userID = user.userid;
         }
 
         List<RequestDataset> requestDatasetList;

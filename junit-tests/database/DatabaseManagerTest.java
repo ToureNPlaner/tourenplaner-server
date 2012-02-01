@@ -55,7 +55,7 @@ public class DatabaseManagerTest {
 						"DmGT9B354DFasH673aGFBM3", "hmAhgAN68sdKNfdA9sd876k0",
 						"John", "Doe", "Musterstraße 42", false);
 				if (user != null) {
-					testUserID = user.id;
+					testUserID = user.userid;
 				} else {
 					userFailureMessage = "TestUser existed before test run.";
 				}
