@@ -86,7 +86,7 @@ public class TravelingSalesman extends GraphAlgorithm {
 
             req.getPoints().setStore(pointStore);
             // Now build real paths
-            chdijks.shortestPath(points, req.getResulWay(), true);
+            chdijks.shortestPath(points, req.getResultWay(), true);
 
 
             debugMat.put("distMat", distmat);
