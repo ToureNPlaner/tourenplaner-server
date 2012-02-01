@@ -40,10 +40,8 @@ public class ComputeThread extends Thread {
 	 * Constructs a new ComputeThread using the given AlgorithmManager and
 	 * RequestQueue
 	 * 
-	 * @param am
-	 * @param rq
-	 * @throws SQLException Thrown only in private mode, and only if 
-	 * 				database connection could not be established.
+	 * @param am AlgorithmManager
+	 * @param rq BlockingQueue&lt;ComputeRequest&gt;
 	 */
 	public ComputeThread(AlgorithmManager am, BlockingQueue<ComputeRequest> rq) {
 		alm = am;
@@ -81,7 +79,7 @@ public class ComputeThread extends Thread {
         while (!Thread.interrupted()) {
 			long cpuTime = 0;
 			int requestID = -1;
-			ByteArrayOutputStream baOutputStream = null;
+			ByteArrayOutputStream baOutputStream;
 			
 			try {
 				work = reqQueue.take();
@@ -114,24 +112,10 @@ public class ComputeThread extends Thread {
                             String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
                                     "The server could not send and not store the compute result", "",
                                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
-							if (isPrivate) {
-								try {
-									// TODO change failDescription to user friendly message?
-									dbm.updateRequestWithComputeResult(
-											requestID,
-                                            // TODO maybe a better method should be used to convert a string to a byte array
-                                            errorMessage.getBytes(), //jsonResponse
-											false, //isPending
-											0, //costs
-											cpuTime, 
-											true, //hasFailed
-											null); //failDescription
-								} catch (SQLException sqlE) {
-									log.log(Level.WARNING, "Could not log IOException into DB ", sqlE);
-								}
-								
-							}
-							throw e;
+
+                            writeIntoDatabase(requestID, errorMessage, "IOException");
+
+                            throw e;
 						}
 						if (isPrivate) {
 							
@@ -160,47 +144,15 @@ public class ComputeThread extends Thread {
                         String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
 								e.getMessage(), "",
 								HttpResponseStatus.PROCESSING); //TODO maybe wrong response status
-						if (isPrivate) {
-							try {
-								// TODO change failDescription to user friendly message?
-								dbm.updateRequestWithComputeResult(
-										requestID,
-                                        // TODO maybe a better method should be used to convert a string to a byte array
-                                        errorMessage.getBytes(), //jsonResponse
-										false, //isPending
-										0, //costs
-										cpuTime,
-										true, //hasFailed
-										null); //failDescription
-							} catch (SQLException sqlE) {
-								log.log(Level.WARNING, "Could not log ComputeException into DB", sqlE);
-							}
-							
-						}
+
+                        writeIntoDatabase(requestID, errorMessage, "ComputeException");
 					}
 				} else {
-					log.warning("Unsupported algorithm "
-							+ work.getAlgorithmURLSuffix() + " requested");
+					log.warning("Unsupported algorithm " + work.getAlgorithmURLSuffix() + " requested");
 					String errorMessage = work.getResponder().writeAndReturnErrorMessage("EUNKNOWNALG",
-							"An unknown algorithm was requested", null,
-							HttpResponseStatus.NOT_FOUND);
-                    if (isPrivate) {
-                        try {
-                            // TODO change failDescription to user friendly message?
-                            dbm.updateRequestWithComputeResult(
-                                    requestID,
-                                    // TODO maybe a better method should be used to convert a string to a byte array
-                                    errorMessage.getBytes(), //jsonResponse
-                                    false, //isPending
-                                    0, //costs
-                                    0, //cpuTime
-                                    true, //hasFailed
-                                    null); //failDescription
-                        } catch (SQLException sqlE) {
-                            log.log(Level.WARNING, "ComputeThread: Could not log EUNKNOWNALG into DB", sqlE);
-                        }
+							"An unknown algorithm was requested", null, HttpResponseStatus.NOT_FOUND);
 
-                    }
+                    writeIntoDatabase(requestID, errorMessage, "EUNKNOWNALG");
 				}
 
 			} catch (InterruptedException e) {
@@ -218,6 +170,25 @@ public class ComputeThread extends Thread {
             dbm.close();
         }
 	}
+
+    private void writeIntoDatabase(int requestID, String errorMessage, String errorName) {
+        if (isPrivate) {
+            try {
+                // TODO change failDescription to user friendly message?
+                dbm.updateRequestWithComputeResult(
+                        requestID,
+                        // TODO maybe a better method should be used to convert a string to a byte array
+                        errorMessage.getBytes(), //jsonResponse
+                        false, //isPending
+                        0, //costs
+                        0, //cpuTime
+                        true, //hasFailed
+                        null); //failDescription
+            } catch (SQLException sqlE) {
+                log.log(Level.WARNING, "Could not log " + errorName + " into DB ", sqlE);
+            }
+        }
+    }
 
     private long startTimeMeasurement() {
         long cpuTime = 0;
