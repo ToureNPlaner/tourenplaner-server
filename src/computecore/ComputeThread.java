@@ -33,7 +33,7 @@ public class ComputeThread extends Thread {
 	private final AlgorithmManager alm;
 	private final BlockingQueue<ComputeRequest> reqQueue;
 	private boolean isPrivate;
-	private ThreadMXBean tmxb;
+	private ThreadMXBean threadMXBean;
 	private DatabaseManager dbm = null;
 
 	/**
@@ -50,7 +50,7 @@ public class ComputeThread extends Thread {
 		reqQueue = rq;
 		ConfigManager cm = ConfigManager.getInstance();
 		isPrivate = cm.getEntryBool("private", false);
-		tmxb = ManagementFactory.getThreadMXBean();
+		threadMXBean = ManagementFactory.getThreadMXBean();
 		if (isPrivate) {
             try {
                 this.dbm = new DatabaseManager(cm.getEntryString("dburi",
@@ -76,9 +76,10 @@ public class ComputeThread extends Thread {
 		ComputeRequest work;
 		Algorithm alg;
 
-		while (!Thread.interrupted()) {
+        checkThreadMXBeanSupport();
+
+        while (!Thread.interrupted()) {
 			long cpuTime = 0;
-			boolean tmxbSupport = true;
 			int requestID = -1;
 			ByteArrayOutputStream baOutputStream = null;
 			
@@ -89,30 +90,17 @@ public class ComputeThread extends Thread {
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
 					try {
-						
-						if (isPrivate) {
-							requestID = work.getRequestID();
-							try {
-								cpuTime = tmxb.getCurrentThreadCpuTime();
-							} catch (UnsupportedOperationException e) {
-								cpuTime = System.nanoTime();
-								tmxbSupport = false;
-							}
-							
-							alg.compute(work);
-						
-							if (tmxbSupport) {
-								cpuTime = tmxb.getCurrentThreadCpuTime() - cpuTime;
-							} else {
-								cpuTime = System.nanoTime() - cpuTime;
-							}
-							// convert to milliseconds
-							cpuTime = cpuTime / 1000000;
-							
-						} else {
-							alg.compute(work);
-						}
-						log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
+
+                        // if server is not private, work.getRequestID() should return -1
+                        requestID = work.getRequestID();
+
+                        cpuTime = startTimeMeasurement();
+
+                        alg.compute(work);
+
+                        cpuTime = finishTimeMeasurement(cpuTime);
+
+                        log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
 								+ " successfully computed.");
 						
 						try {
@@ -217,6 +205,9 @@ public class ComputeThread extends Thread {
 
 			} catch (InterruptedException e) {
 				log.warning("ComputeThread interrupted");
+                if (this.dbm != null) {
+                    dbm.close();
+                }
 				return;
 			} catch (Exception e) {
 				log.log(Level.WARNING ,"An exception occurred", e);
@@ -227,4 +218,44 @@ public class ComputeThread extends Thread {
             dbm.close();
         }
 	}
+
+    private long startTimeMeasurement() {
+        long cpuTime = 0;
+        if (isPrivate) {
+            if (threadMXBean != null) {
+                cpuTime = threadMXBean.getCurrentThreadCpuTime();
+            } else {
+                cpuTime = System.nanoTime();
+            }
+        }
+        return cpuTime;
+    }
+
+    private long finishTimeMeasurement(long cpuStartTime) {
+        if (isPrivate) {
+            if (threadMXBean != null) {
+                cpuStartTime = threadMXBean.getCurrentThreadCpuTime() - cpuStartTime;
+            } else {
+                cpuStartTime = System.nanoTime() - cpuStartTime;
+            }
+            // convert to milliseconds
+            cpuStartTime = cpuStartTime / 1000000;
+        }
+        return cpuStartTime;
+    }
+
+    /**
+     * Checks if thread CPU time measurements works correctly. If not, this method will set this.threadMXBean = null
+     */
+    private void checkThreadMXBeanSupport() {
+        if (threadMXBean != null) {
+            try {
+                if (threadMXBean.getCurrentThreadCpuTime() < 0) {
+                    threadMXBean = null;
+                }
+            } catch (UnsupportedOperationException e) {
+                threadMXBean = null;
+            }
+        }
+    }
 }
