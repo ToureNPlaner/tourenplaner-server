@@ -200,14 +200,6 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#getAllRequests()}.
-	 */
-	@Test
-	public final void testGetAllRequests() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
 	 * Test method for {@link database.DatabaseManager#getAllRequests(int, int)}
 	 * .
 	 */
@@ -221,14 +213,6 @@ public class DatabaseManagerTest {
 	 */
 	@Test
 	public final void testGetRequest() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link database.DatabaseManager#getRequests(int)}.
-	 */
-	@Test
-	public final void testGetRequestsInt() {
 		fail("Not yet implemented"); // TODO
 	}
 

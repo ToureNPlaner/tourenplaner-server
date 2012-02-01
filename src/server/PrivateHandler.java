@@ -84,8 +84,122 @@ public class PrivateHandler extends RequestHandler {
         return objmap;
     }
 
-    public void handleListUsers(final HttpRequest request, Map<String, List<String>> parameters)
-            throws SQLException, JsonGenerationException, JsonMappingException, IOException {
+
+
+    /**
+     * If authorization is okay, but no admin, registration fails. If no
+     * authorization as admin, the new registered user will not be registered as
+     * admin, even if json admin flag is true.
+     *
+     * @param request
+     * @throws java.sql.SQLFeatureNotSupportedException
+     *
+     * @throws SQLException
+     * @throws java.io.IOException
+     */
+    public void handleRegisterUser(final HttpRequest request) throws IOException, SQLFeatureNotSupportedException,
+            SQLException {
+
+        UserDataset authenticatedUser = null;
+
+        // if no authorization header keep on with adding not verified user
+        if (request.getHeader("Authorization") != null) {
+            authenticatedUser = authorizer.auth(request);
+            if (authenticatedUser == null) {
+                // auth(request) sent error response
+                return;
+            }
+
+            if (!authenticatedUser.admin) {
+                responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
+                        "A logged in user has to be admin to register users.", HttpResponseStatus.FORBIDDEN);
+                return;
+            }
+        }
+
+        Map<String, Object> objmap = getJSONContent(responder, request);
+
+        // getJSONContent adds error-message to responder
+        // if json object is bad or if there is no json object
+        // so no further handling needed if objmap == null
+        if (objmap == null) {
+            log.warning("Failed, bad json object.");
+            return;
+        }
+
+        if ( !(objmap.get("email") instanceof String) || !(objmap.get("password") instanceof String)
+                || !(objmap.get("firstname") instanceof String) || !(objmap.get("lastname") instanceof String)
+                || !(objmap.get("address") instanceof String) ) {
+            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
+                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
+                    HttpResponseStatus.UNAUTHORIZED);
+            return;
+        }
+
+        final String email = (String) objmap.get("email");
+        final String pw = (String) objmap.get("password");
+        final String firstName = (String) objmap.get("firstname");
+        final String lastName = (String) objmap.get("lastname");
+        final String address = (String) objmap.get("address");
+
+        if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
+            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
+                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
+                    HttpResponseStatus.UNAUTHORIZED);
+            return;
+        }
+
+        final String salt = authorizer.generateSalt();
+
+        final String toHash = authorizer.generateHash(salt, pw);
+
+
+        UserDataset newUser;
+
+        // if there is no authorization, add user but without verification
+        if (authenticatedUser == null) {
+            // if there is no authorization as admin, the new registered user will
+            // never be registered as admin, even if json admin flag is true
+            newUser = dbm.addNewUser(email, toHash, salt, firstName, lastName, address, false);
+        } else {
+
+            boolean adminFlag = false;
+            // TODO specify the case objmap.get("admin") == null for protocol specification: adminFlag is then false
+            if (objmap.get("admin") != null) {
+                // if (objmap.get("admin") is null, then "instanceof Boolean" would be always false
+                if ( !(objmap.get("admin") instanceof Boolean) ) {
+                    responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
+                            "JSON user object was not correct (\"admin\" should be boolean)",
+                            HttpResponseStatus.UNAUTHORIZED);
+                    return;
+                }
+                adminFlag = (Boolean) objmap.get("admin");
+            }
+            newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, adminFlag);
+        }
+
+        if ( newUser == null) {
+            responder.writeErrorMessage("EREGISTERED", "This email is already registered", null,
+                    HttpResponseStatus.FORBIDDEN);
+            return;
+        }
+
+        responder.writeJSON(newUser, HttpResponseStatus.OK);
+        log.finest("RegisterUser successful.");
+
+    }
+
+
+    public void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException,
+            IOException, SQLException {
+        UserDataset user = authorizer.auth(request);
+        if (user != null) responder.writeJSON(user, HttpResponseStatus.OK);
+
+    }
+
+
+    public void handleGetUser(final HttpRequest request, Map<String, List<String>> parameters)
+            throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
 
         // authentication needed, auth(request) responses with error if auth fails
@@ -93,41 +207,169 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        if (!user.admin) {
-            responder.writeErrorMessage(
-                    "ENOTADMIN",
-                    "You are not an admin",
-                    "You must be admin to list users",
-                    HttpResponseStatus.FORBIDDEN);
+        int userID = -1;
+        UserDataset selectedUser;
+
+        if (parameters.containsKey("id")) {
+            userID = parseUserIdParameter(parameters.get("id").get(0), user, false);
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (userID < 0) {
+                return;
+            }
+            selectedUser = dbm.getUser(userID);
+        } else {
+            selectedUser = user;
+        }
+
+        if (selectedUser == null) {
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
+                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
             return;
         }
 
-        int limit = extractPosIntParameter(parameters, "limit");
-        // if parameter is invalid, an error response is sent from extractPosIntParameter.
-        // the if and return is needed exactly here, because following methods could send more responses,
-        // but only one response per http request is allowed (else Exceptions will be thrown)
-        if (limit < 0) {
+        responder.writeJSON(selectedUser, HttpResponseStatus.OK);
+        log.finest("GetUser successful.");
+
+    }
+
+
+    public void handleUpdateUser(final HttpRequest request, Map<String, List<String>> parameters)
+            throws IOException, SQLException {
+        UserDataset user = authorizer.auth(request);
+
+        // authentication needed, auth(request) responses with error if auth fails
+        if (user == null) {
             return;
         }
 
-        int offset = extractPosIntParameter(parameters, "offset");
-        // if parameter is invalid, an error response is sent from extractPosIntParameter.
-        // the if and return is needed exactly here, because following methods could send more responses,
-        // but only one response per http request is allowed (else Exceptions will be thrown)
-        if (offset < 0) {
+
+        Map<String, Object> objmap = getJSONContent(responder, request);
+
+        // getJSONContent adds error-message to responder
+        // if json object is bad or if there is no json object
+        // so no further handling needed if objmap == null
+        if (objmap == null) {
+            log.warning("Failed, bad json object.");
             return;
         }
 
-        List<UserDataset> userDatasetList = null;
-        userDatasetList = dbm.getAllUsers(limit, offset);
-        int count = dbm.getNumberOfUsers();
 
-        Map<String, Object> responseMap = new HashMap<String, Object>(2);
-        responseMap.put("number", count);
-        responseMap.put("users", userDatasetList);
+        int userID = -1;
+        boolean isAdmin = user.admin;
+        UserDataset selectedUser;
 
-        responder.writeJSON(responseMap, HttpResponseStatus.OK);
-        log.finest("ListUsers successful.");
+        if (parameters.containsKey("id")) {
+            userID = parseUserIdParameter(parameters.get("id").get(0), user, false);
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (userID < 0) {
+                return;
+            }
+            selectedUser = dbm.getUser(userID);
+        } else {
+            selectedUser = user;
+        }
+
+        if (selectedUser == null) {
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
+                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+
+        if (objmap.get("password") != null && (objmap.get("password") instanceof String)) {
+            selectedUser.salt = authorizer.generateSalt();
+            selectedUser.passwordhash = authorizer.generateHash(selectedUser.salt, (String) objmap.get("password"));
+        }
+
+        if (isAdmin) {
+            if (objmap.get("email") != null && (objmap.get("email") instanceof String)) {
+                selectedUser.email = (String) objmap.get("email");
+            }
+            if (objmap.get("firstname") != null && (objmap.get("firstname") instanceof String)) {
+                selectedUser.firstName = (String) objmap.get("firstname");
+            }
+            if (objmap.get("lastname") != null && (objmap.get("lastname") instanceof String)) {
+                selectedUser.lastName = (String) objmap.get("lastname");
+            }
+            if (objmap.get("address") != null && (objmap.get("address") instanceof String)) {
+                selectedUser.address = (String) objmap.get("address");
+            }
+
+
+            if (objmap.get("admin") != null && (objmap.get("admin") instanceof Boolean)) {
+                selectedUser.admin = (Boolean) objmap.get("admin");
+            }
+
+            if (objmap.get("status") != null && (objmap.get("status") instanceof String)) {
+                String status = (String) objmap.get("status");
+                UserStatusEnum previousStatus = selectedUser.status;
+                try {
+                    selectedUser.status = UserStatusEnum.valueOf(status);
+                } catch (IllegalArgumentException e) {
+                    responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
+                            "JSON user object was not correct (\"status\" was not a valid value)",
+                            HttpResponseStatus.UNAUTHORIZED);
+                    return;
+                }
+
+                if (previousStatus == UserStatusEnum.needs_verification
+                        && selectedUser.status == UserStatusEnum.verified) {
+                    selectedUser.verifiedDate = new Date(System.currentTimeMillis());
+                }
+
+                if (previousStatus == UserStatusEnum.verified
+                        && selectedUser.status == UserStatusEnum.needs_verification) {
+                    selectedUser.verifiedDate = null;
+                }
+
+            }
+
+        }
+
+        dbm.updateUser(selectedUser);
+        responder.writeJSON(selectedUser, HttpResponseStatus.OK);
+        log.finest("UpdateUser successful.");
+    }
+
+
+    public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
+        UserDataset user = authorizer.auth(request);
+
+        // authentication needed, auth(request) responses with error if auth fails
+        if (user == null) {
+            return;
+        }
+
+        int requestID = -1;
+        RequestDataset selectedRequest;
+
+        if (parameters.containsKey("id")) {
+            requestID = parseRequestIdParameter(parameters.get("id").get(0));
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (requestID < 0) {
+                return;
+            }
+            selectedRequest = dbm.getRequest(requestID);
+        } else {
+            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
+                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+        if (selectedRequest == null) {
+            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
+                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+        responder.writeJSON(selectedRequest, HttpResponseStatus.OK);
+        log.finest("GetRequest successful.");
 
     }
 
@@ -175,15 +417,22 @@ public class PrivateHandler extends RequestHandler {
         } else {
             userID = user.userid;
         }
+        
+        boolean sendJson = true;
+        if (parameters.containsKey("details")) {
+            if ( "nojson".equals(parameters.get("details").get(0)) ) {
+                sendJson = false;
+            }
+        }
 
         List<RequestDataset> requestDatasetList;
         int count;
         if (allRequests) {
-            requestDatasetList = dbm.getAllRequests(limit, offset);
+            requestDatasetList = dbm.getAllRequests(limit, offset, sendJson);
             count = dbm.getNumberOfRequests();
 
         } else {
-            requestDatasetList = dbm.getRequests(userID, limit, offset);
+            requestDatasetList = dbm.getRequests(userID, limit, offset, sendJson);
             count = dbm.getNumberOfRequestsWithUserId(userID);
         }
 
@@ -197,7 +446,9 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
-    public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
+
+    public void handleListUsers(final HttpRequest request, Map<String, List<String>> parameters)
+            throws SQLException, JsonGenerationException, JsonMappingException, IOException {
         UserDataset user = authorizer.auth(request);
 
         // authentication needed, auth(request) responses with error if auth fails
@@ -205,205 +456,45 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int requestID = -1;
-        RequestDataset selectedRequest;
-
-        if (parameters.containsKey("id")) {
-            requestID = parseRequestIdParameter(parameters.get("id").get(0));
-            // if parameter is invalid, an error response is sent from parseUserIdParameter.
-            // the if and return is needed exactly here, because following methods could send more responses,
-            // but only one response per http request is allowed (else Exceptions will be thrown)
-            if (requestID < 0) {
-                return;
-            }
-            selectedRequest = dbm.getRequest(requestID);
-        } else {
-            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
-                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
+        if (!user.admin) {
+            responder.writeErrorMessage(
+                    "ENOTADMIN",
+                    "You are not an admin",
+                    "You must be admin to list users",
+                    HttpResponseStatus.FORBIDDEN);
             return;
         }
 
-        if (selectedRequest == null) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+        int limit = extractPosIntParameter(parameters, "limit");
+        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        // the if and return is needed exactly here, because following methods could send more responses,
+        // but only one response per http request is allowed (else Exceptions will be thrown)
+        if (limit < 0) {
             return;
         }
 
-        responder.writeJSON(selectedRequest, HttpResponseStatus.OK);
-        log.finest("GetRequest successful.");
+        int offset = extractPosIntParameter(parameters, "offset");
+        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        // the if and return is needed exactly here, because following methods could send more responses,
+        // but only one response per http request is allowed (else Exceptions will be thrown)
+        if (offset < 0) {
+            return;
+        }
+
+        List<UserDataset> userDatasetList = null;
+        userDatasetList = dbm.getAllUsers(limit, offset);
+        int count = dbm.getNumberOfUsers();
+
+        Map<String, Object> responseMap = new HashMap<String, Object>(2);
+        responseMap.put("number", count);
+        responseMap.put("users", userDatasetList);
+
+        responder.writeJSON(responseMap, HttpResponseStatus.OK);
+        log.finest("ListUsers successful.");
 
     }
 
 
-    /**
-     * Returns -1 if parameter is invalid (not a natural number) and will then
-     * response to request with error message.
-     * @param parameterValue the value of the id parameter as String
-     * @return
-     * @throws java.io.IOException
-     */
-    private Integer parseRequestIdParameter(String parameterValue) throws IOException {
-
-        if (parameterValue == null) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                    "The given id is null", HttpResponseStatus.NOT_FOUND);
-            return -1;
-        }
-
-        int requestID = -1;
-
-        try {
-            requestID = Integer.parseInt(parameterValue);
-        } catch (NumberFormatException e) {
-            requestID = -1;
-        }
-
-        if (requestID < 0) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                    "The given id is not an allowed number (positive or zero)", HttpResponseStatus.NOT_FOUND);
-            return requestID;
-        }
-
-        return requestID;
-
-    }
-
-
-    public void handleUpdateUser(final HttpRequest request, Map<String, List<String>> parameters)
-            throws IOException, SQLException {
-        UserDataset user = authorizer.auth(request);
-
-        // authentication needed, auth(request) responses with error if auth fails
-        if (user == null) {
-            return;
-        }
-
-
-        Map<String, Object> objmap = getJSONContent(responder, request);
-
-        // getJSONContent adds error-message to responder
-        // if json object is bad or if there is no json object
-        // so no further handling needed if objmap == null
-        if (objmap == null) {
-            log.warning("Failed, bad json object.");
-            return;
-        }
-        
-
-        int userID = -1;
-        boolean isAdmin = user.admin;
-        UserDataset selectedUser;
-
-        if (parameters.containsKey("id")) {
-            userID = parseUserIdParameter(parameters.get("id").get(0), user, false);
-            // if parameter is invalid, an error response is sent from parseUserIdParameter.
-            // the if and return is needed exactly here, because following methods could send more responses,
-            // but only one response per http request is allowed (else Exceptions will be thrown)
-            if (userID < 0) {
-                return;
-            }
-            selectedUser = dbm.getUser(userID);
-        } else {
-            selectedUser = user;
-        }
-
-        if (selectedUser == null) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-        
-
-        if (objmap.get("password") != null && (objmap.get("password") instanceof String)) {
-            selectedUser.salt = authorizer.generateSalt();
-            selectedUser.passwordhash = authorizer.generateHash(selectedUser.salt, (String) objmap.get("password"));
-        }
-
-        if (isAdmin) {
-            if (objmap.get("email") != null && (objmap.get("email") instanceof String)) {
-                selectedUser.email = (String) objmap.get("email");
-            }
-            if (objmap.get("firstname") != null && (objmap.get("firstname") instanceof String)) {
-                selectedUser.firstName = (String) objmap.get("firstname");
-            }
-            if (objmap.get("lastname") != null && (objmap.get("lastname") instanceof String)) {
-                selectedUser.lastName = (String) objmap.get("lastname");
-            }
-            if (objmap.get("address") != null && (objmap.get("address") instanceof String)) {
-                selectedUser.address = (String) objmap.get("address");
-            }
-
-
-            if (objmap.get("admin") != null && (objmap.get("admin") instanceof Boolean)) {
-                selectedUser.admin = (Boolean) objmap.get("admin");
-            }
-
-            if (objmap.get("status") != null && (objmap.get("status") instanceof String)) {
-                String status = (String) objmap.get("status");
-                UserStatusEnum previousStatus = selectedUser.status;
-                try {
-                    selectedUser.status = UserStatusEnum.valueOf(status);
-                } catch (IllegalArgumentException e) {
-                    responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                            "JSON user object was not correct (\"status\" was not a valid value)",
-                            HttpResponseStatus.UNAUTHORIZED);
-                    return;
-                }
-                
-                if (previousStatus == UserStatusEnum.needs_verification
-                        && selectedUser.status == UserStatusEnum.verified) {
-                    selectedUser.verifiedDate = new Date(System.currentTimeMillis());
-                }
-
-                if (previousStatus == UserStatusEnum.verified
-                        && selectedUser.status == UserStatusEnum.needs_verification) {
-                    selectedUser.verifiedDate = null;
-                }
-                
-            }
-
-        }
-
-        dbm.updateUser(selectedUser);
-        responder.writeJSON(selectedUser, HttpResponseStatus.OK);
-        log.finest("UpdateUser successful.");
-    }
-
-    public void handleGetUser(final HttpRequest request, Map<String, List<String>> parameters)
-            throws IOException, SQLException {
-        UserDataset user = authorizer.auth(request);
-
-        // authentication needed, auth(request) responses with error if auth fails
-        if (user == null) {
-            return;
-        }
-
-        int userID = -1;
-        UserDataset selectedUser;
-
-        if (parameters.containsKey("id")) {
-            userID = parseUserIdParameter(parameters.get("id").get(0), user, false);
-            // if parameter is invalid, an error response is sent from parseUserIdParameter.
-            // the if and return is needed exactly here, because following methods could send more responses,
-            // but only one response per http request is allowed (else Exceptions will be thrown)
-            if (userID < 0) {
-                return;
-            }
-            selectedUser = dbm.getUser(userID);
-        } else {
-            selectedUser = user;
-        }
-
-        if (selectedUser == null) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-
-        responder.writeJSON(selectedUser, HttpResponseStatus.OK);
-        log.finest("GetUser successful.");
-
-    }
 
     public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
@@ -440,7 +531,46 @@ public class PrivateHandler extends RequestHandler {
         log.finest("DeleteUser successful.");
 
     }
-    
+
+
+
+    /**
+     * Returns -1 if parameter is invalid (not a natural number) and will then
+     * response to request with error message.
+     * @param parameterValue the value of the id parameter as String
+     * @return
+     * @throws java.io.IOException
+     */
+    private Integer parseRequestIdParameter(String parameterValue) throws IOException {
+
+        if (parameterValue == null) {
+            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
+                    "The given id is null", HttpResponseStatus.NOT_FOUND);
+            return -1;
+        }
+
+        int requestID = -1;
+
+        try {
+            requestID = Integer.parseInt(parameterValue);
+        } catch (NumberFormatException e) {
+            requestID = -1;
+        }
+
+        if (requestID < 0) {
+            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
+                    "The given id is not an allowed number (positive or zero)", HttpResponseStatus.NOT_FOUND);
+            return requestID;
+        }
+
+        return requestID;
+
+    }
+
+
+
+
+
     /**
      * Returns -1 if parameter is invalid (not a natural number) and will then
      * response to request with error message. But the authenticated user must be an admin (will be checked by this
@@ -521,117 +651,6 @@ public class PrivateHandler extends RequestHandler {
 
         return param;
     }
-
-    public void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException,
-            IOException, SQLException {
-        UserDataset user = authorizer.auth(request);
-        if (user != null) responder.writeJSON(user, HttpResponseStatus.OK);
-
-    }
-
-    /**
-     * If authorization is okay, but no admin, registration fails. If no
-     * authorization as admin, the new registered user will not be registered as
-     * admin, even if json admin flag is true.
-     *
-     * @param request
-     * @throws java.sql.SQLFeatureNotSupportedException
-     *
-     * @throws SQLException
-     * @throws java.io.IOException
-     */
-    public void handleRegisterUser(final HttpRequest request) throws IOException, SQLFeatureNotSupportedException,
-            SQLException {
-
-        UserDataset authenticatedUser = null;
-
-        // if no authorization header keep on with adding not verified user
-        if (request.getHeader("Authorization") != null) {
-            authenticatedUser = authorizer.auth(request);
-            if (authenticatedUser == null) {
-                // auth(request) sent error response
-                return;
-            }
-
-            if (!authenticatedUser.admin) {
-                responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
-                        "A logged in user has to be admin to register users.", HttpResponseStatus.FORBIDDEN);
-                return;
-            }
-        }
-
-        Map<String, Object> objmap = getJSONContent(responder, request);
-
-        // getJSONContent adds error-message to responder
-        // if json object is bad or if there is no json object
-        // so no further handling needed if objmap == null
-        if (objmap == null) {
-            log.warning("Failed, bad json object.");
-            return;
-        }
-
-        if ( !(objmap.get("email") instanceof String) || !(objmap.get("password") instanceof String)
-                || !(objmap.get("firstname") instanceof String) || !(objmap.get("lastname") instanceof String)
-                || !(objmap.get("address") instanceof String) ) {
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
-                    HttpResponseStatus.UNAUTHORIZED);
-            return;
-        }
-        
-        final String email = (String) objmap.get("email");
-        final String pw = (String) objmap.get("password");
-        final String firstName = (String) objmap.get("firstname");
-        final String lastName = (String) objmap.get("lastname");
-        final String address = (String) objmap.get("address");
-
-        if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
-                    HttpResponseStatus.UNAUTHORIZED);
-            return;
-        }
-
-        final String salt = authorizer.generateSalt();
-
-        final String toHash = authorizer.generateHash(salt, pw);
-
-
-        UserDataset newUser;
-
-        // if there is no authorization, add user but without verification
-        if (authenticatedUser == null) {
-            // if there is no authorization as admin, the new registered user will
-            // never be registered as admin, even if json admin flag is true
-            newUser = dbm.addNewUser(email, toHash, salt, firstName, lastName, address, false);
-        } else {
-
-            boolean adminFlag = false;
-            // TODO specify the case objmap.get("admin") == null for protocol specification: adminFlag is then false
-            if (objmap.get("admin") != null) {
-                // if (objmap.get("admin") is null, then "instanceof Boolean" would be always false
-                if ( !(objmap.get("admin") instanceof Boolean) ) {
-                    responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                            "JSON user object was not correct (\"admin\" should be boolean)",
-                            HttpResponseStatus.UNAUTHORIZED);
-                    return;
-                }
-                adminFlag = (Boolean) objmap.get("admin");
-            }
-            newUser = dbm.addNewVerifiedUser(email, toHash, salt, firstName, lastName, address, adminFlag);
-        }
-
-        if ( newUser == null) {
-            responder.writeErrorMessage("EREGISTERED", "This email is already registered", null,
-                    HttpResponseStatus.FORBIDDEN);
-            return;
-        }
-
-        responder.writeJSON(newUser, HttpResponseStatus.OK);
-        log.finest("RegisterUser successful.");
-
-    }
-
 
 
 }

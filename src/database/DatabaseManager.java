@@ -66,11 +66,21 @@ public class DatabaseManager {
     private final static String strGetAllRequestsWithLimitOffset = strGetAllRequests
             + " LIMIT ? OFFSET ?";
 
-    private final static String strGetRequestsWithUserId = strGetAllRequests
-            + " WHERE UserID = ?";
+    private final static String strGetRequestsWithUserIdLimitOffset = strGetAllRequests
+            + " WHERE UserID = ? LIMIT ? OFFSET ?";
 
-    private final static String strGetRequestsWithUserIdLimitOffset = strGetRequestsWithUserId
+
+    private final static String strGetAllRequestsNoJson = "SELECT id, UserID, "
+            + "Algorithm, PendingFlag, Costs, PaidFlag, "
+            + "RequestDate, FinishedDate, CPUTime, FailedFlag, "
+            + "FailDescription FROM Requests";
+
+    private final static String strGetAllRequestsNoJsonWithLimitOffset = strGetAllRequestsNoJson
             + " LIMIT ? OFFSET ?";
+
+    private final static String strGetRequestsNoJsonWithUserIdLimitOffset = strGetAllRequestsNoJson
+            + " WHERE UserID = ? LIMIT ? OFFSET ?";
+
 
     // single result
     private final static String strGetRequestWithRequestId = strGetAllRequests
@@ -167,10 +177,10 @@ public class DatabaseManager {
         AddNewRequest,
         AddNewUser,
 
-        GetAllRequests,
         GetAllUsers,
         GetUserWithEmail,
         GetUserWithId,
+        GetRequestWithRequestId,
 
         UpdateRequest,
         UpdateRequestWithComputeResult,
@@ -182,10 +192,11 @@ public class DatabaseManager {
         DeleteUserWithEmail,
 
         GetAllRequestsWithLimitOffset,
-        GetRequestWithRequestId,
-        GetRequestsWithUserId,
         GetRequestsWithUserIdLimitOffset,
         GetAllUsersWithLimitOffset,
+
+        GetAllRequestsNoJsonWithLimitOffset,
+        GetRequestsNoJsonWithUserIdLimitOffset,
 
         CountAllRequests,
         CountRequestsWithUserId,
@@ -209,9 +220,6 @@ public class DatabaseManager {
 
         // SELECT statements without limit and without offset
 
-        sqlStatementMap.put(SqlStatementEnum.GetAllRequests,
-                new SqlStatementString(strGetAllRequests));
-
         sqlStatementMap.put(SqlStatementEnum.GetAllUsers,
                 new SqlStatementString(strGetAllUsers));
 
@@ -220,6 +228,9 @@ public class DatabaseManager {
 
         sqlStatementMap.put(SqlStatementEnum.GetUserWithId,
                 new SqlStatementString(strGetUserWithId));
+
+        sqlStatementMap.put(SqlStatementEnum.GetRequestWithRequestId,
+                new SqlStatementString(strGetRequestWithRequestId));
 
         // UPDATE statements
 
@@ -251,17 +262,17 @@ public class DatabaseManager {
         sqlStatementMap.put(SqlStatementEnum.GetAllRequestsWithLimitOffset,
                 new SqlStatementString(strGetAllRequestsWithLimitOffset));
 
-        sqlStatementMap.put(SqlStatementEnum.GetRequestWithRequestId,
-                new SqlStatementString(strGetRequestWithRequestId));
-
-        sqlStatementMap.put(SqlStatementEnum.GetRequestsWithUserId,
-                new SqlStatementString(strGetRequestsWithUserId));
-
         sqlStatementMap.put(SqlStatementEnum.GetRequestsWithUserIdLimitOffset,
                 new SqlStatementString(strGetRequestsWithUserIdLimitOffset));
 
         sqlStatementMap.put(SqlStatementEnum.GetAllUsersWithLimitOffset,
                 new SqlStatementString(strGetAllUsersWithLimitOffset));
+
+        sqlStatementMap.put(SqlStatementEnum.GetAllRequestsNoJsonWithLimitOffset,
+                new SqlStatementString(strGetAllRequestsNoJsonWithLimitOffset));
+
+        sqlStatementMap.put(SqlStatementEnum.GetRequestsNoJsonWithUserIdLimitOffset,
+                new SqlStatementString(strGetRequestsNoJsonWithUserIdLimitOffset));
 
         // statements for COUNTING rows
 
@@ -798,40 +809,6 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Gets a list with all requests within the Requests table. If no requests
-	 * are within the table, an empty list will be returned. </br>SQL command:
-	 * {@value #strGetAllRequests}
-	 * 
-	 * @return A list with all requests. If no requests exists, the list is
-	 *         empty, but not null.
-	 * @throws SQLException
-	 *             Thrown if select fails.
-	 */
-	public List<RequestDataset> getAllRequests() throws SQLException {
-
-        PreparedStatement pstGetAllRequests = preparedStatementMap.get(SqlStatementEnum.GetAllRequests);
-
-		ResultSet resultSet = pstGetAllRequests.executeQuery();
-		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
-
-		while (resultSet.next()) {
-
-			list.add(new RequestDataset(resultSet.getInt(1), resultSet
-					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
-					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
-							.getInt(7), resultSet.getBoolean(8),
-					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), resultSet
-							.getLong(11), resultSet.getBoolean(12), resultSet
-							.getString(13)));
-		}
-
-		resultSet.close();
-
-		return list;
-	}
-
-	/**
 	 * Gets a list with all requests within the Requests table with regard to
 	 * the limit and offset constraints. If no requests are found with the given
 	 * constraints or the table is empty, an empty list will be returned.
@@ -874,6 +851,61 @@ public class DatabaseManager {
 		return list;
 	}
 
+
+    /**
+     * Gets a list with all requests within the Requests table with regard to
+     * the limit and offset constraints. If no requests are found with the given
+     * constraints or the table is empty, an empty list will be returned.
+     * </br>SQL command: {@value #strGetAllRequestsWithLimitOffset}
+     *
+     * @param limit
+     *            How many rows should maximal selected.
+     * @param offset
+     *            How many rows should be skimmed.
+     * @param sendJson Should be false, if you do not want to send JSON objects, else it should be true.
+     * @return A list with all selected requests. If no requests selected, the
+     *         list is empty, but not null.
+     * @throws SQLException
+     *             Thrown if select fails.
+     */
+    public List<RequestDataset> getAllRequests(int limit, int offset, boolean sendJson)
+            throws SQLException {
+
+        if (sendJson) {
+            return getAllRequests(limit, offset);
+        }
+
+        PreparedStatement pstGetAllRequests
+                = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsNoJsonWithLimitOffset);
+
+        pstGetAllRequests.setInt(1, limit);
+        pstGetAllRequests.setInt(2, offset);
+
+        ResultSet resultSet = pstGetAllRequests.executeQuery();
+        ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+
+        while (resultSet.next()) {
+
+            list.add(new RequestDataset(
+                    resultSet.getInt(1),
+                    resultSet.getInt(2),
+                    resultSet.getString(3),
+                    null,
+                    null,
+                    resultSet.getBoolean(4),
+                    resultSet.getInt(5),
+                    resultSet.getBoolean(6),
+                    timestampToDate(resultSet.getTimestamp(7)),
+                    timestampToDate(resultSet.getTimestamp(8)),
+                    resultSet.getLong(9),
+                    resultSet.getBoolean(10),
+                    resultSet.getString(11)));
+        }
+        resultSet.close();
+
+        return list;
+    }
+
 	/**
 	 * Gets a request object of the Requests table with the given request id.
 	 * 
@@ -908,44 +940,6 @@ public class DatabaseManager {
 		resultSet.close();
 
 		return request;
-	}
-
-	/**
-	 * Gets a list with all requests within the Requests table which have the
-	 * given user id. If no requests are found with the given user id or the
-	 * table is empty, an empty list will be returned. </br>SQL command:
-	 * {@value #strGetRequestsWithUserId}
-	 * 
-	 * @param userId
-	 * @return A list with all selected requests. If no requests selected, the
-	 *         list is empty, but not null.
-	 * @throws SQLException
-	 *             Thrown if select fails.
-	 */
-	public List<RequestDataset> getRequests(int userId) throws SQLException {
-
-        PreparedStatement pstGetRequestsWithUserId
-                = preparedStatementMap.get(SqlStatementEnum.GetRequestsWithUserId);
-
-		pstGetRequestsWithUserId.setInt(1, userId);
-
-		ResultSet resultSet = pstGetRequestsWithUserId.executeQuery();
-		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
-
-		while (resultSet.next()) {
-
-			list.add(new RequestDataset(resultSet.getInt(1), resultSet
-					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
-					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
-							.getInt(7), resultSet.getBoolean(8),
-					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), resultSet
-							.getLong(11), resultSet.getBoolean(12), resultSet
-							.getString(13)));
-		}
-		resultSet.close();
-
-		return list;
 	}
 
 	/**
@@ -995,6 +989,67 @@ public class DatabaseManager {
 
 		return list;
 	}
+
+
+    /**
+     * Gets a list with all requests within the Requests table which have the
+     * given user id with regard to the limit and offset constraints. If no
+     * requests are found with the given user id and given constraints or the
+     * table is empty, an empty list will be returned. </br>SQL command:
+     * {@value #strGetRequestsWithUserIdLimitOffset}
+     *
+     * @param userId
+     *            User id
+     * @param limit
+     *            How many rows should maximal selected.
+     * @param offset
+     *            How many rows should be skimmed.
+     * @param sendJson Should be false, if you do not want to send JSON objects, else it should be true.
+     * @return A list with all selected requests. If no requests selected, the
+     *         list is empty, but not null.
+     * @throws SQLException
+     *             Thrown if select fails.
+     */
+    public List<RequestDataset> getRequests(int userId, int limit, int offset, boolean sendJson)
+            throws SQLException {
+
+        if (sendJson) {
+            return getRequests(userId, limit, offset);
+        }
+
+        PreparedStatement pstGetRequests
+                = preparedStatementMap.get(SqlStatementEnum.GetRequestsNoJsonWithUserIdLimitOffset);
+
+        pstGetRequests.setInt(1, userId);
+        pstGetRequests.setInt(2, limit);
+        pstGetRequests.setInt(3, offset);
+
+        ResultSet resultSet = pstGetRequests
+                .executeQuery();
+        ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+
+        while (resultSet.next()) {
+
+            list.add(new RequestDataset(
+                    resultSet.getInt(1),
+                    resultSet.getInt(2),
+                    resultSet.getString(3),
+                    null,
+                    null,
+                    resultSet.getBoolean(4),
+                    resultSet.getInt(5),
+                    resultSet.getBoolean(6),
+                    timestampToDate(resultSet.getTimestamp(7)),
+                    timestampToDate(resultSet.getTimestamp(8)),
+                    resultSet.getLong(9),
+                    resultSet.getBoolean(10),
+                    resultSet.getString(11)));
+        }
+        resultSet.close();
+
+        return list;
+    }
+
 
 	/**
 	 * Gets a list with all users within the Users table. If the table is empty,
