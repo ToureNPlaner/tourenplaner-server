@@ -330,8 +330,7 @@ public class DatabaseManager {
 	 *             Thrown if the insertion failed.
 	 */
 	public RequestDataset addNewRequest(int userID, String algorithm,
-			byte[] jsonRequest) throws SQLFeatureNotSupportedException,
-			SQLException {
+			byte[] jsonRequest) throws SQLException {
 
 		/*
 		 * id INT NOT NULL AUTO_INCREMENT, UserID INT NOT NULL REFERENCES Users
@@ -347,7 +346,7 @@ public class DatabaseManager {
         PreparedStatement pstAddNewRequest = preparedStatementMap.get(SqlStatementEnum.AddNewRequest);
         
 		RequestDataset request = null;
-		ResultSet generatedKeyResultSet = null;
+		ResultSet generatedKeyResultSet;
 
         boolean hasKey = false;
 
@@ -384,6 +383,8 @@ public class DatabaseManager {
 
             } catch (SQLException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             }
 
         }
@@ -415,7 +416,10 @@ public class DatabaseManager {
 	 * @param firstName
 	 *            First name of the user. Parameter will be trimmed from this
 	 *            method.
-	 * @param address
+	 * @param lastName
+     *            Last name of the user. Parameter will be trimmed from this
+     *            method.
+     * @param address
 	 *            Address of the user. Parameter will be trimmed from this
 	 *            method.
 	 * @param isAdmin
@@ -432,8 +436,7 @@ public class DatabaseManager {
 	 */
 	public UserDataset addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) throws SQLFeatureNotSupportedException,
-			SQLException {
+			boolean isAdmin) throws SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.needs_verification, false);
@@ -476,17 +479,35 @@ public class DatabaseManager {
 	 */
 	public UserDataset addNewVerifiedUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
-			boolean isAdmin) throws SQLFeatureNotSupportedException,
-			SQLException {
+			boolean isAdmin) throws SQLException {
 
 		return addNewUser(email, passwordhash, salt, firstName, lastName,
 				address, isAdmin, UserStatusEnum.verified, true);
 	}
 
+    /**
+     *
+     * @param email email
+     * @param passwordhash password hash
+     * @param salt salt
+     * @param firstName first name
+     * @param lastName last name
+     * @param address address
+     * @param isAdmin isAdmin flag
+     * @param status status
+     * @param isVerified isVerified flag
+     * @return user object
+     * @throws SQLFeatureNotSupportedException
+     *             Thrown if the id could not received or another function is
+     *             not supported by driver.
+     * @throws SQLException
+     *            Thrown if other errors occurred than a duplicate email.
+     *
+     */
 	private UserDataset addNewUser(String email, String passwordhash,
 			String salt, String firstName, String lastName, String address,
 			boolean isAdmin, UserStatusEnum status, boolean isVerified)
-			throws SQLFeatureNotSupportedException, SQLException {
+			throws SQLException {
 
 		/*
 		 * id INT NOT NULL AUTO_INCREMENT, Email VARCHAR(255) NOT NULL UNIQUE,
@@ -540,7 +561,7 @@ public class DatabaseManager {
 					verifiedDate, null);
 
 			// try {
-			ResultSet generatedKeyResultSet = null;
+			ResultSet generatedKeyResultSet;
 
 			generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
 
@@ -588,7 +609,7 @@ public class DatabaseManager {
         PreparedStatement pstUpdateRequest = preparedStatementMap.get(SqlStatementEnum.UpdateRequest);
 
         int tryAgain = maxTries;
-        int rowsAffected = 0;
+        int rowsAffected;
 
         while (tryAgain > 0) {
             tryAgain--;
@@ -626,6 +647,8 @@ public class DatabaseManager {
 
             } catch (SQLException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             }
 
         }
@@ -640,13 +663,13 @@ public class DatabaseManager {
 	 * within the database table. </br>SQL command:
 	 * {@value #strUpdateRequestWithComputeResult}
 	 * 
-	 * @param requestID
-	 * @param jsonResponse
-	 * @param isPending
-	 * @param costs
-	 * @param cpuTime
-	 * @param hasFailed
-	 * @param failDescription
+	 * @param requestID requestID
+	 * @param jsonResponse JSON response object
+	 * @param isPending isPending flag
+	 * @param costs cost of request
+	 * @param cpuTime cpuTime
+	 * @param hasFailed hasFailed flag
+	 * @param failDescription failure description
 	 * @throws SQLException
 	 *             Thrown if update fails.
      * @return number of database rows changed (1 if successful, else 0)
@@ -658,7 +681,7 @@ public class DatabaseManager {
         PreparedStatement pstUpdateRequestWithComputeResult
                 = preparedStatementMap.get(SqlStatementEnum.UpdateRequestWithComputeResult);
 
-        int rowsAffected = 0;
+        int rowsAffected;
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
@@ -683,7 +706,8 @@ public class DatabaseManager {
                 return rowsAffected;
 
             } catch (SQLException e) {
-
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             }
 
@@ -793,7 +817,7 @@ public class DatabaseManager {
 	 * requests could be deleted too because of the FOREIGN KEY UserId within
 	 * the Requests table. </br>SQL command: {@value #strDeleteUserWithEmail}
 	 * 
-	 * @param email
+	 * @param email The email of the user
 	 * @throws SQLException
 	 *             Thrown if delete fails.
      * @return number of database rows changed (1 if successful, else 0)
@@ -1131,7 +1155,7 @@ public class DatabaseManager {
 	 * Gets a user object from the Users table with the given email. </br>SQL
 	 * command: {@value #strGetUserWithEmail}
 	 * 
-	 * @param email
+	 * @param email The email of the user
 	 * @return The user object, if the user is found, else null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
@@ -1167,7 +1191,7 @@ public class DatabaseManager {
 	 * 
 	 * @param id
 	 *            User id
-	 * @returnThe user object, if the user is found, else null.
+	 * @return The user object, if the user is found, else null.
 	 * @throws SQLException
 	 *             Thrown if select fails.
 	 */
@@ -1272,26 +1296,31 @@ public class DatabaseManager {
      * Closes the database connection. Exceptions will be caught. 
      */
     public void close() {
-        Iterator<SqlStatementEnum> iterator = preparedStatementMap.keySet().iterator();
-        while (iterator.hasNext()) {
+        for (SqlStatementEnum sqlStatementEnum : preparedStatementMap.keySet()) {
             try {
-                preparedStatementMap.get(iterator.next()).close();
-            } catch (SQLException e) {
+                preparedStatementMap.get(sqlStatementEnum).close();
+            } catch (SQLException ignored) {
             }
         }
         try {
             con.close();
-        } catch (SQLException e) {
+        } catch (SQLException ignored) {
         }
     }
 
-
-    private int processTryAgainExceptionHandling(int tryAgain, SQLException sqlException) throws SQLException {
+    /**
+     *
+     * @param tryAgain the old tryAgain value, specifies how many tries are left before this exception
+     * @param exception Needs to be an Exception, not SQLException, because null pointer can be thrown
+     * @return the new tryAgain value, specifies how many tries are left after this exception
+     * @throws SQLException Thrown if could not be reestablished with allowed number of tries
+     */
+    private int processTryAgainExceptionHandling(int tryAgain, Exception exception) throws SQLException {
         if (tryAgain > 0) {
             log.log(Level.WARNING, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
                     "thread will now reconnect database and send again the sql statement " + 
-                    "\n --- (Exception: " + sqlException.getCause().toString() + " --- " +
-                    sqlException.getMessage() + ")");
+                    "\n --- (Exception: " + exception.getCause().toString() + " --- " +
+                    exception.getMessage() + ")");
             
             this.close();
             try {
@@ -1302,8 +1331,13 @@ public class DatabaseManager {
             }
         } else {
             log.log(Level.SEVERE, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
-                    "thread will now give up executing the statement", sqlException);
-            throw sqlException;
+                    "thread will now give up executing the statement", exception);
+            if (exception instanceof SQLException) {
+                throw (SQLException) exception;
+            } else {
+                throw new SQLException("Exception within database method: " + exception.toString());
+            }
+            
         }
         return tryAgain;
     }
