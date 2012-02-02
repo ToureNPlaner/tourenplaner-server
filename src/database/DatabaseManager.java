@@ -26,7 +26,7 @@ public class DatabaseManager {
     private final String userName;
     private final String password;
 
-    private int maxTries = 2;
+    private final int maxTries = 2;
 
     private static HashMap<SqlStatementEnum, SqlStatementString> sqlStatementStringMap = createSqlStatementStringMap();
     private HashMap<SqlStatementEnum, PreparedStatement> preparedStatementMap;
@@ -365,6 +365,8 @@ public class DatabaseManager {
                 pstAddNewRequest.setTimestamp(4, stamp);
 
                 pstAddNewRequest.executeUpdate();
+                // if no exception occurred, request is added, so do not try again
+                tryAgain = -1;
 
                 request = new RequestDataset(-1, userID, algorithm, jsonRequest, null,
                         true, 0, false, new Date(stamp.getTime()), null, 0, false, null);
@@ -521,7 +523,7 @@ public class DatabaseManager {
 
         PreparedStatement pstAddNewUser = preparedStatementMap.get(SqlStatementEnum.AddNewUser);
 
-		UserDataset user;
+		UserDataset user = null;
 
 		email = email.trim();
 		passwordhash = passwordhash.trim();
@@ -530,63 +532,80 @@ public class DatabaseManager {
 		lastName = lastName.trim();
 		address = address.trim();
 
-		try {
 
-			Timestamp registeredStamp = new Timestamp(
-					System.currentTimeMillis());
-			Timestamp verifiedStamp = null;
-			Date registeredDate = timestampToDate(registeredStamp);
-			Date verifiedDate = null;
+        int tryAgain = maxTries;
 
-			if (isVerified) {
-				verifiedStamp = registeredStamp;
-				verifiedDate = registeredDate;
-			}
+        while (tryAgain > 0) {
+            tryAgain--;
 
-			pstAddNewUser.setString(1, email);
-			pstAddNewUser.setString(2, passwordhash);
-			pstAddNewUser.setString(3, salt);
-			pstAddNewUser.setString(4, firstName);
-			pstAddNewUser.setString(5, lastName);
-			pstAddNewUser.setString(6, address);
-			pstAddNewUser.setBoolean(7, isAdmin);
-			pstAddNewUser.setString(8, status.toString());
-			pstAddNewUser.setTimestamp(9, registeredStamp);
-			pstAddNewUser.setTimestamp(10, verifiedStamp);
+            try {
 
-			pstAddNewUser.executeUpdate();
+                Timestamp registeredStamp = new Timestamp(
+                        System.currentTimeMillis());
+                Timestamp verifiedStamp = null;
+                Date registeredDate = timestampToDate(registeredStamp);
+                Date verifiedDate = null;
 
-			user = new UserDataset(-1, email, passwordhash, salt, isAdmin,
-					status, firstName, lastName, address, registeredDate,
-					verifiedDate, null);
+                if (isVerified) {
+                    verifiedStamp = registeredStamp;
+                    verifiedDate = registeredDate;
+                }
 
-			// try {
-			ResultSet generatedKeyResultSet;
+                pstAddNewUser.setString(1, email);
+                pstAddNewUser.setString(2, passwordhash);
+                pstAddNewUser.setString(3, salt);
+                pstAddNewUser.setString(4, firstName);
+                pstAddNewUser.setString(5, lastName);
+                pstAddNewUser.setString(6, address);
+                pstAddNewUser.setBoolean(7, isAdmin);
+                pstAddNewUser.setString(8, status.toString());
+                pstAddNewUser.setTimestamp(9, registeredStamp);
+                pstAddNewUser.setTimestamp(10, verifiedStamp);
 
-			generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
+                try {
 
-			boolean hasKey = false;
-			if (generatedKeyResultSet.next()) {
-				user.userid = generatedKeyResultSet.getInt(1);
-				hasKey = true;
-			}
-			generatedKeyResultSet.close();
+                    pstAddNewUser.executeUpdate();
+                    // if no exception occurred, user is added, so do not try again
+                    tryAgain = -1;
 
-			if (!hasKey) {
-                log.severe("Current database doesn't support java.sql.Statement.getGeneratedKeys()");
-				user = this.getUser(email);
-			}
-			/*
-			 * } catch (SQLFeatureNotSupportedException ex) { if
-			 * (ex.getNextException() != null) { throw ex; } }
-			 */
-			// catch if duplicate key error
-		} catch (SQLIntegrityConstraintViolationException ex) {
-			if (ex.getNextException() == null) {
-				return null;
-			}
-			throw ex;
-		}
+                    // catch if duplicate key error
+                } catch (SQLIntegrityConstraintViolationException ex) {
+                    if (ex.getNextException() == null) {
+                        return null;
+                    }
+                    throw ex;
+                }
+
+
+                user = new UserDataset(-1, email, passwordhash, salt, isAdmin,
+                        status, firstName, lastName, address, registeredDate,
+                        verifiedDate, null);
+
+                ResultSet generatedKeyResultSet;
+
+                generatedKeyResultSet = pstAddNewUser.getGeneratedKeys();
+
+                boolean hasKey = false;
+                if (generatedKeyResultSet.next()) {
+                    user.userid = generatedKeyResultSet.getInt(1);
+                    hasKey = true;
+                }
+                generatedKeyResultSet.close();
+
+                if (!hasKey) {
+                    log.severe("Current database doesn't support java.sql.Statement.getGeneratedKeys()");
+                    user = this.getUser(email);
+                }
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+		
 		return user;
 	}
 
@@ -732,20 +751,37 @@ public class DatabaseManager {
 
         PreparedStatement pstUpdateUser = preparedStatementMap.get(SqlStatementEnum.UpdateUser);
 
-		pstUpdateUser.setString(1, user.email);
-		pstUpdateUser.setString(2, user.passwordhash);
-		pstUpdateUser.setString(3, user.salt);
-		pstUpdateUser.setBoolean(4, user.admin);
-		pstUpdateUser.setString(5, user.status.toString());
-		pstUpdateUser.setString(6, user.firstName);
-		pstUpdateUser.setString(7, user.lastName);
-		pstUpdateUser.setString(8, user.address);
-		pstUpdateUser.setTimestamp(9, dateToTimestamp(user.registrationDate));
-		pstUpdateUser.setTimestamp(10, dateToTimestamp(user.verifiedDate));
-		pstUpdateUser.setTimestamp(11, dateToTimestamp(user.deleteRequestDate));
-		pstUpdateUser.setInt(12, user.userid);
+        int tryAgain = maxTries;
 
-		return pstUpdateUser.executeUpdate();
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                pstUpdateUser.setString(1, user.email);
+                pstUpdateUser.setString(2, user.passwordhash);
+                pstUpdateUser.setString(3, user.salt);
+                pstUpdateUser.setBoolean(4, user.admin);
+                pstUpdateUser.setString(5, user.status.toString());
+                pstUpdateUser.setString(6, user.firstName);
+                pstUpdateUser.setString(7, user.lastName);
+                pstUpdateUser.setString(8, user.address);
+                pstUpdateUser.setTimestamp(9, dateToTimestamp(user.registrationDate));
+                pstUpdateUser.setTimestamp(10, dateToTimestamp(user.verifiedDate));
+                pstUpdateUser.setTimestamp(11, dateToTimestamp(user.deleteRequestDate));
+                pstUpdateUser.setInt(12, user.userid);
+
+                return pstUpdateUser.executeUpdate();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return 0;
 	}
 
 	/**
@@ -763,9 +799,26 @@ public class DatabaseManager {
         PreparedStatement pstDeleteRequestWithRequestId
                 = preparedStatementMap.get(SqlStatementEnum.DeleteRequestWithRequestId);
 
-		pstDeleteRequestWithRequestId.setInt(1, id);
+        int tryAgain = maxTries;
 
-		return pstDeleteRequestWithRequestId.executeUpdate();
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                pstDeleteRequestWithRequestId.setInt(1, id);
+
+                return pstDeleteRequestWithRequestId.executeUpdate();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return 0;
 	}
 
 	/**
@@ -783,9 +836,26 @@ public class DatabaseManager {
         PreparedStatement pstDeleteRequestsOfUserWithUserId
                 = preparedStatementMap.get(SqlStatementEnum.DeleteRequestsOfUserWithUserId);
 
-		pstDeleteRequestsOfUserWithUserId.setInt(1, userId);
+        int tryAgain = maxTries;
 
-		return pstDeleteRequestsOfUserWithUserId.executeUpdate();
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                pstDeleteRequestsOfUserWithUserId.setInt(1, userId);
+
+                return pstDeleteRequestsOfUserWithUserId.executeUpdate();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return 0;
 	}
 
 	/**
@@ -806,9 +876,26 @@ public class DatabaseManager {
         PreparedStatement pstDeleteUserWithUserId
                 = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithUserId);
 
-		pstDeleteUserWithUserId.setInt(1, userId);
+        int tryAgain = maxTries;
 
-		return pstDeleteUserWithUserId.executeUpdate();
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                pstDeleteUserWithUserId.setInt(1, userId);
+
+                return pstDeleteUserWithUserId.executeUpdate();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return 0;
 	}
 
 	/**
@@ -827,9 +914,28 @@ public class DatabaseManager {
         PreparedStatement pstDeleteUserWithEmail
                 = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithEmail);
 
-		pstDeleteUserWithEmail.setString(1, email);
 
-		return pstDeleteUserWithEmail.executeUpdate();
+        int tryAgain = maxTries;
+
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                pstDeleteUserWithEmail.setString(1, email);
+
+                return pstDeleteUserWithEmail.executeUpdate();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return 0;
+
 	}
 
 	/**
@@ -853,27 +959,46 @@ public class DatabaseManager {
         PreparedStatement pstGetAllRequestsWithLimitOffset
                 = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsWithLimitOffset);
 
-		pstGetAllRequestsWithLimitOffset.setInt(1, limit);
-		pstGetAllRequestsWithLimitOffset.setInt(2, offset);
 
-		ResultSet resultSet = pstGetAllRequestsWithLimitOffset.executeQuery();
-		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+        int tryAgain = maxTries;
 
-		while (resultSet.next()) {
+        while (tryAgain > 0) {
+            tryAgain--;
 
-			list.add(new RequestDataset(resultSet.getInt(1), resultSet
-					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
-					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
-							.getInt(7), resultSet.getBoolean(8),
-					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), resultSet
-							.getLong(11), resultSet.getBoolean(12), resultSet
-							.getString(13)));
-		}
-		resultSet.close();
+            try {
 
-		return list;
-	}
+                pstGetAllRequestsWithLimitOffset.setInt(1, limit);
+                pstGetAllRequestsWithLimitOffset.setInt(2, offset);
+
+                ResultSet resultSet = pstGetAllRequestsWithLimitOffset.executeQuery();
+                ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+
+                while (resultSet.next()) {
+
+                    list.add(new RequestDataset(resultSet.getInt(1), resultSet
+                            .getInt(2), resultSet.getString(3), resultSet.getBytes(4),
+                            resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
+                            .getInt(7), resultSet.getBoolean(8),
+                            timestampToDate(resultSet.getTimestamp(9)),
+                            timestampToDate(resultSet.getTimestamp(10)), resultSet
+                            .getLong(11), resultSet.getBoolean(12), resultSet
+                            .getString(13)));
+                }
+                resultSet.close();
+
+                return list;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return null;
+
+    }
 
 
     /**
@@ -902,32 +1027,49 @@ public class DatabaseManager {
         PreparedStatement pstGetAllRequests
                 = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsNoJsonWithLimitOffset);
 
-        pstGetAllRequests.setInt(1, limit);
-        pstGetAllRequests.setInt(2, offset);
+        int tryAgain = maxTries;
 
-        ResultSet resultSet = pstGetAllRequests.executeQuery();
-        ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+        while (tryAgain > 0) {
+            tryAgain--;
 
-        while (resultSet.next()) {
+            try {
 
-            list.add(new RequestDataset(
-                    resultSet.getInt(1),
-                    resultSet.getInt(2),
-                    resultSet.getString(3),
-                    null,
-                    null,
-                    resultSet.getBoolean(4),
-                    resultSet.getInt(5),
-                    resultSet.getBoolean(6),
-                    timestampToDate(resultSet.getTimestamp(7)),
-                    timestampToDate(resultSet.getTimestamp(8)),
-                    resultSet.getLong(9),
-                    resultSet.getBoolean(10),
-                    resultSet.getString(11)));
+                pstGetAllRequests.setInt(1, limit);
+                pstGetAllRequests.setInt(2, offset);
+
+                ResultSet resultSet = pstGetAllRequests.executeQuery();
+                ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+
+                while (resultSet.next()) {
+
+                    list.add(new RequestDataset(
+                            resultSet.getInt(1),
+                            resultSet.getInt(2),
+                            resultSet.getString(3),
+                            null,
+                            null,
+                            resultSet.getBoolean(4),
+                            resultSet.getInt(5),
+                            resultSet.getBoolean(6),
+                            timestampToDate(resultSet.getTimestamp(7)),
+                            timestampToDate(resultSet.getTimestamp(8)),
+                            resultSet.getLong(9),
+                            resultSet.getBoolean(10),
+                            resultSet.getString(11)));
+                }
+                resultSet.close();
+
+                return list;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
         }
-        resultSet.close();
 
-        return list;
+        return null;
     }
 
 	/**
@@ -946,24 +1088,41 @@ public class DatabaseManager {
         PreparedStatement pstGetRequestWithRequestId
                 = preparedStatementMap.get(SqlStatementEnum.GetRequestWithRequestId);
 
-		pstGetRequestWithRequestId.setInt(1, id);
-		ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
-		RequestDataset request = null;
+        int tryAgain = maxTries;
 
-		while (resultSet.next()) {
-			request = new RequestDataset(resultSet.getInt(1),
-					resultSet.getInt(2), resultSet.getString(3),
-					resultSet.getBytes(4), resultSet.getBytes(5),
-					resultSet.getBoolean(6), resultSet.getInt(7),
-					resultSet.getBoolean(8),
-					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)),
-					resultSet.getLong(11), resultSet.getBoolean(12),
-					resultSet.getString(13));
-		}
-		resultSet.close();
+        while (tryAgain > 0) {
+            tryAgain--;
 
-		return request;
+            try {
+
+                pstGetRequestWithRequestId.setInt(1, id);
+                ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
+                RequestDataset request = null;
+
+                while (resultSet.next()) {
+                    request = new RequestDataset(resultSet.getInt(1),
+                            resultSet.getInt(2), resultSet.getString(3),
+                            resultSet.getBytes(4), resultSet.getBytes(5),
+                            resultSet.getBoolean(6), resultSet.getInt(7),
+                            resultSet.getBoolean(8),
+                            timestampToDate(resultSet.getTimestamp(9)),
+                            timestampToDate(resultSet.getTimestamp(10)),
+                            resultSet.getLong(11), resultSet.getBoolean(12),
+                            resultSet.getString(13));
+                }
+                resultSet.close();
+
+                return request;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return null;
 	}
 
 	/**
@@ -990,28 +1149,45 @@ public class DatabaseManager {
         PreparedStatement pstGetRequestsWithUserIdLimitOffset
                 = preparedStatementMap.get(SqlStatementEnum.GetRequestsWithUserIdLimitOffset);
 
-		pstGetRequestsWithUserIdLimitOffset.setInt(1, userId);
-		pstGetRequestsWithUserIdLimitOffset.setInt(2, limit);
-		pstGetRequestsWithUserIdLimitOffset.setInt(3, offset);
+        int tryAgain = maxTries;
 
-		ResultSet resultSet = pstGetRequestsWithUserIdLimitOffset
-				.executeQuery();
-		ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+        while (tryAgain > 0) {
+            tryAgain--;
 
-		while (resultSet.next()) {
+            try {
 
-			list.add(new RequestDataset(resultSet.getInt(1), resultSet
-					.getInt(2), resultSet.getString(3), resultSet.getBytes(4),
-					resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
-							.getInt(7), resultSet.getBoolean(8),
-					timestampToDate(resultSet.getTimestamp(9)),
-					timestampToDate(resultSet.getTimestamp(10)), resultSet
-							.getLong(11), resultSet.getBoolean(12), resultSet
-							.getString(13)));
-		}
-		resultSet.close();
+                pstGetRequestsWithUserIdLimitOffset.setInt(1, userId);
+                pstGetRequestsWithUserIdLimitOffset.setInt(2, limit);
+                pstGetRequestsWithUserIdLimitOffset.setInt(3, offset);
 
-		return list;
+                ResultSet resultSet = pstGetRequestsWithUserIdLimitOffset
+                        .executeQuery();
+                ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+
+                while (resultSet.next()) {
+
+                    list.add(new RequestDataset(resultSet.getInt(1), resultSet
+                            .getInt(2), resultSet.getString(3), resultSet.getBytes(4),
+                            resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
+                            .getInt(7), resultSet.getBoolean(8),
+                            timestampToDate(resultSet.getTimestamp(9)),
+                            timestampToDate(resultSet.getTimestamp(10)), resultSet
+                            .getLong(11), resultSet.getBoolean(12), resultSet
+                            .getString(13)));
+                }
+                resultSet.close();
+
+                return list;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return null;
 	}
 
 
@@ -1044,34 +1220,50 @@ public class DatabaseManager {
         PreparedStatement pstGetRequests
                 = preparedStatementMap.get(SqlStatementEnum.GetRequestsNoJsonWithUserIdLimitOffset);
 
-        pstGetRequests.setInt(1, userId);
-        pstGetRequests.setInt(2, limit);
-        pstGetRequests.setInt(3, offset);
+        int tryAgain = maxTries;
 
-        ResultSet resultSet = pstGetRequests
-                .executeQuery();
-        ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+        while (tryAgain > 0) {
+            tryAgain--;
 
-        while (resultSet.next()) {
+            try {
 
-            list.add(new RequestDataset(
-                    resultSet.getInt(1),
-                    resultSet.getInt(2),
-                    resultSet.getString(3),
-                    null,
-                    null,
-                    resultSet.getBoolean(4),
-                    resultSet.getInt(5),
-                    resultSet.getBoolean(6),
-                    timestampToDate(resultSet.getTimestamp(7)),
-                    timestampToDate(resultSet.getTimestamp(8)),
-                    resultSet.getLong(9),
-                    resultSet.getBoolean(10),
-                    resultSet.getString(11)));
+                pstGetRequests.setInt(1, userId);
+                pstGetRequests.setInt(2, limit);
+                pstGetRequests.setInt(3, offset);
+
+                ResultSet resultSet = pstGetRequests
+                        .executeQuery();
+                ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
+
+                while (resultSet.next()) {
+
+                    list.add(new RequestDataset(
+                            resultSet.getInt(1),
+                            resultSet.getInt(2),
+                            resultSet.getString(3),
+                            null,
+                            null,
+                            resultSet.getBoolean(4),
+                            resultSet.getInt(5),
+                            resultSet.getBoolean(6),
+                            timestampToDate(resultSet.getTimestamp(7)),
+                            timestampToDate(resultSet.getTimestamp(8)),
+                            resultSet.getLong(9),
+                            resultSet.getBoolean(10),
+                            resultSet.getString(11)));
+                }
+                resultSet.close();
+
+                return list;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
         }
-        resultSet.close();
-
-        return list;
+        return null;
     }
 
 
@@ -1089,23 +1281,38 @@ public class DatabaseManager {
 
         PreparedStatement pstGetAllUsers = preparedStatementMap.get(SqlStatementEnum.GetAllUsers);
 
-		ResultSet resultSet = pstGetAllUsers.executeQuery();
-		ArrayList<UserDataset> list = new ArrayList<UserDataset>();
+        int tryAgain = maxTries;
 
-		while (resultSet.next()) {
+        while (tryAgain > 0) {
+            tryAgain--;
 
-			list.add(new UserDataset(resultSet.getInt(1), resultSet
-					.getString(2), resultSet.getString(3), resultSet
-					.getString(4), resultSet.getBoolean(5), UserStatusEnum
-					.valueOf(resultSet.getString(6)), resultSet.getString(7),
-					resultSet.getString(8), resultSet.getString(9),
-					timestampToDate(resultSet.getTimestamp(10)),
-					timestampToDate(resultSet.getTimestamp(11)),
-					timestampToDate(resultSet.getTimestamp(12))));
-		}
-		resultSet.close();
+            try {
 
-		return list;
+                ResultSet resultSet = pstGetAllUsers.executeQuery();
+                ArrayList<UserDataset> list = new ArrayList<UserDataset>();
+
+                while (resultSet.next()) {
+
+                    list.add(new UserDataset(resultSet.getInt(1), resultSet
+                            .getString(2), resultSet.getString(3), resultSet
+                            .getString(4), resultSet.getBoolean(5), UserStatusEnum
+                            .valueOf(resultSet.getString(6)), resultSet.getString(7),
+                            resultSet.getString(8), resultSet.getString(9),
+                            timestampToDate(resultSet.getTimestamp(10)),
+                            timestampToDate(resultSet.getTimestamp(11)),
+                            timestampToDate(resultSet.getTimestamp(12))));
+                }
+                resultSet.close();
+
+                return list;
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+        return null;
 	}
 
 	/**
@@ -1129,26 +1336,43 @@ public class DatabaseManager {
         PreparedStatement pstGetAllUsersWithLimitOffset
                 = preparedStatementMap.get(SqlStatementEnum.GetAllUsersWithLimitOffset);
 
-		pstGetAllUsersWithLimitOffset.setInt(1, limit);
-		pstGetAllUsersWithLimitOffset.setInt(2, offset);
+        int tryAgain = maxTries;
 
-		ResultSet resultSet = pstGetAllUsersWithLimitOffset.executeQuery();
-		ArrayList<UserDataset> list = new ArrayList<UserDataset>();
+        while (tryAgain > 0) {
+            tryAgain--;
 
-		while (resultSet.next()) {
+            try {
 
-			list.add(new UserDataset(resultSet.getInt(1), resultSet
-					.getString(2), resultSet.getString(3), resultSet
-					.getString(4), resultSet.getBoolean(5), UserStatusEnum
-					.valueOf(resultSet.getString(6)), resultSet.getString(7),
-					resultSet.getString(8), resultSet.getString(9),
-					timestampToDate(resultSet.getTimestamp(10)),
-					timestampToDate(resultSet.getTimestamp(11)),
-					timestampToDate(resultSet.getTimestamp(12))));
-		}
-		resultSet.close();
+                pstGetAllUsersWithLimitOffset.setInt(1, limit);
+                pstGetAllUsersWithLimitOffset.setInt(2, offset);
 
-		return list;
+                ResultSet resultSet = pstGetAllUsersWithLimitOffset.executeQuery();
+                ArrayList<UserDataset> list = new ArrayList<UserDataset>();
+
+                while (resultSet.next()) {
+
+                    list.add(new UserDataset(resultSet.getInt(1), resultSet
+                            .getString(2), resultSet.getString(3), resultSet
+                            .getString(4), resultSet.getBoolean(5), UserStatusEnum
+                            .valueOf(resultSet.getString(6)), resultSet.getString(7),
+                            resultSet.getString(8), resultSet.getString(9),
+                            timestampToDate(resultSet.getTimestamp(10)),
+                            timestampToDate(resultSet.getTimestamp(11)),
+                            timestampToDate(resultSet.getTimestamp(12))));
+                }
+                resultSet.close();
+
+                return list;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return null;
 	}
 
 	/**
@@ -1164,25 +1388,42 @@ public class DatabaseManager {
 
         PreparedStatement pstGetUserWithEmail = preparedStatementMap.get(SqlStatementEnum.GetUserWithEmail);
 
-		UserDataset user = null;
+        int tryAgain = maxTries;
 
-		pstGetUserWithEmail.setString(1, email);
-		ResultSet resultSet = pstGetUserWithEmail.executeQuery();
+        while (tryAgain > 0) {
+            tryAgain--;
 
-		while (resultSet.next()) {
+            try {
 
-			user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
-					resultSet.getString(3), resultSet.getString(4),
-					resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
-							.getString(6)), resultSet.getString(7),
-					resultSet.getString(8), resultSet.getString(9),
-					timestampToDate(resultSet.getTimestamp(10)),
-					timestampToDate(resultSet.getTimestamp(11)),
-					timestampToDate(resultSet.getTimestamp(12)));
-		}
-		resultSet.close();
+                UserDataset user = null;
 
-		return user;
+                pstGetUserWithEmail.setString(1, email);
+                ResultSet resultSet = pstGetUserWithEmail.executeQuery();
+
+                while (resultSet.next()) {
+
+                    user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
+                            resultSet.getString(3), resultSet.getString(4),
+                            resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
+                            .getString(6)), resultSet.getString(7),
+                            resultSet.getString(8), resultSet.getString(9),
+                            timestampToDate(resultSet.getTimestamp(10)),
+                            timestampToDate(resultSet.getTimestamp(11)),
+                            timestampToDate(resultSet.getTimestamp(12)));
+                }
+                resultSet.close();
+
+                return user;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return null;
 	}
 
 	/**
@@ -1199,25 +1440,43 @@ public class DatabaseManager {
 
         PreparedStatement pstGetUserWithId = preparedStatementMap.get(SqlStatementEnum.GetUserWithId);
 
-		UserDataset user = null;
 
-		pstGetUserWithId.setInt(1, id);
-		ResultSet resultSet = pstGetUserWithId.executeQuery();
+        int tryAgain = maxTries;
 
-		while (resultSet.next()) {
+        while (tryAgain > 0) {
+            tryAgain--;
 
-			user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
-					resultSet.getString(3), resultSet.getString(4),
-					resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
-							.getString(6)), resultSet.getString(7),
-					resultSet.getString(8), resultSet.getString(9),
-					timestampToDate(resultSet.getTimestamp(10)),
-					timestampToDate(resultSet.getTimestamp(11)),
-					timestampToDate(resultSet.getTimestamp(12)));
-		}
-		resultSet.close();
+            try {
 
-		return user;
+                UserDataset user = null;
+
+                pstGetUserWithId.setInt(1, id);
+                ResultSet resultSet = pstGetUserWithId.executeQuery();
+
+                while (resultSet.next()) {
+
+                    user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
+                            resultSet.getString(3), resultSet.getString(4),
+                            resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
+                            .getString(6)), resultSet.getString(7),
+                            resultSet.getString(8), resultSet.getString(9),
+                            timestampToDate(resultSet.getTimestamp(10)),
+                            timestampToDate(resultSet.getTimestamp(11)),
+                            timestampToDate(resultSet.getTimestamp(12)));
+                }
+                resultSet.close();
+
+                return user;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return null;
 	}
 
 
@@ -1230,16 +1489,31 @@ public class DatabaseManager {
 
         PreparedStatement pstCountAllRequests = preparedStatementMap.get(SqlStatementEnum.CountAllRequests);
 
-        ResultSet resultSet = pstCountAllRequests.executeQuery();
+        int tryAgain = maxTries;
 
-        if (resultSet.next()) {
-            int count = resultSet.getInt(1);
-            resultSet.close();
-            return count;
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                ResultSet resultSet = pstCountAllRequests.executeQuery();
+
+                if (resultSet.next()) {
+                    int count = resultSet.getInt(1);
+                    resultSet.close();
+                    return count;
+                }
+
+                log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
+                resultSet.close();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
         }
-
-        log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
-        resultSet.close();
         return 0;
     }
 
@@ -1254,17 +1528,33 @@ public class DatabaseManager {
         PreparedStatement pstCountRequestsWithUserId
                 = preparedStatementMap.get(SqlStatementEnum.CountRequestsWithUserId);
 
-        pstCountRequestsWithUserId.setInt(1, userId);
-        ResultSet resultSet = pstCountRequestsWithUserId.executeQuery();
+        int tryAgain = maxTries;
 
-        if (resultSet.next()) {
-            int count = resultSet.getInt(1);
-            resultSet.close();
-            return count;
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                pstCountRequestsWithUserId.setInt(1, userId);
+                ResultSet resultSet = pstCountRequestsWithUserId.executeQuery();
+
+                if (resultSet.next()) {
+                    int count = resultSet.getInt(1);
+                    resultSet.close();
+                    return count;
+                }
+
+                log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
+                resultSet.close();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
         }
 
-        log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
-        resultSet.close();
         return 0;
     }
 
@@ -1278,16 +1568,32 @@ public class DatabaseManager {
         PreparedStatement pstCountAllUsers
                 = preparedStatementMap.get(SqlStatementEnum.CountAllUsers);
 
-        ResultSet resultSet = pstCountAllUsers.executeQuery();
+        int tryAgain = maxTries;
 
-        if (resultSet.next()) {
-            int count = resultSet.getInt(1);
-            resultSet.close();
-            return count;
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                ResultSet resultSet = pstCountAllUsers.executeQuery();
+
+                if (resultSet.next()) {
+                    int count = resultSet.getInt(1);
+                    resultSet.close();
+                    return count;
+                }
+
+                log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
+                resultSet.close();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
         }
 
-        log.severe("Failed SELECT COUNT(*) with empty result set, but no SQL Exception thrown.");
-        resultSet.close();
         return 0;
     }
 
