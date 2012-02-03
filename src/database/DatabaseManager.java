@@ -1620,6 +1620,7 @@ public class DatabaseManager {
         }
     }
 
+
     /**
      *
      * @param tryAgain the old tryAgain value, specifies how many tries are left before this exception
@@ -1630,13 +1631,13 @@ public class DatabaseManager {
     private int processTryAgainExceptionHandling(int tryAgain, Exception exception) throws SQLException {
         if (tryAgain > 0) {
             log.log(Level.WARNING, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
-                    "thread will now reconnect database and send again the sql statement " + 
-                    "\n --- (" + exception.getClass().getName() + ": " + exception.getMessage() + ")");
-            
+                    "thread will now reconnect database and send again the sql statement ", exception);
+
             this.close();
             try {
                 init();
             } catch (SQLException e) {
+                log.warning("Reinitializing of database connection failed.");
                 tryAgain--;
                 return processTryAgainExceptionHandling(tryAgain, e);
             }
@@ -1646,13 +1647,17 @@ public class DatabaseManager {
             if (exception instanceof SQLException) {
                 throw (SQLException) exception;
             } else {
-                throw new SQLException("Exception within database method: " + exception.getClass().getName() + ": " +
-                        exception.getMessage());
+                SQLException sqlEx = new SQLException("Exception within database method: "
+                        + exception.getClass().getName() + ": " + exception.getMessage());
+                sqlEx.setStackTrace(exception.getStackTrace());
+                throw sqlEx;
             }
-            
+
         }
         return tryAgain;
     }
+
+
 
 	/**
 	 * Converts a sql timestamp to a java date
