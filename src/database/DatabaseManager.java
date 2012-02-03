@@ -204,7 +204,7 @@ public class DatabaseManager {
 
 
     private static int initMaxTries() {
-        int maxTries = ConfigManager.getInstance().getEntryInt("maxdbtries", 2);
+        int maxTries = ConfigManager.getInstance().getEntryInt("maxdbtries", 3);
         if (maxTries > 0) {
             return maxTries;
         }
@@ -348,8 +348,6 @@ public class DatabaseManager {
 		 * 0, FailDescription TEXT DEFAULT NULL, PRIMARY KEY (ID), FOREIGN KEY
 		 * (UserID) REFERENCES Users (id)
 		 */
-
-        PreparedStatement pstAddNewRequest = preparedStatementMap.get(SqlStatementEnum.AddNewRequest);
         
 		RequestDataset request = null;
 		ResultSet generatedKeyResultSet;
@@ -363,6 +361,7 @@ public class DatabaseManager {
 
             try {
 
+                PreparedStatement pstAddNewRequest = preparedStatementMap.get(SqlStatementEnum.AddNewRequest);
                 Timestamp stamp = new Timestamp(System.currentTimeMillis());
 
                 pstAddNewRequest.setInt(1, userID);
@@ -527,7 +526,6 @@ public class DatabaseManager {
 		 * DEFAULT NULL, PRIMARY KEY (ID)
 		 */
 
-        PreparedStatement pstAddNewUser = preparedStatementMap.get(SqlStatementEnum.AddNewUser);
 
 		UserDataset user = null;
 
@@ -546,6 +544,7 @@ public class DatabaseManager {
 
             try {
 
+                PreparedStatement pstAddNewUser = preparedStatementMap.get(SqlStatementEnum.AddNewUser);
                 Timestamp registeredStamp = new Timestamp(
                         System.currentTimeMillis());
                 Timestamp verifiedStamp = null;
@@ -631,8 +630,6 @@ public class DatabaseManager {
 	 */
 	public int updateRequest(RequestDataset request) throws SQLException {
 
-        PreparedStatement pstUpdateRequest = preparedStatementMap.get(SqlStatementEnum.UpdateRequest);
-
         int tryAgain = maxTries;
         int rowsAffected;
 
@@ -640,6 +637,8 @@ public class DatabaseManager {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstUpdateRequest = preparedStatementMap.get(SqlStatementEnum.UpdateRequest);
                 boolean hasFailed = false;
                 boolean isPending = false;
 
@@ -703,9 +702,6 @@ public class DatabaseManager {
 			byte[] jsonResponse, boolean isPending, int costs, long cpuTime,
 			boolean hasFailed, String failDescription) throws SQLException {
 
-        PreparedStatement pstUpdateRequestWithComputeResult
-                = preparedStatementMap.get(SqlStatementEnum.UpdateRequestWithComputeResult);
-
         int rowsAffected;
         int tryAgain = maxTries;
 
@@ -713,6 +709,9 @@ public class DatabaseManager {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstUpdateRequestWithComputeResult
+                        = preparedStatementMap.get(SqlStatementEnum.UpdateRequestWithComputeResult);
 
                 Timestamp stamp = new Timestamp(System.currentTimeMillis());
 
@@ -755,14 +754,14 @@ public class DatabaseManager {
 	 */
 	public int  updateUser(UserDataset user) throws SQLException {
 
-        PreparedStatement pstUpdateUser = preparedStatementMap.get(SqlStatementEnum.UpdateUser);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstUpdateUser = preparedStatementMap.get(SqlStatementEnum.UpdateUser);
 
                 pstUpdateUser.setString(1, user.email);
                 pstUpdateUser.setString(2, user.passwordhash);
@@ -802,15 +801,15 @@ public class DatabaseManager {
 	 */
 	public int deleteRequest(int id) throws SQLException {
 
-        PreparedStatement pstDeleteRequestWithRequestId
-                = preparedStatementMap.get(SqlStatementEnum.DeleteRequestWithRequestId);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstDeleteRequestWithRequestId
+                        = preparedStatementMap.get(SqlStatementEnum.DeleteRequestWithRequestId);
 
                 pstDeleteRequestWithRequestId.setInt(1, id);
 
@@ -839,15 +838,15 @@ public class DatabaseManager {
 	 */
 	public int deleteRequestsOfUser(int userId) throws SQLException {
 
-        PreparedStatement pstDeleteRequestsOfUserWithUserId
-                = preparedStatementMap.get(SqlStatementEnum.DeleteRequestsOfUserWithUserId);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstDeleteRequestsOfUserWithUserId
+                        = preparedStatementMap.get(SqlStatementEnum.DeleteRequestsOfUserWithUserId);
 
                 pstDeleteRequestsOfUserWithUserId.setInt(1, userId);
 
@@ -879,15 +878,15 @@ public class DatabaseManager {
 	 */
 	public int deleteUser(int userId) throws SQLException {
 
-        PreparedStatement pstDeleteUserWithUserId
-                = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithUserId);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstDeleteUserWithUserId
+                        = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithUserId);
 
                 pstDeleteUserWithUserId.setInt(1, userId);
 
@@ -917,16 +916,15 @@ public class DatabaseManager {
 	 */
 	public int deleteUser(String email) throws SQLException {
 
-        PreparedStatement pstDeleteUserWithEmail
-                = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithEmail);
-
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstDeleteUserWithEmail
+                        = preparedStatementMap.get(SqlStatementEnum.DeleteUserWithEmail);
 
                 pstDeleteUserWithEmail.setString(1, email);
 
@@ -962,16 +960,16 @@ public class DatabaseManager {
 	public List<RequestDataset> getAllRequests(int limit, int offset)
 			throws SQLException {
 
-        PreparedStatement pstGetAllRequestsWithLimitOffset
-                = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsWithLimitOffset);
-
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetAllRequestsWithLimitOffset
+                        = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsWithLimitOffset);
+
 
                 pstGetAllRequestsWithLimitOffset.setInt(1, limit);
                 pstGetAllRequestsWithLimitOffset.setInt(2, offset);
@@ -1030,15 +1028,15 @@ public class DatabaseManager {
             return getAllRequests(limit, offset);
         }
 
-        PreparedStatement pstGetAllRequests
-                = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsNoJsonWithLimitOffset);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetAllRequests
+                        = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsNoJsonWithLimitOffset);
 
                 pstGetAllRequests.setInt(1, limit);
                 pstGetAllRequests.setInt(2, offset);
@@ -1091,15 +1089,15 @@ public class DatabaseManager {
 	 */
 	public RequestDataset getRequest(int id) throws SQLException {
 
-        PreparedStatement pstGetRequestWithRequestId
-                = preparedStatementMap.get(SqlStatementEnum.GetRequestWithRequestId);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetRequestWithRequestId
+                        = preparedStatementMap.get(SqlStatementEnum.GetRequestWithRequestId);
 
                 pstGetRequestWithRequestId.setInt(1, id);
                 ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
@@ -1152,15 +1150,15 @@ public class DatabaseManager {
 	public List<RequestDataset> getRequests(int userId, int limit, int offset)
 			throws SQLException {
 
-        PreparedStatement pstGetRequestsWithUserIdLimitOffset
-                = preparedStatementMap.get(SqlStatementEnum.GetRequestsWithUserIdLimitOffset);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetRequestsWithUserIdLimitOffset
+                        = preparedStatementMap.get(SqlStatementEnum.GetRequestsWithUserIdLimitOffset);
 
                 pstGetRequestsWithUserIdLimitOffset.setInt(1, userId);
                 pstGetRequestsWithUserIdLimitOffset.setInt(2, limit);
@@ -1223,15 +1221,15 @@ public class DatabaseManager {
             return getRequests(userId, limit, offset);
         }
 
-        PreparedStatement pstGetRequests
-                = preparedStatementMap.get(SqlStatementEnum.GetRequestsNoJsonWithUserIdLimitOffset);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetRequests
+                        = preparedStatementMap.get(SqlStatementEnum.GetRequestsNoJsonWithUserIdLimitOffset);
 
                 pstGetRequests.setInt(1, userId);
                 pstGetRequests.setInt(2, limit);
@@ -1285,14 +1283,14 @@ public class DatabaseManager {
 	 */
 	public List<UserDataset> getAllUsers() throws SQLException {
 
-        PreparedStatement pstGetAllUsers = preparedStatementMap.get(SqlStatementEnum.GetAllUsers);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetAllUsers = preparedStatementMap.get(SqlStatementEnum.GetAllUsers);
 
                 ResultSet resultSet = pstGetAllUsers.executeQuery();
                 ArrayList<UserDataset> list = new ArrayList<UserDataset>();
@@ -1339,15 +1337,15 @@ public class DatabaseManager {
 	public List<UserDataset> getAllUsers(int limit, int offset)
 			throws SQLException {
 
-        PreparedStatement pstGetAllUsersWithLimitOffset
-                = preparedStatementMap.get(SqlStatementEnum.GetAllUsersWithLimitOffset);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetAllUsersWithLimitOffset
+                        = preparedStatementMap.get(SqlStatementEnum.GetAllUsersWithLimitOffset);
 
                 pstGetAllUsersWithLimitOffset.setInt(1, limit);
                 pstGetAllUsersWithLimitOffset.setInt(2, offset);
@@ -1392,14 +1390,14 @@ public class DatabaseManager {
 	 */
 	public UserDataset getUser(String email) throws SQLException {
 
-        PreparedStatement pstGetUserWithEmail = preparedStatementMap.get(SqlStatementEnum.GetUserWithEmail);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetUserWithEmail = preparedStatementMap.get(SqlStatementEnum.GetUserWithEmail);
 
                 UserDataset user = null;
 
@@ -1444,15 +1442,14 @@ public class DatabaseManager {
 	 */
 	public UserDataset getUser(int id) throws SQLException {
 
-        PreparedStatement pstGetUserWithId = preparedStatementMap.get(SqlStatementEnum.GetUserWithId);
-
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstGetUserWithId = preparedStatementMap.get(SqlStatementEnum.GetUserWithId);
 
                 UserDataset user = null;
 
@@ -1493,14 +1490,14 @@ public class DatabaseManager {
      */
     public int getNumberOfRequests() throws SQLException {
 
-        PreparedStatement pstCountAllRequests = preparedStatementMap.get(SqlStatementEnum.CountAllRequests);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstCountAllRequests = preparedStatementMap.get(SqlStatementEnum.CountAllRequests);
 
                 ResultSet resultSet = pstCountAllRequests.executeQuery();
 
@@ -1531,15 +1528,15 @@ public class DatabaseManager {
      */
     public int getNumberOfRequestsWithUserId(int userId) throws SQLException {
 
-        PreparedStatement pstCountRequestsWithUserId
-                = preparedStatementMap.get(SqlStatementEnum.CountRequestsWithUserId);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstCountRequestsWithUserId
+                        = preparedStatementMap.get(SqlStatementEnum.CountRequestsWithUserId);
 
                 pstCountRequestsWithUserId.setInt(1, userId);
                 ResultSet resultSet = pstCountRequestsWithUserId.executeQuery();
@@ -1571,15 +1568,15 @@ public class DatabaseManager {
      */
     public int getNumberOfUsers() throws SQLException {
 
-        PreparedStatement pstCountAllUsers
-                = preparedStatementMap.get(SqlStatementEnum.CountAllUsers);
-
         int tryAgain = maxTries;
 
         while (tryAgain > 0) {
             tryAgain--;
 
             try {
+
+                PreparedStatement pstCountAllUsers
+                        = preparedStatementMap.get(SqlStatementEnum.CountAllUsers);
 
                 ResultSet resultSet = pstCountAllUsers.executeQuery();
 
