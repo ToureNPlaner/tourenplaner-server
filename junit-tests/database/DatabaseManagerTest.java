@@ -34,11 +34,10 @@ public class DatabaseManagerTest {
 	public final static void prepareTestRun() {
 		final ConfigManager cm = ConfigManager.getInstance();
 		try {
-			dbm = new DatabaseManager(cm.getEntryString("dburi",
-					"jdbc:mysql://gerbera.informatik.uni-stuttgart.de:3306/"),
-					cm.getEntryString("dbname", "tourenplaner"),
-					cm.getEntryString("dbuser", "tnpuser"), cm.getEntryString(
-							"dbpw", "toureNPlaner"));
+            dbm = new DatabaseManager(
+                    cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                    cm.getEntryString("dbuser","tnpuser"),
+                    cm.getEntryString("dbpw","toureNPlaner"));
 		} catch (SQLException e) {
 			dbmFailureMessage = "No Database Connection established. "
 					+ "Connection parameter:\n"
@@ -95,7 +94,7 @@ public class DatabaseManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link database.DatabaseManager#DatabaseManager(java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
+	 * {@link database.DatabaseManager#DatabaseManager(java.lang.String, java.lang.String, java.lang.String)}
 	 * .
 	 */
 	@Test
@@ -255,15 +254,6 @@ public class DatabaseManagerTest {
 	 */
 	@Test
 	public final void testGetUserInt() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link database.DatabaseManager#printDatabaseInformation()}.
-	 */
-	@Test
-	public final void testPrintDatabaseInformation() {
 		fail("Not yet implemented"); // TODO
 	}
 

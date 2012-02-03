@@ -4,6 +4,7 @@
 package database;
 
 import com.mysql.jdbc.Statement;
+import config.ConfigManager;
 
 import java.sql.*;
 import java.util.*;
@@ -22,11 +23,10 @@ public class DatabaseManager {
 	private Connection con = null;
     
     private final String url;
-    private final String dbName;
     private final String userName;
     private final String password;
 
-    private final int maxTries = 2;
+    private final int maxTries = initMaxTries();
 
     private static HashMap<SqlStatementEnum, SqlStatementString> sqlStatementStringMap = createSqlStatementStringMap();
     private HashMap<SqlStatementEnum, PreparedStatement> preparedStatementMap;
@@ -147,12 +147,12 @@ public class DatabaseManager {
 	 * 
 	 * @param url
 	 *            A database driver specific url of the form
-	 *            <i>jdbc:subprotocol:subnamewithoutdatabase</i> where
-	 *            <i>subnamewithoutdatabase</i> is the server address without
-	 *            the database name but with a slash at the end</br> Example:
-	 *            "jdbc:mysql://localhost:3306/"
-	 * @param dbName
-	 *            The database name Example: "tourenplaner"
+	 *            <i>jdbc:subprotocol:subname</i> where <i>subname</i> is the server address with
+     *            the database name (for example &quot;tourenplaner&quot;)
+     *            and at the end some connection properties if needed
+     *            (for example &quot;?autoReconnect=true&quot;)
+     *            </br> Example:
+	 *            "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"
 	 * @param userName
 	 *            User name of the database user account
 	 * @param password
@@ -162,10 +162,9 @@ public class DatabaseManager {
 	 *             occur while creating prepared statements
 	 * @see java.sql.DriverManager#getConnection(java.lang.String,java.lang.String, java.lang.String)
 	 */
-	public DatabaseManager(String url, String dbName, String userName,
+	public DatabaseManager(String url, String userName,
 			String password) throws SQLException {
         this.url = url;
-        this.dbName = dbName;
         this.userName = userName;
         this.password = password;
         
@@ -204,6 +203,13 @@ public class DatabaseManager {
     }
 
 
+    private static int initMaxTries() {
+        int maxTries = ConfigManager.getInstance().getEntryInt("maxdbtries", 2);
+        if (maxTries > 0) {
+            return maxTries;
+        }
+        return 2;
+    }
 
     private static HashMap<SqlStatementEnum, SqlStatementString> createSqlStatementStringMap() {
         HashMap<SqlStatementEnum, SqlStatementString> sqlStatementMap = new HashMap<SqlStatementEnum, SqlStatementString>(21);
@@ -305,7 +311,7 @@ public class DatabaseManager {
     }
 
     private void init() throws SQLException {
-        con = DriverManager.getConnection(url + dbName + "?autoReconnect=true", userName, password);
+        con = DriverManager.getConnection(url, userName, password);
         this.preparedStatementMap = createPreparedStatementMap(con);
     }
 

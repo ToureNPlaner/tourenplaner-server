@@ -66,7 +66,10 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
         authorizer = null;
         if (isPrivate){
             try {
-                this.dbm = new DatabaseManager(cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/"), cm.getEntryString("dbname", "tourenplaner"), cm.getEntryString("dbuser", "tnpuser"), cm.getEntryString("dbpw", "toureNPlaner"));
+                this.dbm = new DatabaseManager(
+                        cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                        cm.getEntryString("dbuser","tnpuser"),
+                        cm.getEntryString("dbpw","toureNPlaner"));
                 authorizer = new Authorizer(this.dbm);
             } catch (SQLException e) {
                 log.log(Level.SEVERE, "Can't connect to database falling back to public mode", e);

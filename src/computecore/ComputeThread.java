@@ -51,11 +51,10 @@ public class ComputeThread extends Thread {
 		threadMXBean = ManagementFactory.getThreadMXBean();
 		if (isPrivate) {
             try {
-                this.dbm = new DatabaseManager(cm.getEntryString("dburi",
-                        "jdbc:mysql://localhost:3306/"), cm.getEntryString(
-                        "dbname", "tourenplaner"), cm.getEntryString("dbuser",
-                        "tnpuser"), cm.getEntryString("dbpw",
-                        "toureNPlaner"));
+                this.dbm = new DatabaseManager(
+                        cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                        cm.getEntryString("dbuser","tnpuser"),
+                        cm.getEntryString("dbpw","toureNPlaner"));
             } catch(SQLException e){
                 log.severe("Couldn't establish database connection");
                 System.exit(1);
