@@ -1631,8 +1631,7 @@ public class DatabaseManager {
         if (tryAgain > 0) {
             log.log(Level.WARNING, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
                     "thread will now reconnect database and send again the sql statement " + 
-                    "\n --- (Exception: " + exception.getCause().toString() + " --- " +
-                    exception.getMessage() + ")");
+                    "\n --- (" + exception.getClass().getName() + ": " + exception.getMessage() + ")");
             
             this.close();
             try {
@@ -1647,7 +1646,8 @@ public class DatabaseManager {
             if (exception instanceof SQLException) {
                 throw (SQLException) exception;
             } else {
-                throw new SQLException("Exception within database method: " + exception.toString());
+                throw new SQLException("Exception within database method: " + exception.getClass().getName() + ": " +
+                        exception.getMessage());
             }
             
         }
