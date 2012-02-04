@@ -53,7 +53,7 @@ public class ShortestPath extends GraphAlgorithm {
             throw new ComputeException("Not enough points, need at least 2");
         }
 
-        Points resultWay = req.getResulWay();
+        Points resultWay = req.getResultWay();
         int distance = 0;
         try {
             // First let's map the RequestPoints to Ids

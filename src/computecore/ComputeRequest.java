@@ -86,7 +86,7 @@ public class ComputeRequest {
 	 * 
 	 * @return
 	 */
-	public Points getResulWay() {
+	public Points getResultWay() {
 		return resultWay;
 	}
 
@@ -185,7 +185,7 @@ public class ComputeRequest {
 		gen.writeEndArray();
 
 		gen.writeArrayFieldStart("way");
-		Points way = this.getResulWay();
+		Points way = this.getResultWay();
 		for (int i = 0; i < way.size(); i++) {
 			gen.writeStartObject();
 			gen.writeNumberField("lt", way.getPointLat(i));

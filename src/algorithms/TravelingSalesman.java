@@ -60,8 +60,8 @@ public class TravelingSalesman extends GraphAlgorithm {
        
         // Map points to ids
         RequestPoints points = req.getPoints();
-        if(points.size() < 1){
-            throw new ComputeException("Not enough points, need at least 1");
+        if(points.size() < 2){
+            throw new ComputeException("Not enough points, need at least 2");
         }
         int[][] distmat;
 
@@ -86,7 +86,7 @@ public class TravelingSalesman extends GraphAlgorithm {
 
             req.getPoints().setStore(pointStore);
             // Now build real paths
-            chdijks.shortestPath(points, req.getResulWay(), true);
+            chdijks.shortestPath(points, req.getResultWay(), true);
 
 
             debugMat.put("distMat", distmat);
