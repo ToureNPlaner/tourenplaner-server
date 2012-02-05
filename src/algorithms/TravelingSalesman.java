@@ -8,10 +8,7 @@ import computecore.RequestPoints;
 import graphrep.GraphRep;
 import utils.StaticMath;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -82,6 +79,8 @@ public class TravelingSalesman extends GraphAlgorithm {
             } else {
                 // To big let the Heuristics get something nice
                 pointStore = nnHeuristic(distmat, points.getStore());
+                // Improve it with twoOpt
+                pointStore = twoOpt(distmat, pointStore);
             }
 
             req.getPoints().setStore(pointStore);
@@ -118,6 +117,44 @@ public class TravelingSalesman extends GraphAlgorithm {
             pointStore.add(requestPointList.get(bestTour[i]));
         }
         return  pointStore;
+    }
+
+    private final List<RequestPoint> twoOpt(int[][] distmat, List<RequestPoint> requestPointList){
+        List<RequestPoint> pointStore = new ArrayList<RequestPoint>(requestPointList.size());
+        int[] shiftedTour = new int[requestPointList.size()];
+        for (int i = 0; i < shiftedTour.length; i++) {
+            shiftedTour[i] = i;
+        }
+
+        int[] bestTour = shiftedTour.clone();
+        int bestLength = calcTourLength(distmat, bestTour);
+        for(int i = 0; i < shiftedTour.length; i++){
+            for(int j = 1;j< shiftedTour.length-1;j++){
+                int[] neighborTour = shiftedTour.clone();
+                StaticMath.reverse(neighborTour, 0,j+1);
+                int length = calcTourLength(distmat, neighborTour);
+                if(length < bestLength){
+                    bestTour = neighborTour.clone();
+                }
+
+                neighborTour = shiftedTour.clone();
+                StaticMath.reverse(neighborTour, j, shiftedTour.length);
+                length = calcTourLength(distmat, neighborTour);
+                if (length < bestLength) {
+                    bestTour = neighborTour.clone();
+                }
+            }
+            // shift  array to the left
+            int first = shiftedTour[0];
+            System.arraycopy(shiftedTour, 1, shiftedTour, 0, shiftedTour.length - 1);
+            shiftedTour[shiftedTour.length-1] = first;
+        }
+
+        // Rearrange the point store to the found bestTour
+        for (int i = 0; i < bestTour.length; i++) {
+            pointStore.add(requestPointList.get(bestTour[i]));
+        }
+        return pointStore;
     }
     
     private final int calcTourLength(int[][] distmat, int[] tourPerm){
