@@ -6,8 +6,6 @@ import computecore.ComputeCore;
 import computecore.ComputeRequest;
 import computecore.RequestPoints;
 import database.DatabaseManager;
-import database.RequestDataset;
-import database.RequestStatusEnum;
 import database.UserDataset;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
@@ -145,8 +143,8 @@ public class AlgorithmHandler extends RequestHandler {
     }
 
     /**
-     * @param request
-     * @param algName
+     * @param request HttpRequest
+     * @param algName algName as String
      * @throws java.io.IOException
      * @throws java.sql.SQLException Thrown if auth fails or logging of request fails
      */
@@ -173,12 +171,12 @@ public class AlgorithmHandler extends RequestHandler {
             final ComputeRequest req = readComputeRequest(algName, responder, request);
 
             if (req != null) {
-                RequestDataset requestDataset = null;
+                int requestID = -1;
 
                 if (isPrivate && !algFac.isHidden()) {
                     byte[] jsonRequest = request.getContent().array();
-                    requestDataset = dbm.addNewRequest(userDataset.userid, algName, jsonRequest);
-                    req.setRequestID(requestDataset.requestID);
+                    requestID = dbm.addNewRequest(userDataset.userid, algName, jsonRequest);
+                    req.setRequestID(requestID);
                 }
 
                 final boolean success = computer.submit(req);
@@ -187,17 +185,15 @@ public class AlgorithmHandler extends RequestHandler {
                     String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate && !algFac.isHidden()){
-                        // Log failed requests because of full queue as failed
+                        // Write requests with status failed into database, failure cause is busy server
                         // TODO specify this case clearly, maybe behavior should be another
-                        requestDataset.failDescription = errorMessage;
                         // TODO maybe a better method should be used to convert a string to a byte array
-                        requestDataset.jsonResponse = errorMessage.getBytes();
-                        requestDataset.status = RequestStatusEnum.failed;
 
-                        // already sent error message, throw no exception
+                        // already sent error message, we should throw no exception
+                        // (MasterHandler would send an error message if it catches an SQLException)
                         try {
-                            dbm.updateRequest(requestDataset);
-                        } catch (SQLException e) {
+                            dbm.updateRequestAsFailed(requestID, errorMessage.getBytes());
+                        } catch (SQLException ignored) {
                         }
                     }
 

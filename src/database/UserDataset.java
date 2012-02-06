@@ -13,6 +13,22 @@ import java.util.Date;
  */
 public class UserDataset {
 
+    /*
+      id                INT           NOT NULL AUTO_INCREMENT,
+      Email             VARCHAR(255)  NOT NULL UNIQUE,
+      Passwordhash      TEXT          NOT NULL,
+      Salt              TEXT          NOT NULL,
+      AdminFlag         BOOL          NOT NULL DEFAULT 0,
+      Status            ENUM ('needs_verification','verified')
+                                      NOT NULL DEFAULT 'needs_verification',
+      FirstName         TEXT          NOT NULL,
+      LastName          TEXT          NOT NULL,
+      Address           TEXT          NOT NULL,
+      RegistrationDate  DATETIME      NOT NULL,
+      VerifiedDate      DATETIME               DEFAULT NULL,
+      PRIMARY KEY (ID)
+	*/
+
 	public int userid = 0;
 	public String email;
 	public String firstName;
@@ -29,13 +45,10 @@ public class UserDataset {
 	public Date registrationDate;
 	public Date verifiedDate;
 
-	@JsonIgnore
-	public Date deleteRequestDate;
-
 	public UserDataset(int id, String email, String passwordhash, String salt,
 			boolean isAdmin, UserStatusEnum status, String firstName,
 			String lastName, String address, Date registrationDate,
-			Date verifiedDate, Date deleteRequestDate) {
+			Date verifiedDate) {
 		this.userid = id;
 		this.email = email;
 		this.passwordhash = passwordhash;
@@ -47,6 +60,5 @@ public class UserDataset {
 		this.address = address;
 		this.registrationDate = registrationDate;
 		this.verifiedDate = verifiedDate;
-		this.deleteRequestDate = deleteRequestDate;
 	}
 }

@@ -110,10 +110,10 @@ public class DatabaseManagerTest {
 	@Test
 	public final void testAddNewRequest() {
 		try {
-			RequestDataset request = dbm.addNewRequest(testUserID,
+			int requestID = dbm.addNewRequest(testUserID,
 					"testRequest", "jsonRequestTestBlob".getBytes());
 			assertFalse("dbm is null", dbm == null);
-			assertFalse("returned object should never be null", request == null);
+			assertFalse("returned request id should never be <= 0", requestID <= 0);
 		} catch (SQLFeatureNotSupportedException e) {
 			e.printStackTrace();
 			fail(e.getLocalizedMessage());

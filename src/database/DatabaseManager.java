@@ -59,9 +59,9 @@ public class DatabaseManager {
      */
     
 	private final static String strGetAllRequests = "SELECT id, UserID, "
-            + "Algorithm, JSONRequest, JSONResponse, PendingFlag, Costs, PaidFlag, "
-            + "RequestDate, FinishedDate, CPUTime, FailedFlag, "
-            + "FailDescription FROM Requests";
+            + "Algorithm, JSONRequest, JSONResponse, Cost, "
+            + "RequestDate, FinishedDate, CPUTime, Status "
+            + "FROM Requests ORDER BY RequestDate DESC";
 
     private final static String strGetAllRequestsWithLimitOffset = strGetAllRequests
             + " LIMIT ? OFFSET ?";
@@ -71,9 +71,9 @@ public class DatabaseManager {
 
 
     private final static String strGetAllRequestsNoJson = "SELECT id, UserID, "
-            + "Algorithm, PendingFlag, Costs, PaidFlag, "
-            + "RequestDate, FinishedDate, CPUTime, FailedFlag, "
-            + "FailDescription FROM Requests";
+            + "Algorithm, PendingFlag, Cost, PaidFlag, "
+            + "RequestDate, FinishedDate, CPUTime, Status "
+            + "FROM Requests ORDER BY RequestDate DESC";
 
     private final static String strGetAllRequestsNoJsonWithLimitOffset = strGetAllRequestsNoJson
             + " LIMIT ? OFFSET ?";
@@ -92,7 +92,7 @@ public class DatabaseManager {
      */
 	private final static String strGetAllUsers = "SELECT id, Email, "
 			+ "Passwordhash, Salt, AdminFlag, Status, FirstName, LastName, "
-			+ "Address, RegistrationDate, VerifiedDate, DeleteRequestDate "
+			+ "Address, RegistrationDate, VerifiedDate "
 			+ "FROM Users";
 
     private final static String strGetAllUsersWithLimitOffset = strGetAllUsers
@@ -111,19 +111,17 @@ public class DatabaseManager {
      */
 	private final static String strUpdateRequest = "UPDATE Requests SET "
 			+ "UserID = ?, Algorithm = ?, JSONRequest = ?, JSONResponse = ?, "
-			+ "PendingFlag = ?, Costs = ?, PaidFlag = ?, RequestDate = ?, "
-			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
-			+ "FailDescription = ? WHERE id = ?";
+			+ "Cost = ?, RequestDate = ?, FinishedDate = ?, CPUTime = ?, Status = ? "
+			+ "WHERE id = ?";
 
 	private final static String strUpdateRequestWithComputeResult = "UPDATE Requests SET JSONResponse = ?, "
-			+ "PendingFlag = ?, Costs = ?, "
-			+ "FinishedDate = ?, CPUTime = ?, FailedFlag = ?, "
-			+ "FailDescription = ? WHERE id = ?";
+			+ "Cost = ?, FinishedDate = ?, CPUTime = ?, Status = ? "
+			+ "WHERE id = ?";
 
 	private final static String strUpdateUser = "UPDATE Users SET "
 			+ "Email = ?, Passwordhash = ?, Salt = ?, AdminFlag = ?, "
 			+ "Status = ?, FirstName = ?, LastName = ?, Address = ?, "
-			+ "RegistrationDate = ?, VerifiedDate = ?, DeleteRequestDate = ? "
+			+ "RegistrationDate = ?, VerifiedDate = ? "
 			+ "WHERE id = ?";
 
 
@@ -317,7 +315,7 @@ public class DatabaseManager {
 
 	/**
 	 * Tries to insert a new request dataset into the database. The inserted
-	 * dataset will be pending, have no costs and will be unpaid.</br>SQL
+	 * dataset will have the status pending and have 0 cost.<br />SQL
 	 * command: {@value #strAddNewRequest}
 	 * 
 	 * @param userID
@@ -326,33 +324,38 @@ public class DatabaseManager {
 	 *            The algorithm name
 	 * @param jsonRequest
 	 *            The request encoded as byte array
-	 * @return Returns the inserted request object only if the id could received
+	 * @return Returns the request id if the id could received
 	 *         from the database and the insert was successful, else an
-	 *         exception will be thrown.
+	 *         exception will be thrown. Request id should be > 0.
 	 * @throws SQLFeatureNotSupportedException
 	 *             Thrown if the id could not received or another function is
 	 *             not supported by driver.
 	 * @throws SQLException
 	 *             Thrown if the insertion failed.
 	 */
-	public RequestDataset addNewRequest(int userID, String algorithm,
+	public int addNewRequest(int userID, String algorithm,
 			byte[] jsonRequest) throws SQLException {
 
 		/*
-		 * id INT NOT NULL AUTO_INCREMENT, UserID INT NOT NULL REFERENCES Users
-		 * (id), Algorithm VARCHAR(255) NOT NULL, JSONRequest LONGBLOB,
-		 * JSONResponse LONGBLOB DEFAULT NULL, PendingFlag BOOL NOT NULL DEFAULT
-		 * 1, Costs INT NOT NULL DEFAULT 0, PaidFlag BOOL NOT NULL DEFAULT 0,
-		 * RequestDate DATETIME NOT NULL, FinishedDate DATETIME DEFAULT NULL,
-		 * CPUTime BIGINT NOT NULL DEFAULT 0, FailedFlag BOOL NOT NULL DEFAULT
-		 * 0, FailDescription TEXT DEFAULT NULL, PRIMARY KEY (ID), FOREIGN KEY
-		 * (UserID) REFERENCES Users (id)
+              id              INT           NOT NULL AUTO_INCREMENT,
+              UserID          INT           NOT NULL REFERENCES Users (id),
+              Algorithm       VARCHAR(255)  NOT NULL,
+              JSONRequest     LONGBLOB,
+              JSONResponse    LONGBLOB               DEFAULT NULL,
+              Cost            INT           NOT NULL DEFAULT 0,
+              RequestDate     DATETIME      NOT NULL,
+              FinishedDate    DATETIME               DEFAULT NULL,
+              CPUTime         BIGINT        NOT NULL DEFAULT 0,
+              Status          ENUM ('ok','pending','failed')
+                                            NOT NULL DEFAULT 'pending',
+              PRIMARY KEY (ID),
+              FOREIGN KEY (UserID) REFERENCES Users (id)
 		 */
-        
-		RequestDataset request = null;
+
 		ResultSet generatedKeyResultSet;
 
         boolean hasKey = false;
+        int requestID = -1;
 
         int tryAgain = maxTries;
 
@@ -371,22 +374,17 @@ public class DatabaseManager {
 
                 pstAddNewRequest.executeUpdate();
                 // if no exception occurred, request is added, so do not try again
-                tryAgain = -1;
-
-                request = new RequestDataset(-1, userID, algorithm, jsonRequest, null,
-                        true, 0, false, new Date(stamp.getTime()), null, 0, false, null);
+                tryAgain = 0;
 
                 hasKey = false;
                 generatedKeyResultSet = pstAddNewRequest.getGeneratedKeys();
                 if (generatedKeyResultSet.next()) {
-                    request.requestID = generatedKeyResultSet.getInt(1);
+                    requestID = generatedKeyResultSet.getInt(1);
                     hasKey = true;
                 }
                 generatedKeyResultSet.close();
 
-                tryAgain = 0;
                 log.fine("Database query successful");
-
 
             } catch (SQLException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
@@ -404,11 +402,11 @@ public class DatabaseManager {
                             + "java.sql.Statement.getGeneratedKeys()");
         }
 
-		return request;
+		return requestID;
 	}
 
 	/**
-	 * Tries to insert a new user dataset into the database. </br>SQL command:
+	 * Tries to insert a new user dataset into the database. <br />SQL command:
 	 * {@value #strAddNewUser}
 	 * 
 	 * @param email
@@ -452,7 +450,7 @@ public class DatabaseManager {
 	/**
 	 * Tries to insert a new user dataset into the database, but request should
 	 * have legit admin authentication (will not be checked within this method).
-	 * New user will be verified. </br>SQL command: {@value #strAddNewUser}
+	 * New user will be verified. <br />SQL command: {@value #strAddNewUser}
 	 * 
 	 * @param email
 	 *            Have to be unique, that means another user must not have the
@@ -493,7 +491,8 @@ public class DatabaseManager {
 	}
 
     /**
-     *
+     * <br />SQL command:
+     * {@value #strAddNewUser}
      * @param email email
      * @param passwordhash password hash
      * @param salt salt
@@ -517,13 +516,19 @@ public class DatabaseManager {
 			throws SQLException {
 
 		/*
-		 * id INT NOT NULL AUTO_INCREMENT, Email VARCHAR(255) NOT NULL UNIQUE,
-		 * Passwordhash TEXT NOT NULL, Salt TEXT NOT NULL, AdminFlag BOOL NOT
-		 * NULL DEFAULT 0,Status ENUM ('needs_verification','verified')
-         * NOT NULL DEFAULT 'needs_verification', FirstName TEXT NOT NULL, LastName TEXT NOT NULL,
-		 * Address TEXT NOT NULL, RegistrationDate DATETIME NOT NULL,
-		 * VerifiedDate DATETIME DEFAULT NULL, DeleteRequestDate DATETIME
-		 * DEFAULT NULL, PRIMARY KEY (ID)
+              id                INT           NOT NULL AUTO_INCREMENT,
+              Email             VARCHAR(255)  NOT NULL UNIQUE,
+              Passwordhash      TEXT          NOT NULL,
+              Salt              TEXT          NOT NULL,
+              AdminFlag         BOOL          NOT NULL DEFAULT 0,
+              Status            ENUM ('needs_verification','verified')
+                                              NOT NULL DEFAULT 'needs_verification',
+              FirstName         TEXT          NOT NULL,
+              LastName          TEXT          NOT NULL,
+              Address           TEXT          NOT NULL,
+              RegistrationDate  DATETIME      NOT NULL,
+              VerifiedDate      DATETIME               DEFAULT NULL,
+              PRIMARY KEY (ID)
 		 */
 
 
@@ -584,7 +589,7 @@ public class DatabaseManager {
 
                 user = new UserDataset(-1, email, passwordhash, salt, isAdmin,
                         status, firstName, lastName, address, registeredDate,
-                        verifiedDate, null);
+                        verifiedDate);
 
                 ResultSet generatedKeyResultSet;
 
@@ -619,7 +624,7 @@ public class DatabaseManager {
 	 * (<b><code>request.id</code></b>). All values within the given object will
 	 * be written into the database, so all old values within the row will be
 	 * overwritten. <b><code>request.id</code></b> has to be > 0 and must exists
-	 * within the database table. </br>SQL command:
+	 * within the database table. <br />SQL command:
 	 * {@value #strUpdateRequest}
 	 * 
 	 * @param request
@@ -639,30 +644,17 @@ public class DatabaseManager {
             try {
 
                 PreparedStatement pstUpdateRequest = preparedStatementMap.get(SqlStatementEnum.UpdateRequest);
-                boolean hasFailed = false;
-                boolean isPending = false;
-
-                if (request.status == RequestStatusEnum.pending) {
-                    isPending = true;
-                }
-                if (request.status == RequestStatusEnum.failed) {
-                    hasFailed = true;
-                }
-
 
                 pstUpdateRequest.setInt(1, request.userID);
                 pstUpdateRequest.setString(2, request.algorithm);
                 pstUpdateRequest.setBytes(3, request.jsonRequest);
                 pstUpdateRequest.setBytes(4, request.jsonResponse);
-                pstUpdateRequest.setBoolean(5, isPending);
-                pstUpdateRequest.setInt(6, request.cost);
-                pstUpdateRequest.setBoolean(7, request.isPaid);
-                pstUpdateRequest.setTimestamp(8, dateToTimestamp(request.requestDate));
-                pstUpdateRequest.setTimestamp(9, dateToTimestamp(request.finishedDate));
-                pstUpdateRequest.setLong(10, request.duration);
-                pstUpdateRequest.setBoolean(11, hasFailed);
-                pstUpdateRequest.setString(12, request.failDescription);
-                pstUpdateRequest.setInt(13, request.requestID);
+                pstUpdateRequest.setInt(5, request.cost);
+                pstUpdateRequest.setTimestamp(6, dateToTimestamp(request.requestDate));
+                pstUpdateRequest.setTimestamp(7, dateToTimestamp(request.finishedDate));
+                pstUpdateRequest.setLong(8, request.duration);
+                pstUpdateRequest.setString(9, request.status.toString());
+                pstUpdateRequest.setInt(10, request.requestID);
 
                 rowsAffected = pstUpdateRequest.executeUpdate();
 
@@ -683,24 +675,20 @@ public class DatabaseManager {
 	 * Updates the Requests table row with the id given through the parameter
 	 * (<b><code>requestID</code></b>). The given parameters will overwrite the
 	 * old values in the database row. FinishedDate will be set to the current
-	 * timestamp. <b><code>requestID</code></b> has to be > 0 and must exists
-	 * within the database table. </br>SQL command:
+	 * timestamp. Status will be set to ok. <b><code>requestID</code></b> has to be > 0 and must exists
+	 * within the database table. <br />SQL command:
 	 * {@value #strUpdateRequestWithComputeResult}
 	 * 
 	 * @param requestID requestID
 	 * @param jsonResponse JSON response object
-	 * @param isPending isPending flag
-	 * @param costs cost of request
+	 * @param cost cost of request
 	 * @param cpuTime cpuTime
-	 * @param hasFailed hasFailed flag
-	 * @param failDescription failure description
 	 * @throws SQLException
 	 *             Thrown if update fails.
      * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int updateRequestWithComputeResult(int requestID,
-			byte[] jsonResponse, boolean isPending, int costs, long cpuTime,
-			boolean hasFailed, String failDescription) throws SQLException {
+			byte[] jsonResponse, int cost, long cpuTime) throws SQLException {
 
         int rowsAffected;
         int tryAgain = maxTries;
@@ -716,13 +704,11 @@ public class DatabaseManager {
                 Timestamp stamp = new Timestamp(System.currentTimeMillis());
 
                 pstUpdateRequestWithComputeResult.setBytes(1, jsonResponse);
-                pstUpdateRequestWithComputeResult.setBoolean(2, isPending);
-                pstUpdateRequestWithComputeResult.setInt(3, costs);
-                pstUpdateRequestWithComputeResult.setTimestamp(4, stamp);
-                pstUpdateRequestWithComputeResult.setLong(5, cpuTime);
-                pstUpdateRequestWithComputeResult.setBoolean(6, hasFailed);
-                pstUpdateRequestWithComputeResult.setString(7, failDescription);
-                pstUpdateRequestWithComputeResult.setInt(8, requestID);
+                pstUpdateRequestWithComputeResult.setInt(2, cost);
+                pstUpdateRequestWithComputeResult.setTimestamp(3, stamp);
+                pstUpdateRequestWithComputeResult.setLong(4, cpuTime);
+                pstUpdateRequestWithComputeResult.setString(5, RequestStatusEnum.ok.toString());
+                pstUpdateRequestWithComputeResult.setInt(6, requestID);
 
                 rowsAffected = pstUpdateRequestWithComputeResult.executeUpdate();
 
@@ -739,12 +725,67 @@ public class DatabaseManager {
         return 0;
 	}
 
+
+
+    /**
+     * Updates the Requests table row with the id given through the parameter
+     * <b><code>requestID</code></b>. The given parameter <b><code>jsonResponse</code></b>
+     * will overwrite the old values in the database row. Cost and CPUTime will be set 0.
+     * FinishedDate will be set to the current timestamp. Status will be set &quot;failed&quot;.
+     * <b><code>requestID</code></b> has to be > 0 and must exists
+     * within the database table. <br />SQL command:
+     * {@value #strUpdateRequestWithComputeResult}
+     *
+     * @param requestID requestID
+     * @param jsonResponse JSON response object with error message
+     * @throws SQLException
+     *             Thrown if update fails.
+     * @return number of database rows changed (1 if successful, else 0)
+     */
+    public int updateRequestAsFailed(int requestID, byte[] jsonResponse) throws SQLException {
+
+        int rowsAffected;
+        int tryAgain = maxTries;
+
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                PreparedStatement pstUpdateRequestWithComputeResult
+                        = preparedStatementMap.get(SqlStatementEnum.UpdateRequestWithComputeResult);
+
+                Timestamp stamp = new Timestamp(System.currentTimeMillis());
+
+                pstUpdateRequestWithComputeResult.setBytes(1, jsonResponse);
+                pstUpdateRequestWithComputeResult.setInt(2, 0);
+                pstUpdateRequestWithComputeResult.setTimestamp(3, stamp);
+                pstUpdateRequestWithComputeResult.setLong(4, 0);
+                pstUpdateRequestWithComputeResult.setString(5, RequestStatusEnum.failed.toString());
+                pstUpdateRequestWithComputeResult.setInt(6, requestID);
+
+                rowsAffected = pstUpdateRequestWithComputeResult.executeUpdate();
+
+                log.fine("Database query successful");
+                return rowsAffected;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+        return 0;
+    }
+
+
     /**
 	 * Updates the Users table row with the id given through the parameter (<b>
 	 * <code>request.id</code></b>). All values within the given object will be
 	 * written into the database, so all old values within the row will be
 	 * overwritten. <b><code>user.userid</code></b> has to be > 0 and must exists
-	 * within the database table. </br>SQL command: {@value #strUpdateUser}
+	 * within the database table. <br />SQL command: {@value #strUpdateUser}
 	 * 
 	 * @param user
 	 *            The user object to write into the database.
@@ -773,8 +814,7 @@ public class DatabaseManager {
                 pstUpdateUser.setString(8, user.address);
                 pstUpdateUser.setTimestamp(9, dateToTimestamp(user.registrationDate));
                 pstUpdateUser.setTimestamp(10, dateToTimestamp(user.verifiedDate));
-                pstUpdateUser.setTimestamp(11, dateToTimestamp(user.deleteRequestDate));
-                pstUpdateUser.setInt(12, user.userid);
+                pstUpdateUser.setInt(11, user.userid);
 
                 return pstUpdateUser.executeUpdate();
 
@@ -946,7 +986,7 @@ public class DatabaseManager {
 	 * Gets a list with all requests within the Requests table with regard to
 	 * the limit and offset constraints. If no requests are found with the given
 	 * constraints or the table is empty, an empty list will be returned.
-	 * </br>SQL command: {@value #strGetAllRequestsWithLimitOffset}
+	 * <br />SQL command: {@value #strGetAllRequestsWithLimitOffset}
 	 * 
 	 * @param limit
 	 *            How many rows should maximal selected.
@@ -979,14 +1019,17 @@ public class DatabaseManager {
 
                 while (resultSet.next()) {
 
-                    list.add(new RequestDataset(resultSet.getInt(1), resultSet
-                            .getInt(2), resultSet.getString(3), resultSet.getBytes(4),
-                            resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
-                            .getInt(7), resultSet.getBoolean(8),
-                            timestampToDate(resultSet.getTimestamp(9)),
-                            timestampToDate(resultSet.getTimestamp(10)), resultSet
-                            .getLong(11), resultSet.getBoolean(12), resultSet
-                            .getString(13)));
+                    list.add(new RequestDataset(
+                            resultSet.getInt(1),
+                            resultSet.getInt(2),
+                            resultSet.getString(3),
+                            resultSet.getBytes(4),
+                            resultSet.getBytes(5),
+                            resultSet.getInt(6),
+                            timestampToDate(resultSet.getTimestamp(7)),
+                            timestampToDate(resultSet.getTimestamp(8)),
+                            resultSet.getLong(9),
+                            RequestStatusEnum.valueOf(resultSet.getString(10))));
                 }
                 resultSet.close();
 
@@ -1052,14 +1095,11 @@ public class DatabaseManager {
                             resultSet.getString(3),
                             null,
                             null,
-                            resultSet.getBoolean(4),
-                            resultSet.getInt(5),
-                            resultSet.getBoolean(6),
-                            timestampToDate(resultSet.getTimestamp(7)),
-                            timestampToDate(resultSet.getTimestamp(8)),
-                            resultSet.getLong(9),
-                            resultSet.getBoolean(10),
-                            resultSet.getString(11)));
+                            resultSet.getInt(4),
+                            timestampToDate(resultSet.getTimestamp(5)),
+                            timestampToDate(resultSet.getTimestamp(6)),
+                            resultSet.getLong(7),
+                            RequestStatusEnum.valueOf(resultSet.getString(8))));
                 }
                 resultSet.close();
 
@@ -1104,15 +1144,17 @@ public class DatabaseManager {
                 RequestDataset request = null;
 
                 while (resultSet.next()) {
-                    request = new RequestDataset(resultSet.getInt(1),
-                            resultSet.getInt(2), resultSet.getString(3),
-                            resultSet.getBytes(4), resultSet.getBytes(5),
-                            resultSet.getBoolean(6), resultSet.getInt(7),
-                            resultSet.getBoolean(8),
-                            timestampToDate(resultSet.getTimestamp(9)),
-                            timestampToDate(resultSet.getTimestamp(10)),
-                            resultSet.getLong(11), resultSet.getBoolean(12),
-                            resultSet.getString(13));
+                    request = new RequestDataset(
+                            resultSet.getInt(1),
+                            resultSet.getInt(2),
+                            resultSet.getString(3),
+                            resultSet.getBytes(4),
+                            resultSet.getBytes(5),
+                            resultSet.getInt(6),
+                            timestampToDate(resultSet.getTimestamp(7)),
+                            timestampToDate(resultSet.getTimestamp(8)),
+                            resultSet.getLong(9),
+                            RequestStatusEnum.valueOf(resultSet.getString(10)));
                 }
                 resultSet.close();
 
@@ -1133,7 +1175,7 @@ public class DatabaseManager {
 	 * Gets a list with all requests within the Requests table which have the
 	 * given user id with regard to the limit and offset constraints. If no
 	 * requests are found with the given user id and given constraints or the
-	 * table is empty, an empty list will be returned. </br>SQL command:
+	 * table is empty, an empty list will be returned. <br />SQL command:
 	 * {@value #strGetRequestsWithUserIdLimitOffset}
 	 * 
 	 * @param userId
@@ -1170,14 +1212,17 @@ public class DatabaseManager {
 
                 while (resultSet.next()) {
 
-                    list.add(new RequestDataset(resultSet.getInt(1), resultSet
-                            .getInt(2), resultSet.getString(3), resultSet.getBytes(4),
-                            resultSet.getBytes(5), resultSet.getBoolean(6), resultSet
-                            .getInt(7), resultSet.getBoolean(8),
-                            timestampToDate(resultSet.getTimestamp(9)),
-                            timestampToDate(resultSet.getTimestamp(10)), resultSet
-                            .getLong(11), resultSet.getBoolean(12), resultSet
-                            .getString(13)));
+                    list.add(new RequestDataset(
+                            resultSet.getInt(1),
+                            resultSet.getInt(2),
+                            resultSet.getString(3),
+                            resultSet.getBytes(4),
+                            resultSet.getBytes(5),
+                            resultSet.getInt(6),
+                            timestampToDate(resultSet.getTimestamp(7)),
+                            timestampToDate(resultSet.getTimestamp(8)),
+                            resultSet.getLong(9),
+                            RequestStatusEnum.valueOf(resultSet.getString(10))));
                 }
                 resultSet.close();
 
@@ -1199,7 +1244,7 @@ public class DatabaseManager {
      * Gets a list with all requests within the Requests table which have the
      * given user id with regard to the limit and offset constraints. If no
      * requests are found with the given user id and given constraints or the
-     * table is empty, an empty list will be returned. </br>SQL command:
+     * table is empty, an empty list will be returned. <br />SQL command:
      * {@value #strGetRequestsWithUserIdLimitOffset}
      *
      * @param userId
@@ -1247,14 +1292,11 @@ public class DatabaseManager {
                             resultSet.getString(3),
                             null,
                             null,
-                            resultSet.getBoolean(4),
-                            resultSet.getInt(5),
-                            resultSet.getBoolean(6),
-                            timestampToDate(resultSet.getTimestamp(7)),
-                            timestampToDate(resultSet.getTimestamp(8)),
-                            resultSet.getLong(9),
-                            resultSet.getBoolean(10),
-                            resultSet.getString(11)));
+                            resultSet.getInt(4),
+                            timestampToDate(resultSet.getTimestamp(5)),
+                            timestampToDate(resultSet.getTimestamp(6)),
+                            resultSet.getLong(7),
+                            RequestStatusEnum.valueOf(resultSet.getString(8))));
                 }
                 resultSet.close();
 
@@ -1273,7 +1315,7 @@ public class DatabaseManager {
 
 	/**
 	 * Gets a list with all users within the Users table. If the table is empty,
-	 * an empty list will be returned. </br>SQL command:
+	 * an empty list will be returned. <br />SQL command:
 	 * {@value #strGetAllUsers}
 	 * 
 	 * @return A list with all selected users. If no users selected, the list is
@@ -1297,14 +1339,19 @@ public class DatabaseManager {
 
                 while (resultSet.next()) {
 
-                    list.add(new UserDataset(resultSet.getInt(1), resultSet
-                            .getString(2), resultSet.getString(3), resultSet
-                            .getString(4), resultSet.getBoolean(5), UserStatusEnum
-                            .valueOf(resultSet.getString(6)), resultSet.getString(7),
-                            resultSet.getString(8), resultSet.getString(9),
+                    list.add(new UserDataset(
+                            resultSet.getInt(1),
+                            resultSet.getString(2),
+                            resultSet.getString(3),
+                            resultSet.getString(4),
+                            resultSet.getBoolean(5),
+                            UserStatusEnum.valueOf(resultSet.getString(6)),
+                            resultSet.getString(7),
+                            resultSet.getString(8),
+                            resultSet.getString(9),
                             timestampToDate(resultSet.getTimestamp(10)),
-                            timestampToDate(resultSet.getTimestamp(11)),
-                            timestampToDate(resultSet.getTimestamp(12))));
+                            timestampToDate(resultSet.getTimestamp(11))
+                    ));
                 }
                 resultSet.close();
 
@@ -1323,7 +1370,7 @@ public class DatabaseManager {
 	 * Gets a list with all users within the Users table with regard to the
 	 * limit and offset constraints. If no users are found with the given
 	 * constraints or the table is empty, an empty list will be returned.
-	 * </br>SQL command: {@value #strGetAllUsersWithLimitOffset}
+	 * <br />SQL command: {@value #strGetAllUsersWithLimitOffset}
 	 * 
 	 * @param limit
 	 *            How many rows should maximal selected.
@@ -1355,14 +1402,19 @@ public class DatabaseManager {
 
                 while (resultSet.next()) {
 
-                    list.add(new UserDataset(resultSet.getInt(1), resultSet
-                            .getString(2), resultSet.getString(3), resultSet
-                            .getString(4), resultSet.getBoolean(5), UserStatusEnum
-                            .valueOf(resultSet.getString(6)), resultSet.getString(7),
-                            resultSet.getString(8), resultSet.getString(9),
+                    list.add(new UserDataset(
+                            resultSet.getInt(1),
+                            resultSet.getString(2),
+                            resultSet.getString(3),
+                            resultSet.getString(4),
+                            resultSet.getBoolean(5),
+                            UserStatusEnum.valueOf(resultSet.getString(6)),
+                            resultSet.getString(7),
+                            resultSet.getString(8),
+                            resultSet.getString(9),
                             timestampToDate(resultSet.getTimestamp(10)),
-                            timestampToDate(resultSet.getTimestamp(11)),
-                            timestampToDate(resultSet.getTimestamp(12))));
+                            timestampToDate(resultSet.getTimestamp(11))
+                    ));
                 }
                 resultSet.close();
 
@@ -1380,7 +1432,7 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Gets a user object from the Users table with the given email. </br>SQL
+	 * Gets a user object from the Users table with the given email. <br />SQL
 	 * command: {@value #strGetUserWithEmail}
 	 * 
 	 * @param email The email of the user
@@ -1406,14 +1458,19 @@ public class DatabaseManager {
 
                 while (resultSet.next()) {
 
-                    user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
-                            resultSet.getString(3), resultSet.getString(4),
-                            resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
-                            .getString(6)), resultSet.getString(7),
-                            resultSet.getString(8), resultSet.getString(9),
+                    user = new UserDataset(
+                            resultSet.getInt(1),
+                            resultSet.getString(2),
+                            resultSet.getString(3),
+                            resultSet.getString(4),
+                            resultSet.getBoolean(5),
+                            UserStatusEnum.valueOf(resultSet.getString(6)),
+                            resultSet.getString(7),
+                            resultSet.getString(8),
+                            resultSet.getString(9),
                             timestampToDate(resultSet.getTimestamp(10)),
-                            timestampToDate(resultSet.getTimestamp(11)),
-                            timestampToDate(resultSet.getTimestamp(12)));
+                            timestampToDate(resultSet.getTimestamp(11))
+                    );
                 }
                 resultSet.close();
 
@@ -1431,7 +1488,7 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Gets a user object from the Users table with the given user id. </br>SQL
+	 * Gets a user object from the Users table with the given user id. <br />SQL
 	 * command: {@value #strGetUserWithId}
 	 * 
 	 * @param id
@@ -1458,14 +1515,19 @@ public class DatabaseManager {
 
                 while (resultSet.next()) {
 
-                    user = new UserDataset(resultSet.getInt(1), resultSet.getString(2),
-                            resultSet.getString(3), resultSet.getString(4),
-                            resultSet.getBoolean(5), UserStatusEnum.valueOf(resultSet
-                            .getString(6)), resultSet.getString(7),
-                            resultSet.getString(8), resultSet.getString(9),
+                    user = new UserDataset(
+                            resultSet.getInt(1),
+                            resultSet.getString(2),
+                            resultSet.getString(3),
+                            resultSet.getString(4),
+                            resultSet.getBoolean(5),
+                            UserStatusEnum.valueOf(resultSet.getString(6)),
+                            resultSet.getString(7),
+                            resultSet.getString(8),
+                            resultSet.getString(9),
                             timestampToDate(resultSet.getTimestamp(10)),
-                            timestampToDate(resultSet.getTimestamp(11)),
-                            timestampToDate(resultSet.getTimestamp(12)));
+                            timestampToDate(resultSet.getTimestamp(11))
+                    );
                 }
                 resultSet.close();
 

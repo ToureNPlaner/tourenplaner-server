@@ -76,7 +76,7 @@ public class ComputeThread extends Thread {
         checkThreadMXBeanSupport();
 
         while (!Thread.interrupted()) {
-			long cpuTime = 0;
+			long cpuTime;
 			int requestID = -1;
 			ByteArrayOutputStream baOutputStream;
 			
@@ -117,8 +117,7 @@ public class ComputeThread extends Thread {
                             throw e;
 						}
 						if (isPrivate) {
-							
-							// TODO get algorithm specific costs
+
 							try {
 								log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
 										+ ": trying to write compute result into database, length of ByteArrayStream: " 
@@ -126,14 +125,11 @@ public class ComputeThread extends Thread {
 								// baOutputStream is not null because else
 								// writeComputeResult would throw an
 								// IOException
-								dbm.updateRequestWithComputeResult(
-										requestID, 
-										baOutputStream.toByteArray(), //jsonResponse
-										false, //isPending
-										0, //costs
-										cpuTime, 
-										false, //hasFailed
-										null); //failDescription
+                                // TODO get algorithm specific costs
+                                int cost = 0;
+                                
+								dbm.updateRequestWithComputeResult(requestID,
+                                        baOutputStream.toByteArray(), cost, cpuTime);
 							} catch (SQLException sqlE) {
 								log.log(Level.WARNING, "Could not log ComputeResult into DB", sqlE);
 							} 
@@ -174,15 +170,8 @@ public class ComputeThread extends Thread {
         if (isPrivate) {
             try {
                 // TODO change failDescription to user friendly message?
-                dbm.updateRequestWithComputeResult(
-                        requestID,
-                        // TODO maybe a better method should be used to convert a string to a byte array
-                        errorMessage.getBytes(), //jsonResponse
-                        false, //isPending
-                        0, //costs
-                        0, //cpuTime
-                        true, //hasFailed
-                        null); //failDescription
+                // TODO maybe a better method should be used to convert a string to a byte array
+                dbm.updateRequestAsFailed(requestID, errorMessage.getBytes());
             } catch (SQLException sqlE) {
                 log.log(Level.WARNING, "Could not log " + errorName + " into DB ", sqlE);
             }

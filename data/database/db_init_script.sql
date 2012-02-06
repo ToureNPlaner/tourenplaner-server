@@ -23,7 +23,7 @@ CREATE TABLE Requests (
   Algorithm       VARCHAR(255)  NOT NULL,
   JSONRequest     LONGBLOB,
   JSONResponse    LONGBLOB               DEFAULT NULL,
-  Costs           INT           NOT NULL DEFAULT 0,
+  Cost            INT           NOT NULL DEFAULT 0,
   RequestDate     DATETIME      NOT NULL,
   FinishedDate    DATETIME               DEFAULT NULL,
   CPUTime         BIGINT        NOT NULL DEFAULT 0,
