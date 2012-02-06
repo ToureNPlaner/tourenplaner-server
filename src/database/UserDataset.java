@@ -13,7 +13,7 @@ import java.util.Date;
  */
 public class UserDataset {
 
-	public int id = 0;
+	public int userid = 0;
 	public String email;
 	public String firstName;
 	public String lastName;
@@ -36,7 +36,7 @@ public class UserDataset {
 			boolean isAdmin, UserStatusEnum status, String firstName,
 			String lastName, String address, Date registrationDate,
 			Date verifiedDate, Date deleteRequestDate) {
-		this.id = id;
+		this.userid = id;
 		this.email = email;
 		this.passwordhash = passwordhash;
 		this.salt = salt;

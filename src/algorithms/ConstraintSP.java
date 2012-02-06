@@ -49,7 +49,7 @@ public class ConstraintSP extends GraphAlgorithm {
             throw new ComputeException("Not enough points or to much points, need 2");
         }
 
-        Points resultPoints = req.getResulWay();
+        Points resultPoints = req.getResultWay();
 
         // Check for Constraint
         int maxAltitudeDifference;

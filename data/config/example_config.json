@@ -3,11 +3,15 @@
 	"queuelength" : 20,
 	"graphfilepath" : "/home/user/germany.txt",
 	"private" : true,
-	"dburi" : "jdbc:mysql://localhost:3306/",
+	"dburi" : "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true",
 	"dbuser" : "tnpuser",
-	"dbname" : "tourenplaner",
 	"dbpw" : "toureNPlaner",
+	"maxdbtries" : 3,
 	"httpport" : 8080,
 	"sslport" : 8081,
+    "serverinfosslport" : 443,
 	"sslcert" : "/home/user/keystore.jks",
+	"sslalias" : "tourenplaner",
+	"sslpw" : "toureNPlaner"
+
 }

@@ -34,11 +34,10 @@ public class DatabaseManagerTest {
 	public final static void prepareTestRun() {
 		final ConfigManager cm = ConfigManager.getInstance();
 		try {
-			dbm = new DatabaseManager(cm.getEntryString("dburi",
-					"jdbc:mysql://gerbera.informatik.uni-stuttgart.de:3306/"),
-					cm.getEntryString("dbname", "tourenplaner"),
-					cm.getEntryString("dbuser", "tnpuser"), cm.getEntryString(
-							"dbpw", "toureNPlaner"));
+            dbm = new DatabaseManager(
+                    cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                    cm.getEntryString("dbuser","tnpuser"),
+                    cm.getEntryString("dbpw","toureNPlaner"));
 		} catch (SQLException e) {
 			dbmFailureMessage = "No Database Connection established. "
 					+ "Connection parameter:\n"
@@ -55,7 +54,7 @@ public class DatabaseManagerTest {
 						"DmGT9B354DFasH673aGFBM3", "hmAhgAN68sdKNfdA9sd876k0",
 						"John", "Doe", "Musterstraße 42", false);
 				if (user != null) {
-					testUserID = user.id;
+					testUserID = user.userid;
 				} else {
 					userFailureMessage = "TestUser existed before test run.";
 				}
@@ -95,7 +94,7 @@ public class DatabaseManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link database.DatabaseManager#DatabaseManager(java.lang.String, java.lang.String, java.lang.String, java.lang.String)}
+	 * {@link database.DatabaseManager#DatabaseManager(java.lang.String, java.lang.String, java.lang.String)}
 	 * .
 	 */
 	@Test
@@ -200,14 +199,6 @@ public class DatabaseManagerTest {
 	}
 
 	/**
-	 * Test method for {@link database.DatabaseManager#getAllRequests()}.
-	 */
-	@Test
-	public final void testGetAllRequests() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
 	 * Test method for {@link database.DatabaseManager#getAllRequests(int, int)}
 	 * .
 	 */
@@ -221,14 +212,6 @@ public class DatabaseManagerTest {
 	 */
 	@Test
 	public final void testGetRequest() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link database.DatabaseManager#getRequests(int)}.
-	 */
-	@Test
-	public final void testGetRequestsInt() {
 		fail("Not yet implemented"); // TODO
 	}
 
@@ -271,15 +254,6 @@ public class DatabaseManagerTest {
 	 */
 	@Test
 	public final void testGetUserInt() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link database.DatabaseManager#printDatabaseInformation()}.
-	 */
-	@Test
-	public final void testPrintDatabaseInformation() {
 		fail("Not yet implemented"); // TODO
 	}
 

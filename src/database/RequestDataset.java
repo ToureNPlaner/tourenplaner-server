@@ -21,7 +21,7 @@ public class RequestDataset {
 	public byte[] jsonRequest;
     @JsonProperty("response")
 	public byte[] jsonResponse;
-	public int costs;
+	public int cost;
 	public boolean isPaid;
 	public Date requestDate;
 	public Date finishedDate;
@@ -39,7 +39,7 @@ public class RequestDataset {
 		this.algorithm = algorithm;
 		this.jsonRequest = jsonRequest;
 		this.jsonResponse = jsonResponse;
-		this.costs = costs;
+		this.cost = costs;
 		this.isPaid = isPaid;
 		this.requestDate = requestDate;
 		this.finishedDate = finishedDate;

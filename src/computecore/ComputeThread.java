@@ -33,31 +33,28 @@ public class ComputeThread extends Thread {
 	private final AlgorithmManager alm;
 	private final BlockingQueue<ComputeRequest> reqQueue;
 	private boolean isPrivate;
-	private ThreadMXBean tmxb;
+	private ThreadMXBean threadMXBean;
 	private DatabaseManager dbm = null;
 
 	/**
 	 * Constructs a new ComputeThread using the given AlgorithmManager and
 	 * RequestQueue
 	 * 
-	 * @param am
-	 * @param rq
-	 * @throws SQLException Thrown only in private mode, and only if 
-	 * 				database connection could not be established.
+	 * @param am AlgorithmManager
+	 * @param rq BlockingQueue&lt;ComputeRequest&gt;
 	 */
 	public ComputeThread(AlgorithmManager am, BlockingQueue<ComputeRequest> rq) {
 		alm = am;
 		reqQueue = rq;
 		ConfigManager cm = ConfigManager.getInstance();
 		isPrivate = cm.getEntryBool("private", false);
-		tmxb = ManagementFactory.getThreadMXBean();
+		threadMXBean = ManagementFactory.getThreadMXBean();
 		if (isPrivate) {
             try {
-                this.dbm = new DatabaseManager(cm.getEntryString("dburi",
-                        "jdbc:mysql://localhost:3306/"), cm.getEntryString(
-                        "dbname", "tourenplaner"), cm.getEntryString("dbuser",
-                        "tnpuser"), cm.getEntryString("dbpw",
-                        "toureNPlaner"));
+                this.dbm = new DatabaseManager(
+                        cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                        cm.getEntryString("dbuser","tnpuser"),
+                        cm.getEntryString("dbpw","toureNPlaner"));
             } catch(SQLException e){
                 log.severe("Couldn't establish database connection");
                 System.exit(1);
@@ -76,11 +73,12 @@ public class ComputeThread extends Thread {
 		ComputeRequest work;
 		Algorithm alg;
 
-		while (!Thread.interrupted()) {
+        checkThreadMXBeanSupport();
+
+        while (!Thread.interrupted()) {
 			long cpuTime = 0;
-			boolean tmxbSupport = true;
 			int requestID = -1;
-			ByteArrayOutputStream baOutputStream = null;
+			ByteArrayOutputStream baOutputStream;
 			
 			try {
 				work = reqQueue.take();
@@ -89,30 +87,17 @@ public class ComputeThread extends Thread {
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
 					try {
-						
-						if (isPrivate) {
-							requestID = work.getRequestID();
-							try {
-								cpuTime = tmxb.getCurrentThreadCpuTime();
-							} catch (UnsupportedOperationException e) {
-								cpuTime = System.nanoTime();
-								tmxbSupport = false;
-							}
-							
-							alg.compute(work);
-						
-							if (tmxbSupport) {
-								cpuTime = tmxb.getCurrentThreadCpuTime() - cpuTime;
-							} else {
-								cpuTime = System.nanoTime() - cpuTime;
-							}
-							// convert to milliseconds
-							cpuTime = cpuTime / 1000000;
-							
-						} else {
-							alg.compute(work);
-						}
-						log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
+
+                        // if server is not private, work.getRequestID() should return -1
+                        requestID = work.getRequestID();
+
+                        cpuTime = startTimeMeasurement();
+
+                        alg.compute(work);
+
+                        cpuTime = finishTimeMeasurement(cpuTime);
+
+                        log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
 								+ " successfully computed.");
 						
 						try {
@@ -126,24 +111,10 @@ public class ComputeThread extends Thread {
                             String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
                                     "The server could not send and not store the compute result", "",
                                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
-							if (isPrivate) {
-								try {
-									// TODO change failDescription to user friendly message?
-									dbm.updateRequestWithComputeResult(
-											requestID,
-                                            // TODO maybe a better method should be used to convert a string to a byte array
-                                            errorMessage.getBytes(), //jsonResponse
-											false, //isPending
-											0, //costs
-											cpuTime, 
-											true, //hasFailed
-											null); //failDescription
-								} catch (SQLException sqlE) {
-									log.log(Level.WARNING, "Could not log IOException into DB ", sqlE);
-								}
-								
-							}
-							throw e;
+
+                            writeIntoDatabase(requestID, errorMessage, "IOException");
+
+                            throw e;
 						}
 						if (isPrivate) {
 							
@@ -172,55 +143,89 @@ public class ComputeThread extends Thread {
                         String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
 								e.getMessage(), "",
 								HttpResponseStatus.PROCESSING); //TODO maybe wrong response status
-						if (isPrivate) {
-							try {
-								// TODO change failDescription to user friendly message?
-								dbm.updateRequestWithComputeResult(
-										requestID,
-                                        // TODO maybe a better method should be used to convert a string to a byte array
-                                        errorMessage.getBytes(), //jsonResponse
-										false, //isPending
-										0, //costs
-										cpuTime,
-										true, //hasFailed
-										null); //failDescription
-							} catch (SQLException sqlE) {
-								log.log(Level.WARNING, "Could not log ComputeException into DB", sqlE);
-							}
-							
-						}
+
+                        writeIntoDatabase(requestID, errorMessage, "ComputeException");
 					}
 				} else {
-					log.warning("Unsupported algorithm "
-							+ work.getAlgorithmURLSuffix() + " requested");
+					log.warning("Unsupported algorithm " + work.getAlgorithmURLSuffix() + " requested");
 					String errorMessage = work.getResponder().writeAndReturnErrorMessage("EUNKNOWNALG",
-							"An unknown algorithm was requested", null,
-							HttpResponseStatus.NOT_FOUND);
-                    if (isPrivate) {
-                        try {
-                            // TODO change failDescription to user friendly message?
-                            dbm.updateRequestWithComputeResult(
-                                    requestID,
-                                    // TODO maybe a better method should be used to convert a string to a byte array
-                                    errorMessage.getBytes(), //jsonResponse
-                                    false, //isPending
-                                    0, //costs
-                                    0, //cpuTime
-                                    true, //hasFailed
-                                    null); //failDescription
-                        } catch (SQLException sqlE) {
-                            log.log(Level.WARNING, "ComputeThread: Could not log EUNKNOWNALG into DB", sqlE);
-                        }
+							"An unknown algorithm was requested", null, HttpResponseStatus.NOT_FOUND);
 
-                    }
+                    writeIntoDatabase(requestID, errorMessage, "EUNKNOWNALG");
 				}
 
 			} catch (InterruptedException e) {
 				log.warning("ComputeThread interrupted");
+                if (this.dbm != null) {
+                    dbm.close();
+                }
 				return;
 			} catch (Exception e) {
 				log.log(Level.WARNING ,"An exception occurred", e);
 			}
 		}
+
+        if (this.dbm != null) {
+            dbm.close();
+        }
 	}
+
+    private void writeIntoDatabase(int requestID, String errorMessage, String errorName) {
+        if (isPrivate) {
+            try {
+                // TODO change failDescription to user friendly message?
+                dbm.updateRequestWithComputeResult(
+                        requestID,
+                        // TODO maybe a better method should be used to convert a string to a byte array
+                        errorMessage.getBytes(), //jsonResponse
+                        false, //isPending
+                        0, //costs
+                        0, //cpuTime
+                        true, //hasFailed
+                        null); //failDescription
+            } catch (SQLException sqlE) {
+                log.log(Level.WARNING, "Could not log " + errorName + " into DB ", sqlE);
+            }
+        }
+    }
+
+    private long startTimeMeasurement() {
+        long cpuTime = 0;
+        if (isPrivate) {
+            if (threadMXBean != null) {
+                cpuTime = threadMXBean.getCurrentThreadCpuTime();
+            } else {
+                cpuTime = System.nanoTime();
+            }
+        }
+        return cpuTime;
+    }
+
+    private long finishTimeMeasurement(long cpuStartTime) {
+        if (isPrivate) {
+            if (threadMXBean != null) {
+                cpuStartTime = threadMXBean.getCurrentThreadCpuTime() - cpuStartTime;
+            } else {
+                cpuStartTime = System.nanoTime() - cpuStartTime;
+            }
+            // convert to milliseconds
+            cpuStartTime = cpuStartTime / 1000000;
+        }
+        return cpuStartTime;
+    }
+
+    /**
+     * Checks if thread CPU time measurements works correctly. If not, this method will set this.threadMXBean = null
+     */
+    private void checkThreadMXBeanSupport() {
+        if (threadMXBean != null) {
+            try {
+                if (threadMXBean.getCurrentThreadCpuTime() < 0) {
+                    threadMXBean = null;
+                }
+            } catch (UnsupportedOperationException e) {
+                threadMXBean = null;
+            }
+        }
+    }
 }

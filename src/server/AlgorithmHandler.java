@@ -156,7 +156,7 @@ public class AlgorithmHandler extends RequestHandler {
         if (isPrivate) {
             userDataset = authorizer.auth(request);
             if (userDataset == null) {
-                responder.writeUnauthorizedClose();
+                // auth closes connection and sends error
                 return;
             }
         }
@@ -177,7 +177,7 @@ public class AlgorithmHandler extends RequestHandler {
 
                 if (isPrivate && !algFac.isHidden()) {
                     byte[] jsonRequest = request.getContent().array();
-                    requestDataset = dbm.addNewRequest(userDataset.id, algName, jsonRequest);
+                    requestDataset = dbm.addNewRequest(userDataset.userid, algName, jsonRequest);
                     req.setRequestID(requestDataset.requestID);
                 }
 
@@ -193,7 +193,12 @@ public class AlgorithmHandler extends RequestHandler {
                         // TODO maybe a better method should be used to convert a string to a byte array
                         requestDataset.jsonResponse = errorMessage.getBytes();
                         requestDataset.status = RequestStatusEnum.failed;
-                        dbm.updateRequest(requestDataset);
+
+                        // already sent error message, throw no exception
+                        try {
+                            dbm.updateRequest(requestDataset);
+                        } catch (SQLException e) {
+                        }
                     }
 
                 }
