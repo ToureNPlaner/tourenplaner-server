@@ -14,7 +14,6 @@ CREATE TABLE Users (
   Address           TEXT          NOT NULL,
   RegistrationDate  DATETIME      NOT NULL,
   VerifiedDate      DATETIME               DEFAULT NULL,
-  DeleteRequestDate DATETIME               DEFAULT NULL,
   PRIMARY KEY (ID)
 );
 
@@ -24,19 +23,17 @@ CREATE TABLE Requests (
   Algorithm       VARCHAR(255)  NOT NULL,
   JSONRequest     LONGBLOB,
   JSONResponse    LONGBLOB               DEFAULT NULL,
-  PendingFlag     BOOL          NOT NULL DEFAULT 1,
   Costs           INT           NOT NULL DEFAULT 0,
-  PaidFlag        BOOL          NOT NULL DEFAULT 0,
   RequestDate     DATETIME      NOT NULL,
   FinishedDate    DATETIME               DEFAULT NULL,
   CPUTime         BIGINT        NOT NULL DEFAULT 0,
-  FailedFlag      BOOL          NOT NULL DEFAULT 0,
-  FailDescription TEXT                   DEFAULT NULL,
+  Status          ENUM ('ok','pending','failed')
+                                NOT NULL DEFAULT 'pending',
   PRIMARY KEY (ID),
   FOREIGN KEY (UserID) REFERENCES Users (id)
 );
 
 INSERT INTO Users (Email, Passwordhash, Salt, AdminFlag, Status, 
   FirstName, LastName, Address, RegistrationDate, VerifiedDate) 
-  VALUES('root@tourenplaner.de', 'bef799d49eb5f183a7844da07467dbb2904a10ba', 'fe394f70a381403d4af33595823c7d733', '1', 'Verified', 
-    'ro', 'ot', 'localhost', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+  VALUES('root@tourenplaner.de', 'bef799d49eb5f183a7844da07467dbb2904a10ba', 'fe394f70a381403d4af33595823c7d733',
+    '1', 'verified', 'ro', 'ot', 'localhost', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

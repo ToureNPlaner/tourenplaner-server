@@ -1,17 +1,37 @@
 #! /bin/bash
 
-## if errors occur, next command within script will be executed
-## (because of option --force)
-## because of that the script will continue without error if database exists
-## to see all errors you should read the output carefully
+## If errors occur, next command within script will be executed (because of option --force)
+## So the script will continue without error if database already exists
 
-## you must maybe change host and port parameter if you use a remote DB
+## You must maybe change host and port parameter if you use a remote DB
+
+DATABASE_HOST=localhost
+DATABASE_PORT=3306
+
+echo
+echo "If you are using a remote database (not at localhost) or your database"
+echo uses another port, you will have to change the parameters
+echo DATABASE_HOST and DATABASE_PORT within the script file.
+echo
+
+echo You will be prompted to enter a password, the password is
+echo the root password of your mysql database
+echo
 
 mysql -u root -p --verbose --force \
-  --host=localhost --port=3306 < db_init_script
+  --host=$DATABASE_HOST --port=$DATABASE_PORT < db_init_script.sql
 
-## use following commands in your mysql client to create a new user with
-## rights on your previously created tables
-#CREATE USER tnpuser IDENTIFIED BY 'yourpassword'; 
-#grant usage on *.* to tnpuser@localhost identified by 'yourpassword'; 
-#grant all privileges on tourenplaner.* to tnpuser@localhost;
+echo
+echo Executing database script done
+echo If you want to see if errors occurred, read the output above carefully.
+echo
+
+echo If you want to create a new database user, you can use the following code
+echo "(But you should change the password 'toureNPlaner')"
+echo "(You will also need your database root password again)"
+echo
+
+echo "mysql -u root -p --host=$DATABASE_HOST --port=$DATABASE_PORT"
+echo "GRANT ALL PRIVILEGES ON tourenplaner.* TO 'tnpuser'@'localhost' IDENTIFIED BY 'toureNPlaner';"
+echo "exit;"
+echo
