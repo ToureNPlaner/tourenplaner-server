@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE tests SYSTEM "project.dtd">
+<tests product="TestDataManager" team="05" version="1.0">
+<sequence created="06.02.2012" creator="PeterVollmer" name="Projekt" number="0">
+<description>Dies ist der Wurzelknoten des Projekts. Er enthält alle anderen Testsequenzen und Testfälle</description>
+<pre/>
+<sequence created="01.02.2012" creator="PeterVollmer" name="Unit Test" number="1">
+<description/>
+<pre/>
+</sequence>
+<sequence created="01.02.2012" creator="PeterVollmer" name="Integration Test" number="2">
+<description/>
+<pre/>
+</sequence>
+<sequence created="01.02.2012" creator="PeterVollmer" name="System Test" number="3">
+<description/>
+<pre/>
+<testcase created="01.02.2012" creator="PeterVollmer" effort="00:00" number="4" priority="C" title="Test Case 4">
+<description/>
+<pre/>
+<actions/>
+<post/>
+<tags/>
+</testcase>
+<sequence created="01.02.2012" creator="PeterVollmer" name="Alle Tests als Admin mit Rechten" number="5">
+<description>Hier werden </description>
+<pre>Admin ist in der Datenbank und hat die entsprechenden Rechte</pre>
+<testcase created="01.02.2012" creator="PeterVollmer" effort="00:00" number="6" priority="C" title="Alles ok">
+<description/>
+<pre>Admin in Datenbank
+User nicht in der DB
+</pre>
+<actions>Curlscript "registeruser.sh" mit registernormal.json</actions>
+<post>User ist in der Datenbank</post>
+<tags/>
+</testcase>
+<testcase created="01.02.2012" creator="PeterVollmer" effort="00:00" number="7" priority="C" title="User schon in der Datenbank">
+<description/>
+<pre>Admin in Datenbank
+User in der DB</pre>
+<actions>Curlscript "registeruser.sh" mit registernormal.json</actions>
+<post>User nicht in der Datenbank</post>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="06.02.2012" creator="PeterVollmer" name="Alle Tests als Admin ohne Rechte" number="8">
+<description/>
+<pre/>
+</sequence>
+<sequence created="06.02.2012" creator="PeterVollmer" name="Alle Tests als normaler User mit Rechten" number="9">
+<description/>
+<pre/>
+</sequence>
+<sequence created="06.02.2012" creator="PeterVollmer" name="Alle Tests als normaler User ohne Rechte" number="10">
+<description/>
+<pre/>
+</sequence>
+</sequence>
+</sequence>
+<tsa name="Projekt" number="0" revId="0">
+<relatedsequence>0</relatedsequence>
+<tsa name="Unit Test" number="1" revId="1">
+<relatedsequence>1</relatedsequence>
+</tsa>
+<tsa name="Integration Test" number="2" revId="1">
+<relatedsequence>2</relatedsequence>
+</tsa>
+<tsa name="System Test" number="3" revId="1">
+<relatedsequence>3</relatedsequence>
+<tsa name="Alle Tests als Admin ohne Rechte" number="8" revId="2">
+<relatedsequence>8</relatedsequence>
+</tsa>
+<tsa name="Alle Tests als Admin mit Rechten" number="5" revId="3">
+<relatedsequence>5</relatedsequence>
+</tsa>
+<tsa name="Alle Tests als normaler User mit Rechten" number="9" revId="1">
+<relatedsequence>9</relatedsequence>
+</tsa>
+<tsa name="Alle Tests als normaler User ohne Rechte" number="10" revId="2">
+<relatedsequence>10</relatedsequence>
+</tsa>
+</tsa>
+</tsa>
+<author active="Y" firstname="" lastname="Peter Vollmer" uid="PeterVollmer">
+<extension name="standarduser" value="Y"/>
+</author>
+<extension name="maxid" value="10"/>
+</tests>
