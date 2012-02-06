@@ -153,7 +153,7 @@ public class TourenPlaner {
         reg.registerAlgorithm(new ShortestPathCHFactory(graph));
         reg.registerAlgorithm(new TravelingSalesmenFactory(graph));
         reg.registerAlgorithm(new NNSearchFactory(graph));
-        reg.registerAlgorithm(new ConstraintSPFactory(graph));
+        reg.registerAlgorithm(new ConstrainedSPFactory(graph));
 
         // Create our ComputeCore that manages all ComputeThreads
         ComputeCore comCore = new ComputeCore(reg, cm.getEntryInt("threads", 16), cm.getEntryInt("queuelength", 32));

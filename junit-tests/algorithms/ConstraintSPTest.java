@@ -1,7 +1,5 @@
 package algorithms;
 
-import computecore.ComputeCore;
-import computecore.ComputeRequest;
 import computecore.Points;
 import computecore.RequestPoints;
 import graphrep.GraphRep;
@@ -24,8 +22,8 @@ public class ConstraintSPTest {
         byte[] testFileBytes = testFile.getBytes();
         ByteArrayInputStream testFileByteArrayStream = new ByteArrayInputStream(testFileBytes);
         GraphRep graphRep = graphRepTextReader.createGraphRep(testFileByteArrayStream);
-        GraphAlgorithmFactory fac = new ConstraintSPFactory(graphRep);
-        ConstraintSP constraintSP = (ConstraintSP)fac.createAlgorithm();
+        GraphAlgorithmFactory fac = new ConstrainedSPFactory(graphRep);
+        ConstrainedSP constraintSP = (ConstrainedSP)fac.createAlgorithm();
 
         RequestPoints points = new RequestPoints();
         points.addPoint(10000000,10000000);

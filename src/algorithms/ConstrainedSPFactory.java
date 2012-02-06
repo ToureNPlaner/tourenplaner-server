@@ -12,7 +12,7 @@ import java.util.*;
  *
  * Used to create instances of ConstraintShortestPath algorithm
  */
-public class ConstraintSPFactory extends SharingAlgorithmFactory {
+public class ConstrainedSPFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;
     private final List<Map<String, Object>> constraints;
     private final List<Map<String, Object>> pointConstraints;
@@ -21,7 +21,7 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
     /**
      * @param graph
      */
-    public ConstraintSPFactory(GraphRep graph) {
+    public ConstrainedSPFactory(GraphRep graph) {
         super(graph);
         constraints = new ArrayList<Map<String, Object>>();
         constraints.add(new HashMap<String, Object>(4));
@@ -47,7 +47,7 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
 
     @Override
     public Algorithm createAlgorithm(DijkstraStructs rs) {
-        return new ConstraintSP(graph, rs);
+        return new ConstrainedSP(graph, rs);
     }
 
     /*
@@ -57,7 +57,7 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
       */
     @Override
     public Algorithm createAlgorithm() {
-        return new ConstraintSP(graph, new DijkstraStructs(
+        return new ConstrainedSP(graph, new DijkstraStructs(
                 graph.getNodeCount(), graph.getEdgeCount()));
     }
 
@@ -68,7 +68,7 @@ public class ConstraintSPFactory extends SharingAlgorithmFactory {
 
     @Override
     public String getAlgName() {
-        return "Constraint Shortest Path";
+        return "Constrained Shortest Path";
     }
 
     @Override

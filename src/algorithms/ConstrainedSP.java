@@ -12,9 +12,9 @@ import java.util.logging.Logger;
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
- * Provides an implementation of resource constraint shortest path algorithm.
+ * Provides an implementation of resource constrained shortest path algorithm.
  */
-public class ConstraintSP extends GraphAlgorithm {
+public class ConstrainedSP extends GraphAlgorithm {
     private static Logger log = Logger.getLogger("algorithms");
     private Heap heap;
 
@@ -22,7 +22,7 @@ public class ConstraintSP extends GraphAlgorithm {
     private final DijkstraStructs ds;
 
     
-    public ConstraintSP(GraphRep graph, DijkstraStructs dijkstraStructs) {
+    public ConstrainedSP(GraphRep graph, DijkstraStructs dijkstraStructs) {
         super(graph);
         ds = dijkstraStructs;
     }
@@ -45,8 +45,8 @@ public class ConstraintSP extends GraphAlgorithm {
         RequestPoints points = req.getPoints();
 
         // Check if we have enough points to do something useful
-        if (points.size() < 2 && points.size() > 2) {
-            throw new ComputeException("Not enough points or to much points, need 2");
+        if (points.size() != 2) {
+            throw new ComputeException("Not enough points or too much points, need 2");
         }
 
         Points resultPoints = req.getResultWay();
@@ -55,12 +55,12 @@ public class ConstraintSP extends GraphAlgorithm {
         int maxAltitudeDifference;
 
         if (req.getConstraints() == null || req.getConstraints().get("maxAltitudeDifference") == null){
-            throw new ComputeException("Missing maxAltitudeDifference constrained");
+            throw new ComputeException("Missing maxAltitudeDifference constraint");
         }
         try {
             maxAltitudeDifference = (Integer) req.getConstraints().get("maxAltitudeDifference");
         } catch (ClassCastException e){
-            throw new ComputeException("Couldn't read maxAltitudeDifference, wrong type");
+            throw new ComputeException("Couldn't read maxAltitudeDifference, wrong type: " + e.getMessage());
         }
 
         int[] result = cSP(points, resultPoints, maxAltitudeDifference);
@@ -267,7 +267,7 @@ public class ConstraintSP extends GraphAlgorithm {
         }
         if (nodeId != trgtId) {
             log.fine(
-                    "There is no path from src: " + srcId + " to trgt: " + trgtId + "Dijkstra does not found the " +
+                    "There is no path from src: " + srcId + " to trgt: " + trgtId + "Dijkstra did not find the " +
                             "target"
             );
             ds.returnDistArray(false);
