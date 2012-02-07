@@ -7,6 +7,7 @@ import computecore.ComputeRequest;
 import computecore.RequestPoints;
 import database.DatabaseManager;
 import database.UserDataset;
+import database.UserStatusEnum;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
@@ -157,6 +158,11 @@ public class AlgorithmHandler extends RequestHandler {
                 // auth closes connection and sends error
                 return;
             }
+            if (userDataset.status != UserStatusEnum.verified && userDataset.admin == false) {
+                responder.writeErrorMessage("ENOTVERIFIED", "User account is not verified",
+                        null, HttpResponseStatus.FORBIDDEN);
+                return;
+            }
         }
 
         try {
@@ -164,7 +170,8 @@ public class AlgorithmHandler extends RequestHandler {
             AlgorithmFactory algFac = algReg.getAlgByURLSuffix(algName);
             if (algFac == null) {
                 log.warning("Unsupported algorithm " + algName + " requested");
-                responder.writeErrorMessage("EUNKNOWNALG", "An unknown algorithm was requested", null, HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage("EUNKNOWNALG", "An unknown algorithm was requested", null,
+                        HttpResponseStatus.NOT_FOUND);
                 return;
             }
             // Only now read the request
