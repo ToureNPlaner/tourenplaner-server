@@ -61,25 +61,25 @@ public class DatabaseManager {
 	private final static String strGetAllRequests = "SELECT id, UserID, "
             + "Algorithm, JSONRequest, JSONResponse, Cost, "
             + "RequestDate, FinishedDate, CPUTime, Status "
-            + "FROM Requests ORDER BY RequestDate DESC";
+            + "FROM Requests";
 
     private final static String strGetAllRequestsWithLimitOffset = strGetAllRequests
-            + " LIMIT ? OFFSET ?";
+            + " ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
     private final static String strGetRequestsWithUserIdLimitOffset = strGetAllRequests
-            + " WHERE UserID = ? LIMIT ? OFFSET ?";
+            + " WHERE UserID = ? ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
 
     private final static String strGetAllRequestsNoJson = "SELECT id, UserID, "
             + "Algorithm, PendingFlag, Cost, PaidFlag, "
             + "RequestDate, FinishedDate, CPUTime, Status "
-            + "FROM Requests ORDER BY RequestDate DESC";
+            + "FROM Requests";
 
     private final static String strGetAllRequestsNoJsonWithLimitOffset = strGetAllRequestsNoJson
-            + " LIMIT ? OFFSET ?";
+            + " ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
     private final static String strGetRequestsNoJsonWithUserIdLimitOffset = strGetAllRequestsNoJson
-            + " WHERE UserID = ? LIMIT ? OFFSET ?";
+            + " WHERE UserID = ? ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
 
     // single result
