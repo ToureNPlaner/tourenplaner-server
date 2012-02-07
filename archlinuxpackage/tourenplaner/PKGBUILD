@@ -28,7 +28,7 @@ build() {
   msg "Please make sure you have the most recent tourenplaner-server.jar and sptogpx.jar in your directory"
   cp ${startdir}/tourenplaner-server.jar .
   cp ${startdir}/sptogpx.jar .
-  cp ${startdir}/db_init_script .
+  cp ${startdir}/db_init_script.sql .
   cp ${startdir}/db_init.sh .
 
   install -d ${pkgdir}/usr/share/java/tourenplaner/
@@ -36,7 +36,7 @@ build() {
   install -d ${pkgdir}/usr/bin
 
   install -d ${pkgdir}/usr/share/tourenplaner/
-  install -m644 ${srcdir}/db_init_script ${pkgdir}/usr/share/tourenplaner/
+  install -m644 ${srcdir}/db_init_script.sql ${pkgdir}/usr/share/tourenplaner/
   install -m644 ${srcdir}/db_init.sh ${pkgdir}/usr/share/tourenplaner/
   chmod +x ${pkgdir}/usr/share/tourenplaner/db_init.sh 
 
