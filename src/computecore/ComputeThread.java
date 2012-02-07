@@ -35,6 +35,7 @@ public class ComputeThread extends Thread {
 	private boolean isPrivate;
 	private ThreadMXBean threadMXBean;
 	private DatabaseManager dbm = null;
+    private double costPerMillisecond = 0;
 
 	/**
 	 * Constructs a new ComputeThread using the given AlgorithmManager and
@@ -51,6 +52,17 @@ public class ComputeThread extends Thread {
 		threadMXBean = ManagementFactory.getThreadMXBean();
 		if (isPrivate) {
             try {
+                int costPerTimeUnit = cm.getEntryInt("costpertimeunit", 10);
+                if (costPerTimeUnit < 0) {
+                    costPerTimeUnit = 0;
+                }
+                // size of time unit is in milliseconds
+                int timeUnitSize = cm.getEntryInt("timeunitsize", 1000);
+                if (timeUnitSize <= 0) {
+                    timeUnitSize = 1;
+                }
+                costPerMillisecond = costPerTimeUnit / timeUnitSize;
+
                 this.dbm = new DatabaseManager(
                         cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
                         cm.getEntryString("dbuser","tnpuser"),
@@ -82,7 +94,14 @@ public class ComputeThread extends Thread {
 			
 			try {
 				work = reqQueue.take();
-                isPrivate = work.isPrivate();
+
+                // workIsPrivate should only be true if ComputeThread is private,
+                // else there is no database connection available
+                boolean workIsPrivate = false;
+                if (this.isPrivate) {
+                    workIsPrivate = work.isPrivate();
+                }
+
                 // check needed if availability of algorithms changes
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
@@ -91,20 +110,18 @@ public class ComputeThread extends Thread {
                         // if server is not private, work.getRequestID() should return -1
                         requestID = work.getRequestID();
 
-                        cpuTime = startTimeMeasurement();
+                        cpuTime = startTimeMeasurement(workIsPrivate);
 
                         alg.compute(work);
 
-                        cpuTime = finishTimeMeasurement(cpuTime);
+                        cpuTime = finishTimeMeasurement(cpuTime, workIsPrivate);
 
-                        log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
-								+ " successfully computed.");
+                        log.fine("Algorithm "+ work.getAlgorithmURLSuffix() + " successfully computed.");
 						
 						try {
 							baOutputStream = work.getResponder().writeComputeResult(work,
 									HttpResponseStatus.OK);
-							log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
-									+ " compute result successfully written into response.");
+
 						} catch (IOException e) {
                             log.log(Level.WARNING, "There was an IOException", e);
                             // TODO define error and write to protocol specification
@@ -112,22 +129,17 @@ public class ComputeThread extends Thread {
                                     "The server could not send and not store the compute result", "",
                                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
 
-                            writeIntoDatabase(requestID, errorMessage, "IOException");
+                            writeIntoDatabase(requestID, errorMessage, "IOException", workIsPrivate);
 
                             throw e;
 						}
-						if (isPrivate) {
+						if (workIsPrivate) {
 
 							try {
-								log.fine("Algorithm "+ work.getAlgorithmURLSuffix()
-										+ ": trying to write compute result into database, length of ByteArrayStream: " 
-										+ baOutputStream.toByteArray().length);
-								// baOutputStream is not null because else
-								// writeComputeResult would throw an
-								// IOException
-                                // TODO get algorithm specific costs
-                                int cost = 0;
-                                
+                                int cost = (int) Math.ceil(cpuTime * costPerMillisecond);
+
+                                // baOutputStream is not null because else writeComputeResult
+                                // would throw an IOException
 								dbm.updateRequestWithComputeResult(requestID,
                                         baOutputStream.toByteArray(), cost, cpuTime);
 							} catch (SQLException sqlE) {
@@ -140,14 +152,14 @@ public class ComputeThread extends Thread {
 								e.getMessage(), "",
 								HttpResponseStatus.PROCESSING); //TODO maybe wrong response status
 
-                        writeIntoDatabase(requestID, errorMessage, "ComputeException");
+                        writeIntoDatabase(requestID, errorMessage, "ComputeException", workIsPrivate);
 					}
 				} else {
 					log.warning("Unsupported algorithm " + work.getAlgorithmURLSuffix() + " requested");
 					String errorMessage = work.getResponder().writeAndReturnErrorMessage("EUNKNOWNALG",
 							"An unknown algorithm was requested", null, HttpResponseStatus.NOT_FOUND);
 
-                    writeIntoDatabase(requestID, errorMessage, "EUNKNOWNALG");
+                    writeIntoDatabase(requestID, errorMessage, "EUNKNOWNALG", workIsPrivate);
 				}
 
 			} catch (InterruptedException e) {
@@ -166,8 +178,8 @@ public class ComputeThread extends Thread {
         }
 	}
 
-    private void writeIntoDatabase(int requestID, String errorMessage, String errorName) {
-        if (isPrivate) {
+    private void writeIntoDatabase(int requestID, String errorMessage, String errorName, boolean workIsPrivate) {
+        if (workIsPrivate) {
             try {
                 // TODO change failDescription to user friendly message?
                 // TODO maybe a better method should be used to convert a string to a byte array
@@ -178,9 +190,9 @@ public class ComputeThread extends Thread {
         }
     }
 
-    private long startTimeMeasurement() {
+    private long startTimeMeasurement(boolean workIsPrivate) {
         long cpuTime = 0;
-        if (isPrivate) {
+        if (workIsPrivate) {
             if (threadMXBean != null) {
                 cpuTime = threadMXBean.getCurrentThreadCpuTime();
             } else {
@@ -190,15 +202,18 @@ public class ComputeThread extends Thread {
         return cpuTime;
     }
 
-    private long finishTimeMeasurement(long cpuStartTime) {
-        if (isPrivate) {
+    private long finishTimeMeasurement(long cpuStartTime, boolean workIsPrivate) {
+        if (workIsPrivate) {
             if (threadMXBean != null) {
                 cpuStartTime = threadMXBean.getCurrentThreadCpuTime() - cpuStartTime;
             } else {
                 cpuStartTime = System.nanoTime() - cpuStartTime;
             }
             // convert to milliseconds
-            cpuStartTime = cpuStartTime / 1000000;
+            cpuStartTime = Math.round(cpuStartTime / 1000000);
+            if (cpuStartTime == 0) {
+                cpuStartTime = 1;
+            }
         }
         return cpuStartTime;
     }

@@ -298,6 +298,9 @@ public class Responder {
             future.addListener(ChannelFutureListener.CLOSE);
         }
 
+        log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
+                + " compute result successfully written into response.");
+
         return resultStream;
 
     }

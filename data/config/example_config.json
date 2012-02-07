@@ -12,6 +12,9 @@
     "serverinfosslport" : 443,
 	"sslcert" : "/home/user/keystore.jks",
 	"sslalias" : "tourenplaner",
-	"sslpw" : "toureNPlaner"
-
+	"sslpw" : "toureNPlaner",
+	// cost per time unit in cents
+	"costpertimeunit" : 10,
+	// size of time unit in milliseconds
+	"timeunitsize" : 1000
 }
