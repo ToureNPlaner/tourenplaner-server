@@ -23,7 +23,7 @@ public class ShortestPathCHFactory extends SharingAlgorithmFactory {
         pointConstraints = new ArrayList<Map<String, Object>>(0);
         details = new HashMap<String, Object>(3);
         details.put("hidden", this.isHidden());
-        details.put("minpoints", 1);
+        details.put("minpoints", 2);
         details.put("sourceistarget", false);
 
     }
