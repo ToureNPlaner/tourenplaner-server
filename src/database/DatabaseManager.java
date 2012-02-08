@@ -61,25 +61,25 @@ public class DatabaseManager {
 	private final static String strGetAllRequests = "SELECT id, UserID, "
             + "Algorithm, JSONRequest, JSONResponse, Cost, "
             + "RequestDate, FinishedDate, CPUTime, Status "
-            + "FROM Requests ORDER BY RequestDate DESC";
+            + "FROM Requests";
 
     private final static String strGetAllRequestsWithLimitOffset = strGetAllRequests
-            + " LIMIT ? OFFSET ?";
+            + " ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
     private final static String strGetRequestsWithUserIdLimitOffset = strGetAllRequests
-            + " WHERE UserID = ? LIMIT ? OFFSET ?";
+            + " WHERE UserID = ? ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
 
     private final static String strGetAllRequestsNoJson = "SELECT id, UserID, "
-            + "Algorithm, PendingFlag, Cost, PaidFlag, "
+            + "Algorithm, Cost, "
             + "RequestDate, FinishedDate, CPUTime, Status "
-            + "FROM Requests ORDER BY RequestDate DESC";
+            + "FROM Requests";
 
     private final static String strGetAllRequestsNoJsonWithLimitOffset = strGetAllRequestsNoJson
-            + " LIMIT ? OFFSET ?";
+            + " ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
     private final static String strGetRequestsNoJsonWithUserIdLimitOffset = strGetAllRequestsNoJson
-            + " WHERE UserID = ? LIMIT ? OFFSET ?";
+            + " WHERE UserID = ? ORDER BY RequestDate DESC LIMIT ? OFFSET ?";
 
 
     // single result
@@ -1052,7 +1052,7 @@ public class DatabaseManager {
      * Gets a list with all requests within the Requests table with regard to
      * the limit and offset constraints. If no requests are found with the given
      * constraints or the table is empty, an empty list will be returned.
-     * </br>SQL command: {@value #strGetAllRequestsWithLimitOffset}
+     * </br>SQL command: {@value #strGetAllRequestsNoJsonWithLimitOffset}
      *
      * @param limit
      *            How many rows should maximal selected.
@@ -1245,7 +1245,7 @@ public class DatabaseManager {
      * given user id with regard to the limit and offset constraints. If no
      * requests are found with the given user id and given constraints or the
      * table is empty, an empty list will be returned. <br />SQL command:
-     * {@value #strGetRequestsWithUserIdLimitOffset}
+     * {@value #strGetRequestsNoJsonWithUserIdLimitOffset}
      *
      * @param userId
      *            User id
