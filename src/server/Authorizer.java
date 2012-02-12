@@ -2,6 +2,7 @@ package server;
 
 import database.DatabaseManager;
 import database.UserDataset;
+import database.UserStatusEnum;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.base64.Base64;
@@ -86,7 +87,9 @@ public class Authorizer extends RequestHandler {
      * UserDataset object of the authenticated user or null if authentication
      * failed. Errors will be sent to the client as error messages see protocol
      * specification for details. The connection will get closed after the error
-     * has been sent.
+     * has been sent. <br />
+     * This method will check if the user is verified. If the user is not verified,
+     * an error will be sent and the connection will get closed.
      *
      * @param myReq
      * @return the UserDataset object of the user or null if auth failed
@@ -101,13 +104,20 @@ public class Authorizer extends RequestHandler {
             return null;
         }
 
+        if (user.status != UserStatusEnum.verified) {
+            responder.writeErrorMessage("ENOTVERIFIED", "User account is not verified",
+                    null, HttpResponseStatus.FORBIDDEN);
+            return null;
+        }
+
         return user;
     }
 
     /**
      * Authenticates a Request using HTTP Basic Authentication and returns the
      * UserDataset object of the authenticated user or null if authentication
-     * failed. No error responses will be sent to the client.
+     * failed. No error responses will be sent to the client. This method will
+     * not check if the user is verified.
      *
      * @param myReq
      * @return the UserDataset object of the user or null if auth failed
