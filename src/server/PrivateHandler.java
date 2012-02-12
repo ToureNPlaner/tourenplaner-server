@@ -69,7 +69,7 @@ public class PrivateHandler extends RequestHandler {
                 });
             } catch (JsonParseException e) {
                 responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", e.getMessage(),
-                        HttpResponseStatus.UNAUTHORIZED);
+                        HttpResponseStatus.BAD_REQUEST);
                 objmap = null;
             }
 
@@ -132,7 +132,7 @@ public class PrivateHandler extends RequestHandler {
                 || !(objmap.get("address") instanceof String) ) {
             responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
                     "JSON user object was not correct (needs email, password, firstname, lastname, address)",
-                    HttpResponseStatus.UNAUTHORIZED);
+                    HttpResponseStatus.BAD_REQUEST);
             return;
         }
 
@@ -145,7 +145,7 @@ public class PrivateHandler extends RequestHandler {
         if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
             responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
                     "JSON user object was not correct (needs email, password, firstname, lastname, address)",
-                    HttpResponseStatus.UNAUTHORIZED);
+                    HttpResponseStatus.BAD_REQUEST);
             return;
         }
 
@@ -170,7 +170,7 @@ public class PrivateHandler extends RequestHandler {
                 if ( !(objmap.get("admin") instanceof Boolean) ) {
                     responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
                             "JSON user object was not correct (\"admin\" should be boolean)",
-                            HttpResponseStatus.UNAUTHORIZED);
+                            HttpResponseStatus.BAD_REQUEST);
                     return;
                 }
                 adminFlag = (Boolean) objmap.get("admin");
@@ -312,7 +312,7 @@ public class PrivateHandler extends RequestHandler {
                 } catch (IllegalArgumentException e) {
                     responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
                             "JSON user object was not correct (\"status\" was not a valid value)",
-                            HttpResponseStatus.UNAUTHORIZED);
+                            HttpResponseStatus.BAD_REQUEST);
                     return;
                 }
 
@@ -630,7 +630,7 @@ public class PrivateHandler extends RequestHandler {
 
         if (!parameters.containsKey(name)) {
             responder.writeErrorMessage("E" + name.toUpperCase(), "The given " + name + " is invalid",
-                    "You must send a " + name + " parameter", HttpResponseStatus.NOT_ACCEPTABLE);
+                    "You must send a " + name + " parameter", HttpResponseStatus.BAD_REQUEST);
             return -1;
         }
 
@@ -644,7 +644,7 @@ public class PrivateHandler extends RequestHandler {
 
         if (param < 0) {
             responder.writeErrorMessage("E" + name.toUpperCase(), "The given " + name + " is invalid",
-                    "You must send a " + name + " parameter", HttpResponseStatus.NOT_ACCEPTABLE);
+                    "You must send a " + name + " parameter", HttpResponseStatus.BAD_REQUEST);
 
             return -1;
         }

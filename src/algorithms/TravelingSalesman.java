@@ -87,9 +87,6 @@ public class TravelingSalesman extends GraphAlgorithm {
             // Now build real paths
             chdijks.shortestPath(points, req.getResultWay(), true);
 
-
-            debugMat.put("distMat", distmat);
-            req.setMisc(debugMat);
         } catch (IllegalAccessException e) {
             throw new ComputeException("Illegal Access: " + e.getMessage());
         }

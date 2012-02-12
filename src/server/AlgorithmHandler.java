@@ -93,41 +93,59 @@ public class AlgorithmHandler extends RequestHandler {
             JsonToken token;
             Map<String, Object> pconsts;
             int lat = 0, lon = 0;
-            while (jp.nextToken() != JsonToken.END_OBJECT) {
-                fieldname = jp.getCurrentName();
-                token = jp.nextToken(); // move to value, or
-                // START_OBJECT/START_ARRAY
-                if ("points".equals(fieldname)) {
-                    // Should be on START_ARRAY
-                    if (token != JsonToken.START_ARRAY) {
-                        throw new JsonParseException("points is no array", jp.getCurrentLocation());
-                    }
-                    // Read array elements
-                    while (jp.nextToken() != JsonToken.END_ARRAY) {
-                        pconsts = new HashMap<String, Object>();
-                        while (jp.nextToken() != JsonToken.END_OBJECT) {
-                            fieldname = jp.getCurrentName();
-                            token = jp.nextToken();
-
-                            if ("lt".equals(fieldname)) {
-                                lat = jp.getIntValue();
-                            } else if ("ln".equals(fieldname)) {
-                                lon = jp.getIntValue();
-                            } else {
-                                pconsts.put(fieldname, jp.readValueAs(Object.class));
-                            }
+            boolean finished = false;
+            while (!finished) {
+                //move to next field or END_OBJECT/EOF
+                token = jp.nextToken();
+                if(token == JsonToken.FIELD_NAME){
+                    fieldname = jp.getCurrentName();
+                    token = jp.nextToken(); // move to value, or
+                    // START_OBJECT/START_ARRAY
+                    if ("points".equals(fieldname)) {
+                        // Should be on START_ARRAY
+                        if (token != JsonToken.START_ARRAY) {
+                            throw new JsonParseException("points is no array", jp.getCurrentLocation());
                         }
-                        points.addPoint(lat, lon, pconsts);
-                    }
+                        // Read array elements
+                        while (jp.nextToken() != JsonToken.END_ARRAY) {
+                            pconsts = new HashMap<String, Object>();
+                            while (jp.nextToken() != JsonToken.END_OBJECT) {
+                                fieldname = jp.getCurrentName();
+                                token = jp.nextToken();
 
-                } else if ("constraints".equals(fieldname)) {
-                    constraints = jp.readValueAs(JSONOBJECT);
-                } else {
-                    // ignore for now TODO: user version string etc.
-                    if ((token == JsonToken.START_ARRAY) || (token == JsonToken.START_OBJECT)) {
-                        jp.skipChildren();
+                                if ("lt".equals(fieldname)) {
+                                    lat = jp.getIntValue();
+                                } else if ("ln".equals(fieldname)) {
+                                    lon = jp.getIntValue();
+                                } else {
+                                    pconsts.put(fieldname, jp.readValueAs(Object.class));
+                                }
+                            }
+                            points.addPoint(lat, lon, pconsts);
+                        }
+
+                    } else if ("constraints".equals(fieldname)) {
+                        // Should be on START_OBJECT
+                        if (token != JsonToken.START_OBJECT) {
+                            throw new JsonParseException("constraints is not an object", jp.getCurrentLocation());
+                        }
+                        constraints = jp.readValueAs(JSONOBJECT);
+                    } else {
+                        // ignore for now TODO: user version string etc.
+                        if ((token == JsonToken.START_ARRAY) || (token == JsonToken.START_OBJECT)) {
+                            jp.skipChildren();
+                        }
                     }
+                } else if (token == JsonToken.END_OBJECT){
+                    // Normal end of request
+                    finished = true;
+                } else if (token == null){
+                    //EOF
+                    throw new JsonParseException("Unexpected EOF in Request", jp.getCurrentLocation());
+                } else {
+                    throw new JsonParseException("Unexpected token "+token, jp.getCurrentLocation());
                 }
+
             }
 
         } else {
