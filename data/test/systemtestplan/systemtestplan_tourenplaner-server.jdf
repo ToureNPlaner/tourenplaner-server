@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE tests SYSTEM "project.dtd">
 <tests product="TestDataManager" team="05" version="1.0">
-<sequence created="08.02.2012" creator="PeterVollmer" name="Projekt" number="0">
+<sequence created="12.02.2012" creator="PeterVollmer" name="Projekt" number="0">
 <description>Dies ist der Wurzelknoten des Projekts. Er enthält alle anderen Testsequenzen und Testfälle</description>
 <pre/>
 <sequence created="01.02.2012" creator="PeterVollmer" name="Unit Test" number="1">
@@ -21,24 +21,31 @@
 <sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="80">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="38" priority="C" title="Authentifizierung ohne E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="38" priority="C" title="Authentifizierung ohne alles">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_e-mail.sh ausführen</actions>
+<actions>Curlscript authuser_without_all.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="81" priority="C" title="Authentifizierung ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="426" priority="C" title="Authentifizierung E-Mail">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_pw.sh ausführen</actions>
+<actions>Curlscript authuser_e-mail.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="82" priority="C" title="Authentifizierung mit E-Mail und Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="81" priority="C" title="Authentifizierung Passwort">
 <description/>
 <pre/>
-<actions>Curlscript authuser.sh ausführen</actions>
+<actions>Curlscript authuser_pw.sh ausführen</actions>
+<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="82" priority="C" title="Authentifizierung E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript authuser_e-mail_pw.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
@@ -49,56 +56,56 @@
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="86" priority="C" title="Benutzerdaten abfragen ohne alles">
 <description>Benutzerdaten abfragen ohne E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="87" priority="C" title="Benutzerdaten abfragen E-Mail">
 <description>Benutzerdaten abfragen mit E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="39" priority="C" title="Benutzerdaten abfragen Passwort">
 <description>Benutzerdaten abfragen ohne E-Mail mit Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="85" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
 <description>Benutzerdaten abfragen mit Passwort und E-Mail ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="90" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="84" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="88" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="89" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -109,56 +116,56 @@
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="93" priority="C" title="Benutzerdaten ändern ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="94" priority="C" title="Benutzerdaten ändern E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="95" priority="C" title="Benutzerdaten ändern Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="96" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="97" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="98" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="99" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="101" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -169,56 +176,56 @@
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="103" priority="C" title="Abfrage abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="104" priority="C" title="Abfrage abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="105" priority="C" title="Abfrage abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="106" priority="C" title="Abfrage abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="107" priority="C" title="Abfrage abrufen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="108" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="109" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="110" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -226,59 +233,227 @@
 <sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="111">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="112" priority="C" title="Abfragenverlauf abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="431" priority="C" title="Abfragenverlauf abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="113" priority="C" title="Abfragenverlauf abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="432" priority="C" title="Abfragenverlauf abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="114" priority="C" title="Abfragenverlauf abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="433" priority="C" title="Abfragenverlauf abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="115" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="434" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="116" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="435" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="117" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="436" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="118" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="437" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="119" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="438" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="439" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="440" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="441" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="442" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="443" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="444" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail.sh_limit_offset ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="445" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="446" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="447" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="448" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="449" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="450" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="451" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="452" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="453" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="454" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="455" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="456" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="457" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="458" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="459" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="460" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="461" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="462" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -289,112 +464,112 @@
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="121" priority="C" title="Benutzerliste abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="122" priority="C" title="Benutzerliste abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="123" priority="C" title="Benutzerliste abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="124" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="125" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="126" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="127" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_pw_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="128" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail_pw_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="129" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="130" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="131" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_pw_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="132" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail_pw_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="133" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_limit_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="134" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail_limit_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="135" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_pw_limit_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="136" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail_pw_limit_offset.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -405,56 +580,56 @@
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="138" priority="C" title="Benutzer löschen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="139" priority="C" title="Benutzer löschen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="140" priority="C" title="Benutzer löschen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="141" priority="C" title="Benutzer löschen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="142" priority="C" title="Benutzer löschen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="143" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="144" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="145" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript deleteuser_e-mailpw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -462,25 +637,31 @@
 <sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="77">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="37" priority="A" title="User registrieren mit allen Angaben">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="427" priority="C" title="User registrieren ohne alles">
 <description/>
 <pre/>
-<actions/>
-<post>User ist in der Datenbank aber mit Status "needs verification" 
-</post>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="78" priority="C" title="User registrieren ohne E-mail">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript registeruser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="79" priority="C" title="User registrieren ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="428" priority="C" title="User registrieren E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript registeruser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="429" priority="C" title="User registrieren Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="430" priority="C" title="User registrieren E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -495,469 +676,650 @@
 <sequence created="07.02.2012" creator="PeterVollmer" name="mit Adminrechten" number="33">
 <description/>
 <pre>User hat Adminrechte</pre>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="146">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="463">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="147" priority="C" title="Authentifizierung ohne E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="464" priority="C" title="Authentifizierung ohne alles">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_e-mail.sh ausführen</actions>
+<actions>Curlscript authuser_without_all.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="148" priority="C" title="Authentifizierung ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="465" priority="C" title="Authentifizierung E-Mail">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_pw.sh ausführen</actions>
+<actions>Curlscript authuser_e-mail.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="149" priority="C" title="Authentifizierung mit E-Mail und Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="466" priority="C" title="Authentifizierung Passwort">
 <description/>
 <pre/>
-<actions>Curlscript authuser.sh ausführen</actions>
+<actions>Curlscript authuser_pw.sh ausführen</actions>
+<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="467" priority="C" title="Authentifizierung E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript authuser_e-mail_pw.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="150">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="468">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="151" priority="C" title="Benutzerdaten abfragen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="469" priority="C" title="Benutzerdaten abfragen ohne alles">
 <description>Benutzerdaten abfragen ohne E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="152" priority="C" title="Benutzerdaten abfragen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="470" priority="C" title="Benutzerdaten abfragen E-Mail">
 <description>Benutzerdaten abfragen mit E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="153" priority="C" title="Benutzerdaten abfragen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="471" priority="C" title="Benutzerdaten abfragen Passwort">
 <description>Benutzerdaten abfragen ohne E-Mail mit Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="154" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="472" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
 <description>Benutzerdaten abfragen mit Passwort und E-Mail ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="155" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="473" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="156" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="474" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="157" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="475" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="158" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="476" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="159">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="160" priority="C" title="Benutzerdaten ändern ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="161" priority="C" title="Benutzerdaten ändern E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="162" priority="C" title="Benutzerdaten ändern Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="163" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="164" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="165" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="166" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="167" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="168">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="477">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="169" priority="C" title="Abfrage abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="478" priority="C" title="Benutzerdaten ändern ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="170" priority="C" title="Abfrage abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="479" priority="C" title="Benutzerdaten ändern E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="171" priority="C" title="Abfrage abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="480" priority="C" title="Benutzerdaten ändern Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="172" priority="C" title="Abfrage abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="481" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="173" priority="C" title="Abfrage abrufen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="482" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="174" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="483" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="175" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="484" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="176" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="485" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="177">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="178" priority="C" title="Abfragenverlauf abrufen ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="179" priority="C" title="Abfragenverlauf abrufen E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="180" priority="C" title="Abfragenverlauf abrufen Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="181" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="182" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="183" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="184" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="185" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="186">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="486">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="187" priority="C" title="Benutzerliste abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="487" priority="C" title="Abfrage abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="188" priority="C" title="Benutzerliste abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="488" priority="C" title="Abfrage abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="189" priority="C" title="Benutzerliste abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="489" priority="C" title="Abfrage abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="190" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="490" priority="C" title="Abfrage abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="191" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="491" priority="C" title="Abfrage abrufen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="192" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="492" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="193" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="493" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="194" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="494" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="195" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="196" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="197" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="198" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="199" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="200" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="201" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="202" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="203">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="495">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="204" priority="C" title="Benutzer löschen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="496" priority="C" title="Abfragenverlauf abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="205" priority="C" title="Benutzer löschen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="497" priority="C" title="Abfragenverlauf abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="206" priority="C" title="Benutzer löschen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="498" priority="C" title="Abfragenverlauf abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="207" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="499" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="208" priority="C" title="Benutzer löschen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="500" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="209" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="501" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="210" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="502" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="211" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="503" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="504" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="505" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="506" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="507" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="508" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="509" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail.sh_limit_offset ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="510" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="511" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="512" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="513" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="514" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="515" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="516" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="517" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="518" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="519" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="520" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="521" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="522" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="523" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="524" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="525" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="526" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="527" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="212">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="528">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="213" priority="A" title="User registrieren mit allen Angaben">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="529" priority="C" title="Benutzerliste abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
-<post>User ist in der Datenbank aber mit Status "needs verification" 
-</post>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="214" priority="C" title="User registrieren ohne E-mail">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript listusers_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="215" priority="C" title="User registrieren ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="530" priority="C" title="Benutzerliste abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="531" priority="C" title="Benutzerliste abrufen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="532" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="533" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="534" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="535" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="536" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="537" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="538" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="539" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="540" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="541" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="542" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="543" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="544" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="545">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="546" priority="C" title="Benutzer löschen ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="547" priority="C" title="Benutzer löschen E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="548" priority="C" title="Benutzer löschen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="549" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="550" priority="C" title="Benutzer löschen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="551" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="552" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="553" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mailpw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="554">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="555" priority="C" title="User registrieren ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="556" priority="C" title="User registrieren E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="557" priority="C" title="User registrieren Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="558" priority="C" title="User registrieren E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -966,469 +1328,650 @@
 <sequence created="07.02.2012" creator="PeterVollmer" name="ohne Adminrechte" number="34">
 <description/>
 <pre>User hat keine Adminrechte</pre>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="216">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="559">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="217" priority="C" title="Authentifizierung ohne E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="560" priority="C" title="Authentifizierung ohne alles">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_e-mail.sh ausführen</actions>
+<actions>Curlscript authuser_without_all.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="218" priority="C" title="Authentifizierung ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="561" priority="C" title="Authentifizierung E-Mail">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_pw.sh ausführen</actions>
+<actions>Curlscript authuser_e-mail.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="219" priority="C" title="Authentifizierung mit E-Mail und Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="562" priority="C" title="Authentifizierung Passwort">
 <description/>
 <pre/>
-<actions>Curlscript authuser.sh ausführen</actions>
+<actions>Curlscript authuser_pw.sh ausführen</actions>
+<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="563" priority="C" title="Authentifizierung E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript authuser_e-mail_pw.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="220">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="564">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="221" priority="C" title="Benutzerdaten abfragen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="565" priority="C" title="Benutzerdaten abfragen ohne alles">
 <description>Benutzerdaten abfragen ohne E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="222" priority="C" title="Benutzerdaten abfragen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="566" priority="C" title="Benutzerdaten abfragen E-Mail">
 <description>Benutzerdaten abfragen mit E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="223" priority="C" title="Benutzerdaten abfragen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="567" priority="C" title="Benutzerdaten abfragen Passwort">
 <description>Benutzerdaten abfragen ohne E-Mail mit Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="224" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="568" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
 <description>Benutzerdaten abfragen mit Passwort und E-Mail ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="225" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="569" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="226" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="570" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="227" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="571" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="228" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="572" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="229">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="230" priority="C" title="Benutzerdaten ändern ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="231" priority="C" title="Benutzerdaten ändern E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="232" priority="C" title="Benutzerdaten ändern Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="233" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="234" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="235" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="236" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="237" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="238">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="573">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="239" priority="C" title="Abfrage abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="574" priority="C" title="Benutzerdaten ändern ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="240" priority="C" title="Abfrage abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="575" priority="C" title="Benutzerdaten ändern E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="241" priority="C" title="Abfrage abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="576" priority="C" title="Benutzerdaten ändern Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="242" priority="C" title="Abfrage abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="577" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="243" priority="C" title="Abfrage abrufen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="578" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="244" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="579" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="245" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="580" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="246" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="581" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="247">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="248" priority="C" title="Abfragenverlauf abrufen ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="249" priority="C" title="Abfragenverlauf abrufen E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="250" priority="C" title="Abfragenverlauf abrufen Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="251" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="252" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="253" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="254" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="255" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="256">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="582">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="257" priority="C" title="Benutzerliste abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="583" priority="C" title="Abfrage abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="258" priority="C" title="Benutzerliste abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="584" priority="C" title="Abfrage abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="259" priority="C" title="Benutzerliste abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="585" priority="C" title="Abfrage abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="260" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="586" priority="C" title="Abfrage abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="261" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="587" priority="C" title="Abfrage abrufen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="262" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="588" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="263" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="589" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="264" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="590" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="265" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="266" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="267" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="268" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="269" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="270" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="271" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="272" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="273">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="591">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="274" priority="C" title="Benutzer löschen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="592" priority="C" title="Abfragenverlauf abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="275" priority="C" title="Benutzer löschen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="593" priority="C" title="Abfragenverlauf abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="276" priority="C" title="Benutzer löschen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="594" priority="C" title="Abfragenverlauf abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="277" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="595" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="278" priority="C" title="Benutzer löschen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="596" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="279" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="597" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="280" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="598" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="281" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="599" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="600" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="601" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="602" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="603" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="604" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="605" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail.sh_limit_offset ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="606" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="607" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="608" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="609" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="610" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="611" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="612" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="613" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="614" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="615" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="616" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="617" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="618" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="619" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="620" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="621" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="622" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="623" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="282">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="624">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="283" priority="A" title="User registrieren mit allen Angaben">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="625" priority="C" title="Benutzerliste abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
-<post>User ist in der Datenbank aber mit Status "needs verification" 
-</post>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="284" priority="C" title="User registrieren ohne E-mail">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript listusers_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="285" priority="C" title="User registrieren ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="626" priority="C" title="Benutzerliste abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="627" priority="C" title="Benutzerliste abrufen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="628" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="629" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="630" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="631" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="632" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="633" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="634" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="635" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="636" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="637" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="638" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="639" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="640" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="641">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="642" priority="C" title="Benutzer löschen ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="643" priority="C" title="Benutzer löschen E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="644" priority="C" title="Benutzer löschen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="645" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="646" priority="C" title="Benutzer löschen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="647" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="648" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="649" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mailpw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="650">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="651" priority="C" title="User registrieren ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="652" priority="C" title="User registrieren E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="653" priority="C" title="User registrieren Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="654" priority="C" title="User registrieren E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -1441,469 +1984,650 @@
 <sequence created="07.02.2012" creator="PeterVollmer" name="mit Adminrechten" number="35">
 <description/>
 <pre>User hat Adminrechte</pre>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="286">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="751">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="287" priority="C" title="Authentifizierung ohne E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="752" priority="C" title="Authentifizierung ohne alles">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_e-mail.sh ausführen</actions>
+<actions>Curlscript authuser_without_all.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="288" priority="C" title="Authentifizierung ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="753" priority="C" title="Authentifizierung E-Mail">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_pw.sh ausführen</actions>
+<actions>Curlscript authuser_e-mail.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="289" priority="C" title="Authentifizierung mit E-Mail und Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="754" priority="C" title="Authentifizierung Passwort">
 <description/>
 <pre/>
-<actions>Curlscript authuser.sh ausführen</actions>
+<actions>Curlscript authuser_pw.sh ausführen</actions>
+<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="755" priority="C" title="Authentifizierung E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript authuser_e-mail_pw.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="290">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="756">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="291" priority="C" title="Benutzerdaten abfragen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="757" priority="C" title="Benutzerdaten abfragen ohne alles">
 <description>Benutzerdaten abfragen ohne E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="292" priority="C" title="Benutzerdaten abfragen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="758" priority="C" title="Benutzerdaten abfragen E-Mail">
 <description>Benutzerdaten abfragen mit E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="293" priority="C" title="Benutzerdaten abfragen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="759" priority="C" title="Benutzerdaten abfragen Passwort">
 <description>Benutzerdaten abfragen ohne E-Mail mit Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="294" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="760" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
 <description>Benutzerdaten abfragen mit Passwort und E-Mail ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="295" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="761" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="296" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="762" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="297" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="763" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="298" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="764" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="299">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="300" priority="C" title="Benutzerdaten ändern ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="301" priority="C" title="Benutzerdaten ändern E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="302" priority="C" title="Benutzerdaten ändern Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="303" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="304" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="305" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="306" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="307" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="308">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="765">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="309" priority="C" title="Abfrage abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="766" priority="C" title="Benutzerdaten ändern ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="310" priority="C" title="Abfrage abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="767" priority="C" title="Benutzerdaten ändern E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="311" priority="C" title="Abfrage abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="768" priority="C" title="Benutzerdaten ändern Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="312" priority="C" title="Abfrage abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="769" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="313" priority="C" title="Abfrage abrufen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="770" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="314" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="771" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="315" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="772" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="316" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="773" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="317">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="318" priority="C" title="Abfragenverlauf abrufen ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="319" priority="C" title="Abfragenverlauf abrufen E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="320" priority="C" title="Abfragenverlauf abrufen Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="321" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="322" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="323" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="324" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="325" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="326">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="774">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="327" priority="C" title="Benutzerliste abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="775" priority="C" title="Abfrage abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="328" priority="C" title="Benutzerliste abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="776" priority="C" title="Abfrage abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="329" priority="C" title="Benutzerliste abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="777" priority="C" title="Abfrage abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="330" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="778" priority="C" title="Abfrage abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="331" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="779" priority="C" title="Abfrage abrufen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="332" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="780" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="333" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="781" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="334" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="782" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="335" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="336" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="337" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="338" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="339" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="340" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="341" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="342" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="343">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="783">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="344" priority="C" title="Benutzer löschen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="784" priority="C" title="Abfragenverlauf abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="345" priority="C" title="Benutzer löschen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="785" priority="C" title="Abfragenverlauf abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="346" priority="C" title="Benutzer löschen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="786" priority="C" title="Abfragenverlauf abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="347" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="787" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="348" priority="C" title="Benutzer löschen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="788" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="349" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="789" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="350" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="790" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="351" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="791" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="792" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="793" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="794" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="795" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="796" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="797" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail.sh_limit_offset ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="798" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="799" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="800" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="801" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="802" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="803" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="804" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="805" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="806" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="807" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="808" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="809" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="810" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="811" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="812" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="813" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="814" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="815" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="352">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="816">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="353" priority="A" title="User registrieren mit allen Angaben">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="817" priority="C" title="Benutzerliste abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
-<post>User ist in der Datenbank aber mit Status "needs verification" 
-</post>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="354" priority="C" title="User registrieren ohne E-mail">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript listusers_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="355" priority="C" title="User registrieren ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="818" priority="C" title="Benutzerliste abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="819" priority="C" title="Benutzerliste abrufen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="820" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="821" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="822" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="823" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="824" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="825" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="826" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="827" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="828" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="829" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="830" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="831" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="832" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="833">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="834" priority="C" title="Benutzer löschen ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="835" priority="C" title="Benutzer löschen E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="836" priority="C" title="Benutzer löschen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="837" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="838" priority="C" title="Benutzer löschen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="839" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="840" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="841" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mailpw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="842">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="843" priority="C" title="User registrieren ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="844" priority="C" title="User registrieren E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="845" priority="C" title="User registrieren Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="846" priority="C" title="User registrieren E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -1912,469 +2636,650 @@
 <sequence created="07.02.2012" creator="PeterVollmer" name="ohne Adminrechte" number="36">
 <description/>
 <pre>User hat keine Adminrechte</pre>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="356">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Authetifizierung" number="847">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="357" priority="C" title="Authentifizierung ohne E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="848" priority="C" title="Authentifizierung ohne alles">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_e-mail.sh ausführen</actions>
+<actions>Curlscript authuser_without_all.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="358" priority="C" title="Authentifizierung ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="849" priority="C" title="Authentifizierung E-Mail">
 <description/>
 <pre/>
-<actions>Curlscript authuser_without_pw.sh ausführen</actions>
+<actions>Curlscript authuser_e-mail.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="359" priority="C" title="Authentifizierung mit E-Mail und Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="850" priority="C" title="Authentifizierung Passwort">
 <description/>
 <pre/>
-<actions>Curlscript authuser.sh ausführen</actions>
+<actions>Curlscript authuser_pw.sh ausführen</actions>
+<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="851" priority="C" title="Authentifizierung E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript authuser_e-mail_pw.sh ausführen</actions>
 <post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="360">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten abfragen" number="852">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="361" priority="C" title="Benutzerdaten abfragen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="853" priority="C" title="Benutzerdaten abfragen ohne alles">
 <description>Benutzerdaten abfragen ohne E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="362" priority="C" title="Benutzerdaten abfragen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="854" priority="C" title="Benutzerdaten abfragen E-Mail">
 <description>Benutzerdaten abfragen mit E-Mail ohne Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="363" priority="C" title="Benutzerdaten abfragen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="855" priority="C" title="Benutzerdaten abfragen Passwort">
 <description>Benutzerdaten abfragen ohne E-Mail mit Passwort ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="364" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="856" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
 <description>Benutzerdaten abfragen mit Passwort und E-Mail ohne "id"</description>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="365" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="857" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="366" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="858" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="367" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="859" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="368" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="860" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="369">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="370" priority="C" title="Benutzerdaten ändern ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="371" priority="C" title="Benutzerdaten ändern E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="372" priority="C" title="Benutzerdaten ändern Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="373" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="374" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="375" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="376" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="377" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="378">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerdaten ändern" number="861">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="379" priority="C" title="Abfrage abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="862" priority="C" title="Benutzerdaten ändern ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="380" priority="C" title="Abfrage abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="863" priority="C" title="Benutzerdaten ändern E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="381" priority="C" title="Abfrage abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="864" priority="C" title="Benutzerdaten ändern Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="382" priority="C" title="Abfrage abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="865" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="383" priority="C" title="Abfrage abrufen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="866" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="384" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="867" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="385" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="868" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript updateuser_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="386" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="869" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-</sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="387">
-<description/>
-<pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="388" priority="C" title="Abfragenverlauf abrufen ohne alles">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="389" priority="C" title="Abfragenverlauf abrufen E-Mail">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="390" priority="C" title="Abfragenverlauf abrufen Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="391" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="392" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="393" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="394" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="395" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript updateuser_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="396">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfrage abrufen" number="870">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="397" priority="C" title="Benutzerliste abrufen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="871" priority="C" title="Abfrage abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="398" priority="C" title="Benutzerliste abrufen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="872" priority="C" title="Abfrage abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="399" priority="C" title="Benutzerliste abrufen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="873" priority="C" title="Abfrage abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="400" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="874" priority="C" title="Abfrage abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="401" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="875" priority="C" title="Abfrage abrufen &quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="402" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="876" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="403" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="877" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript getrequest_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="404" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="878" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="405" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="406" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="407" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="408" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="409" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="410" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="411" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
-<post/>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="412" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript getrequest_e-mail_pw_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="413">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Abfragenverlauf abrufen" number="879">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="414" priority="C" title="Benutzer löschen ohne alles">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="880" priority="C" title="Abfragenverlauf abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="415" priority="C" title="Benutzer löschen E-Mail">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="881" priority="C" title="Abfragenverlauf abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="416" priority="C" title="Benutzer löschen Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="882" priority="C" title="Abfragenverlauf abrufen Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="417" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="883" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="418" priority="C" title="Benutzer löschen &quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="884" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="419" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="885" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="420" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="886" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_pw_limit.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="421" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="887" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listrequests_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="888" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="889" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="890" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="891" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="892" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="893" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail.sh_limit_offset ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="894" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="895" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="896" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="897" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="898" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="899" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="900" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="901" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="902" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="903" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="904" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="905" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="906" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="907" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="908" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="909" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="910" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_pw_limit_offset_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="911" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listrequests_e-mail_pw_limit_offset_id.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
 </sequence>
-<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="422">
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzerliste abrufen" number="912">
 <description/>
 <pre/>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="423" priority="A" title="User registrieren mit allen Angaben">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="913" priority="C" title="Benutzerliste abrufen ohne alles">
 <description/>
 <pre/>
-<actions/>
-<post>User ist in der Datenbank aber mit Status "needs verification" 
-</post>
-<tags/>
-</testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="424" priority="C" title="User registrieren ohne E-mail">
-<description/>
-<pre/>
-<actions/>
+<actions>Curlscript listusers_without_all.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
-<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="425" priority="C" title="User registrieren ohne Passwort">
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="914" priority="C" title="Benutzerliste abrufen E-Mail">
 <description/>
 <pre/>
-<actions/>
+<actions>Curlscript listusers_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="915" priority="C" title="Benutzerliste abrufen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="916" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="917" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="918" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="919" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="920" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="921" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="922" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="923" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="924" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="925" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="926" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="927" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="928" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
+<description/>
+<pre/>
+<actions>Curlscript listusers_e-mail_pw_limit_offset.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="Benutzer löschen" number="929">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="930" priority="C" title="Benutzer löschen ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="931" priority="C" title="Benutzer löschen E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="932" priority="C" title="Benutzer löschen Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="933" priority="C" title="Benutzer löschen E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="934" priority="C" title="Benutzer löschen &quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="935" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mail_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="936" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_pw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="937" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
+<description/>
+<pre/>
+<actions>Curlscript deleteuser_e-mailpw_id.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+</sequence>
+<sequence created="08.02.2012" creator="PeterVollmer" name="User registrieren" number="938">
+<description/>
+<pre/>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="939" priority="C" title="User registrieren ohne alles">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_without_all.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="940" priority="C" title="User registrieren E-Mail">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="941" priority="C" title="User registrieren Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_pw.sh ausführen</actions>
+<post/>
+<tags/>
+</testcase>
+<testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="942" priority="C" title="User registrieren E-Mail/Passwort">
+<description/>
+<pre/>
+<actions>Curlscript registeruser_e-mail_pw.sh ausführen</actions>
 <post/>
 <tags/>
 </testcase>
@@ -2395,39 +3300,39 @@
 <tsa name="System Test" number="3" revId="1">
 <relatedsequence>3</relatedsequence>
 <tsa name="User in DB mit Adminrechten aktiv" number="25" revId="1"/>
-<tsa name="als User nicht in DB" number="23" revId="2">
+<tsa name="als User nicht in DB" number="23" revId="1">
 <relatedsequence>23</relatedsequence>
-<tsa name="User registrieren" number="77" revId="2">
+<tsa name="User registrieren" number="77" revId="1">
 <relatedsequence>77</relatedsequence>
 </tsa>
-<tsa name="Authetifizierung" number="80" revId="2">
+<tsa name="Authetifizierung" number="80" revId="1">
 <relatedsequence>80</relatedsequence>
 </tsa>
-<tsa name="Benutzerdaten abfragen" number="83" revId="2">
+<tsa name="Benutzerdaten abfragen" number="83" revId="1">
 <relatedsequence>83</relatedsequence>
 </tsa>
-<tsa name="Benutzerdaten ändern" number="91" revId="3">
+<tsa name="Benutzerdaten ändern" number="91" revId="1">
 <relatedsequence>91</relatedsequence>
 </tsa>
-<tsa name="Abfrage abrufen" number="102" revId="3">
+<tsa name="Abfrage abrufen" number="102" revId="1">
 <relatedsequence>102</relatedsequence>
 </tsa>
-<tsa name="Abfragenverlauf abrufen" number="111" revId="2">
+<tsa name="Abfragenverlauf abrufen" number="111" revId="1">
 <relatedsequence>111</relatedsequence>
 </tsa>
 <tsa name="Benutzerliste abrufen" number="120" revId="1">
 <relatedsequence>120</relatedsequence>
 </tsa>
-<tsa name="Benutzer löschen" number="137" revId="2">
+<tsa name="Benutzer löschen" number="137" revId="1">
 <relatedsequence>137</relatedsequence>
 </tsa>
 </tsa>
-<tsa name="als User in DB" number="28" revId="2">
+<tsa name="als User in DB" number="28" revId="1">
 <relatedsequence>28</relatedsequence>
-<tsa name="verified" number="31" revId="2">
+<tsa name="verified" number="31" revId="1">
 <relatedsequence>31</relatedsequence>
 </tsa>
-<tsa name="needs verification" number="32" revId="2">
+<tsa name="needs verification" number="32" revId="1">
 <relatedsequence>32</relatedsequence>
 </tsa>
 </tsa>
@@ -2436,5 +3341,5 @@
 <author active="Y" firstname="" lastname="Peter Vollmer" uid="PeterVollmer">
 <extension name="standarduser" value="Y"/>
 </author>
-<extension name="maxid" value="425"/>
+<extension name="maxid" value="942"/>
 </tests>
