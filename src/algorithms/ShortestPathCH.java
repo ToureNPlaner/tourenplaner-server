@@ -6,11 +6,12 @@ package algorithms;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import computecore.ComputeRequest;
-import computecore.Points;
 import computecore.RequestPoints;
+import computecore.Way;
 import graphrep.GraphRep;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -56,13 +57,13 @@ public class ShortestPathCH extends GraphAlgorithm {
             throw new ComputeException("Not enough points, need at least 2");
         }
 
-        Points resultWay = req.getResultWay();
+        List<Way> resultWays = req.getResultWays();
         int distance = 0;
         try {
             // First let's map the RequestPoints to Ids
             points.setIdsFromGraph(graph);
             // Then compute the multi hop shortest path of them
-            distance = shortestPath(points, resultWay, false);
+            distance = shortestPath(points, resultWays, false);
         } catch (IllegalAccessException e) {
             // If this happens there likely is a programming error
             e.printStackTrace();
@@ -224,12 +225,12 @@ public class ShortestPathCH extends GraphAlgorithm {
      *
      * @param prevEdges
      * @param dists
-     * @param resultPoints
+     * @param resultWay
      * @param srcId
      * @param destId
      * @throws IllegalAccessException
      */
-    protected final int backtrack(int[] dists, int[] prevEdges, Points resultPoints, int srcId, int destId) throws IllegalAccessException {
+    protected final int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int destId) throws IllegalAccessException {
         int nodeLat;
         int nodeLon;
         int edgeId;
@@ -266,7 +267,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 currNode = graph.getSource(edgeId);
                 nodeLat = graph.getNodeLat(currNode);
                 nodeLon = graph.getNodeLon(currNode);
-                resultPoints.addPoint(nodeLat, nodeLon);
+                resultWay.addPoint(nodeLat, nodeLon);
                 length += graph.getEuclidianDist(edgeId);
             }
         }
@@ -276,16 +277,16 @@ public class ShortestPathCH extends GraphAlgorithm {
 
     /**
      * Computes the shortest path over points[0] -> points[1] -> points[2]...
-     * and stores all points on the path in resultWay
+     * and stores all points on the path in resultWays
      *
      * @param points    The points the route should span, the id's must have been set
-     * @param resultWay
+     * @param resultWays
      * @param tour         Specifies whether this is a tour and points[n]->points[0]
      * @return
      * @throws IllegalAccessException
      * @throws Exception
      */
-    protected int shortestPath(RequestPoints points, Points resultWay, boolean tour) throws ComputeException, IllegalAccessException {
+    protected int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException {
 
         int srcId = 0;
         int destId = 0;
@@ -297,6 +298,8 @@ public class ShortestPathCH extends GraphAlgorithm {
         double directDistance = 0.0;
 
         for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
+            //New point -> new subway
+            resultWays.add(new Way());
             // New Dijkstra need to reset
             long starttime = System.nanoTime();
             srcId = points.getPointId(pointIndex);
@@ -306,7 +309,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 destId = points.getPointId(0);
             } else {
                 // Don't forget to add destination (destId is still the last one)
-                resultWay.addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
+                resultWays.get(pointIndex).addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
                 break;
             }
             // get data structures used by Dijkstra
@@ -333,7 +336,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            distance += backtrack(dists, prevEdges, resultWay, srcId, destId);
+            distance += backtrack(dists, prevEdges, resultWays.get(pointIndex), srcId, destId);
 
             long backtracktime = System.nanoTime();
 

@@ -9,6 +9,8 @@ import server.Responder;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -21,7 +23,7 @@ import java.util.Map.Entry;
 public class ComputeRequest {
 
 	private final RequestPoints points;
-	private final Points resultWay;
+	private final List<Way> resultWays;
 	private final Map<String, Object> constraints;
 	private Map<String, Object> misc;
 	private final String algName;
@@ -30,7 +32,7 @@ public class ComputeRequest {
     private final boolean acceptsSmile;
 
 	/**
-	 * Constructs a new ComputeRequest using the given Responder, Points and
+	 * Constructs a new ComputeRequest using the given Responder, Way and
 	 * Constraints. The requestID of the constructed ComputeRequest object is
 	 * -1, must be set with {@link #setRequestID(int)} if server is private. If
 	 * server is not private the requestID must remain -1.
@@ -43,7 +45,7 @@ public class ComputeRequest {
                           RequestPoints points, Map<String, Object> constraints, boolean acceptsSmile) {
 		this.algName = algName;
 		this.points = points;
-		this.resultWay = new Points();
+		this.resultWays = new ArrayList<Way> (1);
 		this.constraints = constraints;
 		this.responder = responder;
 		this.misc = null;
@@ -72,7 +74,7 @@ public class ComputeRequest {
 	}
 
 	/**
-	 * Returns the Points object associated with this request
+	 * Returns the Way object associated with this request
 	 * 
 	 * @return
 	 */
@@ -81,12 +83,14 @@ public class ComputeRequest {
 	}
 
 	/**
-	 * Returns the Points object used to store the result of this request
+	 * Returns the list of Ways making up the result of the computation
+     * it's an Algorithms job that after it's computation it contains all
+     * the ways connection the Points
 	 * 
 	 * @return
 	 */
-	public Points getResultWay() {
-		return resultWay;
+	public List<Way> getResultWays() {
+		return resultWays;
 	}
 
 	/**
@@ -186,13 +190,16 @@ public class ComputeRequest {
 		gen.writeEndArray();
 
 		gen.writeArrayFieldStart("way");
-		Points way = this.getResultWay();
-		for (int i = 0; i < way.size(); i++) {
-			gen.writeStartObject();
-			gen.writeNumberField("lt", way.getPointLat(i));
-			gen.writeNumberField("ln", way.getPointLon(i));
-			gen.writeEndObject();
-		}
+        for(Way way : this.getResultWays()){
+            gen.writeStartArray();
+            for (int i = 0; i < way.size(); i++) {
+                gen.writeStartObject();
+                gen.writeNumberField("lt", way.getPointLat(i));
+                gen.writeNumberField("ln", way.getPointLon(i));
+                gen.writeEndObject();
+            }
+            gen.writeEndArray();
+        }
 		gen.writeEndArray();
 		gen.writeObjectField("misc", this.getMisc());
 		gen.writeEndObject();

@@ -3,11 +3,11 @@ package computecore;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
-public class PointsTest {
+public class WayTest {
 
     @Test
     public final void test_addPoint_getPointLat_getPointLon() {
-        Points p = new Points();
+        Way p = new Way();
         p.addPoint(1,2);
         p.addPoint(2,3);
         p.addPoint(4,5);
@@ -21,7 +21,7 @@ public class PointsTest {
 
     @Test
     public final void testsetPointLat() {
-        Points p = new Points();
+        Way p = new Way();
         p.addPoint(1, 2);
         p.addPoint(2, 3);
         p.addPoint(4, 5);
@@ -35,7 +35,7 @@ public class PointsTest {
 
     @Test
     public final void testsetPointLon() {
-        Points p = new Points();
+        Way p = new Way();
         p.addPoint(1, 2);
         p.addPoint(2, 3);
         p.addPoint(4, 5);
@@ -49,7 +49,7 @@ public class PointsTest {
     
     @Test
     public final void testsize() {
-        Points p = new Points();
+        Way p = new Way();
         p.addPoint(1, 2);
         assertEquals(p.size(), 1);
         p.addPoint(2, 3);

@@ -1,7 +1,7 @@
 package algorithms;
 
 import computecore.ComputeRequest;
-import computecore.Points;
+import computecore.Way;
 import computecore.RequestPoints;
 import graphrep.GraphRep;
 
@@ -48,8 +48,9 @@ public class ConstrainedSP extends GraphAlgorithm {
         if (points.size() != 2) {
             throw new ComputeException("Not enough points or too much points, need 2");
         }
-
-        Points resultPoints = req.getResultWay();
+        // We can only do 1-1 ways so just create and use one Way
+        req.getResultWays().add(new Way());
+        Way resultWay = req.getResultWays().get(0);
 
         // Check for Constraint
         int maxAltitudeDifference;
@@ -63,7 +64,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             throw new ComputeException("Couldn't read maxAltitudeDifference, wrong type: " + e.getMessage());
         }
 
-        int[] result = cSP(points, resultPoints, maxAltitudeDifference);
+        int[] result = cSP(points, resultWay, maxAltitudeDifference);
         int altitudeDiff = result[0];
         int distance = result[1];
         
@@ -79,12 +80,12 @@ public class ConstrainedSP extends GraphAlgorithm {
      *  calculates resource constraint shortest path
      *
      * @param points
-     * @param resultPoints
+     * @param resultWay
      * @param maxAltitudeDifference
      * @return
      * @throws ComputeException
      */
-    protected int[] cSP (RequestPoints points, Points resultPoints, int maxAltitudeDifference) throws ComputeException {
+    protected int[] cSP (RequestPoints points, Way resultWay, int maxAltitudeDifference) throws ComputeException {
         int srclat, srclon;
         int destlat, destlon;
         int srcId, trgtId;
@@ -164,9 +165,9 @@ public class ConstrainedSP extends GraphAlgorithm {
                 "path goes over " + routeElements + " nodes and over " + altitudeDiff +
                         " meters of altitude Difference");
         // Add points to the end
-        resultAddIndex = resultPoints.size();
+        resultAddIndex = resultWay.size();
         // Add them without values we set the values in the next step
-        resultPoints.addEmptyPoints(routeElements);
+        resultWay.addEmptyPoints(routeElements);
         int distance = 0;
         // backtracking here
         // Don't read distance from multipliedDist[], because there are
@@ -177,13 +178,13 @@ public class ConstrainedSP extends GraphAlgorithm {
         while (routeElements > 1) {
             distance += graph.getEuclidianDist(prevEdges[currNode]);
             routeElements--;
-            resultPoints.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
-            resultPoints.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
+            resultWay.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
+            resultWay.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
-        resultPoints.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-        resultPoints.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
+        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
 
         ds.returnDistArray(false);
         ds.returnHeap();

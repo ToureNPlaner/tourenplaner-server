@@ -1,11 +1,12 @@
 package algorithms;
 
 import computecore.ComputeRequest;
-import computecore.Points;
 import computecore.RequestPoints;
+import computecore.Way;
 import graphrep.GraphRep;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -53,13 +54,13 @@ public class ShortestPath extends GraphAlgorithm {
             throw new ComputeException("Not enough points, need at least 2");
         }
 
-        Points resultWay = req.getResultWay();
+        List<Way> resultWays = req.getResultWays();
         int distance = 0;
         try {
             // First let's map the RequestPoints to Ids
             points.setIdsFromGraph(graph);
             // Then compute the multi hop shortest path of them
-            distance = shortestPath(points, resultWay, false);
+            distance = shortestPath(points, resultWays, false);
         } catch (IllegalAccessException e) {
             // If this happens there likely is a programming error
             e.printStackTrace();
@@ -82,7 +83,7 @@ public class ShortestPath extends GraphAlgorithm {
      * @throws ComputeException
      * @throws IllegalAccessException
      */
-    protected int shortestPath(RequestPoints points, Points resultWay, boolean tour) throws ComputeException, IllegalAccessException {
+    protected int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException {
 
         int srcId = 0;
         int trgtId = 0;
@@ -94,6 +95,9 @@ public class ShortestPath extends GraphAlgorithm {
         double directDistance = 0.0;
 
         for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
+            // New Point -> new subway
+            resultWays.add(new Way());
+            
             // New Dijkstra need to reset
             long starttime = System.nanoTime();
             srcId = points.getPointId(pointIndex);
@@ -103,7 +107,7 @@ public class ShortestPath extends GraphAlgorithm {
                 trgtId = points.getPointId(0);
             } else {
                 // Don't forget to add destination (trgtId is still the last one)
-                resultWay.addPoint(graph.getNodeLat(trgtId), graph.getNodeLon(trgtId));
+                resultWays.get(pointIndex).addPoint(graph.getNodeLat(trgtId), graph.getNodeLon(trgtId));
                 break;
             }
             // get data structures used by Dijkstra
@@ -130,7 +134,7 @@ public class ShortestPath extends GraphAlgorithm {
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            distance += backtrack(dists, prevEdges, resultWay, srcId, trgtId);
+            distance += backtrack(dists, prevEdges, resultWays.get(pointIndex), srcId, trgtId);
 
             long backtracktime = System.nanoTime();
 
@@ -224,7 +228,7 @@ public class ShortestPath extends GraphAlgorithm {
      * @return
      * @throws IllegalAccessException
      */
-    protected final int backtrack(int[] dists, int[] prevEdges, Points resultWay, int srcId, int trgtId) throws
+    protected final int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int trgtId) throws
                                                                                                             IllegalAccessException {
         // Find out how much space to allocate
         int currNode = trgtId;

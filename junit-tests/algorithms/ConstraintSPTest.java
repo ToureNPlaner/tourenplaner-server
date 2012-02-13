@@ -1,6 +1,6 @@
 package algorithms;
 
-import computecore.Points;
+import computecore.Way;
 import computecore.RequestPoints;
 import graphrep.GraphRep;
 import graphrep.GraphRepFactory;
@@ -31,7 +31,7 @@ public class ConstraintSPTest {
 
         //shortest path is the best fittest
 
-        Points resultWay = new Points();
+        Way resultWay = new Way();
         int[] result = constraintSP.cSP(points,resultWay,90);
         assertEquals(80,result[0]);
         assertEquals(7,result[1]);
@@ -44,7 +44,7 @@ public class ConstraintSPTest {
 
         //middle way
 
-        resultWay = new Points();
+        resultWay = new Way();
         result = constraintSP.cSP(points,resultWay,60);
         assertEquals(45,result[0]);
         assertEquals(9,result[1]);
@@ -59,7 +59,7 @@ public class ConstraintSPTest {
 
         //longest possible way
 
-        resultWay = new Points();
+        resultWay = new Way();
         result = constraintSP.cSP(points,resultWay,44);
         assertEquals(40,result[0]);
         assertEquals(14,result[1]);
@@ -75,7 +75,7 @@ public class ConstraintSPTest {
         assertEquals(30000000,resultWay.getPointLon(4));
 
         //no possible way with a constraint
-        resultWay = new Points();
+        resultWay = new Way();
         try {
             result = constraintSP.cSP(points,resultWay,30);
             fail("Should have raised an IllegalArgumentException");

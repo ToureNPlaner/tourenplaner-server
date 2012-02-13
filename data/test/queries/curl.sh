@@ -41,19 +41,21 @@ else
     fi
 fi
 
-HTTP_CODE='\n\nHttpStatusCode:\t%{http_code}\n\n'
+HTTP_CODE='\n\nHttpStatusCode:\t%{http_code}\n'
 
 if [ "YES" == "$USER_AUTH" ]
 then
     curl -s $HTTPS_OPTION $JSON_OPTION -u "$USER_OPTION" "$1/$3" -w $HTTP_CODE
 
-    echo "END OF curl -sL" $HTTPS_OPTION $JSON_OPTION -u "$USER_OPTION" \"$1/$3\" -w  '\\n\\nHttpStatusCode:\\t%{http_code}\\n\\n'
+    echo "";
+    echo "END OF curl -sL" $HTTPS_OPTION $JSON_OPTION -u "$USER_OPTION" \"$1/$3\" -w $HTTP_CODE
     echo "";
 
 else
     curl -s $HTTPS_OPTION $JSON_OPTION "$1/$3" -w $HTTP_CODE
 
-    echo "END OF curl -sL" $HTTPS_OPTION $JSON_OPTION \"$1/$3\" -w  '\\n\\nHttpStatusCode:\\t%{http_code}\\n\\n'
+    echo "";
+    echo "END OF curl -sL" $HTTPS_OPTION $JSON_OPTION \"$1/$3\" -w $HTTP_CODE
     echo "";
 fi
 
