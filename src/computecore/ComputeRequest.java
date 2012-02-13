@@ -167,6 +167,8 @@ public class ComputeRequest {
 		gen.setCodec(mapper);
 		gen.writeStartObject();
 
+        gen.writeObjectField("constraints", this.getConstraints());
+
 		gen.writeArrayFieldStart("points");
 		RequestPoints points = this.getPoints();
 		for (int i = 0; i < points.size(); i++) {
