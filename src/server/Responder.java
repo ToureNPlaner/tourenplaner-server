@@ -301,6 +301,14 @@ public class Responder {
         log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
                 + " compute result successfully written into response.");
 
+        if (work.isAcceptsSmile()) {
+            resultStream = new ByteArrayOutputStream();
+            work.writeToStream(mapper, resultStream);
+            resultStream.flush();
+            log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
+                    + " compute result successfully written into stream.");
+        }
+
         return resultStream;
 
     }
