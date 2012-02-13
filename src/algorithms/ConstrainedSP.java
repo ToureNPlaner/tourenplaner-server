@@ -18,7 +18,7 @@ public class ConstrainedSP extends GraphAlgorithm {
     private static Logger log = Logger.getLogger("algorithms");
     private Heap heap;
 
-    // DijkstraStructs used by the ConstraintShortestPath
+    // DijkstraStructs used by the ConstrainedShortestPath
     private final DijkstraStructs ds;
 
     
@@ -76,7 +76,7 @@ public class ConstrainedSP extends GraphAlgorithm {
     }
 
     /**
-     *  calculates resource constraint shortest path
+     *  calculates resource constrained shortest path
      *
      * @param points
      * @param resultPoints
