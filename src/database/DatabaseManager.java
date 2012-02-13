@@ -83,7 +83,13 @@ public class DatabaseManager {
 
 
     // single result
-    private final static String strGetRequestWithRequestId = strGetAllRequests
+    private final static String strGetRequestWithRequestId = strGetAllRequestsNoJson
+            + " WHERE id = ?";
+
+    private final static String strGetJSONRequestWithRequestId = "SELECT JSONRequest FROM Requests"
+            + " WHERE id = ?";
+
+    private final static String strGetJSONResponseWithRequestId = "SELECT JSONResponse FROM Requests"
             + " WHERE id = ?";
 
 
@@ -178,6 +184,8 @@ public class DatabaseManager {
         GetUserWithEmail,
         GetUserWithId,
         GetRequestWithRequestId,
+        GetJSONRequestWithRequestId,
+        GetJSONResponseWithRequestId,
 
         UpdateRequest,
         UpdateRequestWithComputeResult,
@@ -235,6 +243,12 @@ public class DatabaseManager {
 
         sqlStatementMap.put(SqlStatementEnum.GetRequestWithRequestId,
                 new SqlStatementString(strGetRequestWithRequestId));
+
+        sqlStatementMap.put(SqlStatementEnum.GetJSONRequestWithRequestId,
+                new SqlStatementString(strGetJSONRequestWithRequestId));
+
+        sqlStatementMap.put(SqlStatementEnum.GetJSONResponseWithRequestId,
+                new SqlStatementString(strGetJSONResponseWithRequestId));
 
         // UPDATE statements
 
@@ -982,94 +996,25 @@ public class DatabaseManager {
 
 	}
 
-	/**
-	 * Gets a list with all requests within the Requests table with regard to
-	 * the limit and offset constraints. If no requests are found with the given
-	 * constraints or the table is empty, an empty list will be returned.
-	 * <br />SQL command: {@value #strGetAllRequestsWithLimitOffset}
-	 * 
-	 * @param limit
-	 *            How many rows should maximal selected.
-	 * @param offset
-	 *            How many rows should be skimmed.
-	 * @return A list with all selected requests. If no requests selected, the
-	 *         list is empty, but not null.
-	 * @throws SQLException
-	 *             Thrown if select fails.
-	 */
-	public List<RequestDataset> getAllRequests(int limit, int offset)
-			throws SQLException {
-
-        int tryAgain = maxTries;
-
-        while (tryAgain > 0) {
-            tryAgain--;
-
-            try {
-
-                PreparedStatement pstGetAllRequestsWithLimitOffset
-                        = preparedStatementMap.get(SqlStatementEnum.GetAllRequestsWithLimitOffset);
-
-
-                pstGetAllRequestsWithLimitOffset.setInt(1, limit);
-                pstGetAllRequestsWithLimitOffset.setInt(2, offset);
-
-                ResultSet resultSet = pstGetAllRequestsWithLimitOffset.executeQuery();
-                ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
-
-                while (resultSet.next()) {
-
-                    list.add(new RequestDataset(
-                            resultSet.getInt(1),
-                            resultSet.getInt(2),
-                            resultSet.getString(3),
-                            resultSet.getBytes(4),
-                            resultSet.getBytes(5),
-                            resultSet.getInt(6),
-                            timestampToDate(resultSet.getTimestamp(7)),
-                            timestampToDate(resultSet.getTimestamp(8)),
-                            resultSet.getLong(9),
-                            RequestStatusEnum.valueOf(resultSet.getString(10))));
-                }
-                resultSet.close();
-
-                return list;
-
-            } catch (SQLException e) {
-                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
-            } catch (NullPointerException e) {
-                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
-            }
-
-        }
-
-        return null;
-
-    }
-
 
     /**
      * Gets a list with all requests within the Requests table with regard to
      * the limit and offset constraints. If no requests are found with the given
      * constraints or the table is empty, an empty list will be returned.
+     * The fields JSONRequest and JSONResponse will not get retrieved from database.
      * </br>SQL command: {@value #strGetAllRequestsNoJsonWithLimitOffset}
      *
      * @param limit
      *            How many rows should maximal selected.
      * @param offset
      *            How many rows should be skimmed.
-     * @param sendJson Should be false, if you do not want to send JSON objects, else it should be true.
      * @return A list with all selected requests. If no requests selected, the
      *         list is empty, but not null.
      * @throws SQLException
      *             Thrown if select fails.
      */
-    public List<RequestDataset> getAllRequests(int limit, int offset, boolean sendJson)
+    public List<RequestDataset> getAllRequests(int limit, int offset)
             throws SQLException {
-
-        if (sendJson) {
-            return getAllRequests(limit, offset);
-        }
 
         int tryAgain = maxTries;
 
@@ -1143,18 +1088,18 @@ public class DatabaseManager {
                 ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
                 RequestDataset request = null;
 
-                while (resultSet.next()) {
+                if (resultSet.next()) {
                     request = new RequestDataset(
                             resultSet.getInt(1),
                             resultSet.getInt(2),
                             resultSet.getString(3),
-                            resultSet.getBytes(4),
-                            resultSet.getBytes(5),
-                            resultSet.getInt(6),
-                            timestampToDate(resultSet.getTimestamp(7)),
-                            timestampToDate(resultSet.getTimestamp(8)),
-                            resultSet.getLong(9),
-                            RequestStatusEnum.valueOf(resultSet.getString(10)));
+                            null,
+                            null,
+                            resultSet.getInt(4),
+                            timestampToDate(resultSet.getTimestamp(5)),
+                            timestampToDate(resultSet.getTimestamp(6)),
+                            resultSet.getLong(7),
+                            RequestStatusEnum.valueOf(resultSet.getString(8)));
                 }
                 resultSet.close();
 
@@ -1171,26 +1116,21 @@ public class DatabaseManager {
         return null;
 	}
 
-	/**
-	 * Gets a list with all requests within the Requests table which have the
-	 * given user id with regard to the limit and offset constraints. If no
-	 * requests are found with the given user id and given constraints or the
-	 * table is empty, an empty list will be returned. <br />SQL command:
-	 * {@value #strGetRequestsWithUserIdLimitOffset}
-	 * 
-	 * @param userId
-	 *            User id
-	 * @param limit
-	 *            How many rows should maximal selected.
-	 * @param offset
-	 *            How many rows should be skimmed.
-	 * @return A list with all selected requests. If no requests selected, the
-	 *         list is empty, but not null.
-	 * @throws SQLException
-	 *             Thrown if select fails.
-	 */
-	public List<RequestDataset> getRequests(int userId, int limit, int offset)
-			throws SQLException {
+
+
+    /**
+     * Gets a json request as byte array of the Requests table with the given request id.
+     *
+     * </br>SQL command: {@value #strGetJSONRequestWithRequestId}
+     *
+     * @param id
+     *            Request id
+     * @return A json request as byte array if the request with the id exists. The byte array can be null.
+     * @throws SQLException
+     *             Thrown if select fails.
+     * @throws DatabaseEntryNotFound Thrown if no entry found for the given id
+     */
+    public byte[] getJsonRequest(int id) throws SQLException, DatabaseEntryNotFound {
 
         int tryAgain = maxTries;
 
@@ -1199,34 +1139,25 @@ public class DatabaseManager {
 
             try {
 
-                PreparedStatement pstGetRequestsWithUserIdLimitOffset
-                        = preparedStatementMap.get(SqlStatementEnum.GetRequestsWithUserIdLimitOffset);
+                PreparedStatement pstGetRequestWithRequestId
+                        = preparedStatementMap.get(SqlStatementEnum.GetJSONRequestWithRequestId);
 
-                pstGetRequestsWithUserIdLimitOffset.setInt(1, userId);
-                pstGetRequestsWithUserIdLimitOffset.setInt(2, limit);
-                pstGetRequestsWithUserIdLimitOffset.setInt(3, offset);
+                pstGetRequestWithRequestId.setInt(1, id);
+                ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
+                byte[] jsonRequest = null;
 
-                ResultSet resultSet = pstGetRequestsWithUserIdLimitOffset
-                        .executeQuery();
-                ArrayList<RequestDataset> list = new ArrayList<RequestDataset>();
-
-                while (resultSet.next()) {
-
-                    list.add(new RequestDataset(
-                            resultSet.getInt(1),
-                            resultSet.getInt(2),
-                            resultSet.getString(3),
-                            resultSet.getBytes(4),
-                            resultSet.getBytes(5),
-                            resultSet.getInt(6),
-                            timestampToDate(resultSet.getTimestamp(7)),
-                            timestampToDate(resultSet.getTimestamp(8)),
-                            resultSet.getLong(9),
-                            RequestStatusEnum.valueOf(resultSet.getString(10))));
+                boolean hasResult = false;
+                if (resultSet.next()) {
+                    jsonRequest = resultSet.getBytes(1);
+                    hasResult = true;
                 }
                 resultSet.close();
 
-                return list;
+                if (!hasResult) {
+                    throw new DatabaseEntryNotFound("No database row found for id " + id);
+                }
+
+                return jsonRequest;
 
             } catch (SQLException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
@@ -1237,14 +1168,69 @@ public class DatabaseManager {
         }
 
         return null;
-	}
+    }
+
+
+    /**
+     * Gets a json response as byte array of the Requests table with the given request id.
+     *
+     * </br>SQL command: {@value #strGetJSONResponseWithRequestId}
+     *
+     * @param id
+     *            Request id
+     * @return A json response as byte array if the request with the id exists. The byte array can be null.
+     * @throws SQLException
+     *             Thrown if select fails.
+     * @throws DatabaseEntryNotFound Thrown if no entry found for the given id
+     */
+    public byte[] getJsonResponse(int id) throws SQLException, DatabaseEntryNotFound {
+
+        int tryAgain = maxTries;
+
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                PreparedStatement pstGetRequestWithRequestId
+                        = preparedStatementMap.get(SqlStatementEnum.GetJSONResponseWithRequestId);
+
+                pstGetRequestWithRequestId.setInt(1, id);
+                ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
+                byte[] jsonResponse = null;
+
+                boolean hasResult = false;
+                if (resultSet.next()) {
+                    jsonResponse = resultSet.getBytes(1);
+                    hasResult = true;
+                }
+                resultSet.close();
+
+                if (!hasResult) {
+                    throw new DatabaseEntryNotFound("No database row found for id " + id);
+                }
+
+                return jsonResponse;
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return null;
+    }
 
 
     /**
      * Gets a list with all requests within the Requests table which have the
      * given user id with regard to the limit and offset constraints. If no
      * requests are found with the given user id and given constraints or the
-     * table is empty, an empty list will be returned. <br />SQL command:
+     * table is empty, an empty list will be returned.
+     * The fields JSONRequest and JSONResponse will not get retrieved from database.
+     * <br />SQL command:
      * {@value #strGetRequestsNoJsonWithUserIdLimitOffset}
      *
      * @param userId
@@ -1253,18 +1239,13 @@ public class DatabaseManager {
      *            How many rows should maximal selected.
      * @param offset
      *            How many rows should be skimmed.
-     * @param sendJson Should be false, if you do not want to send JSON objects, else it should be true.
      * @return A list with all selected requests. If no requests selected, the
      *         list is empty, but not null.
      * @throws SQLException
      *             Thrown if select fails.
      */
-    public List<RequestDataset> getRequests(int userId, int limit, int offset, boolean sendJson)
+    public List<RequestDataset> getRequests(int userId, int limit, int offset)
             throws SQLException {
-
-        if (sendJson) {
-            return getRequests(userId, limit, offset);
-        }
 
         int tryAgain = maxTries;
 

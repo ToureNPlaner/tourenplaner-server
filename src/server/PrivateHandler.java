@@ -1,9 +1,6 @@
 package server;
 
-import database.DatabaseManager;
-import database.RequestDataset;
-import database.UserDataset;
-import database.UserStatusEnum;
+import database.*;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -336,7 +333,9 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
-    public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
+    // TODO delete this or add new url getrequestinfo or something similar
+    /*
+    public void handleGetRequestInfo(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
 
         // authentication needed, auth(request) responses with error if auth fails
@@ -370,6 +369,82 @@ public class PrivateHandler extends RequestHandler {
 
         responder.writeJSON(selectedRequest, HttpResponseStatus.OK);
         log.finest("GetRequest successful.");
+
+    }
+    */
+
+    public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
+        UserDataset user = authorizer.auth(request);
+
+        // authentication needed, auth(request) responses with error if auth fails
+        if (user == null) {
+            return;
+        }
+
+        int requestID = -1;
+        byte[] jsonByteArray;
+
+        if (parameters.containsKey("id")) {
+            requestID = parseRequestIdParameter(parameters.get("id").get(0));
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (requestID < 0) {
+                return;
+            }
+            try {
+                jsonByteArray = dbm.getJsonRequest(requestID);
+            } catch (DatabaseEntryNotFound e) {
+                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                return;
+            }
+        } else {
+            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
+                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+        responder.writeByteArray(jsonByteArray, HttpResponseStatus.OK);
+        log.finest("GetRequest successful.");
+
+    }
+
+
+    public void handleGetResponse(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
+        UserDataset user = authorizer.auth(request);
+
+        // authentication needed, auth(request) responses with error if auth fails
+        if (user == null) {
+            return;
+        }
+
+        int requestID = -1;
+        byte[] jsonByteArray;
+
+        if (parameters.containsKey("id")) {
+            requestID = parseRequestIdParameter(parameters.get("id").get(0));
+            // if parameter is invalid, an error response is sent from parseUserIdParameter.
+            // the if and return is needed exactly here, because following methods could send more responses,
+            // but only one response per http request is allowed (else Exceptions will be thrown)
+            if (requestID < 0) {
+                return;
+            }
+            try {
+                jsonByteArray = dbm.getJsonResponse(requestID);
+            } catch (DatabaseEntryNotFound e) {
+                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                return;
+            }
+        } else {
+            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
+                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
+            return;
+        }
+
+        responder.writeByteArray(jsonByteArray, HttpResponseStatus.OK);
+        log.finest("GetResponse successful.");
 
     }
 
@@ -417,22 +492,15 @@ public class PrivateHandler extends RequestHandler {
         } else {
             userID = user.userid;
         }
-        
-        boolean sendJson = true;
-        if (parameters.containsKey("details")) {
-            if ( "nojson".equals(parameters.get("details").get(0)) ) {
-                sendJson = false;
-            }
-        }
 
         List<RequestDataset> requestDatasetList;
         int count;
         if (allRequests) {
-            requestDatasetList = dbm.getAllRequests(limit, offset, sendJson);
+            requestDatasetList = dbm.getAllRequests(limit, offset);
             count = dbm.getNumberOfRequests();
 
         } else {
-            requestDatasetList = dbm.getRequests(userID, limit, offset, sendJson);
+            requestDatasetList = dbm.getRequests(userID, limit, offset);
             count = dbm.getNumberOfRequestsWithUserId(userID);
         }
 
