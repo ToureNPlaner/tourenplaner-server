@@ -85,7 +85,9 @@ public class TravelingSalesman extends GraphAlgorithm {
             req.getPoints().setStore(pointStore);
             // Now build real paths
             int distance = chdijks.shortestPath(points, req.getResultWay(), true);
-            req.getMisc().put("distance", distance);
+            HashMap<String, Object> misc = new HashMap<String, Object>(1);
+            misc.put("distance", distance);
+            req.setMisc(misc);
 
         } catch (IllegalAccessException e) {
             throw new ComputeException("Illegal Access: " + e.getMessage());
