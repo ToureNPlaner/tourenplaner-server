@@ -77,7 +77,7 @@ public class ShortestPath extends GraphAlgorithm {
      * and stores all points on the path in resultWay
      *
      * @param points
-     * @param resultWay
+     * @param resultWays
      * @param tour
      * @return
      * @throws ComputeException
@@ -95,9 +95,6 @@ public class ShortestPath extends GraphAlgorithm {
         double directDistance = 0.0;
 
         for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
-            // New Point -> new subway
-            resultWays.add(new Way());
-            
             // New Dijkstra need to reset
             long starttime = System.nanoTime();
             srcId = points.getPointId(pointIndex);
@@ -106,10 +103,14 @@ public class ShortestPath extends GraphAlgorithm {
             } else if (tour) {
                 trgtId = points.getPointId(0);
             } else {
-                // Don't forget to add destination (trgtId is still the last one)
-                resultWays.get(pointIndex).addPoint(graph.getNodeLat(trgtId), graph.getNodeLon(trgtId));
+                // Don't forget to add destination to prev. way (trgtId is still the last one)
+                resultWays.get(pointIndex-1).addPoint(graph.getNodeLat(trgtId), graph.getNodeLon(trgtId));
                 break;
             }
+
+            // New Point -> new subway
+            resultWays.add(new Way());
+
             // get data structures used by Dijkstra
             int[] dists = ds.borrowDistArray();
             int[] prevEdges = ds.borrowPrevArray();
@@ -140,7 +141,7 @@ public class ShortestPath extends GraphAlgorithm {
 
             // Save the distance to the last point at the target
             // wrap around at tour
-            points.getConstraints((pointIndex + 1) % (points.size() - 1)).put("distToPrev", distance - oldDistance);
+            points.getConstraints((pointIndex + 1) % points.size()).put("distToPrev", distance - oldDistance);
 
             oldDistance = distance;
 

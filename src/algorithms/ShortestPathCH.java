@@ -298,8 +298,7 @@ public class ShortestPathCH extends GraphAlgorithm {
         double directDistance = 0.0;
 
         for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
-            //New point -> new subway
-            resultWays.add(new Way());
+
             // New Dijkstra need to reset
             long starttime = System.nanoTime();
             srcId = points.getPointId(pointIndex);
@@ -308,10 +307,14 @@ public class ShortestPathCH extends GraphAlgorithm {
             } else if (tour) {
                 destId = points.getPointId(0);
             } else {
-                // Don't forget to add destination (destId is still the last one)
-                resultWays.get(pointIndex).addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
+                // Don't forget to add destination to the last subway (destId is still the last one)
+                resultWays.get(pointIndex-1).addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
                 break;
             }
+
+            //New point -> new subway
+            resultWays.add(new Way());
+
             // get data structures used by Dijkstra
             int[] dists = ds.borrowDistArray();
             int[] prevEdges = ds.borrowPrevArray();
@@ -342,7 +345,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
             // Save the distance to the last point at the target
             // wrap around at tour
-            points.getConstraints((pointIndex + 1) % (points.size() - 1)).put("distToPrev", distance - oldDistance);
+            points.getConstraints((pointIndex + 1) % points.size()).put("distToPrev", distance - oldDistance);
 
             oldDistance = distance;
 
