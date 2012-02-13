@@ -176,11 +176,6 @@ public class AlgorithmHandler extends RequestHandler {
                 // auth closes connection and sends error
                 return;
             }
-            if (userDataset.status != UserStatusEnum.verified && userDataset.admin == false) {
-                responder.writeErrorMessage("ENOTVERIFIED", "User account is not verified",
-                        null, HttpResponseStatus.FORBIDDEN);
-                return;
-            }
         }
 
         try {

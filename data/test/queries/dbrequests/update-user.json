@@ -1,0 +1,9 @@
+{
+	"email":"testuser@tourenplaner.de",
+	"password":"testThisQuery",
+	"firstname":"test",
+	"lastname":"user",
+	"address":"Hamilton Path",
+	"admin":false,
+	"status":"verified"
+}
