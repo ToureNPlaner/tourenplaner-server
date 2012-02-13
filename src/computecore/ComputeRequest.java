@@ -27,7 +27,6 @@ public class ComputeRequest {
 	private final String algName;
 	private final Responder responder;
 	private int requestID;
-    private boolean isPrivate;
     private final boolean acceptsSmile;
 
 	/**
