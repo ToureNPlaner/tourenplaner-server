@@ -54,7 +54,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         // Check for Constraint
         int maxAltitudeDifference;
 
-        if (req.getConstraints() == null || req.getConstraints().get("maxAltitudeDifference") == null){
+        if (req.getConstraints() == null || req.getConstraints().get("Maximum Altitude Difference") == null){
             throw new ComputeException("Missing maxAltitudeDifference constraint");
         }
         try {
