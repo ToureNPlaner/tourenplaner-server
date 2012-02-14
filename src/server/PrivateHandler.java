@@ -8,21 +8,17 @@ import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
-
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -47,15 +43,15 @@ public class PrivateHandler extends RequestHandler {
 
     /**
      * Extracts and parses the JSON encoded content of the given HttpRequest, in
-     * case of error sends a EBADJSON or HttpStatus.NO_CONTENT answer to the
-     * client and returns null, the connection will be closed afterwards.
+     * case of error sends a EBADJSON answer to the client and returns null,
+     * the connection will be closed afterwards.
      *
-     * @param responder
-     * @param request
-     * @return
-     * @throws java.io.IOException
+     * @param request HttpRequest
+     * @return Returns parsed json map or null in case of an error
+     * @throws IOException Thrown if error message sending or reading json content fails
+     * @throws JsonMappingException Thrown if reading json content fails
      */
-    private Map<String, Object> getJSONContent(final Responder responder, final HttpRequest request) throws IOException {
+    private Map<String, Object> getJSONContent(final HttpRequest request) throws IOException {
 
         Map<String, Object> objmap = null;
         final ChannelBuffer content = request.getContent();
@@ -70,11 +66,8 @@ public class PrivateHandler extends RequestHandler {
             }
 
         } else {
-            // Respond with No Content
-            final HttpResponse response = new DefaultHttpResponse(HTTP_1_1, NO_CONTENT);
-            // Write the response.
-            final ChannelFuture future = responder.getChannel().write(response);
-            future.addListener(ChannelFutureListener.CLOSE);
+            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", "Content is empty",
+                    HttpResponseStatus.BAD_REQUEST);
         }
 
         return objmap;
@@ -87,14 +80,17 @@ public class PrivateHandler extends RequestHandler {
      * authorization as admin, the new registered user will not be registered as
      * admin, even if json admin flag is true.
      *
-     * @param request
-     * @throws java.sql.SQLFeatureNotSupportedException
-     *
+     * @param request HttpRequest
+     * @throws SQLFeatureNotSupportedException
+     *          Thrown if a function is not supported by driver.
+     * @throws JsonMappingException
+     *          Thrown if reading json content fails
      * @throws SQLException
-     * @throws java.io.IOException
+     *          Thrown if database query fails
+     * @throws IOException
+     *          Thrown if error message sending or reading json content fails
      */
-    public void handleRegisterUser(final HttpRequest request) throws IOException, SQLFeatureNotSupportedException,
-            SQLException {
+    public void handleRegisterUser(final HttpRequest request) throws IOException, SQLException {
 
         UserDataset authenticatedUser = null;
 
@@ -113,7 +109,7 @@ public class PrivateHandler extends RequestHandler {
             }
         }
 
-        Map<String, Object> objmap = getJSONContent(responder, request);
+        Map<String, Object> objmap = getJSONContent(request);
 
         // getJSONContent adds error-message to responder
         // if json object is bad or if there is no json object
@@ -160,9 +156,9 @@ public class PrivateHandler extends RequestHandler {
         } else {
 
             boolean adminFlag = false;
-            // TODO specify the case objmap.get("admin") == null for protocol specification: adminFlag is then false
             if (objmap.get("admin") != null) {
                 // if (objmap.get("admin") is null, then "instanceof Boolean" would be always false
+                // so following check makes only sense if objmap.get("admin") != null
                 if ( !(objmap.get("admin") instanceof Boolean) ) {
                     responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
                             "JSON user object was not correct (\"admin\" should be boolean)",
@@ -186,6 +182,14 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
+    /**
+     *
+     * @param request
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
+     * @throws IOException
+     * @throws SQLException
+     */
     public void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException,
             IOException, SQLException {
         UserDataset user = authorizer.auth(request);
@@ -194,6 +198,13 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
+    /**
+     *
+     * @param request
+     * @param parameters
+     * @throws IOException
+     * @throws SQLException
+     */
     public void handleGetUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
@@ -203,7 +214,7 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int userID = -1;
+        int userID;
         UserDataset selectedUser;
 
         if (parameters.containsKey("id")) {
@@ -231,6 +242,13 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
+    /**
+     *
+     * @param request
+     * @param parameters
+     * @throws IOException
+     * @throws SQLException
+     */
     public void handleUpdateUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
@@ -241,7 +259,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
 
-        Map<String, Object> objmap = getJSONContent(responder, request);
+        Map<String, Object> objmap = getJSONContent(request);
 
         // getJSONContent adds error-message to responder
         // if json object is bad or if there is no json object
@@ -252,7 +270,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
 
-        int userID = -1;
+        int userID;
         boolean isAdmin = user.admin;
         UserDataset selectedUser;
 
@@ -265,14 +283,14 @@ public class PrivateHandler extends RequestHandler {
                 return;
             }
             selectedUser = dbm.getUser(userID);
+
+            if (selectedUser == null) {
+                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                return;
+            }
         } else {
             selectedUser = user;
-        }
-
-        if (selectedUser == null) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
-            return;
         }
 
 
@@ -316,14 +334,7 @@ public class PrivateHandler extends RequestHandler {
                         && selectedUser.status == UserStatusEnum.verified) {
                     selectedUser.verifiedDate = new Date(System.currentTimeMillis());
                 }
-
-                if (previousStatus == UserStatusEnum.verified
-                        && selectedUser.status == UserStatusEnum.needs_verification) {
-                    selectedUser.verifiedDate = null;
-                }
-
             }
-
         }
 
         dbm.updateUser(selectedUser);
@@ -372,6 +383,14 @@ public class PrivateHandler extends RequestHandler {
     }
     */
 
+
+    /**
+     *
+     * @param request
+     * @param parameters
+     * @throws IOException
+     * @throws SQLException
+     */
     public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
 
@@ -418,6 +437,13 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
+    /**
+     *
+     * @param request
+     * @param parameters
+     * @throws IOException
+     * @throws SQLException
+     */
     public void handleGetResponse(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
 
@@ -463,6 +489,15 @@ public class PrivateHandler extends RequestHandler {
 
     }
 
+    /**
+     *
+     * @param request
+     * @param parameters
+     * @throws SQLException
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
     public void handleListRequests(final HttpRequest request, Map<String, List<String>> parameters) throws SQLException, JsonGenerationException, JsonMappingException, IOException {
 
         UserDataset user = authorizer.auth(request);
@@ -474,16 +509,16 @@ public class PrivateHandler extends RequestHandler {
         }
 
 
-        int limit = extractPosIntParameter(parameters, "limit");
-        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        int limit = extractNaturalIntParameter(parameters, "limit");
+        // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
         if (limit < 0) {
             return;
         }
 
-        int offset = extractPosIntParameter(parameters, "offset");
-        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        int offset = extractNaturalIntParameter(parameters, "offset");
+        // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
         if (offset < 0) {
@@ -491,7 +526,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
 
-        Integer userID = -1;
+        Integer userID;
         boolean allRequests = false;
         if (parameters.containsKey("id")) {
             userID = parseUserIdParameter(parameters.get("id").get(0), user, true);
@@ -529,7 +564,15 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
-
+    /**
+     *
+     * @param request
+     * @param parameters
+     * @throws SQLException
+     * @throws JsonGenerationException
+     * @throws JsonMappingException
+     * @throws IOException
+     */
     public void handleListUsers(final HttpRequest request, Map<String, List<String>> parameters)
             throws SQLException, JsonGenerationException, JsonMappingException, IOException {
         UserDataset user = authorizer.auth(request);
@@ -540,31 +583,28 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (!user.admin) {
-            responder.writeErrorMessage(
-                    "ENOTADMIN",
-                    "You are not an admin",
-                    "You must be admin to list users",
+            responder.writeErrorMessage("ENOTADMIN", "You are not an admin", "You must be admin to list users",
                     HttpResponseStatus.FORBIDDEN);
             return;
         }
 
-        int limit = extractPosIntParameter(parameters, "limit");
-        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        int limit = extractNaturalIntParameter(parameters, "limit");
+        // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
         if (limit < 0) {
             return;
         }
 
-        int offset = extractPosIntParameter(parameters, "offset");
-        // if parameter is invalid, an error response is sent from extractPosIntParameter.
+        int offset = extractNaturalIntParameter(parameters, "offset");
+        // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
         if (offset < 0) {
             return;
         }
 
-        List<UserDataset> userDatasetList = null;
+        List<UserDataset> userDatasetList;
         userDatasetList = dbm.getAllUsers(limit, offset);
         int count = dbm.getNumberOfUsers();
 
@@ -578,7 +618,13 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
-
+    /**
+     *
+     * @param request
+     * @param parameters
+     * @throws IOException
+     * @throws SQLException
+     */
     public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
@@ -588,7 +634,7 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int userID = -1;
+        int userID;
         if (parameters.containsKey("id")) {
             userID = parseUserIdParameter(parameters.get("id").get(0), user, false);
             // if parameter is invalid, an error response is sent from parseUserIdParameter.
@@ -618,13 +664,13 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
-     * Returns -1 if parameter is invalid (not a natural number) and will then
+     * Returns the parsed number or -1 if parameter is invalid (not a natural number) and will then
      * response to request with error message.
      * @param parameterValue the value of the id parameter as String
-     * @return
-     * @throws java.io.IOException
+     * @return Returns the parsed number or -1 if parameter is invalid (not a natural number)
+     * @throws java.io.IOException Thrown if error message sending fails
      */
-    private Integer parseRequestIdParameter(String parameterValue) throws IOException {
+    private int parseRequestIdParameter(String parameterValue) throws IOException {
 
         if (parameterValue == null) {
             responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
@@ -632,7 +678,7 @@ public class PrivateHandler extends RequestHandler {
             return -1;
         }
 
-        int requestID = -1;
+        int requestID;
 
         try {
             requestID = Integer.parseInt(parameterValue);
@@ -651,19 +697,18 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
-
-
-
     /**
-     * Returns -1 if parameter is invalid (not a natural number) and will then
+     * Returns the parsed number or -1 if parameter is invalid (not a natural number) and will then
      * response to request with error message. But the authenticated user must be an admin (will be checked by this
      * method) or an error message will be sent. If "id=all" is allowed and the value of the parameter is "all",
      * this method will return null.
      * @param parameterValue the value of the id parameter as String
      * @param authenticatedUser UserDataset of the user who sent the request
      * @param valueAllIsAllowed determines if id=all is allowed for the parameter
-     * @return
-     * @throws java.io.IOException
+     * @return Returns the parsed number or -1 if parameter is invalid (not a natural number).
+     *          If "id=all" is allowed and the value of the parameter is "all",
+     *          this method will return null.
+     * @throws java.io.IOException Thrown if error message sending fails
      */
     private Integer parseUserIdParameter(String parameterValue, UserDataset authenticatedUser,
                                            boolean valueAllIsAllowed) throws IOException {
@@ -680,7 +725,7 @@ public class PrivateHandler extends RequestHandler {
             return -1;
         }
 
-        int userID = -1;
+        int userID;
 
         if ("all".equals(parameterValue) && valueAllIsAllowed) {
             return null;
@@ -699,16 +744,18 @@ public class PrivateHandler extends RequestHandler {
         }
 
         return userID;
-        
     }
 
+
     /**
-     * Returns -1 if parameter is invalid (missing or not a natural number) and will then response to request
-     * with error message.
-     * @param parameters
-     * @return
+     * Returns the parsed number or -1 if parameter is invalid (missing or not a natural number)
+     * and will then response to request with error message.
+     * @param parameters map with url parameters from client
+     * @param name the name of the parameter
+     * @return Returns the parsed number or -1 if parameter is invalid (missing or not a natural number)
+     * @throws java.io.IOException Thrown if error message sending fails
      */
-    private int extractPosIntParameter(Map<String, List<String>> parameters, String name) throws IOException{
+    private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name) throws IOException {
         int param = -1;
 
         if (!parameters.containsKey(name)) {

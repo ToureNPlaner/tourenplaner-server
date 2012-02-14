@@ -7,7 +7,6 @@ import computecore.ComputeRequest;
 import computecore.RequestPoints;
 import database.DatabaseManager;
 import database.UserDataset;
-import database.UserStatusEnum;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
@@ -32,9 +31,8 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * User: Niklas Schnelle
- * Date: 12/26/11
- * Time: 11:34 PM
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  */
 public class AlgorithmHandler extends RequestHandler {
 
@@ -164,8 +162,8 @@ public class AlgorithmHandler extends RequestHandler {
     /**
      * @param request HttpRequest
      * @param algName algName as String
-     * @throws java.io.IOException
-     * @throws java.sql.SQLException Thrown if auth fails or logging of request fails
+     * @throws java.io.IOException Thrown if error message sending or reading compute request fails
+     * @throws java.sql.SQLException Thrown if auth fails or writing request into database fails
      */
     public void handleAlg(HttpRequest request, String algName) throws IOException, SQLException {
         UserDataset userDataset = null;
@@ -205,13 +203,12 @@ public class AlgorithmHandler extends RequestHandler {
                     String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate && !algFac.isHidden()){
-                        // Write requests with status failed into database, failure cause is busy server
-                        // TODO specify this case clearly, maybe behavior should be another
-                        // TODO maybe a better method should be used to convert a string to a byte array
+                        // Write request with status failed into database, failure cause is busy server
 
                         // already sent error message, we should throw no exception
                         // (MasterHandler would send an error message if it catches an SQLException)
                         try {
+                            // TODO maybe a better method should be used to convert a string to a byte array
                             dbm.updateRequestAsFailed(requestID, errorMessage.getBytes());
                         } catch (SQLException ignored) {
                         }
