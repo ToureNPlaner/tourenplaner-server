@@ -4,6 +4,8 @@
 package computecore;
 
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import server.Responder;
 
@@ -37,10 +39,15 @@ public class ComputeRequest {
 	 * -1, must be set with {@link #setRequestID(int)} if server is private. If
 	 * server is not private the requestID must remain -1.
 	 *
-     * @param responder
-     * @param algName
-     * @param acceptsSmile
+     * @param responder The to this compute request corresponding Responder
+     * @param algName The algorithm name
+     * @param points
+     * @param constraints
+     * @param acceptsSmile Flag if client accepts Smile
      */
+
+    // TODO should here RequestPoints or a way object be given?
+
 	public ComputeRequest(Responder responder, String algName,
                           RequestPoints points, Map<String, Object> constraints, boolean acceptsSmile) {
 		this.algName = algName;
@@ -57,22 +64,23 @@ public class ComputeRequest {
 	 * Gets the responder object which is used to send the result to the correct
 	 * client connection
 	 * 
-	 * @return
+	 * @return Returns the Responder object
 	 */
 	public Responder getResponder() {
 		return responder;
 	}
 
 	/**
-	 * Gets the URLSuffix for the requested algorithmm e.g. "sp" for a shortest
+	 * Gets the URLSuffix for the requested algorithm e.g. "sp" for a shortest
 	 * path algorithm
 	 * 
-	 * @return
+	 * @return Returns the URLSuffix
 	 */
 	public String getAlgorithmURLSuffix() {
 		return algName;
 	}
 
+    // TODO should this really return RequestPoints or a Way object?
 	/**
 	 * Returns the Way object associated with this request
 	 * 
@@ -82,12 +90,13 @@ public class ComputeRequest {
 		return points;
 	}
 
+    // TODO rewrite not good readable javadoc. newline must be written with <br />
 	/**
 	 * Returns the list of Ways making up the result of the computation
      * it's an Algorithms job that after it's computation it contains all
      * the ways connection the Points
 	 * 
-	 * @return
+	 * @return A List with the result ways
 	 */
 	public List<Way> getResultWays() {
 		return resultWays;
@@ -96,7 +105,7 @@ public class ComputeRequest {
 	/**
 	 * Returns the constraints associated with this request
 	 * 
-	 * @return
+	 * @return A Map representing the constraints
 	 */
 	public Map<String, Object> getConstraints() {
 		return constraints;
@@ -105,12 +114,17 @@ public class ComputeRequest {
 	/**
 	 * Returns the misc field used to store results, initially this is null
 	 * 
-	 * @return
+	 * @return A Map representing the misc field
 	 */
 	public Map<String, Object> getMisc() {
 		return misc;
 	}
 
+    /**
+     * Sets the misc field used to store results, initially this is null
+     *
+     * @param misc A Map representing the misc field
+     */
 	public void setMisc(Map<String, Object> misc) {
 		this.misc = misc;
 	}
@@ -122,17 +136,18 @@ public class ComputeRequest {
 	 * RequestDataset within the database. Must be set after construction of the
 	 * ComputeRequest object if server is in private mode.
 	 *
-	 */
+     * @param requestID The requestID to set
+     */
 	public void setRequestID(int requestID) {
 		this.requestID = requestID;
 	}
 
 	/**
 	 * Gets the requestID, should be -1 if server is not in private mode. This
-	 * attribute should cointain the requestID of the corresponding
+	 * attribute should contain the requestID of the corresponding
 	 * RequestDataset within the database.
 	 * 
-	 * @return
+	 * @return Returns the requestID
 	 */
 	public int getRequestID() {
 		return this.requestID;
@@ -148,7 +163,7 @@ public class ComputeRequest {
 
     /**
      * Returns if request comes from a client accepting "application/x-jackson-smile"
-     * @return
+     * @return Returns if client is accepting smile
      */
     public boolean isAcceptsSmile() {
         return acceptsSmile;
@@ -158,12 +173,13 @@ public class ComputeRequest {
 	 * Writes a json representation of the result of this request to the given
 	 * stream
 	 * 
-	 * @param mapper
-	 * @param stream
-	 * @throws IOException
+	 * @param mapper Jackson ObjectMapper
+	 * @param stream OutputStream
+	 * @throws JsonGenerationException Thrown if generating json fails
+     * @throws JsonProcessingException Thrown if json generation processing fails
+     * @throws IOException Thrown if writing json onto the stream fails
 	 */
-	public void writeToStream(ObjectMapper mapper, OutputStream stream)
-			throws IOException {
+	public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
 
 		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
 		Map<String, Object> pconsts;

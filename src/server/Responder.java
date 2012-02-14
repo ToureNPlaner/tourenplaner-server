@@ -35,7 +35,8 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * then to the wire. As well as providing utility methods for sending answers to
  * clients
  *
- * @author Niklas Schnelle, Peter Vollmer
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  */
 public class Responder {
 
@@ -61,7 +62,7 @@ public class Responder {
     /**
      * Constructs a new Responder from the given Channel
      *
-     * @param replyChan
+     * @param replyChan reply channel
      */
     public Responder(Channel replyChan) {
         this.replyChannel = replyChan;
@@ -70,11 +71,13 @@ public class Responder {
     }
 
 
+    // TODO should we keep this unused method here?
     /**
      * Gets the KeepAlive flag
      *
-     * @return
+     * @return Returns the KeepAlive flag
      */
+    @SuppressWarnings("UnusedDeclaration")
     public boolean getKeepAlive() {
         return keepAlive;
     }
@@ -82,7 +85,7 @@ public class Responder {
     /**
      * Sets the KeepAlive flag
      *
-     * @param keepAlive
+     * @param keepAlive how to set the KeepAlive flag
      */
     public void setKeepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
@@ -91,15 +94,17 @@ public class Responder {
     /**
      * Gets the Channel associated with this Responder
      *
-     * @return
+     * @return Returns the reply channel
      */
     public Channel getChannel() {
         return replyChannel;
     }
 
+    // TODO should we keep this unused method here?
     /**
      * Writes a HTTP Unauthorized answer to the wire and closes the connection
      */
+    @SuppressWarnings("UnusedDeclaration")
     public void writeUnauthorizedClose() {
         log.info("Writing unauthorized close");
         // Respond with Unauthorized Access
@@ -113,9 +118,9 @@ public class Responder {
 
     /**
      * Writes a HTTP status answer to the wire and closes the connection if it is not a keep-alive connection
+     * @param status HttpResponseStatus
      */
     public void writeStatusResponse(HttpResponseStatus status) {
-        // TODO check if this method is a correct response
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
 
@@ -142,13 +147,13 @@ public class Responder {
      * Translates a given json compatible object (see simple_json) to JSON and
      * writes it onto the wire
      *
-     * @param toWrite
-     * @param status
-     * @throws IOException
-     * @throws JsonMappingException
-     * @throws JsonGenerationException
+     * @param toWrite json compatible object
+     * @param status HttpResponseStatus
+     * @throws JsonMappingException Thrown if mapping object to json fails
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if writing json onto the output fails
      */
-    public void writeJSON(Object toWrite, HttpResponseStatus status) throws JsonGenerationException, JsonMappingException, IOException {
+    public void writeJSON(Object toWrite, HttpResponseStatus status) throws IOException {
 
         // Allocate buffer if not already done
         // do this here because we are in a worker thread
@@ -244,13 +249,15 @@ public class Responder {
     /**
      * Sends an error to the client, the connection will be closed afterwards
      *
-     * @param errorId
-     * @param message
-     * @param details
-     * @param status
+     * @param errorId error id (see protocol specification), for example ENOTADMIN
+     * @param message corresponding error message (see protocol specification)
+     * @param details more detailed error information
+     * @param status HttpResponseStatus
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if writing json onto the output fails
      */
     public void writeErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
-        throws IOException
+            throws IOException
     {
         log.info("Writing Error Message: " + message + " --- " + details);
 
@@ -292,11 +299,13 @@ public class Responder {
      * Sends an error to the client, the connection will be closed afterwards
      * A String representing the error response will be returned
      *
-     * @param errorId
-     * @param message
-     * @param details
-     * @param status
-     * @return A String representing the error response 
+     * @param errorId error id (see protocol specification), for example ENOTADMIN
+     * @param message corresponding error message (see protocol specification)
+     * @param details more detailed error information
+     * @param status HttpResponseStatus
+     * @return A String representing the error response
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if writing json onto the output fails
      */
     public String writeAndReturnErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
             throws IOException
@@ -312,10 +321,10 @@ public class Responder {
      * Creates the response for the ComputeResult. Returns a
      * ByteArrayOutputStream which contains the json object of this response.
      *
-     * @param work
-     * @param status
-     * @return
-     * @throws IOException
+     * @param work ComputeRequest
+     * @param status HttpResponseStatus
+     * @return Returns a ByteArrayOutputStream which contains the json object of this response.
+     * @throws IOException Thrown if writing json onto the output or onto the returned ByteArrayOutputStream fails
      */
     public ByteArrayOutputStream writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
         ObjectMapper useMapper = (work.isAcceptsSmile()) ? smileMapper: mapper;

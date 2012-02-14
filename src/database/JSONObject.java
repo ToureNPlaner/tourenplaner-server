@@ -1,7 +1,7 @@
 package database;
 
 /**
- * Class to bundle a json byte array and the according user id.
+ * Class to bundle a json byte array and the corresponding user id.
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
  */
@@ -11,7 +11,7 @@ public class JSONObject {
     private byte[] jsonByteArray;
     
     public JSONObject(int userID, byte[] jsonByteArray) {
-        userID = this.userID;
+        this.userID = userID;
         this.jsonByteArray = jsonByteArray;
     }
 

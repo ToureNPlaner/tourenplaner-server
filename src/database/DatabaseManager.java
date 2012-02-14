@@ -160,7 +160,7 @@ public class DatabaseManager {
 	 * @param userName
 	 *            User name of the database user account
 	 * @param password
-	 *            To the user according password
+	 *            To the user corresponding password
 	 * @throws SQLException
 	 *             Thrown if connection could not be established or if errors
 	 *             occur while creating prepared statements
@@ -919,7 +919,7 @@ public class DatabaseManager {
 
 	/**
 	 * Deletes the Users table row with the given user id. Depending on the
-	 * database configuration(for example strict mode) maybe the according
+	 * database configuration(for example strict mode) maybe the corresponding
 	 * requests could be deleted too because of the FOREIGN KEY UserId within
 	 * the Requests table. </br>SQL command:
 	 * {@value #strDeleteUserWithUserId}
@@ -959,7 +959,7 @@ public class DatabaseManager {
 
 	/**
 	 * Deletes the Users table row with the given user email. Depending on the
-	 * database configuration(for example strict mode) maybe the according
+	 * database configuration(for example strict mode) maybe the corresponding
 	 * requests could be deleted too because of the FOREIGN KEY UserId within
 	 * the Requests table. </br>SQL command: {@value #strDeleteUserWithEmail}
 	 * 
