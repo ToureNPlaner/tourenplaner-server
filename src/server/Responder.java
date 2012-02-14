@@ -197,7 +197,7 @@ public class Responder {
     /**
      * Writes a given byte array onto the wire. The given byte array should be a json object,
      * because this method will write &quot;application/json&quot; as content type into the
-     * response header. If the byte array is null this method will write null into the wire.
+     * response header. If the byte array is null this method will sent an empty response content.
      * @param byteArray A json object as byte array
      * @param status HttpResponseStatus
      * @throws IOException Thrown if writing onto the output fails
@@ -215,15 +215,13 @@ public class Responder {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
         outputBuffer.clear();
-        OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
 
         if (byteArray != null) {
+            OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
             resultStream.write(byteArray);
-        } else {
-            resultStream.write("null".getBytes());
+            resultStream.flush();
         }
 
-        resultStream.flush();
         response.setContent(outputBuffer);
 
         if (keepAlive) {
