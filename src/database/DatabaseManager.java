@@ -86,10 +86,10 @@ public class DatabaseManager {
     private final static String strGetRequestWithRequestId = strGetAllRequestsNoJson
             + " WHERE id = ?";
 
-    private final static String strGetJSONRequestWithRequestId = "SELECT JSONRequest FROM Requests"
+    private final static String strGetJSONRequestWithRequestId = "SELECT UserID, JSONRequest FROM Requests"
             + " WHERE id = ?";
 
-    private final static String strGetJSONResponseWithRequestId = "SELECT JSONResponse FROM Requests"
+    private final static String strGetJSONResponseWithRequestId = "SELECT UserID, JSONResponse FROM Requests"
             + " WHERE id = ?";
 
 
@@ -1120,17 +1120,20 @@ public class DatabaseManager {
 
     /**
      * Gets a json request as byte array of the Requests table with the given request id.
+     * The byte array and the corresponding user id will be stored together in the returned JSONObject.
+     * If no entry is found for the given request id, null will be returned.
      *
      * </br>SQL command: {@value #strGetJSONRequestWithRequestId}
      *
      * @param id
      *            Request id
-     * @return A json request as byte array if the request with the id exists. The byte array can be null.
+     * @return A JSONObject with a byte array and user id if the request with the request id exists.
+     *         The byte array can be null if the database field is NULL.
+     *         The returned JSONObject itself is null if no entry is found for the given request id.
      * @throws SQLException
      *             Thrown if select fails.
-     * @throws DatabaseEntryNotFound Thrown if no entry found for the given id
      */
-    public byte[] getJsonRequest(int id) throws SQLException, DatabaseEntryNotFound {
+    public JSONObject getJsonRequest(int id) throws SQLException {
 
         int tryAgain = maxTries;
 
@@ -1144,18 +1147,15 @@ public class DatabaseManager {
 
                 pstGetRequestWithRequestId.setInt(1, id);
                 ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
-                byte[] jsonRequest = null;
 
-                boolean hasResult = false;
+                JSONObject jsonRequest = null;
+
                 if (resultSet.next()) {
-                    jsonRequest = resultSet.getBytes(1);
-                    hasResult = true;
+                    jsonRequest = new JSONObject(
+                            resultSet.getInt(1),
+                            resultSet.getBytes(2));
                 }
                 resultSet.close();
-
-                if (!hasResult) {
-                    throw new DatabaseEntryNotFound("No database row found for id " + id);
-                }
 
                 return jsonRequest;
 
@@ -1173,17 +1173,20 @@ public class DatabaseManager {
 
     /**
      * Gets a json response as byte array of the Requests table with the given request id.
+     * The byte array and the corresponding user id will be stored together in the returned JSONObject.
+     * If no entry is found for the given request id, null will be returned.
      *
      * </br>SQL command: {@value #strGetJSONResponseWithRequestId}
      *
      * @param id
      *            Request id
-     * @return A json response as byte array if the request with the id exists. The byte array can be null.
+     * @return A JSONObject with a byte array and user id if the request with the request id exists.
+     *         The byte array can be null if the database field is NULL.
+     *         The returned JSONObject itself is null if no entry is found for the given request id.
      * @throws SQLException
      *             Thrown if select fails.
-     * @throws DatabaseEntryNotFound Thrown if no entry found for the given id
      */
-    public byte[] getJsonResponse(int id) throws SQLException, DatabaseEntryNotFound {
+    public JSONObject getJsonResponse(int id) throws SQLException {
 
         int tryAgain = maxTries;
 
@@ -1197,18 +1200,15 @@ public class DatabaseManager {
 
                 pstGetRequestWithRequestId.setInt(1, id);
                 ResultSet resultSet = pstGetRequestWithRequestId.executeQuery();
-                byte[] jsonResponse = null;
 
-                boolean hasResult = false;
+                JSONObject jsonResponse = null;
+
                 if (resultSet.next()) {
-                    jsonResponse = resultSet.getBytes(1);
-                    hasResult = true;
+                    jsonResponse =  new JSONObject(
+                            resultSet.getInt(1),
+                            resultSet.getBytes(2));
                 }
                 resultSet.close();
-
-                if (!hasResult) {
-                    throw new DatabaseEntryNotFound("No database row found for id " + id);
-                }
 
                 return jsonResponse;
 

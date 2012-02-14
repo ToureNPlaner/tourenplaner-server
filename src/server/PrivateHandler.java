@@ -25,9 +25,8 @@ import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
 import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * User: Niklas Schnelle, Sascha Meusel
- * Date: 12/26/11
- * Time: 11:33 PM
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  */
 public class PrivateHandler extends RequestHandler {
 
@@ -381,8 +380,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int requestID = -1;
-        byte[] jsonByteArray;
+        int requestID;
+        JSONObject jsonObject;
 
         if (parameters.containsKey("id")) {
             requestID = parseRequestIdParameter(parameters.get("id").get(0));
@@ -392,9 +391,10 @@ public class PrivateHandler extends RequestHandler {
             if (requestID < 0) {
                 return;
             }
-            try {
-                jsonByteArray = dbm.getJsonRequest(requestID);
-            } catch (DatabaseEntryNotFound e) {
+
+            jsonObject = dbm.getJsonRequest(requestID);
+
+            if (jsonObject == null) {
                 responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
                         "The id is not in the database", HttpResponseStatus.NOT_FOUND);
                 return;
@@ -405,7 +405,14 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        responder.writeByteArray(jsonByteArray, HttpResponseStatus.OK);
+        if (user.userid != jsonObject.getUserID() && !user.admin) {
+            responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
+                    "You cannot view the json object of another user because you are not an admin",
+                    HttpResponseStatus.FORBIDDEN);
+            return;
+        }
+
+        responder.writeByteArray(jsonObject.getJsonByteArray(), HttpResponseStatus.OK);
         log.finest("GetRequest successful.");
 
     }
@@ -419,8 +426,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int requestID = -1;
-        byte[] jsonByteArray;
+        int requestID;
+        JSONObject jsonObject;
 
         if (parameters.containsKey("id")) {
             requestID = parseRequestIdParameter(parameters.get("id").get(0));
@@ -430,9 +437,10 @@ public class PrivateHandler extends RequestHandler {
             if (requestID < 0) {
                 return;
             }
-            try {
-                jsonByteArray = dbm.getJsonResponse(requestID);
-            } catch (DatabaseEntryNotFound e) {
+
+            jsonObject = dbm.getJsonResponse(requestID);
+
+            if (jsonObject == null) {
                 responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
                         "The id is not in the database", HttpResponseStatus.NOT_FOUND);
                 return;
@@ -443,7 +451,14 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        responder.writeByteArray(jsonByteArray, HttpResponseStatus.OK);
+        if (user.userid != jsonObject.getUserID() && !user.admin) {
+            responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
+                    "You cannot view the json object of another user because you are not an admin",
+                    HttpResponseStatus.FORBIDDEN);
+            return;
+        }
+
+        responder.writeByteArray(jsonObject.getJsonByteArray(), HttpResponseStatus.OK);
         log.finest("GetResponse successful.");
 
     }
