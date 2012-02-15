@@ -13,7 +13,7 @@ import java.io.ByteArrayInputStream;
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public class ConstraintSPTest {
+public class ConstrainedSPTest {
     @Test
     public void testCompute() throws Exception {
         GraphRepFactory graphRepTextReader = new GraphRepTextReader();
@@ -23,7 +23,7 @@ public class ConstraintSPTest {
         ByteArrayInputStream testFileByteArrayStream = new ByteArrayInputStream(testFileBytes);
         GraphRep graphRep = graphRepTextReader.createGraphRep(testFileByteArrayStream);
         GraphAlgorithmFactory fac = new ConstrainedSPFactory(graphRep);
-        ConstrainedSP constraintSP = (ConstrainedSP)fac.createAlgorithm();
+        ConstrainedSP constrainedSP = (ConstrainedSP)fac.createAlgorithm();
 
         RequestPoints points = new RequestPoints();
         points.addPoint(10000000,10000000);
@@ -32,7 +32,7 @@ public class ConstraintSPTest {
         //shortest path is the best fittest
 
         Way resultWay = new Way();
-        int[] result = constraintSP.cSP(points,resultWay,90);
+        int[] result = constrainedSP.cSP(points,resultWay,90);
         assertEquals(80,result[0]);
         assertEquals(7,result[1]);
         assertEquals(10000000,resultWay.getPointLat(0));
@@ -45,7 +45,7 @@ public class ConstraintSPTest {
         //middle way
 
         resultWay = new Way();
-        result = constraintSP.cSP(points,resultWay,60);
+        result = constrainedSP.cSP(points,resultWay,60);
         assertEquals(45,result[0]);
         assertEquals(9,result[1]);
         assertEquals(10000000,resultWay.getPointLat(0));
@@ -60,7 +60,7 @@ public class ConstraintSPTest {
         //longest possible way
 
         resultWay = new Way();
-        result = constraintSP.cSP(points,resultWay,44);
+        result = constrainedSP.cSP(points,resultWay,44);
         assertEquals(40,result[0]);
         assertEquals(14,result[1]);
         assertEquals(10000000,resultWay.getPointLat(0));
@@ -77,7 +77,7 @@ public class ConstraintSPTest {
         //no possible way with a constraint
         resultWay = new Way();
         try {
-            result = constraintSP.cSP(points,resultWay,30);
+            result = constrainedSP.cSP(points,resultWay,30);
             fail("Should have raised an IllegalArgumentException");
         } catch (ComputeException expected) {
         }
