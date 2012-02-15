@@ -8,17 +8,14 @@ import computecore.RequestPoints;
 import database.DatabaseManager;
 import database.UserDataset;
 import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
@@ -26,9 +23,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
-
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.NO_CONTENT;
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -64,16 +58,17 @@ public class AlgorithmHandler extends RequestHandler {
      * Reads a JSON encoded compute request from the content field of the given
      * request
      *
-     * @param algName
-     * @param responder
-     * @param request
-     * @return
-     * @throws IOException
-     * @throws JsonParseException
+     * @param algName algorithm name
+     * @param responder Responder
+     * @param request HttpRequest
+     * @return A ComputeRequest object representing the received request.
+     * @throws JsonParseException Thrown if parsing json content fails
+     * @throws JsonProcessingException Thrown if json generation processing fails
+     * @throws IOException Thrown if error message sending or reading json content fails
      */
-    private ComputeRequest readComputeRequest(final String algName, final Responder responder, final HttpRequest request) throws IOException, JsonParseException {
+    private ComputeRequest readComputeRequest(final String algName, final Responder responder, final HttpRequest request) throws IOException {
         // Check whether Client accepts "application/x-jackson-smile"
-        boolean acceptsSmile = (request.getHeader("Accept") != null) ? request.getHeader("Accept").contains("application/x-jackson-smile") : false;
+        boolean acceptsSmile = (request.getHeader("Accept") != null) && request.getHeader("Accept").contains("application/x-jackson-smile");
 
         Map<String, Object> constraints = null;
         final RequestPoints points = new RequestPoints();
@@ -147,12 +142,8 @@ public class AlgorithmHandler extends RequestHandler {
             }
 
         } else {
-            // Respond with No Content
-            final HttpResponse response = new DefaultHttpResponse(HTTP_1_1, NO_CONTENT);
-            // Write the response.
-            final ChannelFuture future = responder.getChannel().write(response);
-            future.addListener(ChannelFutureListener.CLOSE);
-            log.warning("No Content");
+            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", "Content is empty",
+                    HttpResponseStatus.BAD_REQUEST);
             return null;
         }
 
@@ -160,10 +151,12 @@ public class AlgorithmHandler extends RequestHandler {
     }
 
     /**
+     * Handles an algorithm request.
+     *
      * @param request HttpRequest
-     * @param algName algName as String
-     * @throws java.io.IOException Thrown if error message sending or reading compute request fails
-     * @throws java.sql.SQLException Thrown if auth fails or writing request into database fails
+     * @param algName algorithm name as String
+     * @throws IOException Thrown if error message sending or reading compute request fails
+     * @throws SQLException Thrown if database query fails
      */
     public void handleAlg(HttpRequest request, String algName) throws IOException, SQLException {
         UserDataset userDataset = null;

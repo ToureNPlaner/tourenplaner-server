@@ -41,8 +41,8 @@ public class ComputeRequest {
 	 *
      * @param responder The to this compute request corresponding Responder
      * @param algName The algorithm name
-     * @param points
-     * @param constraints
+     * @param points RequestPoints
+     * @param constraints map with constraints
      * @param acceptsSmile Flag if client accepts Smile
      */
 	public ComputeRequest(Responder responder, String algName,
@@ -80,17 +80,16 @@ public class ComputeRequest {
 	/**
 	 * Returns the Points associated with this request
 	 * 
-	 * @return
+	 * @return RequestPoints
 	 */
 	public RequestPoints getPoints() {
 		return points;
 	}
 
-    // TODO rewrite not good readable javadoc. newline must be written with <br />
 	/**
 	 * Returns the list of Ways making up the result of the computation <br />
-     * it's an Algorithms job that after it's computation it contains all <br />
-     * the ways connection the Points
+     * It's an Algorithms job to ensure that after the computation the list contains all
+     * the ways connecting the Points
 	 * 
 	 * @return A List with the result ways
 	 */

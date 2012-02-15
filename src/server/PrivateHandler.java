@@ -49,7 +49,7 @@ public class PrivateHandler extends RequestHandler {
      * @param request HttpRequest
      * @return Returns parsed json map or null in case of an error
      * @throws IOException Thrown if error message sending or reading json content fails
-     * @throws JsonMappingException Thrown if reading json content fails
+     * @throws JsonMappingException Thrown if mapping json content fails
      */
     private Map<String, Object> getJSONContent(final HttpRequest request) throws IOException {
 
@@ -83,12 +83,14 @@ public class PrivateHandler extends RequestHandler {
      * @param request HttpRequest
      * @throws SQLFeatureNotSupportedException
      *          Thrown if a function is not supported by driver.
-     * @throws JsonMappingException
-     *          Thrown if reading json content fails
      * @throws SQLException
      *          Thrown if database query fails
+     * @throws JsonMappingException
+     *          Thrown if mapping object to json fails
+     * @throws JsonGenerationException
+     *          Thrown if generating json fails
      * @throws IOException
-     *          Thrown if error message sending or reading json content fails
+     *          Thrown if error message sending or reading/writing json content fails
      */
     public void handleRegisterUser(final HttpRequest request) throws IOException, SQLException {
 
@@ -183,15 +185,15 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
+     * Authenticates the client and sends the corresponding user object as json to the client.
      *
-     * @param request
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
-     * @throws SQLException
+     * @param request HttpRequest
+     * @throws SQLException Thrown if database query fails
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws JsonMappingException Thrown if mapping object to json fails
+     * @throws IOException Thrown if error message sending or writing json content fails
      */
-    public void handleAuthUser(final HttpRequest request) throws JsonGenerationException, JsonMappingException,
-            IOException, SQLException {
+    public void handleAuthUser(final HttpRequest request) throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
         if (user != null) responder.writeJSON(user, HttpResponseStatus.OK);
 
@@ -199,11 +201,14 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
+     * Sends the data of one user as json to the client.
      *
-     * @param request
-     * @param parameters
-     * @throws IOException
-     * @throws SQLException
+     * @param request HttpRequest
+     * @param parameters map with url parameters from client
+     * @throws SQLException Thrown if database query fails
+     * @throws JsonMappingException Thrown if mapping object to json fails
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if error message sending or writing json content fails
      */
     public void handleGetUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
@@ -243,11 +248,14 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
+     * Updates the data of a user.
      *
-     * @param request
-     * @param parameters
-     * @throws IOException
-     * @throws SQLException
+     * @param request HttpRequest
+     * @param parameters map with url parameters from client
+     * @throws SQLException Thrown if database query fails
+     * @throws JsonMappingException Thrown if mapping object to json fails
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if error message sending or reading/writing json content fails
      */
     public void handleUpdateUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
@@ -385,11 +393,12 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
+     * Sends the JsonRequest of the request with the given id to the client.
      *
-     * @param request
-     * @param parameters
-     * @throws IOException
-     * @throws SQLException
+     * @param request HttpRequest
+     * @param parameters map with url parameters from client
+     * @throws SQLException Thrown if database query fails
+     * @throws IOException Thrown if error message sending or writing content fails
      */
     public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
@@ -438,11 +447,12 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
+     * Sends the JsonResponse of the request with the given id to the client.
      *
-     * @param request
-     * @param parameters
-     * @throws IOException
-     * @throws SQLException
+     * @param request HttpRequest
+     * @param parameters map with url parameters from client
+     * @throws SQLException Thrown if database query fails
+     * @throws IOException Thrown if error message sending or writing content fails
      */
     public void handleGetResponse(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
@@ -490,15 +500,17 @@ public class PrivateHandler extends RequestHandler {
     }
 
     /**
+     * Sends a list with requests as json to the client.
      *
-     * @param request
-     * @param parameters
-     * @throws SQLException
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
+     * @param request HttpRequest
+     * @param parameters map with url parameters from client
+     * @throws SQLException Thrown if database query fails
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws JsonMappingException Thrown if mapping object to json fails
+     * @throws IOException Thrown if error message sending or writing json content fails
      */
-    public void handleListRequests(final HttpRequest request, Map<String, List<String>> parameters) throws SQLException, JsonGenerationException, JsonMappingException, IOException {
+    public void handleListRequests(final HttpRequest request, Map<String, List<String>> parameters)
+            throws SQLException, IOException {
 
         UserDataset user = authorizer.auth(request);
 
@@ -564,17 +576,21 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
+
+
+
     /**
+     * Sends a list with users as json to the client.
      *
-     * @param request
-     * @param parameters
-     * @throws SQLException
-     * @throws JsonGenerationException
-     * @throws JsonMappingException
-     * @throws IOException
+     * @param request HttpRequest
+     * @param parameters map with url parameters from client
+     * @throws SQLException Thrown if database query fails
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws JsonMappingException Thrown if mapping object to json fails
+     * @throws IOException Thrown if error message sending or writing json content fails
      */
     public void handleListUsers(final HttpRequest request, Map<String, List<String>> parameters)
-            throws SQLException, JsonGenerationException, JsonMappingException, IOException {
+            throws SQLException, IOException {
         UserDataset user = authorizer.auth(request);
 
         // authentication needed, auth(request) responses with error if auth fails
@@ -619,11 +635,12 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
+     * Deletes an user and all requests of the user.
      *
-     * @param request
-     * @param parameters
-     * @throws IOException
-     * @throws SQLException
+     * @param request HttpRequest
+     * @param parameters map with url parameters from client
+     * @throws IOException Thrown if error message sending fails
+     * @throws SQLException Thrown if database query fails
      */
     public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
@@ -668,7 +685,7 @@ public class PrivateHandler extends RequestHandler {
      * response to request with error message.
      * @param parameterValue the value of the id parameter as String
      * @return Returns the parsed number or -1 if parameter is invalid (not a natural number)
-     * @throws java.io.IOException Thrown if error message sending fails
+     * @throws IOException Thrown if error message sending fails
      */
     private int parseRequestIdParameter(String parameterValue) throws IOException {
 
@@ -708,7 +725,7 @@ public class PrivateHandler extends RequestHandler {
      * @return Returns the parsed number or -1 if parameter is invalid (not a natural number).
      *          If "id=all" is allowed and the value of the parameter is "all",
      *          this method will return null.
-     * @throws java.io.IOException Thrown if error message sending fails
+     * @throws IOException Thrown if error message sending fails
      */
     private Integer parseUserIdParameter(String parameterValue, UserDataset authenticatedUser,
                                            boolean valueAllIsAllowed) throws IOException {
@@ -753,7 +770,7 @@ public class PrivateHandler extends RequestHandler {
      * @param parameters map with url parameters from client
      * @param name the name of the parameter
      * @return Returns the parsed number or -1 if parameter is invalid (missing or not a natural number)
-     * @throws java.io.IOException Thrown if error message sending fails
+     * @throws IOException Thrown if error message sending fails
      */
     private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name) throws IOException {
         int param = -1;
