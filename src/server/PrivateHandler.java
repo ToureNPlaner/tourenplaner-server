@@ -321,12 +321,13 @@ public class PrivateHandler extends RequestHandler {
                 selectedUser.address = (String) objmap.get("address");
             }
 
-
-            if (objmap.get("admin") != null && (objmap.get("admin") instanceof Boolean)) {
+            // the user with id = 1 should always be admin, so no admin flag changing
+            if (selectedUser.userid != 1 && objmap.get("admin") != null && (objmap.get("admin") instanceof Boolean)) {
                 selectedUser.admin = (Boolean) objmap.get("admin");
             }
 
-            if (objmap.get("status") != null && (objmap.get("status") instanceof String)) {
+            // the user with id = 1 should always be verified, so no status changing
+            if (selectedUser.userid != 1 && objmap.get("status") != null && (objmap.get("status") instanceof String)) {
                 String status = (String) objmap.get("status");
                 UserStatusEnum previousStatus = selectedUser.status;
                 try {
@@ -625,11 +626,13 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-
-        if (dbm.updateUserStatusToDeleted(userID) != 1) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
-            return;
+        // the user with id = 1 should always be verified, so no status changing
+        if (userID != 1) {
+            if (dbm.updateUserStatusToDeleted(userID) != 1) {
+                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                return;
+            }
         }
 
         responder.writeStatusResponse(HttpResponseStatus.OK);
