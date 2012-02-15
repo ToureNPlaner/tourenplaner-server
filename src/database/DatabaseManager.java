@@ -130,6 +130,7 @@ public class DatabaseManager {
 			+ "RegistrationDate = ?, VerifiedDate = ? "
 			+ "WHERE id = ?";
 
+    private final static String strUpdateUserStatusToDeleted = "UPDATE Users SET Status = 'deleted' WHERE id = ?";
 
     /*
        DELETE statements
@@ -190,6 +191,7 @@ public class DatabaseManager {
         UpdateRequest,
         UpdateRequestWithComputeResult,
         UpdateUser,
+        UpdateUserStatusToDeleted,
 
         DeleteRequestWithRequestId,
         DeleteRequestsOfUserWithUserId,
@@ -260,6 +262,9 @@ public class DatabaseManager {
 
         sqlStatementMap.put(SqlStatementEnum.UpdateUser,
                 new SqlStatementString(strUpdateUser));
+
+        sqlStatementMap.put(SqlStatementEnum.UpdateUserStatusToDeleted,
+                new SqlStatementString(strUpdateUserStatusToDeleted));
 
         // DELETE statements
 
@@ -843,6 +848,46 @@ public class DatabaseManager {
         return 0;
 	}
 
+
+    /**
+     * Changes the status of the user who has the given id to the status deleted. 
+     * <b><code>userID</code></b> has to be >= 0 and must exists
+     * within the database table. <br />SQL command: {@value #strUpdateUserStatusToDeleted}
+     *
+     * @param userID
+     *            The id of the user.
+     * @throws SQLException
+     *             Thrown if update fails.
+     * @return number of database rows changed (1 if successful, else 0)
+     */
+    public int updateUserStatusToDeleted(int userID) throws SQLException {
+
+        int tryAgain = maxTries;
+
+        while (tryAgain > 0) {
+            tryAgain--;
+
+            try {
+
+                PreparedStatement pstUpdateUser
+                        = preparedStatementMap.get(SqlStatementEnum.UpdateUserStatusToDeleted);
+
+                pstUpdateUser.setInt(1, userID);
+
+                return pstUpdateUser.executeUpdate();
+
+            } catch (SQLException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } catch (NullPointerException e) {
+                tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            }
+
+        }
+
+        return 0;
+    }
+    
+    
 	/**
 	 * Deletes the Requests table row with the given request id. </br>SQL
 	 * command: {@value #strDeleteRequestWithRequestId}

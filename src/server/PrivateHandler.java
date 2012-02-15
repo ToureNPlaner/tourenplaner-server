@@ -594,7 +594,7 @@ public class PrivateHandler extends RequestHandler {
 
 
     /**
-     * Deletes an user and all requests of the user.
+     * Sets the status flag of the user to deleted.
      *
      * @param request HttpRequest
      * @param parameters map with url parameters from client
@@ -625,8 +625,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        dbm.deleteRequestsOfUser(userID);
-        if (dbm.deleteUser(userID) != 1) {
+
+        if (dbm.updateUserStatusToDeleted(userID) != 1) {
             responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
                     "The id is not in the database", HttpResponseStatus.NOT_FOUND);
             return;
