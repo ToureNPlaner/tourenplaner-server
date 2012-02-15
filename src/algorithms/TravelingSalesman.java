@@ -8,7 +8,9 @@ import computecore.RequestPoints;
 import graphrep.GraphRep;
 import utils.StaticMath;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -62,26 +64,28 @@ public class TravelingSalesman extends GraphAlgorithm {
         }
         int[][] distmat;
 
-
-
-
-        try {
+      try {
             // Map our requested points to ids
             points.setIdsFromGraph(graph);
 
             // Looks cheap but computes the n^2 matrix of distances for the given points
             distmat = computeDistMatrix(points);
-            List<RequestPoint> pointStore;
+            int[] currTour;
             if (points.size() < SMALL){
                 // It's small use the Giant Hammer Method (TM)
-                pointStore = exactSolve(distmat, points.getStore());
+                currTour = exactSolve(distmat);
             } else {
                 // To big let the Heuristics get something nice
-                pointStore = nnHeuristic(distmat, points.getStore());
+                currTour = nnHeuristic(distmat);
                 // Improve it with twoOpt
-                pointStore = twoOpt(distmat, pointStore);
+                currTour = twoOpt(distmat, currTour);
             }
-
+            List<RequestPoint> pointStore = new ArrayList<RequestPoint>(points.size());
+            List<RequestPoint> requestPointList = points.getStore();
+            // Rearrange the point store to the found bestTour
+            for (int i = 0; i < currTour.length; i++) {
+                pointStore.add(requestPointList.get(currTour[i]));
+            }
             req.getPoints().setStore(pointStore);
             // Now build real paths
             int distance = chdijks.shortestPath(points, req.getResultWays(), true);
@@ -94,13 +98,13 @@ public class TravelingSalesman extends GraphAlgorithm {
         }
     }
     
-    private final List<RequestPoint> exactSolve(int[][] distmat, List<RequestPoint> requestPointList){
-        List<RequestPoint> pointStore = new ArrayList<RequestPoint>(requestPointList.size());
-        int[] currTour = new int[requestPointList.size()];
-        for(int i = 0; i < currTour.length; i++){
-            currTour[i]=i;
-        }
+    private final int[] exactSolve(int[][] distmat){
         int[] bestTour = null;
+        int[] currTour = new int[distmat.length];
+        // Begin with tour in original/identity permutation
+        for(int i = 0; i< currTour.length; i++){
+            currTour[i] = i;
+        }
         int bestLength = Integer.MAX_VALUE;
         int currLength;
         do {
@@ -111,19 +115,12 @@ public class TravelingSalesman extends GraphAlgorithm {
             }
         } while(StaticMath.nextPerm(currTour));
 
-        // Rearrange the point store to the found bestTour
-        for(int i = 0; i < bestTour.length; i++){
-            pointStore.add(requestPointList.get(bestTour[i]));
-        }
-        return  pointStore;
+        return  bestTour;
     }
 
-    private final List<RequestPoint> twoOpt(int[][] distmat, List<RequestPoint> requestPointList){
-        List<RequestPoint> pointStore = new ArrayList<RequestPoint>(requestPointList.size());
-        int[] shiftedTour = new int[requestPointList.size()];
-        for (int i = 0; i < shiftedTour.length; i++) {
-            shiftedTour[i] = i;
-        }
+    private final int[] twoOpt(int[][] distmat, int[] currTour){
+        int[] shiftedTour = currTour.clone();
+
 
         int[] bestTour = shiftedTour.clone();
         int bestLength = calcTourLength(distmat, bestTour);
@@ -149,11 +146,7 @@ public class TravelingSalesman extends GraphAlgorithm {
             shiftedTour[shiftedTour.length-1] = first;
         }
 
-        // Rearrange the point store to the found bestTour
-        for (int i = 0; i < bestTour.length; i++) {
-            pointStore.add(requestPointList.get(bestTour[i]));
-        }
-        return pointStore;
+        return bestTour;
     }
     
     private final int calcTourLength(int[][] distmat, int[] tourPerm){
@@ -168,36 +161,35 @@ public class TravelingSalesman extends GraphAlgorithm {
     }
 
     /**
-     * Computes a RequestPoint List (tour) with the Way ordered by the nearest neighbor
+     * Computes a tour (permutation) with the Way ordered by the nearest neighbor
      * heuristic starting at the first point successively adding the nearest unvisited point
      *
      *
      * @param distmat the n^2 matrix of distance values for the given points
-     * @param requestPointList the list of points for which a tour should be computed
      * @return
      */
-    private final List<RequestPoint> nnHeuristic(int[][] distmat, List<RequestPoint> requestPointList) {
-        List<RequestPoint> pointStore = new ArrayList<RequestPoint>(requestPointList.size());
-        IntOpenHashSet visited = new IntOpenHashSet(requestPointList.size());
+    private final int[] nnHeuristic(int[][] distmat) {
+        int[] tour = new int[distmat.length];
+        IntOpenHashSet visited = new IntOpenHashSet(tour.length);
         int currIndex = 0;
         int minValue;
         int minIndex;
         // add the initial point
-        pointStore.add(requestPointList.get(currIndex));
-        for (int nextIndex = 1; nextIndex < requestPointList.size(); nextIndex++) {
+        tour[0]=0;
+        for (int nextIndex = 1; nextIndex < tour.length; nextIndex++) {
             visited.add(currIndex);
 
             minValue = Integer.MAX_VALUE;
             minIndex = 0;
-            for (int i = 0; i < requestPointList.size(); i++) {
+            for (int i = 0; i < tour.length; i++) {
                 if (minValue > distmat[currIndex][i] && i != currIndex && !visited.contains(i)) {
                     minValue = distmat[currIndex][i];
                     minIndex = i;
                 }
             }
             currIndex = minIndex;
-            pointStore.add(requestPointList.get(currIndex));
+            tour[nextIndex]= currIndex;
         }
-        return pointStore;
+        return tour;
     }
 }
