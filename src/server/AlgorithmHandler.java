@@ -20,6 +20,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -155,8 +156,11 @@ public class AlgorithmHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param algName algorithm name as String
-     * @throws IOException Thrown if error message sending or reading compute request fails
+     * @throws SQLFeatureNotSupportedException Thrown if the id could not received or another function is not supported by driver.
      * @throws SQLException Thrown if database query fails
+     * @throws JsonParseException Thrown if parsing json content fails
+     * @throws JsonProcessingException Thrown if json generation processing fails
+     * @throws IOException Thrown if error message sending or reading json fails
      */
     public void handleAlg(HttpRequest request, String algName) throws IOException, SQLException {
         UserDataset userDataset = null;

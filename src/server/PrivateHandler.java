@@ -351,47 +351,6 @@ public class PrivateHandler extends RequestHandler {
     }
 
 
-    // TODO delete this or add new url getrequestinfo or something similar
-    /*
-    public void handleGetRequestInfo(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
-        UserDataset user = authorizer.auth(request);
-
-        // authentication needed, auth(request) responses with error if auth fails
-        if (user == null) {
-            return;
-        }
-
-        int requestID = -1;
-        RequestDataset selectedRequest;
-
-        if (parameters.containsKey("id")) {
-            requestID = parseRequestIdParameter(parameters.get("id").get(0));
-            // if parameter is invalid, an error response is sent from parseUserIdParameter.
-            // the if and return is needed exactly here, because following methods could send more responses,
-            // but only one response per http request is allowed (else Exceptions will be thrown)
-            if (requestID < 0) {
-                return;
-            }
-            selectedRequest = dbm.getRequest(requestID);
-        } else {
-            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
-                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-
-        if (selectedRequest == null) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
-            return;
-        }
-
-        responder.writeJSON(selectedRequest, HttpResponseStatus.OK);
-        log.finest("GetRequest successful.");
-
-    }
-    */
-
-
     /**
      * Sends the JsonRequest of the request with the given id to the client.
      *
