@@ -131,7 +131,7 @@ public class RequestPoints {
     }
 
     /**
-     * Gets the List of Points i.e. this RequestPoints backing store
+     * Gets the List of Way i.e. this RequestPoints backing store
      *
      * @return
      */
@@ -140,7 +140,7 @@ public class RequestPoints {
     }
 
     /**
-     * Sets the List of Points i.e. this RequestPoints backing store
+     * Sets the List of Way i.e. this RequestPoints backing store
      *
      * @param newPoints
      */

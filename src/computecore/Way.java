@@ -5,10 +5,10 @@ package computecore;
 
 import com.carrotsearch.hppc.IntArrayList;
 
-public class Points {
+public class Way {
 	private final IntArrayList points;
 
-	public Points() {
+	public Way() {
 		points = new IntArrayList();
 	}
 

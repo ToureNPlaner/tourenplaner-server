@@ -3,6 +3,7 @@
  */
 package database;
 
+import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.Date;
@@ -32,9 +33,9 @@ public class RequestDataset {
 	public int requestID;
 	public int userID;
 	public String algorithm;
-    @JsonProperty("request")
+    @JsonIgnore
 	public byte[] jsonRequest;
-    @JsonProperty("response")
+    @JsonIgnore
 	public byte[] jsonResponse;
 	public int cost;
 	public Date requestDate;

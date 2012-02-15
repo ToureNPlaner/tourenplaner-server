@@ -62,8 +62,7 @@ public class TravelingSalesman extends GraphAlgorithm {
         }
         int[][] distmat;
 
-        // DEBUG:
-        Map<String, Object> debugMat = new HashMap<String, Object>();
+
 
 
         try {
@@ -85,7 +84,10 @@ public class TravelingSalesman extends GraphAlgorithm {
 
             req.getPoints().setStore(pointStore);
             // Now build real paths
-            chdijks.shortestPath(points, req.getResultWay(), true);
+            int distance = chdijks.shortestPath(points, req.getResultWays(), true);
+            HashMap<String, Object> misc = new HashMap<String, Object>(1);
+            misc.put("distance", distance);
+            req.setMisc(misc);
 
         } catch (IllegalAccessException e) {
             throw new ComputeException("Illegal Access: " + e.getMessage());
@@ -166,7 +168,7 @@ public class TravelingSalesman extends GraphAlgorithm {
     }
 
     /**
-     * Computes a RequestPoint List (tour) with the Points ordered by the nearest neighbor
+     * Computes a RequestPoint List (tour) with the Way ordered by the nearest neighbor
      * heuristic starting at the first point successively adding the nearest unvisited point
      *
      *

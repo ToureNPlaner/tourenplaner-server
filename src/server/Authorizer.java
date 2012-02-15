@@ -19,9 +19,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * User: Niklas Schnelle, Sascha Meusel
- * Date: 12/26/11
- * Time: 11:56 PM.
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  */
 public class Authorizer extends RequestHandler {
 
@@ -47,9 +46,9 @@ public class Authorizer extends RequestHandler {
     /**
      * Generates a Hash of the given salt/pw combination
      *
-     * @param salt
-     * @param pw
-     * @return
+     * @param salt The salt
+     * @param pw The password
+     * @return The generated hash
      */
     protected String generateHash(final String salt, final String pw) {
         // Compute SHA1 of PW:SALT
@@ -69,7 +68,7 @@ public class Authorizer extends RequestHandler {
 
     /**
      * Generates a Salt, necessary for hash generation
-     * @return
+     * @return The generated salt
      */
     protected String generateSalt() {
         // TODO optimize salt-generation
@@ -91,10 +90,10 @@ public class Authorizer extends RequestHandler {
      * This method will check if the user is verified. If the user is not verified,
      * an error will be sent and the connection will get closed.
      *
-     * @param myReq
+     * @param myReq HttpRequest
      * @return the UserDataset object of the user or null if auth failed
-     * @throws java.sql.SQLException
-     * @throws java.io.IOException
+     * @throws java.sql.SQLException Thrown if database query fails
+     * @throws java.io.IOException Thrown if error message sending fails
      */
     public UserDataset auth(final HttpRequest myReq) throws SQLException, IOException {
         UserDataset user = authNoResponse(myReq);
@@ -119,15 +118,14 @@ public class Authorizer extends RequestHandler {
      * failed. No error responses will be sent to the client. This method will
      * not check if the user is verified.
      *
-     * @param myReq
+     * @param myReq HttpRequest
      * @return the UserDataset object of the user or null if auth failed
-     * @throws java.sql.SQLException
-     * @throws java.io.IOException
+     * @throws java.sql.SQLException Thrown if database query fails
      */
-    public UserDataset authNoResponse(final HttpRequest myReq) throws SQLException, IOException {
+    public UserDataset authNoResponse(final HttpRequest myReq) throws SQLException {
         String email, emailandpw, pw;
-        UserDataset user = null;
-        int index = 0;
+        UserDataset user;
+        int index;
         // Why between heaven and earth does Java have AES Encryption in
         // the standard library but not Base64 though it has it internally
         // several times

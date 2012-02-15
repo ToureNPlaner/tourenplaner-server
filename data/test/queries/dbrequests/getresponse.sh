@@ -7,4 +7,4 @@ then
    exit 1
 fi
 
-./curl.sh "$2" "NOJSON" getrequest$1 root@tourenplaner.de toureNPlaner "$3"
+./curl.sh "$2" "NOJSON" getresponse$1 root@tourenplaner.de toureNPlaner "$3"

@@ -4,11 +4,15 @@
 package computecore;
 
 import org.codehaus.jackson.JsonGenerator;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import server.Responder;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -21,13 +25,12 @@ import java.util.Map.Entry;
 public class ComputeRequest {
 
 	private final RequestPoints points;
-	private final Points resultWay;
+	private final List<Way> resultWays;
 	private final Map<String, Object> constraints;
 	private Map<String, Object> misc;
 	private final String algName;
 	private final Responder responder;
 	private int requestID;
-    private boolean isPrivate;
     private final boolean acceptsSmile;
 
 	/**
@@ -36,15 +39,17 @@ public class ComputeRequest {
 	 * -1, must be set with {@link #setRequestID(int)} if server is private. If
 	 * server is not private the requestID must remain -1.
 	 *
-     * @param responder
-     * @param algName
-     * @param acceptsSmile
+     * @param responder The to this compute request corresponding Responder
+     * @param algName The algorithm name
+     * @param points
+     * @param constraints
+     * @param acceptsSmile Flag if client accepts Smile
      */
 	public ComputeRequest(Responder responder, String algName,
                           RequestPoints points, Map<String, Object> constraints, boolean acceptsSmile) {
 		this.algName = algName;
 		this.points = points;
-		this.resultWay = new Points();
+		this.resultWays = new ArrayList<Way> (1);
 		this.constraints = constraints;
 		this.responder = responder;
 		this.misc = null;
@@ -56,24 +61,24 @@ public class ComputeRequest {
 	 * Gets the responder object which is used to send the result to the correct
 	 * client connection
 	 * 
-	 * @return
+	 * @return Returns the Responder object
 	 */
 	public Responder getResponder() {
 		return responder;
 	}
 
 	/**
-	 * Gets the URLSuffix for the requested algorithmm e.g. "sp" for a shortest
+	 * Gets the URLSuffix for the requested algorithm e.g. "sp" for a shortest
 	 * path algorithm
 	 * 
-	 * @return
+	 * @return Returns the URLSuffix
 	 */
 	public String getAlgorithmURLSuffix() {
 		return algName;
 	}
 
 	/**
-	 * Returns the Points object associated with this request
+	 * Returns the Points associated with this request
 	 * 
 	 * @return
 	 */
@@ -81,19 +86,22 @@ public class ComputeRequest {
 		return points;
 	}
 
+    // TODO rewrite not good readable javadoc. newline must be written with <br />
 	/**
-	 * Returns the Points object used to store the result of this request
+	 * Returns the list of Ways making up the result of the computation <br />
+     * it's an Algorithms job that after it's computation it contains all <br />
+     * the ways connection the Points
 	 * 
-	 * @return
+	 * @return A List with the result ways
 	 */
-	public Points getResultWay() {
-		return resultWay;
+	public List<Way> getResultWays() {
+		return resultWays;
 	}
 
 	/**
 	 * Returns the constraints associated with this request
 	 * 
-	 * @return
+	 * @return A Map representing the constraints
 	 */
 	public Map<String, Object> getConstraints() {
 		return constraints;
@@ -102,34 +110,40 @@ public class ComputeRequest {
 	/**
 	 * Returns the misc field used to store results, initially this is null
 	 * 
-	 * @return
+	 * @return A Map representing the misc field
 	 */
 	public Map<String, Object> getMisc() {
 		return misc;
 	}
 
+    /**
+     * Sets the misc field used to store results, initially this is null
+     *
+     * @param misc A Map representing the misc field
+     */
 	public void setMisc(Map<String, Object> misc) {
 		this.misc = misc;
 	}
 
 	/**
 	 * Sets the requestID. The requestID must be -1 if server is not in private
-	 * mode. If the requestID is not explicitly set, it is -1. </br> This
+	 * mode. If the requestID is not explicitly set, it is -1. <br /> This
 	 * attribute should cointain the requestID of the corresponding
 	 * RequestDataset within the database. Must be set after construction of the
 	 * ComputeRequest object if server is in private mode.
 	 *
-	 */
+     * @param requestID The requestID to set
+     */
 	public void setRequestID(int requestID) {
 		this.requestID = requestID;
 	}
 
 	/**
 	 * Gets the requestID, should be -1 if server is not in private mode. This
-	 * attribute should cointain the requestID of the corresponding
+	 * attribute should contain the requestID of the corresponding
 	 * RequestDataset within the database.
 	 * 
-	 * @return
+	 * @return Returns the requestID
 	 */
 	public int getRequestID() {
 		return this.requestID;
@@ -145,7 +159,7 @@ public class ComputeRequest {
 
     /**
      * Returns if request comes from a client accepting "application/x-jackson-smile"
-     * @return
+     * @return Returns if client is accepting smile
      */
     public boolean isAcceptsSmile() {
         return acceptsSmile;
@@ -155,18 +169,22 @@ public class ComputeRequest {
 	 * Writes a json representation of the result of this request to the given
 	 * stream
 	 * 
-	 * @param mapper
-	 * @param stream
-	 * @throws IOException
+	 * @param mapper Jackson ObjectMapper
+	 * @param stream OutputStream
+	 * @throws JsonGenerationException Thrown if generating json fails
+     * @throws JsonProcessingException Thrown if json generation processing fails
+     * @throws IOException Thrown if writing json onto the stream fails
 	 */
-	public void writeToStream(ObjectMapper mapper, OutputStream stream)
-			throws IOException {
+	public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
 
 		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
 		Map<String, Object> pconsts;
 
 		gen.setCodec(mapper);
 		gen.writeStartObject();
+        gen.writeNumberField("requestid", this.getRequestID());
+        
+        gen.writeObjectField("constraints", this.getConstraints());
 
 		gen.writeArrayFieldStart("points");
 		RequestPoints points = this.getPoints();
@@ -185,13 +203,16 @@ public class ComputeRequest {
 		gen.writeEndArray();
 
 		gen.writeArrayFieldStart("way");
-		Points way = this.getResultWay();
-		for (int i = 0; i < way.size(); i++) {
-			gen.writeStartObject();
-			gen.writeNumberField("lt", way.getPointLat(i));
-			gen.writeNumberField("ln", way.getPointLon(i));
-			gen.writeEndObject();
-		}
+        for(Way way : this.getResultWays()){
+            gen.writeStartArray();
+            for (int i = 0; i < way.size(); i++) {
+                gen.writeStartObject();
+                gen.writeNumberField("lt", way.getPointLat(i));
+                gen.writeNumberField("ln", way.getPointLon(i));
+                gen.writeEndObject();
+            }
+            gen.writeEndArray();
+        }
 		gen.writeEndArray();
 		gen.writeObjectField("misc", this.getMisc());
 		gen.writeEndObject();
