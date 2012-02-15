@@ -34,7 +34,7 @@ public class ComputeRequest {
     private final boolean acceptsSmile;
 
 	/**
-	 * Constructs a new ComputeRequest using the given Responder, Way and
+	 * Constructs a new ComputeRequest using the given Responder, Points and
 	 * Constraints. The requestID of the constructed ComputeRequest object is
 	 * -1, must be set with {@link #setRequestID(int)} if server is private. If
 	 * server is not private the requestID must remain -1.
@@ -45,9 +45,6 @@ public class ComputeRequest {
      * @param constraints
      * @param acceptsSmile Flag if client accepts Smile
      */
-
-    // TODO should here RequestPoints or a way object be given?
-
 	public ComputeRequest(Responder responder, String algName,
                           RequestPoints points, Map<String, Object> constraints, boolean acceptsSmile) {
 		this.algName = algName;
@@ -80,9 +77,8 @@ public class ComputeRequest {
 		return algName;
 	}
 
-    // TODO should this really return RequestPoints or a Way object?
 	/**
-	 * Returns the Way object associated with this request
+	 * Returns the Points associated with this request
 	 * 
 	 * @return
 	 */
@@ -92,8 +88,8 @@ public class ComputeRequest {
 
     // TODO rewrite not good readable javadoc. newline must be written with <br />
 	/**
-	 * Returns the list of Ways making up the result of the computation
-     * it's an Algorithms job that after it's computation it contains all
+	 * Returns the list of Ways making up the result of the computation <br />
+     * it's an Algorithms job that after it's computation it contains all <br />
      * the ways connection the Points
 	 * 
 	 * @return A List with the result ways
@@ -131,7 +127,7 @@ public class ComputeRequest {
 
 	/**
 	 * Sets the requestID. The requestID must be -1 if server is not in private
-	 * mode. If the requestID is not explicitly set, it is -1. </br> This
+	 * mode. If the requestID is not explicitly set, it is -1. <br /> This
 	 * attribute should cointain the requestID of the corresponding
 	 * RequestDataset within the database. Must be set after construction of the
 	 * ComputeRequest object if server is in private mode.
