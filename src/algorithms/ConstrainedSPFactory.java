@@ -25,7 +25,7 @@ public class ConstrainedSPFactory extends SharingAlgorithmFactory {
         super(graph);
         constraints = new ArrayList<Map<String, Object>>();
         constraints.add(new HashMap<String, Object>(4));
-        constraints.get(0).put("name", "maxAltitudeDifference");
+        constraints.get(0).put("name", "Maximum Altitude Difference");
         constraints.get(0).put("description", "The maximum difference in altitude combined over the path");
         constraints.get(0).put("type", "meter");
         constraints.get(0).put("min", 0);

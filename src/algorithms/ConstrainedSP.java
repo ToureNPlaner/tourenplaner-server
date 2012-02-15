@@ -18,7 +18,7 @@ public class ConstrainedSP extends GraphAlgorithm {
     private static Logger log = Logger.getLogger("algorithms");
     private Heap heap;
 
-    // DijkstraStructs used by the ConstraintShortestPath
+    // DijkstraStructs used by the ConstrainedShortestPath
     private final DijkstraStructs ds;
 
     
@@ -55,7 +55,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         // Check for Constraint
         int maxAltitudeDifference;
 
-        if (req.getConstraints() == null || req.getConstraints().get("maxAltitudeDifference") == null){
+        if (req.getConstraints() == null || req.getConstraints().get("Maximum Altitude Difference") == null){
             throw new ComputeException("Missing maxAltitudeDifference constraint");
         }
         try {
@@ -77,7 +77,7 @@ public class ConstrainedSP extends GraphAlgorithm {
     }
 
     /**
-     *  calculates resource constraint shortest path
+     *  calculates resource constrained shortest path
      *
      * @param points
      * @param resultWay
