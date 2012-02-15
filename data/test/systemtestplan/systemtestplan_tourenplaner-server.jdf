@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE tests SYSTEM "project.dtd">
 <tests product="TestDataManager" team="05" version="1.0">
-<sequence created="12.02.2012" creator="PeterVollmer" name="Projekt" number="0">
+<sequence created="13.02.2012" creator="PeterVollmer" name="Projekt" number="0">
 <description>Dies ist der Wurzelknoten des Projekts. Er enthält alle anderen Testsequenzen und Testfälle</description>
 <pre/>
 <sequence created="01.02.2012" creator="PeterVollmer" name="Unit Test" number="1">
@@ -25,28 +25,40 @@
 <description/>
 <pre/>
 <actions>Curlscript authuser_without_all.sh ausführen</actions>
-<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Authorizierung</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="426" priority="C" title="Authentifizierung E-Mail">
 <description/>
 <pre/>
 <actions>Curlscript authuser_e-mail.sh ausführen</actions>
-<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Authorizierung</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="81" priority="C" title="Authentifizierung Passwort">
 <description/>
 <pre/>
 <actions>Curlscript authuser_pw.sh ausführen</actions>
-<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Authorizierung</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="82" priority="C" title="Authentifizierung E-Mail/Passwort">
 <description/>
 <pre/>
 <actions>Curlscript authuser_e-mail_pw.sh ausführen</actions>
-<post>Fehlermeldung "401 Unauthorized: Email/Passwort falsch"</post>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Authorizierung</post>
 <tags/>
 </testcase>
 </sequence>
@@ -57,56 +69,80 @@
 <description>Benutzerdaten abfragen ohne E-Mail ohne Passwort ohne "id"</description>
 <pre/>
 <actions>Curlscript getuser_without_all.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="87" priority="C" title="Benutzerdaten abfragen E-Mail">
 <description>Benutzerdaten abfragen mit E-Mail ohne Passwort ohne "id"</description>
 <pre/>
 <actions>Curlscript getuser_e-mail.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="39" priority="C" title="Benutzerdaten abfragen Passwort">
 <description>Benutzerdaten abfragen ohne E-Mail mit Passwort ohne "id"</description>
 <pre/>
 <actions>Curlscript getuser_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="85" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort">
 <description>Benutzerdaten abfragen mit Passwort und E-Mail ohne "id"</description>
 <pre/>
 <actions>Curlscript getuser_e-mail_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="90" priority="C" title="Benutzerdaten abfragen &quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getuser_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="84" priority="C" title="Benutzerdaten abfragen E-Mail/ &quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getuser_e-mail_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="88" priority="C" title="Benutzerdaten abfragen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getuser_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="89" priority="C" title="Benutzerdaten abfragen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getuser_e-mail_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden geliefert..</post>
 <tags/>
 </testcase>
 </sequence>
@@ -117,56 +153,80 @@
 <description/>
 <pre/>
 <actions>Curlscript updateuser_without_all.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="94" priority="C" title="Benutzerdaten ändern E-Mail">
 <description/>
 <pre/>
 <actions>Curlscript updateuser_e-mail.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="95" priority="C" title="Benutzerdaten ändern Passwort">
 <description/>
 <pre/>
 <actions>Curlscript updateuser_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="96" priority="C" title="Benutzerdaten ändern E-Mail/Passwort">
 <description/>
 <pre/>
 <actions>Curlscript updateuser_e-mail_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="97" priority="C" title="Benutzerdaten ändern &quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript updateuser_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="98" priority="C" title="Benutzerdaten ändern E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript updateuser_e-mail_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="99" priority="C" title="Benutzerdaten ändern Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript updateuser_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="101" priority="C" title="Benutzerdaten ändern E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript updateuser_e-mail_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerdaten wurden nicht geändert.</post>
 <tags/>
 </testcase>
 </sequence>
@@ -177,56 +237,80 @@
 <description/>
 <pre/>
 <actions>Curlscript getrequest_without_all.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="104" priority="C" title="Abfrage abrufen E-Mail">
 <description/>
 <pre/>
 <actions>Curlscript getrequest_e-mail.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="105" priority="C" title="Abfrage abrufen Passwort">
 <description/>
 <pre/>
 <actions>Curlscript getrequest_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="106" priority="C" title="Abfrage abrufen E-Mail/Passwort">
 <description/>
 <pre/>
 <actions>Curlscript getrequest_e-mail_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="107" priority="C" title="Abfrage abrufen &quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getrequest_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="108" priority="C" title="Abfrage abrufen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getrequest_e-mail_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="109" priority="C" title="Abfrage abrufen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getrequest_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="110" priority="C" title="Abfrage abrufen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript getrequest_e-mail_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine requestdaten bekommen</post>
 <tags/>
 </testcase>
 </sequence>
@@ -237,224 +321,320 @@
 <description/>
 <pre/>
 <actions>Curlscript listrequests_without_all.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="432" priority="C" title="Abfragenverlauf abrufen E-Mail">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="433" priority="C" title="Abfragenverlauf abrufen Passwort">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="434" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="435" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="436" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="437" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="438" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="439" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="440" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="441" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="442" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="443" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_limit_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="444" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail.sh_limit_offset ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="445" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw_limit_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="446" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw_limit_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="447" priority="C" title="Abfragenverlauf abrufen &quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="448" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="449" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="450" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="451" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_limit_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="452" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_limit_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="453" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw_limit_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="454" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw_limit_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="455" priority="C" title="Abfragenverlauf abrufen &quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="456" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="457" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="458" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="459" priority="C" title="Abfragenverlauf abrufen &quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_limit_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="460" priority="C" title="Abfragenverlauf abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_limit_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="461" priority="C" title="Abfragenverlauf abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_pw_limit_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="462" priority="C" title="Abfragenverlauf abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listrequests_e-mail_pw_limit_offset_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Requestverlaufsdaten bekommen</post>
 <tags/>
 </testcase>
 </sequence>
@@ -465,112 +645,160 @@
 <description/>
 <pre/>
 <actions>Curlscript listusers_without_all.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="122" priority="C" title="Benutzerliste abrufen E-Mail">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="123" priority="C" title="Benutzerliste abrufen Passwort">
 <description/>
 <pre/>
 <actions>Curlscript listusers_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="124" priority="C" title="Benutzerliste abrufen E-Mail/Passwort">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="125" priority="C" title="Benutzerliste abrufen &quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="126" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="127" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_pw_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="128" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail_pw_limit.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="129" priority="C" title="Benutzerliste abrufen &quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="130" priority="C" title="Benutzerliste abrufen E-Mail/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="131" priority="C" title="Benutzerliste abrufen Passwort/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_pw_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="132" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail_pw_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="133" priority="C" title="Benutzerliste abrufen &quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_limit_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="134" priority="C" title="Benutzerliste abrufen E-Mail/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail_limit_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="135" priority="C" title="Benutzerliste abrufen Passwort/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_pw_limit_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="136" priority="C" title="Benutzerliste abrufen E-Mail/Passwort/&quot;limit&quot;/&quot;offset&quot;">
 <description/>
 <pre/>
 <actions>Curlscript listusers_e-mail_pw_limit_offset.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+keine Benutzerlistendaten bekommen</post>
 <tags/>
 </testcase>
 </sequence>
@@ -581,56 +809,80 @@
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_without_all.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="139" priority="C" title="Benutzer löschen E-Mail">
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_e-mail.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="140" priority="C" title="Benutzer löschen Passwort">
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="141" priority="C" title="Benutzer löschen E-Mail/Passwort">
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_e-mail_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="142" priority="C" title="Benutzer löschen &quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="143" priority="C" title="Benutzer löschen E-Mail/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_e-mail_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="144" priority="C" title="Benutzer löschen Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_pw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="145" priority="C" title="Benutzer löschen E-Mail/Passwort/&quot;id&quot;">
 <description/>
 <pre/>
 <actions>Curlscript deleteuser_e-mailpw_id.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EAUTH", "Wrong username or password"
+HTTP-Fehlercode 401
+Benutzer nicht gelöscht</post>
 <tags/>
 </testcase>
 </sequence>
@@ -641,28 +893,37 @@
 <description/>
 <pre/>
 <actions>Curlscript registeruser_without_all.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EBADJSON", "Could not parse supplied JSON","JSON user object was not correct (needs email, password, firstname, lastname, address)",             
+HTTP-Fehlercode 400
+User nicht registriert</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="428" priority="C" title="User registrieren E-Mail">
 <description/>
 <pre/>
 <actions>Curlscript registeruser_e-mail.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EBADJSON", "Could not parse supplied JSON","JSON user object was not correct (needs email, password, firstname, lastname, address)",             
+HTTP-Fehlercode 400
+User nicht registriert</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="429" priority="C" title="User registrieren Passwort">
 <description/>
 <pre/>
 <actions>Curlscript registeruser_pw.sh ausführen</actions>
-<post/>
+<post>Fehlermeldung:
+"EBADJSON", "Could not parse supplied JSON","JSON user object was not correct (needs email, password, firstname, lastname, address)",             
+HTTP-Fehlercode 400
+User nicht registriert</post>
 <tags/>
 </testcase>
 <testcase created="08.02.2012" creator="PeterVollmer" effort="00:00" number="430" priority="C" title="User registrieren E-Mail/Passwort">
 <description/>
 <pre/>
 <actions>Curlscript registeruser_e-mail_pw.sh ausführen</actions>
-<post/>
+<post>User wie beschrieben in der Datenbank mit Status need verifikation und ohne Adminrechte</post>
 <tags/>
 </testcase>
 </sequence>
