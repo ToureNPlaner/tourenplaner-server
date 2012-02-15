@@ -104,8 +104,14 @@ public class Authorizer extends RequestHandler {
         }
 
         if (user.status != UserStatusEnum.verified) {
-            responder.writeErrorMessage("ENOTVERIFIED", "User account is not verified",
-                    null, HttpResponseStatus.FORBIDDEN);
+            if (user.status != UserStatusEnum.needs_verification) {
+                responder.writeErrorMessage("ENOTVERIFIED", "User account is not verified",
+                        null, HttpResponseStatus.FORBIDDEN);
+            } else {
+                // for example if user is marked as deleted
+                responder.writeErrorMessage("EAUTH", "Wrong username or password", null,
+                        HttpResponseStatus.UNAUTHORIZED);
+            }
             return null;
         }
 

@@ -7,7 +7,7 @@ CREATE TABLE Users (
   Passwordhash      TEXT          NOT NULL,
   Salt              TEXT          NOT NULL,
   AdminFlag         BOOL          NOT NULL DEFAULT 0,
-  Status            ENUM ('needs_verification','verified')
+  Status            ENUM ('needs_verification','verified','deleted')
                                   NOT NULL DEFAULT 'needs_verification',
   FirstName         TEXT          NOT NULL,
   LastName          TEXT          NOT NULL,
