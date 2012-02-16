@@ -61,7 +61,7 @@ public class ComputeThread extends Thread {
                 if (timeUnitSize <= 0) {
                     timeUnitSize = 1;
                 }
-                costPerMillisecond = costPerTimeUnit / timeUnitSize;
+                costPerMillisecond = ((double) costPerTimeUnit) / ((double) timeUnitSize);
 
                 this.dbm = new DatabaseManager(
                         cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
@@ -136,7 +136,7 @@ public class ComputeThread extends Thread {
 						if (workIsPrivate) {
 
 							try {
-                                int cost = (int) Math.ceil(cpuTime * costPerMillisecond);
+                                int cost = (int) Math.ceil(((double) cpuTime) * costPerMillisecond);
 
                                 // baOutputStream is not null because else writeComputeResult
                                 // would throw an IOException
