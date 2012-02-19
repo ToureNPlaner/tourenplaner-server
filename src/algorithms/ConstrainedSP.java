@@ -55,11 +55,11 @@ public class ConstrainedSP extends GraphAlgorithm {
         // Check for Constraint
         int maxAltitudeDifference;
 
-        if (req.getConstraints() == null || req.getConstraints().get("Maximum Altitude Difference") == null){
+        if (req.getConstraints() == null || req.getConstraints().get("maxAltitudeDifference") == null){
             throw new ComputeException("Missing Maximum Altitude Difference constraint");
         }
         try {
-            maxAltitudeDifference = ((Number) req.getConstraints().get("Maximum Altitude Difference")).intValue();
+            maxAltitudeDifference = ((Number) req.getConstraints().get("maxAltitudeDifference")).intValue();
         } catch (ClassCastException e){
             throw new ComputeException("Couldn't read Maximum Altitude Difference, wrong type: " + e.getMessage());
         }
