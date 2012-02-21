@@ -251,7 +251,6 @@ public class ShortestPath extends GraphAlgorithm {
         // Don't read distance from multipliedDist[], because there are
         // distances with
         // regard to the multiplier
-        // only without the first node
         currNode = trgtId;
         while (routeElements > 0) {
             length += graph.getDist(prevEdges[currNode]);
@@ -262,10 +261,6 @@ public class ShortestPath extends GraphAlgorithm {
 
             currNode = graph.getSource(prevEdges[currNode]);
         }
-        // add source node to the result.
-        length += graph.getDist(prevEdges[currNode]);
-        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
         return length;
     }
 
