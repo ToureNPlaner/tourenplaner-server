@@ -89,9 +89,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstAddNewRequest = null;
+
             try {
 
-                PreparedStatement pstAddNewRequest = SqlStatementConstants.AddNewRequest.createPreparedStatement(dataSource);
+                pstAddNewRequest = SqlStatementConstants.AddNewRequest.createPreparedStatement(dataSource);
                 Timestamp stamp = new Timestamp(System.currentTimeMillis());
 
                 pstAddNewRequest.setInt(1, userID);
@@ -117,6 +119,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstAddNewRequest);
             }
 
         }
@@ -274,9 +278,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstAddNewUser = null;
+
             try {
 
-                PreparedStatement pstAddNewUser = SqlStatementConstants.AddNewUser.createPreparedStatement(dataSource);
+                pstAddNewUser = SqlStatementConstants.AddNewUser.createPreparedStatement(dataSource);
                 Timestamp registeredStamp = new Timestamp(
                         System.currentTimeMillis());
                 Timestamp verifiedStamp = null;
@@ -338,6 +344,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstAddNewUser);
             }
 
         }
@@ -368,9 +376,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstUpdateRequest = null;
+
             try {
 
-                PreparedStatement pstUpdateRequest = SqlStatementConstants.UpdateRequest.createPreparedStatement(dataSource);
+                pstUpdateRequest = SqlStatementConstants.UpdateRequest.createPreparedStatement(dataSource);
 
                 pstUpdateRequest.setInt(1, request.userID);
                 pstUpdateRequest.setString(2, request.algorithm);
@@ -392,6 +402,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstUpdateRequest);
             }
 
         }
@@ -423,9 +435,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstUpdateRequestWithComputeResult = null;
+
             try {
 
-                PreparedStatement pstUpdateRequestWithComputeResult
+                pstUpdateRequestWithComputeResult
                         = SqlStatementConstants.UpdateRequestWithComputeResult.createPreparedStatement(dataSource);
 
                 Timestamp stamp = new Timestamp(System.currentTimeMillis());
@@ -446,6 +460,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstUpdateRequestWithComputeResult);
             }
 
         }
@@ -477,9 +493,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstUpdateRequestWithComputeResult = null;
+
             try {
 
-                PreparedStatement pstUpdateRequestWithComputeResult
+                pstUpdateRequestWithComputeResult
                         = SqlStatementConstants.UpdateRequestWithComputeResult.createPreparedStatement(dataSource);
 
                 Timestamp stamp = new Timestamp(System.currentTimeMillis());
@@ -500,6 +518,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstUpdateRequestWithComputeResult);
             }
 
         }
@@ -527,9 +547,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstUpdateUser = null;
+
             try {
 
-                PreparedStatement pstUpdateUser = SqlStatementConstants.UpdateUser.createPreparedStatement(dataSource);
+                pstUpdateUser = SqlStatementConstants.UpdateUser.createPreparedStatement(dataSource);
 
                 pstUpdateUser.setString(1, user.email);
                 pstUpdateUser.setString(2, user.passwordhash);
@@ -549,6 +571,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstUpdateUser);
             }
 
         }
@@ -575,9 +599,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstUpdateUser = null;
+
             try {
 
-                PreparedStatement pstUpdateUser
+                pstUpdateUser
                         = SqlStatementConstants.UpdateUserStatusToDeleted.createPreparedStatement(dataSource);
 
                 pstUpdateUser.setInt(1, userID);
@@ -588,6 +614,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstUpdateUser);
             }
 
         }
@@ -613,9 +641,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstDeleteRequestWithRequestId = null;
+
             try {
 
-                PreparedStatement pstDeleteRequestWithRequestId
+                pstDeleteRequestWithRequestId
                         = SqlStatementConstants.DeleteRequestWithRequestId.createPreparedStatement(dataSource);
 
                 pstDeleteRequestWithRequestId.setInt(1, id);
@@ -626,6 +656,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstDeleteRequestWithRequestId);
             }
 
         }
@@ -650,9 +682,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstDeleteRequestsOfUserWithUserId = null;
+
             try {
 
-                PreparedStatement pstDeleteRequestsOfUserWithUserId
+                pstDeleteRequestsOfUserWithUserId
                         = SqlStatementConstants.DeleteRequestsOfUserWithUserId.createPreparedStatement(dataSource);
 
                 pstDeleteRequestsOfUserWithUserId.setInt(1, userId);
@@ -663,6 +697,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstDeleteRequestsOfUserWithUserId);
             }
 
         }
@@ -690,9 +726,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstDeleteUserWithUserId = null;
+
             try {
 
-                PreparedStatement pstDeleteUserWithUserId
+                pstDeleteUserWithUserId
                         = SqlStatementConstants.DeleteUserWithUserId.createPreparedStatement(dataSource);
 
                 pstDeleteUserWithUserId.setInt(1, userId);
@@ -703,6 +741,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstDeleteUserWithUserId);
             }
 
         }
@@ -728,9 +768,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstDeleteUserWithEmail = null;
+
             try {
 
-                PreparedStatement pstDeleteUserWithEmail
+                pstDeleteUserWithEmail
                         = SqlStatementConstants.DeleteUserWithEmail.createPreparedStatement(dataSource);
 
                 pstDeleteUserWithEmail.setString(1, email);
@@ -741,6 +783,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstDeleteUserWithEmail);
             }
 
         }
@@ -774,9 +818,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetAllRequests = null;
+
             try {
 
-                PreparedStatement pstGetAllRequests
+                pstGetAllRequests
                         = SqlStatementConstants.GetAllRequestsNoJsonWithLimitOffset.createPreparedStatement(dataSource);
 
                 pstGetAllRequests.setInt(1, limit);
@@ -807,6 +853,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetAllRequests);
             }
 
         }
@@ -832,9 +880,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetRequestWithRequestId = null;
+
             try {
 
-                PreparedStatement pstGetRequestWithRequestId
+                pstGetRequestWithRequestId
                         = SqlStatementConstants.GetRequestWithRequestId.createPreparedStatement(dataSource);
 
                 pstGetRequestWithRequestId.setInt(1, id);
@@ -862,6 +912,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetRequestWithRequestId);
             }
 
         }
@@ -893,9 +945,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetRequestWithRequestId = null;
+
             try {
 
-                PreparedStatement pstGetRequestWithRequestId
+                pstGetRequestWithRequestId
                         = SqlStatementConstants.GetJSONRequestWithRequestId.createPreparedStatement(dataSource);
 
                 pstGetRequestWithRequestId.setInt(1, id);
@@ -916,6 +970,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetRequestWithRequestId);
             }
 
         }
@@ -946,9 +1002,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetRequestWithRequestId = null;
+
             try {
 
-                PreparedStatement pstGetRequestWithRequestId
+                pstGetRequestWithRequestId
                         = SqlStatementConstants.GetJSONResponseWithRequestId.createPreparedStatement(dataSource);
 
                 pstGetRequestWithRequestId.setInt(1, id);
@@ -969,6 +1027,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetRequestWithRequestId);
             }
 
         }
@@ -1005,9 +1065,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetRequests = null;
+
             try {
 
-                PreparedStatement pstGetRequests
+                pstGetRequests
                         = SqlStatementConstants.GetRequestsNoJsonWithUserIdLimitOffset.createPreparedStatement(dataSource);
 
                 pstGetRequests.setInt(1, userId);
@@ -1040,6 +1102,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetRequests);
             }
 
         }
@@ -1064,9 +1128,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetAllUsers = null;
+
             try {
 
-                PreparedStatement pstGetAllUsers = SqlStatementConstants.GetAllUsers.createPreparedStatement(dataSource);
+                pstGetAllUsers = SqlStatementConstants.GetAllUsers.createPreparedStatement(dataSource);
 
                 ResultSet resultSet = pstGetAllUsers.executeQuery();
                 ArrayList<UserDataset> list = new ArrayList<UserDataset>();
@@ -1094,6 +1160,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetAllUsers);
             }
 
         }
@@ -1123,9 +1191,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetAllUsersWithLimitOffset = null;
+
             try {
 
-                PreparedStatement pstGetAllUsersWithLimitOffset
+                pstGetAllUsersWithLimitOffset
                         = SqlStatementConstants.GetAllUsersWithLimitOffset.createPreparedStatement(dataSource);
 
                 pstGetAllUsersWithLimitOffset.setInt(1, limit);
@@ -1158,6 +1228,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetAllUsersWithLimitOffset);
             }
 
         }
@@ -1181,9 +1253,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetUserWithEmail = null;
+
             try {
 
-                PreparedStatement pstGetUserWithEmail = SqlStatementConstants.GetUserWithEmail.createPreparedStatement(dataSource);
+                pstGetUserWithEmail = SqlStatementConstants.GetUserWithEmail.createPreparedStatement(dataSource);
 
                 UserDataset user = null;
 
@@ -1214,6 +1288,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetUserWithEmail);
             }
 
         }
@@ -1238,9 +1314,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstGetUserWithId = null;
+
             try {
 
-                PreparedStatement pstGetUserWithId = SqlStatementConstants.GetUserWithId.createPreparedStatement(dataSource);
+                pstGetUserWithId = SqlStatementConstants.GetUserWithId.createPreparedStatement(dataSource);
 
                 UserDataset user = null;
 
@@ -1271,6 +1349,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstGetUserWithId);
             }
 
         }
@@ -1291,9 +1371,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstCountAllRequests = null;
+
             try {
 
-                PreparedStatement pstCountAllRequests
+                pstCountAllRequests
                         = SqlStatementConstants.CountAllRequests.createPreparedStatement(dataSource);
 
                 ResultSet resultSet = pstCountAllRequests.executeQuery();
@@ -1311,6 +1393,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstCountAllRequests);
             }
 
         }
@@ -1330,9 +1414,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstCountRequestsWithUserId = null;
+
             try {
 
-                PreparedStatement pstCountRequestsWithUserId
+                pstCountRequestsWithUserId
                         = SqlStatementConstants.CountRequestsWithUserId.createPreparedStatement(dataSource);
 
                 pstCountRequestsWithUserId.setInt(1, userId);
@@ -1351,6 +1437,8 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstCountRequestsWithUserId);
             }
 
         }
@@ -1370,9 +1458,11 @@ public class DatabaseManager {
         while (tryAgain > 0) {
             tryAgain--;
 
+            PreparedStatement pstCountAllUsers = null;
+
             try {
 
-                PreparedStatement pstCountAllUsers
+                pstCountAllUsers
                         = SqlStatementConstants.CountAllUsers.createPreparedStatement(dataSource);
 
                 ResultSet resultSet = pstCountAllUsers.executeQuery();
@@ -1390,30 +1480,13 @@ public class DatabaseManager {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
+            } finally {
+                SqlStatement.close(pstCountAllUsers);
             }
 
         }
 
         return 0;
-    }
-
-
-    /**
-     * Closes the database connection. Exceptions will be caught. 
-     */
-    public void close() {
-        // TODO
-        /*
-        for (SqlStatementEnum sqlStatementEnum : pStatementManager.keySet()) {
-            try {
-                sqlStatementEnum.close();
-            } catch (SQLException ignored) {
-            }
-        }
-        try {
-            con.close();
-        } catch (SQLException ignored) {
-        }*/
     }
 
 
@@ -1428,16 +1501,6 @@ public class DatabaseManager {
         if (tryAgain > 0) {
             log.log(Level.WARNING, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
                     "thread will now reconnect database and send again the sql statement ", exception);
-
-            this.close();
-            // TODO
-            /*try {
-                init();
-            } catch (SQLException e) {
-                log.warning("Reinitializing of database connection failed.");
-                tryAgain--;
-                return processTryAgainExceptionHandling(tryAgain, e);
-            }*/
         } else {
             log.log(Level.SEVERE, "Database exception occurred after " + (maxTries - tryAgain) + ". attempt, " +
                     "thread will now give up executing the statement", exception);

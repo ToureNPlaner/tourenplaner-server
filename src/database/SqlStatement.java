@@ -39,6 +39,8 @@ public class SqlStatement {
      * If the DataSource is created through a connection pool or similar,
      * the PreparedStatement might not be created more than one time per
      * database connection but instead retrieved from a PreparedStatement cache.
+     * And do not forget to close the returned PreparedStatement with {@link #close(java.sql.PreparedStatement)},
+     * this method will close the PreparedStatement and also close the connection.
      *
      * @param dataSource The data source, it must be not null
      * @return The prepared statement
@@ -49,6 +51,25 @@ public class SqlStatement {
     }
 
 
+    /**
+     * Closes the database connection. Exceptions will be caught.
+     * @param preparedStatement the PreparedStatement to close
+     */
+    public static void close(PreparedStatement preparedStatement) {
+        if (preparedStatement != null) {
+            try {
+                if (preparedStatement.getConnection() != null) {
+                    preparedStatement.getConnection().close();
+                }
+            } catch (SQLException ignore) {
+            }
+            
+            try {
+                preparedStatement.close();
+            } catch (SQLException ignore) {
+            }
+        }
+    }
 
     @SuppressWarnings("UnusedDeclaration")
     public String getSqlStatementString() {
