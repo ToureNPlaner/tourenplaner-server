@@ -7,10 +7,12 @@ package server;
 import computecore.ComputeCore;
 import config.ConfigManager;
 import database.DatabaseManager;
+import database.DatabasePool;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.util.CharsetUtil;
 
+import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -66,12 +68,15 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
         authorizer = null;
         if (isPrivate){
             try {
-                this.dbm = new DatabaseManager(
-                        cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
-                        cm.getEntryString("dbuser","tnpuser"),
-                        cm.getEntryString("dbpw","toureNPlaner"));
+                this.dbm = DatabasePool.getDatabaseManager(
+                        cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                        cm.getEntryString("dbuser", "tnpuser"),
+                        cm.getEntryString("dbpw", "toureNPlaner"),
+                        cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver"));
+
                 authorizer = new Authorizer(this.dbm);
-            } catch (SQLException e) {
+            } catch (PropertyVetoException e) {
+                // TODO falling back to public mode is maybe not a good behavior
                 log.log(Level.SEVERE, "Can't connect to database falling back to public mode", e);
                 this.isPrivate = false;
             }

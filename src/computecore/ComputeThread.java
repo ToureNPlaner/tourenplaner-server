@@ -7,8 +7,10 @@ import algorithms.Algorithm;
 import algorithms.ComputeException;
 import config.ConfigManager;
 import database.DatabaseManager;
+import database.DatabasePool;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -63,16 +65,17 @@ public class ComputeThread extends Thread {
                 }
                 costPerMillisecond = ((double) costPerTimeUnit) / ((double) timeUnitSize);
 
-                this.dbm = new DatabaseManager(
+                this.dbm = DatabasePool.getDatabaseManager(
                         cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
                         cm.getEntryString("dbuser","tnpuser"),
-                        cm.getEntryString("dbpw","toureNPlaner"));
-            } catch(SQLException e){
+                        cm.getEntryString("dbpw","toureNPlaner"),
+                        cm.getEntryString("dbdriverclass","com.mysql.jdbc.Driver"));
+            } catch (PropertyVetoException e) {
                 log.severe("Couldn't establish database connection");
                 System.exit(1);
             }
 
-		}
+        }
 		this.setDaemon(true);
 	}
 
