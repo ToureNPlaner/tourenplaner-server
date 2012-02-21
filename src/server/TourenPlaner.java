@@ -9,12 +9,14 @@ import computecore.AlgorithmRegistry;
 import computecore.ComputeCore;
 import computecore.SharingAMFactory;
 import config.ConfigManager;
+import database.DatabasePool;
 import graphrep.GraphRep;
 import graphrep.GraphRepDumpReader;
 import graphrep.GraphRepTextReader;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
+import java.beans.PropertyVetoException;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -155,10 +157,27 @@ public class TourenPlaner {
         reg.registerAlgorithm(new NNSearchFactory(graph));
         reg.registerAlgorithm(new ConstrainedSPFactory(graph));
 
+        // initialize DatabasePool
+        if (cm.getEntryBool("private", false)) {
+            try {
+                DatabasePool.initDatabasePool(
+                        cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                        cm.getEntryString("dbuser", "tnpuser"),
+                        cm.getEntryString("dbpw", "toureNPlaner"),
+                        cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver"));
+            } catch (PropertyVetoException e) {
+                log.severe("Couldn't establish database connection");
+                System.exit(1);
+            }
+        }
+
+
         // Create our ComputeCore that manages all ComputeThreads
         ComputeCore comCore = new ComputeCore(reg, cm.getEntryInt("threads", 16), cm.getEntryInt("queuelength", 32));
         AlgorithmManagerFactory amFac = new SharingAMFactory(graph);
         comCore.start(amFac);
+
+
 
 
         // Create ServerInfo object

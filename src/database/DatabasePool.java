@@ -81,7 +81,7 @@ public class DatabasePool {
      *
      * @return A DatabaseManager
      */
-    public DatabaseManager getDatabaseManager() {
+    public synchronized DatabaseManager getDatabaseManager() {
         // This class is a singleton, so there should be no NullPointerException
         return new DatabaseManager(instance.cpds);
     }
@@ -110,7 +110,7 @@ public class DatabasePool {
      * @see java.sql.DriverManager#getConnection(java.lang.String,java.lang.String, java.lang.String)
      * @throws PropertyVetoException Thrown if driverClass String for the database is not correct.
      */
-    public static DatabaseManager getDatabaseManager(String url, String userName,
+    public synchronized static DatabaseManager getDatabaseManager(String url, String userName,
                                               String password, String driverClass) throws PropertyVetoException {
         initDatabasePool(url, userName, password, driverClass);
         if (instance.cpds == null) {
