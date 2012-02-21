@@ -7,6 +7,7 @@ import graphrep.GraphRep;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -36,6 +37,7 @@ public class ConstrainedSP extends GraphAlgorithm {
      */
     private int[] prevEdges;
 
+    private Map<String, Object> misc = new HashMap<String, Object>(1);
 
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
@@ -68,7 +70,6 @@ public class ConstrainedSP extends GraphAlgorithm {
         int altitudeDiff = result[0];
         int distance = result[1];
         
-        Map<String, Object> misc = new HashMap<String, Object>(1);
         misc.put("distance", distance);
         misc.put("altitude", altitudeDiff);
         req.setMisc(misc);
@@ -97,10 +98,10 @@ public class ConstrainedSP extends GraphAlgorithm {
             dists = ds.borrowDistArray();
             prevEdges = ds.borrowPrevArray();
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            log.log(Level.SEVERE,"Illegal Access", e);
         }
 
-        double threshold = 1.0 / (double) ((long)graph.getNodeCount() * (long)graph.getNodeCount() * (long)maxAltitudeDifference + (long) maxAltitudeDifference);
+        double threshold = 1.0 / (double) ((long)graph.getNodeCount() * (long)graph.getNodeCount() * (long)maxAltitudeDifference * (long) maxAltitudeDifference);
 
         srclat = points.getPointLat(0);
         srclon = points.getPointLon(0);
@@ -113,7 +114,6 @@ public class ConstrainedSP extends GraphAlgorithm {
         double lamdaOfBad;
         double lamda = 1.0;
         int altitudeDiff;
-        double oldLamda;
         // shortest path's difference of altitude
         altitudeDiff = dijkstra(srcId, trgtId, lamda);
         // shortest path serves not the constraint
@@ -130,22 +130,20 @@ public class ConstrainedSP extends GraphAlgorithm {
                 log.fine("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                         maxAltitudeDifference
                 );
+                misc.put("message", "Found Path with smallest altitude difference = " + altitudeDiff);
                 ds.returnDistArray(false);
                 ds.returnHeap();
                 ds.returnPrevArray();
                 throw new ComputeException("No path found");
             }
             lamdaOfGood = lamda;
-            long oldLength = 0;
             lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
             altitudeDiff = dijkstra(srcId, trgtId, lamda);
 
-            while (lamdaOfBad - lamdaOfGood >= threshold ) {
+            while (lamdaOfBad - lamdaOfGood >= threshold + 0.000000001 ) {
                 if (altitudeDiff <= maxAltitudeDifference) {
-                    oldLamda = lamdaOfGood;
                     lamdaOfGood = lamda;
                 } else {
-                    oldLamda = lamdaOfBad;
                     lamdaOfBad = lamda;
                 }
                 lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
@@ -175,7 +173,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         // regard to the multiplier
         // only to the penultimate element (srcId)
         currNode = trgtId;
-        while (routeElements > 1) {
+        while (routeElements > 0) {
             distance += graph.getEuclidianDist(prevEdges[currNode]);
             routeElements--;
             resultWay.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
@@ -183,8 +181,8 @@ public class ConstrainedSP extends GraphAlgorithm {
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
-        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+        /*resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
+        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));*/
 
         ds.returnDistArray(false);
         ds.returnHeap();
