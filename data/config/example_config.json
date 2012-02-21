@@ -6,7 +6,7 @@
 	"dburi" : "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true",
 	"dbuser" : "tnpuser",
 	"dbpw" : "toureNPlaner",
-	"dbdriverclass" : "com.mysql.jdbc.Driver"
+	"dbdriverclass" : "com.mysql.jdbc.Driver",
 	// how many times a database query should be retried
 	"maxdbtries" : 3,
 	"httpport" : 8080,
