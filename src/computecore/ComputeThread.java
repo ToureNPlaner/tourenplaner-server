@@ -167,18 +167,11 @@ public class ComputeThread extends Thread {
 
 			} catch (InterruptedException e) {
 				log.warning("ComputeThread interrupted");
-                if (this.dbm != null) {
-                    dbm.close();
-                }
 				return;
 			} catch (Exception e) {
 				log.log(Level.WARNING ,"An exception occurred", e);
 			}
 		}
-
-        if (this.dbm != null) {
-            dbm.close();
-        }
 	}
 
     private void writeIntoDatabase(int requestID, String errorMessage, String errorName, boolean workIsPrivate) {

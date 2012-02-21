@@ -98,12 +98,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
         infoHandler.setResponder(responder);
     }
 
-    @Override
-    public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
-        if (this.dbm != null) {
-            dbm.close();
-        }
-    }
 
     /**
      * Called when a message is received
