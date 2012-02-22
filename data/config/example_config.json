@@ -3,12 +3,35 @@
 	"queuelength" : 20,
 	"graphfilepath" : "/home/user/germany.txt",
 	"private" : true,
+
 	"dburi" : "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true",
 	"dbuser" : "tnpuser",
 	"dbpw" : "toureNPlaner",
 	"dbdriverclass" : "com.mysql.jdbc.Driver",
 	// how many times a database query should be retried
 	"maxdbtries" : 3,
+
+	"c3p0" :
+	    {
+	        // key AND value have to be always Strings
+
+	        "acquireIncrement" : "3",
+	        "initialPoolSize" : "",
+	        "maxPoolSize" : "15",
+	        "minPoolSize" : "3",
+
+	        "maxConnectionAge" : "0",
+	        "maxIdleTime" : "0",
+	        "maxIdleTimeExcessConnections" : "0",
+
+	        "maxStatements" : "0",
+	        "maxStatementsPerConnection" : "0",
+
+	        "acquireRetryAttempts" : "30",
+	        "acquireRetryDelay" : "1000",
+	        "breakAfterAcquireFailure" : "false"
+	    },
+
 	"httpport" : 8080,
 	"sslport" : 8081,
     "serverinfosslport" : 443,

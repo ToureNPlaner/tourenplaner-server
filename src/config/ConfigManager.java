@@ -28,7 +28,7 @@ public class ConfigManager {
 	 * Construct the ConfigManager and loads the config from JSON file with the
 	 * given file path.
 	 * 
-	 * @param globally
+	 * @param mapper
 	 *            shared ObjectMapper
 	 * @param configPath
 	 * @throws Exception
@@ -129,13 +129,14 @@ public class ConfigManager {
 	 * Return the long value of a given key or the given defaultValue if there
 	 * is a cast error or the key is not found. This is for all types of number
 	 * without an comma.
-	 * 
+	 *
 	 * @param key
 	 * @param defaultValue
 	 * @return value of a given key or the given defaultValue
 	 *         (ClassCastError/key not found)
 	 */
-	public long getEntryLong(String key, long defaultValue) {
+	@SuppressWarnings("UnusedDeclaration")
+    public long getEntryLong(String key, long defaultValue) {
 		Long value = null;
 		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
@@ -220,6 +221,52 @@ public class ConfigManager {
 		}
 		return value;
 	}
+
+
+    /**
+     *
+     * Return the Map<?, ?> value of a given key or the defaultValue if there is a
+     * cast error or the key is not found.
+     *
+     * To read the map (should be of type Map<String, Object>) you can use following code:
+     *
+     * <pre>
+     *     Map<?, ?> map = ConfigManager.getInstance().getEntryMap("key", new HashMap<String, Object>());
+     *     for (Object key : map.keySet()) {
+     *         Object value = map.get(key);
+     *         if (key instanceof String) {
+     *             String keyString = (String) key;
+     *             // do something with this entry
+     *         }
+     *     }
+     * </pre>
+     *
+     * @param key
+     * @param defaultValue
+     * @return value of a given key or the given defaultValue
+     *         (ClassCastError/key not found)
+     */
+    public Map<?, ?> getEntryMap(String key, Map<String, Object> defaultValue) {
+        Map<?, ?> value = null;
+        if ((confMap != null) && confMap.containsKey(key)) {
+            if (confMap.get(key) != null) {
+                try {
+                    value = (Map<?, ?>) confMap.get(key);
+                } catch (ClassCastException e) {
+                    System.out.println("Failed to read config value: "
+                            + e.getMessage());
+                    e.printStackTrace();
+                    return defaultValue;
+                }
+            } else {
+                value = defaultValue;
+            }
+
+        } else {
+            value = defaultValue;
+        }
+        return value;
+    }
 
 	/**
 	 * Return an instance of a constructed ConfigManager. If there was no Init

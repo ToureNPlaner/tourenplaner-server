@@ -1,14 +1,20 @@
 package database;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import config.ConfigManager;
 
 import java.beans.PropertyVetoException;
+import java.util.Map;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
  */
 public class DatabasePool {
+
+    private static Logger log = Logger.getLogger("databasepool");
 
     private String url;
     private String userName;
@@ -32,6 +38,26 @@ public class DatabasePool {
 
     private void init() throws PropertyVetoException {
         this.cpds = new ComboPooledDataSource();
+
+        Properties prop = cpds.getProperties();
+        
+        Map<?, ?> map = ConfigManager.getInstance().getEntryMap("c3p0", null);
+        if (map != null) {
+            for (Object key : map.keySet()) {
+                Object value = map.get(key);
+                if (key instanceof String && value instanceof String) {
+                    prop.setProperty("c3p0." + key, (String) value);
+                } else {
+                    log.warning("The config file has an error within the value of the key \"c3p0\". " +
+                            "The error is near the key " + key.toString());
+                }
+            }
+        }
+
+        
+        cpds.setProperties(prop);
+
+
         try {
             cpds.setDriverClass(driverClass);
         } catch (PropertyVetoException e) {

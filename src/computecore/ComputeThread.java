@@ -71,7 +71,7 @@ public class ComputeThread extends Thread {
                         cm.getEntryString("dbpw","toureNPlaner"),
                         cm.getEntryString("dbdriverclass","com.mysql.jdbc.Driver"));
             } catch (PropertyVetoException e) {
-                log.severe("Couldn't establish database connection");
+                log.log(Level.SEVERE, "Couldn't establish database connection", e);
                 System.exit(1);
             }
 

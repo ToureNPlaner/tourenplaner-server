@@ -18,6 +18,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import java.beans.PropertyVetoException;
 import java.io.*;
+import java.sql.SQLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -160,13 +161,17 @@ public class TourenPlaner {
         // initialize DatabasePool
         if (cm.getEntryBool("private", false)) {
             try {
-                DatabasePool.initDatabasePool(
+                DatabasePool.getDatabaseManager(
                         cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
                         cm.getEntryString("dbuser", "tnpuser"),
                         cm.getEntryString("dbpw", "toureNPlaner"),
-                        cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver"));
+                        cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver")).getNumberOfUsers();
             } catch (PropertyVetoException e) {
-                log.severe("Couldn't establish database connection");
+                log.log(Level.SEVERE, "Couldn't establish database connection", e);
+                System.exit(1);
+            } catch (SQLException e) {
+                log.log(Level.SEVERE, "Couldn't establish database connection. DatabaseManager.getNumberOfUsers() was called " +
+                        "to test and initialize Pool, but an SQLException was thrown", e);
                 System.exit(1);
             }
         }
