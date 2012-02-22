@@ -16,7 +16,7 @@
 	        // key AND value have to be always Strings
 
 	        "acquireIncrement" : "3",
-	        "initialPoolSize" : "",
+	        "initialPoolSize" : "3",
 	        "maxPoolSize" : "15",
 	        "minPoolSize" : "3",
 
@@ -38,6 +38,7 @@
 	"sslcert" : "/home/user/keystore.jks",
 	"sslalias" : "tourenplaner",
 	"sslpw" : "toureNPlaner",
+
 	// cost per time unit in cents
 	"costpertimeunit" : 10,
 	// size of time unit in milliseconds

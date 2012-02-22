@@ -5,7 +5,6 @@ import config.ConfigManager;
 
 import java.beans.PropertyVetoException;
 import java.util.Map;
-import java.util.Properties;
 import java.util.logging.Logger;
 
 /**
@@ -37,16 +36,13 @@ public class DatabasePool {
     }
 
     private void init() throws PropertyVetoException {
-        this.cpds = new ComboPooledDataSource();
 
-        Properties prop = cpds.getProperties();
-        
         Map<?, ?> map = ConfigManager.getInstance().getEntryMap("c3p0", null);
         if (map != null) {
             for (Object key : map.keySet()) {
                 Object value = map.get(key);
                 if (key instanceof String && value instanceof String) {
-                    prop.setProperty("c3p0." + key, (String) value);
+                    System.setProperty("c3p0." + key, (String) value);
                 } else {
                     log.warning("The config file has an error within the value of the key \"c3p0\". " +
                             "The error is near the key " + key.toString());
@@ -54,14 +50,12 @@ public class DatabasePool {
             }
         }
 
-        
-        cpds.setProperties(prop);
-
+        cpds = new ComboPooledDataSource();
 
         try {
             cpds.setDriverClass(driverClass);
         } catch (PropertyVetoException e) {
-            this.cpds = null;
+            cpds = null;
             instance = null;
             throw e;
         }
