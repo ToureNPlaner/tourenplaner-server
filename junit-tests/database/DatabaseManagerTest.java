@@ -7,6 +7,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.beans.PropertyVetoException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 
@@ -34,21 +35,22 @@ public class DatabaseManagerTest {
 	public final static void prepareTestRun() {
 		final ConfigManager cm = ConfigManager.getInstance();
 		try {
-            dbm = new DatabaseManager(
-                    cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
-                    cm.getEntryString("dbuser","tnpuser"),
-                    cm.getEntryString("dbpw","toureNPlaner"));
-		} catch (SQLException e) {
-			dbmFailureMessage = "No Database Connection established. "
-					+ "Connection parameter:\n"
-					+ cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/")
-					+ "\ndbname: "
-					+ cm.getEntryString("dbname", "tourenplaner")
-					+ "\ndbuser: " + cm.getEntryString("dbuser", "tnpuser")
-					+ "\ndbpw: " + cm.getEntryString("dbpw", "toureNPlaner")
-					+ "\n" + e.getMessage();
-		}
-		if (dbm != null) {
+            dbm = DatabasePool.getDatabaseManager(
+                    cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
+                    cm.getEntryString("dbuser", "tnpuser"),
+                    cm.getEntryString("dbpw", "toureNPlaner"),
+                    cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver"));
+		} catch (PropertyVetoException e) {
+            dbmFailureMessage = "No Database Connection established. "
+                    + "Connection parameter:\n"
+                    + cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/")
+                    + "\ndbname: "
+                    + cm.getEntryString("dbname", "tourenplaner")
+                    + "\ndbuser: " + cm.getEntryString("dbuser", "tnpuser")
+                    + "\ndbpw: " + cm.getEntryString("dbpw", "toureNPlaner")
+                    + "\n" + e.getMessage();
+        }
+        if (dbm != null) {
 			try {
 				UserDataset user = dbm.addNewUser("1337testuser@tourenplaner",
 						"DmGT9B354DFasH673aGFBM3", "hmAhgAN68sdKNfdA9sd876k0",
@@ -94,7 +96,7 @@ public class DatabaseManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link database.DatabaseManager#DatabaseManager(java.lang.String, java.lang.String, java.lang.String)}
+	 * {@link database.DatabaseManager#DatabaseManager(javax.sql.DataSource)}
 	 * .
 	 */
 	@Test

@@ -7,8 +7,10 @@ import algorithms.Algorithm;
 import algorithms.ComputeException;
 import config.ConfigManager;
 import database.DatabaseManager;
+import database.DatabasePool;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
+import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -63,16 +65,17 @@ public class ComputeThread extends Thread {
                 }
                 costPerMillisecond = ((double) costPerTimeUnit) / ((double) timeUnitSize);
 
-                this.dbm = new DatabaseManager(
+                this.dbm = DatabasePool.getDatabaseManager(
                         cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
                         cm.getEntryString("dbuser","tnpuser"),
-                        cm.getEntryString("dbpw","toureNPlaner"));
-            } catch(SQLException e){
-                log.severe("Couldn't establish database connection");
+                        cm.getEntryString("dbpw","toureNPlaner"),
+                        cm.getEntryString("dbdriverclass","com.mysql.jdbc.Driver"));
+            } catch (PropertyVetoException e) {
+                log.log(Level.SEVERE, "Couldn't establish database connection", e);
                 System.exit(1);
             }
 
-		}
+        }
 		this.setDaemon(true);
 	}
 
@@ -164,18 +167,11 @@ public class ComputeThread extends Thread {
 
 			} catch (InterruptedException e) {
 				log.warning("ComputeThread interrupted");
-                if (this.dbm != null) {
-                    dbm.close();
-                }
 				return;
 			} catch (Exception e) {
 				log.log(Level.WARNING ,"An exception occurred", e);
 			}
 		}
-
-        if (this.dbm != null) {
-            dbm.close();
-        }
 	}
 
     private void writeIntoDatabase(int requestID, String errorMessage, String errorName, boolean workIsPrivate) {
