@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
 
-public class GraphRepTextReader extends GraphRepFactory {
+public class GraphRepTextReader implements GraphRepReader {
     private static Logger log = Logger.getLogger("tourenplaner");
 
 	// new fileformat is probably:

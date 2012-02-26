@@ -6,7 +6,7 @@ import java.io.InvalidClassException;
 import java.io.ObjectInputStream;
 import java.util.logging.Logger;
 
-public class GraphRepDumpReader extends GraphRepFactory {
+public class GraphRepDumpReader implements GraphRepReader {
     private static Logger log = Logger.getLogger("tourenplaner");
 
 	@Override
