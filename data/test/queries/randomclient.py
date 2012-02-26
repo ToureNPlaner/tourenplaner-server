@@ -15,18 +15,18 @@ def doRequest(http,url, algSuffix, request):
 def main():
    http = httplib2.Http()
    request = {'points':[{'lt': 487786110, 'ln' : 91794440}, {'lt': 535652780, 'ln': 100013890}]}
-   random.seed(42)
-   for i in range(0, 10):
+   #random.seed(42)
+   for i in range(0, 1000):
       points = []
-      for i in range(0, 16):
+      for i in range(0, random.randint(2,5)):
          lat = random.randint(472600000, 548960000)
          lon = random.randint( 59000000, 149900000)
          points.append({'lt': lat, 'ln' : lon})
       
       request['points'] = points
-      success, content = doRequest(http, 'http://localhost:8080', 'tsp', request)
+      success, content = doRequest(http, 'http://localhost:8080', 'sp', request)
       if not success:
-         print('Failed: '+content)
+         print('Failed: '+str(content))
       else:
          print(str(content['misc']['distance']/1000.0))
 
