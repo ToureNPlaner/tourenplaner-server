@@ -4,8 +4,8 @@
 package graphrep;
 
 import com.carrotsearch.hppc.IntArrayList;
-
-import java.util.HashMap;
+import com.carrotsearch.hppc.LongObjectOpenHashMap;
+import com.carrotsearch.hppc.cursors.LongCursor;
 
 /**
  * @author nino
@@ -19,14 +19,14 @@ public class HashNN implements NNSearcher {
 	private static final long serialVersionUID = 1L;
 
 	GraphRep graphRep;
-	HashMap<Long, Object> hashMap;
+	LongObjectOpenHashMap hashMap;
 	NNSearcher dumpNN;
 	private static final int maxHopLimit = 10;
 
 	public HashNN(GraphRep graphRep) {
 		this.graphRep = graphRep;
 		dumpNN = new DumbNN(graphRep);
-		hashMap = new HashMap<Long, Object>();
+		hashMap = new LongObjectOpenHashMap();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
 			long tempLat = graphRep.getNodeLat(i) / 1000;
 			long tempLon = graphRep.getNodeLon(i) / 1000;
@@ -41,9 +41,9 @@ public class HashNN implements NNSearcher {
 				tempValues.add(i);
 			}
 		}
-		for (Long key : hashMap.keySet()) {
-			int[] arr = ((IntArrayList) hashMap.get(key)).toArray();
-			hashMap.put(key, arr);
+		for (LongCursor key : hashMap.keys()) {
+			int[] arr = ((IntArrayList) hashMap.get(key.value)).toArray();
+			hashMap.put(key.value, arr);
 		}
 	}
 
