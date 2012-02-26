@@ -96,7 +96,7 @@ public class TourenPlaner {
         }
         ConfigManager cm = ConfigManager.getInstance();
         graphfilename = cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany-ch.txt");
-        GraphRepWriter gWriter = new GraphSerializer();
+        GraphRepWriter gWriter = new GraphBinaryWriter();
 
         // now that we have a config (or not) we look if we only need to dump our graph and then exit
         if (cliParser.dumpgraph()) {
@@ -105,7 +105,7 @@ public class TourenPlaner {
                 graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
                 gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
             } catch (IOException e) {
-                log.severe("IOError dumping graph to file: " + graphfilename + "\n" + e.getMessage());
+                log.severe("IOError dumping graph to file: " + dumpName(graphfilename) + "\n" + e.getMessage());
             } finally {
                 System.exit(0);
             }
@@ -117,7 +117,7 @@ public class TourenPlaner {
                 graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
             } else {
                 try {
-                    graph = new GraphRepDumpReader().createGraphRep(new FileInputStream(dumpName(graphfilename)));
+                    graph = new GraphRepBinaryReader().createGraphRep(new FileInputStream(dumpName(graphfilename)));
                 } catch (InvalidClassException e) {
                     log.warning("Dumped Graph version does not match the required version: " + e.getMessage());
                     log.info("Falling back to text reading from file: " + graphfilename + " (path provided by config file)");
