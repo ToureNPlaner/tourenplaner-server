@@ -37,9 +37,6 @@ public class GraphRepBinaryWriter implements GraphRepWriter{
 
         // Write edges
         for(int i = 0; i < numEdges; i++){
-            if(graphRep.getSource(i) < 0 || graphRep.getTarget(i) < 0 ){
-                log.severe("Graphrep is weird");
-            }
             dout.writeInt(graphRep.getSource(i));
             dout.writeInt(graphRep.getTarget(i));
             dout.writeInt(graphRep.getDist(i));
