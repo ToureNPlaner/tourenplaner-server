@@ -4,6 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
@@ -45,32 +48,40 @@ public class GraphRepBinaryReader implements GraphRepReader {
 
         GraphRep graphRep = new GraphRep(nodeCount, edgeCount);
 
-
         log.info("Reading " + nodeCount + " nodes and " + edgeCount + " edges ...");
+
+        // read all the nodes in a byte array, wrap this array in a bytebuffer, set the byte order to Big endian and
+        // then look at this buffer as if it were an int buffer
+        byte[] temp = new byte[nodeCount * 4 * 4];
+        din.read(temp, 0, nodeCount * 4 * 4);
+        IntBuffer tempbb = ByteBuffer.wrap(temp).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
         int lat, lon;
         int height;
         int rank;
         // Read nodes
         for (int i = 0; i < nodeCount; i++) {
-            lat = din.readInt();
-            lon = din.readInt();
-            height = din.readInt();
-            rank = din.readInt();
+            lat = tempbb.get();
+            lon = tempbb.get();
+            height = tempbb.get();
+            rank = tempbb.get();
             graphRep.setNodeData(i, lat, lon, height);
             graphRep.setNodeRank(i, rank);
         }
 
+        temp = new byte[edgeCount * 6 * 4];
+        din.read(temp, 0, edgeCount * 6 * 4);
+        tempbb = ByteBuffer.wrap(temp).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
         // temporary values for edges
         int src, trgt, dist, euclidianDist;
         int shortcuttedEdge1, shortcuttedEdge2;
         // Read edges
         for (int i = 0; i < edgeCount; i++) {
-            src = din.readInt();
-            trgt = din.readInt();
-            dist = din.readInt();
-            euclidianDist = din.readInt();
-            shortcuttedEdge1 = din.readInt();
-            shortcuttedEdge2 = din.readInt();
+            src = tempbb.get();
+            trgt = tempbb.get();
+            dist = tempbb.get();
+            euclidianDist = tempbb.get();
+            shortcuttedEdge1 = tempbb.get();
+            shortcuttedEdge2 = tempbb.get();
             graphRep.setEdgeData(i, src, trgt, dist, euclidianDist);
             graphRep.setShortcutData(i, shortcuttedEdge1, shortcuttedEdge2);
         }
