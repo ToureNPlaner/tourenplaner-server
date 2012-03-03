@@ -19,14 +19,14 @@ public class HashNN implements NNSearcher {
 	private static final long serialVersionUID = 1L;
 
 	GraphRep graphRep;
-	LongObjectOpenHashMap hashMap;
+	LongObjectOpenHashMap<Object> hashMap;
 	NNSearcher dumpNN;
 	private static final int maxHopLimit = 10;
 
 	public HashNN(GraphRep graphRep) {
 		this.graphRep = graphRep;
 		dumpNN = new DumbNN(graphRep);
-		hashMap = new LongObjectOpenHashMap();
+		hashMap = new LongObjectOpenHashMap<Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
 			long tempLat = graphRep.getNodeLat(i) / 1000;
 			long tempLon = graphRep.getNodeLon(i) / 1000;
