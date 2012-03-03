@@ -96,7 +96,7 @@ public class TourenPlaner {
         }
         ConfigManager cm = ConfigManager.getInstance();
         graphfilename = cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany-ch.txt");
-        GraphRepWriter gWriter = new GraphBinaryWriter();
+        GraphRepWriter gWriter = new GraphRepBinaryWriter();
 
         // now that we have a config (or not) we look if we only need to dump our graph and then exit
         if (cliParser.dumpgraph()) {

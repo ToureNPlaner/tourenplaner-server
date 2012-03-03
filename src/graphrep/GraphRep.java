@@ -125,9 +125,11 @@ public class GraphRep implements Serializable {
     protected final int[] mapping_InToOut;
 
     /**
-     * A graphrep is the representation of a graph used to perform several
-     * algorithms on. All its protected fields must be be set from the outside
-     * (which is not nice)
+     * A GraphRep is the representation of a graph used to perform several
+     * algorithms on.
+     * This constructor creates all internal data structures but the data needs
+     * to be set with setEdgeDate, setShortcutData and setNodeData
+     * then one can generate the offset arrays from this data.
      */
     public GraphRep(int nodeCount, int edgeCount) {
         this.nodeCount = nodeCount;
