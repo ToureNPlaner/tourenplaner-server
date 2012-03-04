@@ -197,13 +197,17 @@ public class ConstrainedSP extends GraphAlgorithm {
         // regard to the multiplier
         // only to the penultimate element (srcId)
         currNode = trgtId;
-        while (routeElements > 0) {
+        while (routeElements > 1) {
             distance += graph.getEuclidianDist(prevEdges[currNode]);
             routeElements--;
             resultWay.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
             resultWay.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
             currNode = graph.getSource(prevEdges[currNode]);
         }
+        // add source node to the result.
+        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
+        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+
         return distance;
     }
 
