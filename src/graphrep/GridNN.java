@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 public class GridNN implements NNSearcher {
     private static Logger log = Logger.getLogger("graphrep");
     private static final long serialVersionUID = 1L;
-    private static final int numberOfColumns = 2000;
+    private static final int numberOfColumns = 1000;
     private int numRows;
     private int numCols;
 
@@ -97,10 +97,17 @@ public class GridNN implements NNSearcher {
             list = grid[index];
 
             if (list == null) {
-                list = new IntArrayList(1);
+                list = new IntArrayList(10);
                 grid[index] = list;
             }
             list.add(i);
+        }
+
+        // Let's trim the Lists to their internal size
+        for(int i = 0; i < grid.length; i++){
+            list = grid[i];
+            if (list != null)
+                list.trimToSize();
         }
     }
 
