@@ -113,7 +113,7 @@ public class GraphRepBinaryReader implements GraphRepReader {
         // DumbNN uses linear search and is slow.
         // HashNN should be faster but needs more RAM
         log.info("Start creating NNSearcher");
-        graphRep.searcher = new HashNN(graphRep);
+        graphRep.searcher = new GridNN(graphRep);//new HashNN(graphRep);
         System.gc();
         log.info("Graph loaded");
         return graphRep;
