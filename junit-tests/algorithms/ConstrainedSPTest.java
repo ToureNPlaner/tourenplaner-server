@@ -76,15 +76,21 @@ public class ConstrainedSPTest {
         assertEquals(10000000,resultWay.getPointLat(4));
         assertEquals(30000000,resultWay.getPointLon(4));
 
-        //no possible way with a constraint
+        //no possible way with a constraint. There should be the way with the least difference of altitude
         resultWay = new Way();
-        try {
-            result = constrainedSP.cSP(points,resultWay,30);
-            fail("Should have raised an IllegalArgumentException");
-        } catch (ComputeException expected) {
-        }
-
-
+        result = constrainedSP.cSP(points,resultWay,30);
+        assertEquals(40,result[0]);
+        assertEquals(14,result[1]);
+        assertEquals(10000000,resultWay.getPointLat(0));
+        assertEquals(10000000,resultWay.getPointLon(0));
+        assertEquals(20000000,resultWay.getPointLat(1));
+        assertEquals(10000000,resultWay.getPointLon(1));
+        assertEquals(30000000,resultWay.getPointLat(2));
+        assertEquals(10000000,resultWay.getPointLon(2));
+        assertEquals(30000000,resultWay.getPointLat(3));
+        assertEquals(20000000,resultWay.getPointLon(3));
+        assertEquals(10000000,resultWay.getPointLat(4));
+        assertEquals(30000000,resultWay.getPointLon(4));
 
     }
 }
