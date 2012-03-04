@@ -134,7 +134,10 @@ public class ConstrainedSP extends GraphAlgorithm {
                 ds.returnDistArray(false);
                 ds.returnHeap();
                 ds.returnPrevArray();
-                throw new ComputeException("No path found");
+                int distance = backtrack(dists, prevEdges, resultWay, srcId, trgtId);
+                return new int[]{altitudeDiff,distance};
+
+
             }
             lamdaOfGood = lamda;
             lamda = (lamdaOfGood + lamdaOfBad) / 2.0;
@@ -151,7 +154,29 @@ public class ConstrainedSP extends GraphAlgorithm {
             }
             altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
         }
-        // Find out how much space to allocate
+        log.fine("path goes over " + altitudeDiff + " meters of altitude Difference");
+        int distance = backtrack(dists, prevEdges, resultWay, srcId, trgtId);
+
+
+        ds.returnDistArray(false);
+        ds.returnHeap();
+        ds.returnPrevArray();
+        return new int[]{altitudeDiff,distance};
+    }
+
+    /**
+     * Backtracks the prevEdges Array and calculates the actual path length
+     *  returns the length of the found path in meters
+     *
+     * @param dists
+     * @param prevEdges
+     * @param resultWay
+     * @param srcId
+     * @param trgtId
+     * @return
+     */
+    private int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int trgtId) {
+        int resultAddIndex;// Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;
 
@@ -160,8 +185,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             currNode = graph.getSource(prevEdges[currNode]);
         }
         log.fine(
-                "path goes over " + routeElements + " nodes and over " + altitudeDiff +
-                        " meters of altitude Difference");
+                "path goes over " + routeElements + " nodes.");
         // Add points to the end
         resultAddIndex = resultWay.size();
         // Add them without values we set the values in the next step
@@ -180,17 +204,10 @@ public class ConstrainedSP extends GraphAlgorithm {
             resultWay.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
             currNode = graph.getSource(prevEdges[currNode]);
         }
-        // add source node to the result.
-        /*resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));*/
-
-        ds.returnDistArray(false);
-        ds.returnHeap();
-        ds.returnPrevArray();
-        return new int[]{altitudeDiff,distance};
+        return distance;
     }
-    
-    
+
+
     /**
      * Performs the Dijkstra Search on edge weights with
      * euclidian distance * lamda + altitude difference * 1-lamda
