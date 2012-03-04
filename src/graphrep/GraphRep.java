@@ -12,6 +12,10 @@ import java.io.Serializable;
 public class GraphRep implements Serializable {
     private static final long serialVersionUID = 15L;
 
+    /**
+     * This class is used internally to sort the edge arrays
+     * it's a heap sort implementation using a ternary heap.
+     */
     private static class Sorter {
         private static void sort(GraphRep graphRep) {
 
@@ -25,9 +29,9 @@ public class GraphRep implements Serializable {
         }
 
         private static void swap(GraphRep graphRep, int i, int j) {
-            int temp = graphRep.mapping_InToOut[i];
-            graphRep.mapping_InToOut[i] = graphRep.mapping_InToOut[j];
-            graphRep.mapping_InToOut[j] = temp;
+            int temp = graphRep.mappingInToOut[i];
+            graphRep.mappingInToOut[i] = graphRep.mappingInToOut[j];
+            graphRep.mappingInToOut[j] = temp;
         }
 
         /**
@@ -40,8 +44,8 @@ public class GraphRep implements Serializable {
             int edgeI, edgeJ;
             int targetI, targetJ;
             int sourceRankI, sourceRankJ;
-            edgeI = graphRep.mapping_InToOut[i];
-            edgeJ = graphRep.mapping_InToOut[j];
+            edgeI = graphRep.mappingInToOut[i];
+            edgeJ = graphRep.mappingInToOut[j];
             targetI = graphRep.trgt[edgeI];
             targetJ = graphRep.trgt[edgeJ];
             sourceRankI = graphRep.getRank(graphRep.src[edgeI]);
@@ -114,20 +118,22 @@ public class GraphRep implements Serializable {
     protected final int[] shortedEdge1;
     protected final int[] shortedEdge2;
 
-    protected final int[] offsetOut;
-    protected final int[] offsetIn;
+    protected int[] offsetOut;
+    protected int[] offsetIn;
 
     /**
      * Index = "virtual" id for in edges
      * <p/>
      * content = position in the edge array
      */
-    protected final int[] mapping_InToOut;
+    protected int[] mappingInToOut;
 
     /**
-     * A graphrep is the representation of a graph used to perform several
-     * algorithms on. All its protected fields must be be set from the outside
-     * (which is not nice)
+     * A GraphRep is the representation of a graph used to perform several
+     * algorithms on.
+     * This constructor creates all internal data structures but the data needs
+     * to be set with setEdgeDate, setShortcutData and setNodeData
+     * then one can generate the offset arrays from this data.
      */
     public GraphRep(int nodeCount, int edgeCount) {
         this.nodeCount = nodeCount;
@@ -139,9 +145,6 @@ public class GraphRep implements Serializable {
 
         this.rank = new int[nodeCount];
 
-        this.offsetOut = new int[nodeCount + 1];
-        this.offsetIn = new int[nodeCount + 1];
-
         this.src = new int[edgeCount];
         this.trgt = new int[edgeCount];
         this.dist = new int[edgeCount];
@@ -150,8 +153,6 @@ public class GraphRep implements Serializable {
         this.rankSlope = new int[edgeCount];
         this.shortedEdge1 = new int[edgeCount];
         this.shortedEdge2 = new int[edgeCount];
-
-        this.mapping_InToOut = new int[edgeCount];
     }
 
     /**
@@ -188,8 +189,6 @@ public class GraphRep implements Serializable {
      * @param dist
      */
     protected final void setEdgeData(int index, int source, int target, int dist, int euclidianDist) {
-        this.mapping_InToOut[index] = index;
-
         this.src[index] = source;
         this.trgt[index] = target;
         this.dist[index] = dist;
@@ -212,10 +211,77 @@ public class GraphRep implements Serializable {
         this.shortedEdge2[id] = shortedEdge2;
     }
 
+
+    /**
+     * Sets the offsetOut array to the given array, this method
+     * is only used for low level graph loading so generateOffsets()
+     * can be avoided
+     *
+     * @param newOffsetOut
+     */
+    protected final void setOffsetOut(int[] newOffsetOut) {
+        this.offsetOut = newOffsetOut;
+    }
+
+    /**
+     * Gets the offsetOut array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getOffsetOut() {
+        return this.offsetOut;
+    }
+
+    /**
+     * Sets the offsetIn array to the given array, this method
+     * is only used for low level graph loading so generateOffsets()
+     * can be avoided
+     *
+     * @param newOffsetIn
+     */
+    protected final void setOffsetIn(int[] newOffsetIn) {
+        this.offsetIn = newOffsetIn;
+    }
+
+    /**
+     * Gets the offsetIn array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getOffsetIn() {
+        return this.offsetIn;
+    }
+
+    /**
+     * Sets the mappingInToOut array to the given array, this method
+     * is only used for low level graph loading so generateOffsets()
+     * can be avoided
+     *
+     * @param newMapping
+     */
+    protected final void setMappingInToOut(int[] newMapping) {
+        this.mappingInToOut = newMapping;
+    }
+
+    /**
+     * Gets the mappingInToOut array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getMappingInToOut() {
+        return this.mappingInToOut;
+    }
+
     /**
      * Regenerates the offset arrays from the current edge arrays
      */
     protected final void generateOffsets() {
+        this.mappingInToOut = new int[edgeCount];
+        this.offsetOut = new int[nodeCount + 1];
+        this.offsetIn = new int[nodeCount + 1];
+
+        // Set mapping to inital values (0,1,2,3..)
+        for (int i = 0; i < edgeCount; i++) {
+            this.mappingInToOut[i] = i;
+        }
+
         int currentSource;
         int prevSource = -1;
         for (int i = 0; i < edgeCount; i++) {
@@ -239,7 +305,7 @@ public class GraphRep implements Serializable {
         int currentDest;
         int prevDest = -1;
         for (int i = 0; i < edgeCount; i++) {
-            currentDest = trgt[mapping_InToOut[i]];
+            currentDest = trgt[mappingInToOut[i]];
             if (currentDest != prevDest) {
                 for (int j = currentDest; j > prevDest; j--) {
                     offsetIn[j] = i;
@@ -331,7 +397,7 @@ public class GraphRep implements Serializable {
      */
     public final int getInDist(int nodeId, int edgeNum) {
         // return dist_in[offsetIn[nodeID] + edgeNum];
-        return dist[mapping_InToOut[offsetIn[nodeId] + edgeNum]];
+        return dist[mappingInToOut[offsetIn[nodeId] + edgeNum]];
     }
 
     /**
@@ -343,7 +409,7 @@ public class GraphRep implements Serializable {
      * @return
      */
     public final int getInRankSlope(int nodeId, int edgeNum) {
-        return rankSlope[mapping_InToOut[offsetIn[nodeId] + edgeNum]];
+        return rankSlope[mappingInToOut[offsetIn[nodeId] + edgeNum]];
     }
 
     /**
@@ -357,7 +423,7 @@ public class GraphRep implements Serializable {
      */
     public final int getInEuclidianDist(int nodeId, int edgeNum) {
         // return dist_in[offsetIn[nodeID] + edgeNum];
-        return euclidianDist[mapping_InToOut[offsetIn[nodeId] + edgeNum]];
+        return euclidianDist[mappingInToOut[offsetIn[nodeId] + edgeNum]];
     }
 
     /**
@@ -379,7 +445,7 @@ public class GraphRep implements Serializable {
      * @return
      */
     public final int getInEdgeId(int nodeId, int edgeNum) {
-        return mapping_InToOut[offsetIn[nodeId] + edgeNum];
+        return mappingInToOut[offsetIn[nodeId] + edgeNum];
     }
 
     /**
@@ -391,7 +457,7 @@ public class GraphRep implements Serializable {
      */
     public final int getInSource(int nodeId, int edgeNum) {
         // return src_in[offsetIn[nodeID] + edgeNum];
-        return src[mapping_InToOut[offsetIn[nodeId] + edgeNum]];
+        return src[mappingInToOut[offsetIn[nodeId] + edgeNum]];
     }
 
     /**
@@ -402,7 +468,7 @@ public class GraphRep implements Serializable {
      * @return
      */
     public final int getInFirstShortcuttedEdge(int nodeId, int edgeNum) {
-        return shortedEdge1[mapping_InToOut[offsetOut[nodeId] + edgeNum]];
+        return shortedEdge1[mappingInToOut[offsetOut[nodeId] + edgeNum]];
     }
 
     /**
@@ -413,7 +479,7 @@ public class GraphRep implements Serializable {
      * @return
      */
     public final int getInSecondShortcuttedEdge(int nodeId, int edgeNum) {
-        return shortedEdge2[mapping_InToOut[offsetOut[nodeId] + edgeNum]];
+        return shortedEdge2[mappingInToOut[offsetOut[nodeId] + edgeNum]];
     }
 
     /**

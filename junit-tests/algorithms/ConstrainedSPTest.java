@@ -1,14 +1,16 @@
 package algorithms;
 
-import computecore.Way;
 import computecore.RequestPoints;
+import computecore.Way;
 import graphrep.GraphRep;
-import graphrep.GraphRepFactory;
+import graphrep.GraphRepReader;
 import graphrep.GraphRepTextReader;
-import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -16,7 +18,7 @@ import java.io.ByteArrayInputStream;
 public class ConstrainedSPTest {
     @Test
     public void testCompute() throws Exception {
-        GraphRepFactory graphRepTextReader = new GraphRepTextReader();
+        GraphRepReader graphRepTextReader = new GraphRepTextReader();
 
       String testFile = new String("8\n18\n10000000 10000000 20 0\n20000000 20000000 5 0\n20000000 10000000 10 0\n10000000 20000000 100 0\n30000000 10000000 40 0\n30000000 20000000 45 0\n20000000 30000000 30 0\n10000000 30000000 50 0\n0 1 0 4 -1 -1\n0 2 0 2 -1 -1\n0 3 0 3 -1 -1\n1 0 0 4 -1 -1\n1 6 0 2 -1 -1\n2 0 0 2 -1 -1\n2 4 0 3 -1 -1\n3 0 0 3 -1 -1\n3 7 0 4 -1 -1\n4 2 0 2 -1 -1\n4 5 0 4 -1 -1\n5 4 0 4 -1 -1\n5 7 0 5 -1 -1\n6 1 0 2 -1 -1\n6 7 0 3 -1 -1\n7 6 0 3 -1 -1\n7 5 0 5 -1 -1\n7 3 0 4 -1 -1");
         byte[] testFileBytes = testFile.getBytes();

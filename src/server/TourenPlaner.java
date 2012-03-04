@@ -10,9 +10,7 @@ import computecore.ComputeCore;
 import computecore.SharingAMFactory;
 import config.ConfigManager;
 import database.DatabasePool;
-import graphrep.GraphRep;
-import graphrep.GraphRepDumpReader;
-import graphrep.GraphRepTextReader;
+import graphrep.*;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -98,15 +96,16 @@ public class TourenPlaner {
         }
         ConfigManager cm = ConfigManager.getInstance();
         graphfilename = cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany-ch.txt");
+        GraphRepWriter gWriter = new GraphRepBinaryWriter();
 
         // now that we have a config (or not) we look if we only need to dump our graph and then exit
         if (cliParser.dumpgraph()) {
             log.info("Dumping Graph...");
             try {
                 graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
-                utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
+                gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
             } catch (IOException e) {
-                log.severe("IOError dumping graph to file: " + graphfilename + "\n" + e.getMessage());
+                log.severe("IOError dumping graph to file: " + dumpName(graphfilename) + "\n" + e.getMessage());
             } finally {
                 System.exit(0);
             }
@@ -118,7 +117,7 @@ public class TourenPlaner {
                 graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
             } else {
                 try {
-                    graph = new GraphRepDumpReader().createGraphRep(new FileInputStream(dumpName(graphfilename)));
+                    graph = new GraphRepBinaryReader().createGraphRep(new FileInputStream(dumpName(graphfilename)));
                 } catch (InvalidClassException e) {
                     log.warning("Dumped Graph version does not match the required version: " + e.getMessage());
                     log.info("Falling back to text reading from file: " + graphfilename + " (path provided by config file)");
@@ -128,7 +127,7 @@ public class TourenPlaner {
                     if (graph != null && new File(dumpName(graphfilename)).delete()) {
                         log.info("Graph successfully read. Now replacing old dumped graph");
                         try {
-                            utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
+                            gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
                         }catch(IOException e1){
                             log.warning("writing dump failed (but graph loaded):\n" + e1.getMessage());
                         }
@@ -138,7 +137,7 @@ public class TourenPlaner {
                     log.info("Falling back to text reading from file " + graphfilename + " (path provided by config file)");
                     graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
                     log.info("Graph successfully read. Now writing new dump");
-                    utils.GraphSerializer.serialize(new FileOutputStream(dumpName(graphfilename)), graph);
+                    gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
                 }
             }
         } catch (IOException e) {
