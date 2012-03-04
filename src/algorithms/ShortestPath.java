@@ -261,7 +261,11 @@ public class ShortestPath extends GraphAlgorithm {
 
             currNode = graph.getSource(prevEdges[currNode]);
         }
+        // add source node to the result.
+        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
+        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
         return length;
+
     }
 
 }
