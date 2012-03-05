@@ -27,9 +27,8 @@ public class GraphRepBinaryReader implements GraphRepReader {
     @Override
     public GraphRep createGraphRep(InputStream in) throws IOException {
 
-        // 8388608 Bytes = 8 MB
-        BufferedInputStream bin = new BufferedInputStream(in, 8388608);
-        DataInputStream din = new DataInputStream(bin);
+
+        DataInputStream din = new DataInputStream(in);
         // Check the first 4 bytes to see if it's a ToureNPlaner Graphfile
         byte[] magic = new byte[4];
         din.readFully(magic);
@@ -52,58 +51,66 @@ public class GraphRepBinaryReader implements GraphRepReader {
 
         // read all the nodes in a byte array, wrap this array in a bytebuffer, set the byte order to Big endian and
         // then look at this buffer as if it were an int buffer
-        byte[] temp = new byte[nodeCount * 4 * 4];
-        din.read(temp, 0, nodeCount * 4 * 4);
-        IntBuffer tempbb = ByteBuffer.wrap(temp).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+
+        ByteBuffer temp = ByteBuffer.allocate(edgeCount * 6 * 4);
+        din.read(temp.array(), 0, nodeCount * 4 * 4);
+        IntBuffer tempib = temp.order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+        tempib.rewind();
         int lat, lon;
         int height;
         int rank;
         // Read nodes
         for (int i = 0; i < nodeCount; i++) {
-            lat = tempbb.get();
-            lon = tempbb.get();
-            height = tempbb.get();
-            rank = tempbb.get();
+            lat = tempib.get();
+            lon = tempib.get();
+            height = tempib.get();
+            rank = tempib.get();
             graphRep.setNodeData(i, lat, lon, height);
             graphRep.setNodeRank(i, rank);
         }
 
-        temp = new byte[edgeCount * 6 * 4];
-        din.read(temp, 0, edgeCount * 6 * 4);
-        tempbb = ByteBuffer.wrap(temp).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+
+        din.read(temp.array(), 0, edgeCount * 6 * 4);
+        tempib.rewind();
         // temporary values for edges
         int src, trgt, dist, euclidianDist;
         int shortcuttedEdge1, shortcuttedEdge2;
         // Read edges
         for (int i = 0; i < edgeCount; i++) {
-            src = tempbb.get();
-            trgt = tempbb.get();
-            dist = tempbb.get();
-            euclidianDist = tempbb.get();
-            shortcuttedEdge1 = tempbb.get();
-            shortcuttedEdge2 = tempbb.get();
+            src = tempib.get();
+            trgt = tempib.get();
+            dist = tempib.get();
+            euclidianDist = tempib.get();
+            shortcuttedEdge1 = tempib.get();
+            shortcuttedEdge2 = tempib.get();
             graphRep.setEdgeData(i, src, trgt, dist, euclidianDist);
             graphRep.setShortcutData(i, shortcuttedEdge1, shortcuttedEdge2);
         }
 
         // Read mappingInToOut
         final int[] mappingInToOut = new int[edgeCount];
+        din.read(temp.array(), 0, edgeCount  * 4);
+        tempib.rewind();
         for (int i = 0; i < edgeCount; i++) {
-            mappingInToOut[i] = din.readInt();
+            mappingInToOut[i] = tempib.get();
         }
         graphRep.setMappingInToOut(mappingInToOut);
 
         // Read offsetIn
         final int[] offsetIn = new int[nodeCount + 1];
+        tempib.rewind();
+        din.read(temp.array(), 0, (nodeCount+1)  * 4);
         for (int i = 0; i < nodeCount + 1; i++) {
-            offsetIn[i] = din.readInt();
+            offsetIn[i] = tempib.get();
         }
         graphRep.setOffsetIn(offsetIn);
 
         // Read offsetOut
         final int[] offsetOut = new int[nodeCount + 1];
+        tempib.rewind();
+        din.read(temp.array(), 0, (nodeCount+1)  * 4);
         for (int i = 0; i < nodeCount + 1; i++) {
-            offsetOut[i] = din.readInt();
+            offsetOut[i] = tempib.get();
         }
         graphRep.setOffsetOut(offsetOut);
 
