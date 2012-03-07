@@ -87,13 +87,6 @@ public class GraphRepTextReader implements GraphRepReader {
         graphRep.generateOffsets();
         log.info("successfully created offset of InEdges");
 
-        // choose the NNSearcher here
-        // DumbNN uses linear search and is slow.
-        // HashNN should be faster but needs more RAM
-        log.info("Start creating NNSearcher");
-        graphRep.searcher = new GridNN(graphRep);
-        System.gc();
-        log.info("Graph loaded");
         return graphRep;
     }
 }

@@ -1,6 +1,5 @@
 package graphrep;
 
-import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,14 +114,6 @@ public class GraphRepBinaryReader implements GraphRepReader {
         graphRep.setOffsetOut(offsetOut);
 
         in.close();
-        log.info("successfully created offset of InEdges");
-        // choose the NNSearcher here
-        // DumbNN uses linear search and is slow.
-        // HashNN should be faster but needs more RAM
-        log.info("Start creating NNSearcher");
-        graphRep.searcher = new GridNN(graphRep);//new HashNN(graphRep);
-        System.gc();
-        log.info("Graph loaded");
         return graphRep;
     }
 }

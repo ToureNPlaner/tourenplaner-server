@@ -153,6 +153,18 @@ public class GraphRep implements Serializable {
         this.rankSlope = new int[edgeCount];
         this.shortedEdge1 = new int[edgeCount];
         this.shortedEdge2 = new int[edgeCount];
+
+        // Use the simple DumbNN as searcher per default
+        // this one needs no setup time but is slow
+        this.searcher = new DumbNN(this);
+    }
+
+    /**
+     * Set the NNSearcher used by this GraphRep
+     * @param searcher
+     */
+    public void setNNSearcher(NNSearcher searcher) {
+        this.searcher = searcher;
     }
 
     /**

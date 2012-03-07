@@ -149,6 +149,14 @@ public class TourenPlaner {
             System.exit(1);
         }
 
+        // choose the NNSearcher here
+        // DumbNN uses linear search and is slow.
+        // HashNN should be faster but needs more RAM
+        log.info("Start creating NNSearcher");
+        graph.setNNSearcher(new GridNN(graph));//new HashNN(graphRep);
+        System.gc();
+        log.info("Graph loaded");
+
         // Register Algorithms
         AlgorithmRegistry reg = new AlgorithmRegistry();
         // reg.registerAlgorithm(new ShortestPathFactory(graph));
