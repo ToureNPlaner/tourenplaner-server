@@ -3,10 +3,11 @@ package graphrep;
 
 import org.junit.Test;
 
-public class DumbNNTest extends NNTest {
+public class GridNNTest extends NNTest{
+
     @Test
     public void testGetIdForCoordinates() {
-        NNSearcher searcher = new DumbNN(graph);
+        NNSearcher searcher = new GridNN(graph);
         testNNSearcher(searcher);
     }
 }
