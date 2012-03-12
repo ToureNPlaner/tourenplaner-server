@@ -346,7 +346,12 @@ public class PrivateHandler extends RequestHandler {
             }
         }
 
-        dbm.updateUser(selectedUser);
+        int rowsChanged = dbm.updateUser(selectedUser);
+        if (rowsChanged == -1) {
+            responder.writeErrorMessage("EREGISTERED", "This email is already registered", null,
+                    HttpResponseStatus.FORBIDDEN);
+            return;
+        }
         responder.writeJSON(selectedUser, HttpResponseStatus.OK);
         log.finest("UpdateUser successful.");
     }

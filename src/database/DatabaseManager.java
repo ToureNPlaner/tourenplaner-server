@@ -311,7 +311,7 @@ public class DatabaseManager {
                     // if no exception occurred, user is added, so do not try again
                     tryAgain = -1;
 
-                    // catch if duplicate key error
+                    // catch if duplicate key error occurs
                 } catch (SQLIntegrityConstraintViolationException ex) {
                     if (ex.getNextException() == null) {
                         return null;
@@ -538,7 +538,9 @@ public class DatabaseManager {
 	 *            The user object to write into the database.
 	 * @throws SQLException
 	 *             Thrown if update fails.
-     * @return number of database rows changed (1 if successful, else 0)
+     * @return Number of database rows changed (1 if successful, 0 if nothing has changed).
+     *          If the email field of the user should be changed to another email which is already used
+     *          by another user, then this method will return -1.
 	 */
 	public int  updateUser(UserDataset user) throws SQLException {
 
@@ -565,7 +567,16 @@ public class DatabaseManager {
                 pstUpdateUser.setTimestamp(10, dateToTimestamp(user.verifiedDate));
                 pstUpdateUser.setInt(11, user.userid);
 
-                return pstUpdateUser.executeUpdate();
+                try {
+                    return pstUpdateUser.executeUpdate();
+
+                    // catch if duplicate key error occurs
+                } catch (SQLIntegrityConstraintViolationException ex) {
+                    if (ex.getNextException() == null) {
+                        return -1;
+                    }
+                    throw ex;
+                }
 
             } catch (SQLException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);

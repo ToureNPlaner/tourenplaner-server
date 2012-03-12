@@ -8,8 +8,14 @@
 	"dbuser" : "tnpuser",
 	"dbpw" : "toureNPlaner",
 	"dbdriverclass" : "com.mysql.jdbc.Driver",
+
 	// how many times a database query should be retried
 	"maxdbtries" : 3,
+
+	// when "store-full-response" is false the result path will not be stored into database,
+	// but it will store the the start and end points of the sub paths
+	// "store-full-response" will have no effect if "private" is false
+	"store-full-response" : true,
 
 	"c3p0" :
 	    {

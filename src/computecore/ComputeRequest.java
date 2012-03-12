@@ -170,11 +170,13 @@ public class ComputeRequest {
 	 * 
 	 * @param mapper Jackson ObjectMapper
 	 * @param stream OutputStream
+     * @param writePath Determines if the result path should be written into the stream or
+     *                  if no path but the start and end points of the sub paths should be written into the stream
 	 * @throws JsonGenerationException Thrown if generating json fails
      * @throws JsonProcessingException Thrown if json generation processing fails
      * @throws IOException Thrown if writing json onto the stream fails
 	 */
-	public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
+	public void writeToStream(ObjectMapper mapper, OutputStream stream, boolean writePath) throws IOException {
 
 		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
 		Map<String, Object> pconsts;
@@ -202,15 +204,26 @@ public class ComputeRequest {
 		gen.writeEndArray();
 
 		gen.writeArrayFieldStart("way");
-        for(Way way : this.getResultWays()){
-            gen.writeStartArray();
-            for (int i = 0; i < way.size(); i++) {
-                gen.writeStartObject();
-                gen.writeNumberField("lt", way.getPointLat(i));
-                gen.writeNumberField("ln", way.getPointLon(i));
-                gen.writeEndObject();
+        if (writePath) {
+            for(Way way : this.getResultWays()){
+                gen.writeStartArray();
+                for (int i = 0; i < way.size(); i++) {
+                    gen.writeStartObject();
+                    gen.writeNumberField("lt", way.getPointLat(i));
+                    gen.writeNumberField("ln", way.getPointLon(i));
+                    gen.writeEndObject();
+                }
+                gen.writeEndArray();
             }
-            gen.writeEndArray();
+        } else {
+            for (int i = 0; i < points.size(); i++) {
+                gen.writeStartArray();
+                gen.writeStartObject();
+                gen.writeNumberField("lt", points.getPointLat(i));
+                gen.writeNumberField("ln", points.getPointLon(i));
+                gen.writeEndObject();
+                gen.writeEndArray();
+            }
         }
 		gen.writeEndArray();
 		gen.writeObjectField("misc", this.getMisc());

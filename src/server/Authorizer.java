@@ -104,7 +104,7 @@ public class Authorizer extends RequestHandler {
         }
 
         if (user.status != UserStatusEnum.verified) {
-            if (user.status != UserStatusEnum.needs_verification) {
+            if (user.status == UserStatusEnum.needs_verification) {
                 responder.writeErrorMessage("ENOTVERIFIED", "User account is not verified",
                         null, HttpResponseStatus.FORBIDDEN);
             } else {
