@@ -17,7 +17,7 @@ def main():
    requester = tester.Requester(http)
 
 
-   t = tester.Tester(sys.argv[1], requester, allTests)
+   t = tester.Tester(sys.argv[1], requester, GetAllTests())
    t.runTests()
 
 if __name__ == "__main__":

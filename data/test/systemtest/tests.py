@@ -2,14 +2,7 @@
 import httplib2
 import base64
 import urllib.parse
-from tester import Test
-from tester import User
-
-testClasses = []
-
-def TestClass(clazz):
-   testClasses.append(clazz)
-
+from tester import *
 
 @TestClass
 class SPTest(Test):
@@ -132,15 +125,58 @@ class ListUserTestWithoutParams(Test):
       else:
          return status == '400' and (content['errorid'] == 'ELIMIT' or content['errorid'] == 'EOFFSET')
 
+@TestClass
+class GetUserNoParamTest(Test):
 
-users = [
+   def __init__(self, user):
+      super().__init__(user)
+      # asks for own user data
+      self.url = '/getuser'
+      self.method = 'GET'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.verified:
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      else:
+         correct = status == '200' and content['email'] == self.user.email and content['firstname'] == self.user.firstName
+         correct = correct and content['lastname'] == self.user.lastName and content['status'] == 'verified' and content['address'] == self.user.address
+         return correct
+
+
+@TestClass
+class GetUserWithParamTest(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      # asks for user data for user with userid==3 which in the test db is userinactiveadmin@teufel.de
+      self.userid = 2
+      self.url = '/getuser?'+urllib.parse.urlencode({'id':3})
+      self.method = 'GET'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.verified:
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         correct = status == '200' and content['email'] == 'userinactiveadmin@teufel.de' and content['firstname'] == 'InactiveAdmin'
+         correct = correct and content['lastname'] == 'Teufel' and content['status'] == 'needs_verification'
+         return correct
+
+
+TestUsers([
          User('usernotindb@teufel.de', 'only4testing', 'NotInDB', 'Teufel','', admin=False, verified=False, indb=False),
          User('userinactivenotadmin@teufel.de', 'only4testing', 'InactiveNotAdmin', 'Teufel','', admin=False, verified=False, indb=True),
          User('userinactiveadmin@teufel.de', 'only4testing', 'InactiveAdmin', 'Teufel','', admin=True, verified=False, indb=True),
          User('useractivenotadmin@teufel.de', 'only4testing', 'ActiveNotAdmin', 'Teufel','', admin=False, verified=True, indb=True),
-         User('useractiveadmin@teufel.de', 'only4testing', 'ActiveAdmin', 'Teufel','', admin=True, verified=True, indb=True)]
+         User('useractiveadmin@teufel.de', 'only4testing', 'ActiveAdmin', 'Teufel','', admin=True, verified=True, indb=True)
+         ])
 
-
-allTests = [testClass(user) for testClass in testClasses for user in users]
 
 

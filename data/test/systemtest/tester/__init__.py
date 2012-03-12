@@ -62,3 +62,20 @@ class Tester:
             print(str(test.user))
          else:
             print(test.__class__.__name__+' User: '+str(test.user.email)+' ----- PASSED')
+
+
+testClasses = []
+testUsers = []
+
+
+
+def TestClass(clazz):
+   testClasses.append(clazz)
+   return clazz
+
+
+def TestUsers(users):
+   testUsers.extend(users)
+
+def GetAllTests():
+   return [testClass(user) for testClass in testClasses for user in testUsers]
