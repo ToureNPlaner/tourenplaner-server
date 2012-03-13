@@ -169,8 +169,33 @@ class GetUserWithParamTest(Test):
          correct = correct and content['lastname'] == 'Teufel' and content['status'] == 'needs_verification'
          return correct
 
+@TestClass
+class RegisterTest(Test):
+
+   def __init__(self, user):
+         super().__init__( user)
+         self.url = '/registeruser'
+         self.method = 'POST'
+         self.userobject = {'email' : 'registeredBy'+self.user.firstName+'@teufel.de',
+         'password' : 'only4testing',
+         'firstname' : 'registredBy'+self.user.firstName,
+         'lastname' : 'Teufel',
+         'address' : ''}
+         self.request = self.userobject
+
+   def verifyResponse(self, resp, content):
+         status = resp['status']
+         if not self.user.indb and self.user.sendAuth:
+            return status == '401' and content['errorid'] == 'EAUTH'
+         elif not self.user.verified and self.user.sendAuth:
+            return status == '403' and content['errorid'] == 'ENOTVERIFIED'      
+         else:
+            print(content)
+            return True
+
 
 TestUsers([
+         User('usernotindbnoauth@teufel.de', 'only4testing', 'NotInDBNoAuth', 'Teufel', '', admin=False, verified=False, indb=False, sendAuth=False),
          User('usernotindb@teufel.de', 'only4testing', 'NotInDB', 'Teufel','', admin=False, verified=False, indb=False),
          User('userinactivenotadmin@teufel.de', 'only4testing', 'InactiveNotAdmin', 'Teufel','', admin=False, verified=False, indb=True),
          User('userinactiveadmin@teufel.de', 'only4testing', 'InactiveAdmin', 'Teufel','', admin=True, verified=False, indb=True),
