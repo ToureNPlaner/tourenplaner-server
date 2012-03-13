@@ -283,6 +283,11 @@ public class Responder {
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
 
         response.setHeader("Access-Control-Allow-Origin", "*");
+        // Add header so that clients know how they can authenticate
+        if(status == HttpResponseStatus.UNAUTHORIZED){
+            response.setHeader("WWW-Authenticate","Basic realm=\"touenplaner\"");
+        }
+
         response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
 
         response.setContent(outputBuffer);
