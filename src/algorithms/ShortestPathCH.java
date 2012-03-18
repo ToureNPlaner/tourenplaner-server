@@ -198,7 +198,8 @@ public class ShortestPathCH extends GraphAlgorithm {
             if (nodeDist > dists[nodeId]) {
                 continue;
             }
-            for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
+            int edgeCount = graph.getOutEdgeCount(nodeId);
+            for (int i = 0; i < edgeCount; i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 targetNode = graph.getTarget(edgeId);
 

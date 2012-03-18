@@ -195,7 +195,8 @@ public class ShortestPath extends GraphAlgorithm {
             } else if (nodeDist > dists[nodeId]) {
                 continue;
             }
-            for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
+            int edgeCount = graph.getOutEdgeCount(nodeId);
+            for (int i = 0; i < edgeCount; i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 // Ignore Shortcuts
                 if (graph.getFirstShortcuttedEdge(edgeId) != -1) {
@@ -229,8 +230,7 @@ public class ShortestPath extends GraphAlgorithm {
      * @return
      * @throws IllegalAccessException
      */
-    protected final int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int trgtId) throws
-                                                                                                            IllegalAccessException {
+    protected final int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int trgtId) throws IllegalAccessException {
         // Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;
@@ -242,28 +242,23 @@ public class ShortestPath extends GraphAlgorithm {
             currNode = graph.getSource(prevEdges[currNode]);
         }
 
-        // Add points to the end
-        int resultAddIndex = resultWay.size();
         // Add them without values we set the values in the next step
         resultWay.addEmptyPoints(routeElements);
 
         // backtracking here
-        // Don't read distance from multipliedDist[], because there are
-        // distances with
-        // regard to the multiplier
         currNode = trgtId;
-        while (routeElements > 0) {
-            length += graph.getDist(prevEdges[currNode]);
+        while (routeElements > 1) {
+            length += graph.getEuclidianDist(prevEdges[currNode]);
             routeElements--;
 
-            resultWay.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
-            resultWay.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
+            resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
+            resultWay.setPointLon(routeElements, graph.getNodeLon(currNode));
 
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
-        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+        resultWay.setPointLat(0, graph.getNodeLat(currNode));
+        resultWay.setPointLon(0, graph.getNodeLon(currNode));
         return length;
 
     }
