@@ -83,9 +83,9 @@ public class TravelingSalesman extends GraphAlgorithm {
             List<RequestPoint> pointStore = new ArrayList<RequestPoint>(points.size());
             List<RequestPoint> requestPointList = points.getStore();
             // Rearrange the point store to the found bestTour
-            for (int i = 0; i < currTour.length; i++) {
-                pointStore.add(requestPointList.get(currTour[i]));
-            }
+          for (int currTourEntry : currTour) {
+              pointStore.add(requestPointList.get(currTourEntry));
+          }
             req.getPoints().setStore(pointStore);
             // Now build real paths
             int distance = chdijks.shortestPath(points, req.getResultWays(), true);

@@ -25,10 +25,9 @@ public class ShareEnabledAM extends AlgorithmManager {
 	@Override
 	public void addAlgorithm(AlgorithmFactory algFac) {
 		if (algFac instanceof SharingAlgorithmFactory) {
-			super.addAlgorithm(algFac.getURLSuffix(),
-					((SharingAlgorithmFactory) algFac).createAlgorithm(rs));
+			addAlgorithm(algFac.getURLSuffix(), ((SharingAlgorithmFactory) algFac).createAlgorithm(rs));
 		} else {
-			super.addAlgorithm(algFac.getURLSuffix(), algFac.createAlgorithm());
+			addAlgorithm(algFac.getURLSuffix(), algFac.createAlgorithm());
 		}
 	}
 }

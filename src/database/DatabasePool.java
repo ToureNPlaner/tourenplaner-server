@@ -20,9 +20,9 @@ public class DatabasePool {
     private String password;
     private String driverClass;
 
-    private ComboPooledDataSource cpds = null;
+    private ComboPooledDataSource cpds;
 
-    private static DatabasePool instance = null;
+    private static DatabasePool instance;
     
     private DatabasePool(String url, String userName, String password, String driverClass)
             throws PropertyVetoException {

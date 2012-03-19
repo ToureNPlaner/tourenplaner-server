@@ -61,7 +61,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
      * @param serverInfo String-Object-Map
      */
     public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
-        super();
         final ConfigManager cm = ConfigManager.getInstance();
         this.isPrivate = cm.getEntryBool("private", false);
         this.dbm = null;
@@ -178,7 +177,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
                 responder.writeErrorMessage("EUNKNOWNURL", "An unknown URL was requested", "unknown URL: " + path, HttpResponseStatus.NOT_FOUND);
             }
         } catch (SQLException exSQL) {
-            responder.writeErrorMessage("EDATABASE", "The server can't contact it's database", null, HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage("EDATABASE", "The server can't contact its database", null, HttpResponseStatus.NOT_FOUND);
             exSQL.printStackTrace();
         }
     }

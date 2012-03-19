@@ -8,6 +8,6 @@ import java.io.InputStream;
  */
 public interface GraphRepReader {
 
-	public abstract GraphRep createGraphRep(InputStream in) throws IOException;
+	GraphRep createGraphRep(InputStream in) throws IOException;
 
 }

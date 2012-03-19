@@ -36,8 +36,8 @@ public class ComputeThread extends Thread {
 	private final BlockingQueue<ComputeRequest> reqQueue;
 	private boolean isPrivate;
 	private ThreadMXBean threadMXBean;
-	private DatabaseManager dbm = null;
-    private double costPerMillisecond = 0;
+	private DatabaseManager dbm;
+    private double costPerMillisecond;
 
 	/**
 	 * Constructs a new ComputeThread using the given AlgorithmManager and
@@ -189,22 +189,17 @@ public class ComputeThread extends Thread {
     private long startTimeMeasurement(boolean workIsPrivate) {
         long cpuTime = 0;
         if (workIsPrivate) {
-            if (threadMXBean != null) {
-                cpuTime = threadMXBean.getCurrentThreadCpuTime();
-            } else {
-                cpuTime = System.nanoTime();
-            }
+            cpuTime = threadMXBean != null ? threadMXBean.getCurrentThreadCpuTime() : System.nanoTime();
         }
         return cpuTime;
     }
 
     private long finishTimeMeasurement(long cpuStartTime, boolean workIsPrivate) {
         if (workIsPrivate) {
-            if (threadMXBean != null) {
-                cpuStartTime = threadMXBean.getCurrentThreadCpuTime() - cpuStartTime;
-            } else {
-                cpuStartTime = System.nanoTime() - cpuStartTime;
-            }
+            cpuStartTime =
+                    threadMXBean != null ?
+                    threadMXBean.getCurrentThreadCpuTime() - cpuStartTime :
+                    System.nanoTime() - cpuStartTime;
             // convert to milliseconds
             cpuStartTime = Math.round(cpuStartTime / 1000000);
             if (cpuStartTime == 0) {

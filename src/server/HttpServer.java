@@ -3,18 +3,14 @@
  */
 package server;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.concurrent.Executors;
-
-import org.codehaus.jackson.map.ObjectMapper;
+import computecore.ComputeCore;
+import config.ConfigManager;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import computecore.AlgorithmRegistry;
-import computecore.ComputeCore;
-
-import config.ConfigManager;
+import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.concurrent.Executors;
 
 // TODO: maybe move more of this to the main TourenPlaner
 
@@ -33,9 +29,9 @@ import config.ConfigManager;
  */
 public class HttpServer {
 
-	public HttpServer(ConfigManager cm,
-			AlgorithmRegistry reg, Map<String, Object> serverInfo,
-			ComputeCore comCore) {
+	public HttpServer(
+            ConfigManager cm, Map<String, Object> serverInfo, ComputeCore comCore
+                     ) {
 		// Configure the server.
 
 		ServerBootstrap bootstrap = new ServerBootstrap(

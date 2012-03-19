@@ -37,7 +37,6 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
     private Responder responder;
 
     public ServerInfoHandler(Map<String, Object> sInfo) {
-        super();
         this.infoHandler = new InfoHandler(sInfo);
     }
 

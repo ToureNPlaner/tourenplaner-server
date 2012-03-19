@@ -195,8 +195,9 @@ public class PrivateHandler extends RequestHandler {
      */
     public void handleAuthUser(final HttpRequest request) throws IOException, SQLException {
         UserDataset user = authorizer.auth(request);
-        if (user != null) responder.writeJSON(user, HttpResponseStatus.OK);
-
+        if (user != null) {
+            responder.writeJSON(user, HttpResponseStatus.OK);
+        }
     }
 
 
@@ -743,7 +744,7 @@ public class PrivateHandler extends RequestHandler {
         int param = -1;
 
         if (!parameters.containsKey(name)) {
-            responder.writeErrorMessage("E" + name.toUpperCase(), "The given " + name + " is invalid",
+            responder.writeErrorMessage('E' + name.toUpperCase(), "The given " + name + " is invalid",
                     "You must send a " + name + " parameter", HttpResponseStatus.BAD_REQUEST);
             return -1;
         }
@@ -757,7 +758,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (param < 0) {
-            responder.writeErrorMessage("E" + name.toUpperCase(), "The given " + name + " is invalid",
+            responder.writeErrorMessage('E' + name.toUpperCase(), "The given " + name + " is invalid",
                     "You must send a " + name + " parameter", HttpResponseStatus.BAD_REQUEST);
 
             return -1;
