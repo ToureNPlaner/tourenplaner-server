@@ -71,14 +71,13 @@ public class SqlStatement {
         }
     }
 
-    @SuppressWarnings("UnusedDeclaration")
     public String getSqlStatementString() {
         return this.sqlStatementString;
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (obj == null || !(obj instanceof SqlStatement)) {
+        if (!(obj instanceof SqlStatement)) {
             return false;
         }
 

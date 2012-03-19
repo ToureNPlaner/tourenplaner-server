@@ -4,8 +4,6 @@
 package computecore;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
@@ -21,8 +19,7 @@ public class ComputeCore {
     
     private static Logger log = Logger.getLogger(ComputeCore.class.getName());
 
-	private final List<Thread> threads;
-	private final int numThreads;
+    private final int numThreads;
 	private final BlockingQueue<ComputeRequest> reqQueue;
 	private final AlgorithmRegistry registry;
 
@@ -36,7 +33,6 @@ public class ComputeCore {
 	 */
 	public ComputeCore(AlgorithmRegistry algRegistry, int numThreads,
 			int queueLength) {
-		this.threads = new ArrayList<Thread>(numThreads);
 		this.reqQueue = new LinkedBlockingQueue<ComputeRequest>(queueLength);
 		this.registry = algRegistry;
 		this.numThreads = numThreads;
@@ -58,7 +54,6 @@ public class ComputeCore {
 			curr = new ComputeThread(registry.getAlgorithmManager(amFac),
 					reqQueue);
 			curr.start();
-			threads.add(curr);
 		}
 		log.info(numThreads+" ComputeThreads started");
 	}

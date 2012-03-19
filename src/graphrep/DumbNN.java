@@ -27,8 +27,8 @@ public class DumbNN implements NNSearcher {
 		int numberOfNodes = graphRep.getNodeCount();
 
 		int pos = 0;
-		long squareDistance = 0;
-		long bestDistance = 0;
+		long squareDistance;
+		long bestDistance;
 		if (numberOfNodes <= 0) {
 			return -1;
 		}

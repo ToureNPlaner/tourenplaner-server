@@ -3,11 +3,11 @@
  */
 package config;
 
-import java.io.File;
-import java.util.Map;
-
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+
+import java.io.File;
+import java.util.Map;
 
 /**
  * @author Peter Vollmer
@@ -17,7 +17,7 @@ import org.codehaus.jackson.type.TypeReference;
  */
 public class ConfigManager {
 
-	private static volatile ConfigManager instance = null;
+	private static volatile ConfigManager instance;
 
 	/**
 	 * Storage of configuration entries
@@ -73,7 +73,7 @@ public class ConfigManager {
 	 *         (ClassCastError/key not found)
 	 */
 	public double getEntryDouble(String key, double defaultValue) {
-		Double value = null;
+		Double value;
 		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
@@ -104,7 +104,7 @@ public class ConfigManager {
 	 *         (ClassCastError/key not found)
 	 */
 	public boolean getEntryBool(String key, boolean defaultValue) {
-		Boolean value = null;
+		Boolean value;
 		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
@@ -135,9 +135,8 @@ public class ConfigManager {
 	 * @return value of a given key or the given defaultValue
 	 *         (ClassCastError/key not found)
 	 */
-	@SuppressWarnings("UnusedDeclaration")
-    public long getEntryLong(String key, long defaultValue) {
-		Long value = null;
+	public long getEntryLong(String key, long defaultValue) {
+		Long value;
 		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
@@ -169,7 +168,7 @@ public class ConfigManager {
 	 *         (ClassCastError/key not found)
 	 */
 	public int getEntryInt(String key, int defaultValue) {
-		Number value = -1;
+		Number value;
 		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
@@ -201,7 +200,7 @@ public class ConfigManager {
 	 *         (ClassCastError/key not found)
 	 */
 	public String getEntryString(String key, String defaultValue) {
-		String value = null;
+		String value;
 		if ((confMap != null) && confMap.containsKey(key)) {
 			if (confMap.get(key) != null) {
 				try {
@@ -247,7 +246,7 @@ public class ConfigManager {
      *         (ClassCastError/key not found)
      */
     public Map<?, ?> getEntryMap(String key, Map<String, Object> defaultValue) {
-        Map<?, ?> value = null;
+        Map<?, ?> value;
         if ((confMap != null) && confMap.containsKey(key)) {
             if (confMap.get(key) != null) {
                 try {

@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 public class GraphRepTextReader implements GraphRepReader {
     private static Logger log = Logger.getLogger("tourenplaner");
+    private static final Pattern COMPILE = Pattern.compile(" ");
 
     // see file format specification for a description of the format
     @Override
@@ -25,18 +27,10 @@ public class GraphRepTextReader implements GraphRepReader {
         while (line != null && line.trim().startsWith("#")) {
             line = inb.readLine();
         }
-        if (line != null) {
-            nodeCount = Integer.parseInt(line);
-        } else {
-            nodeCount = 0;
-        }
+        nodeCount = line != null ? Integer.parseInt(line) : 0;
 
         line = inb.readLine();
-        if (line != null) {
-            edgeCount = Integer.parseInt(line);
-        } else {
-            edgeCount = 0;
-        }
+        edgeCount = line != null ? Integer.parseInt(line) : 0;
 
         GraphRep graphRep = new GraphRep(nodeCount, edgeCount);
 
@@ -48,7 +42,7 @@ public class GraphRepTextReader implements GraphRepReader {
         int height;
 
         for (int i = 0; i < nodeCount; i++) {
-            splittedLine = inb.readLine().split(" ");
+            splittedLine = COMPILE.split(inb.readLine());
             lat = Integer.parseInt(splittedLine[0]);
             lon = Integer.parseInt(splittedLine[1]);
             height = Integer.parseInt(splittedLine[2]);
@@ -65,7 +59,7 @@ public class GraphRepTextReader implements GraphRepReader {
         int shortcuttedEdge1, shortcuttedEdge2;
         for (int i = 0; i < edgeCount; i++) {
 
-            splittedLine = inb.readLine().split(" ");
+            splittedLine = COMPILE.split(inb.readLine());
 
             src = Integer.parseInt(splittedLine[0]);
             dest = Integer.parseInt(splittedLine[1]);

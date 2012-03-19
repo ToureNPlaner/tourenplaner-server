@@ -22,9 +22,7 @@ public class ShortestPath extends GraphAlgorithm {
 	// DijkstraStructs used by the ShortestPathCH
 	private final DijkstraStructs ds;
 
-	double directDistance;
-
-	public ShortestPath(GraphRep graph, DijkstraStructs rs) {
+    public ShortestPath(GraphRep graph, DijkstraStructs rs) {
 		super(graph);
 		ds = rs;
 	}
@@ -85,7 +83,7 @@ public class ShortestPath extends GraphAlgorithm {
      */
     protected int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException {
 
-        int srcId = 0;
+        int srcId;
         int trgtId = 0;
 
         int oldDistance = 0;
@@ -131,11 +129,11 @@ public class ShortestPath extends GraphAlgorithm {
                 // Return/Reset the data structures
                 ds.returnDistArray(false);
                 ds.returnPrevArray();
-                log.info("There is no path from src to trgt (" + srcId + " to " + trgtId + ")");
+                log.info("There is no path from src to trgt (" + srcId + " to " + trgtId + ')');
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            distance += backtrack(dists, prevEdges, resultWays.get(pointIndex), srcId, trgtId);
+            distance += backtrack(prevEdges, resultWays.get(pointIndex), srcId, trgtId);
 
             long backtracktime = System.nanoTime();
 
@@ -147,7 +145,7 @@ public class ShortestPath extends GraphAlgorithm {
 
             log.fine(
                     "found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
-                    " dist[destid] = " + dists[trgtId] + "\n" +
+                    " dist[destid] = " + dists[trgtId] + '\n' +
                     (dijkstratime - starttime) / 1000000.0 + " ms\n" +
                     "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms"
                     );
@@ -192,7 +190,8 @@ public class ShortestPath extends GraphAlgorithm {
             heap.removeMin();
             if (nodeId == trgtId) {
                 break DIJKSTRA;
-            } else if (nodeDist > dists[nodeId]) {
+            }
+            if (nodeDist > dists[nodeId]) {
                 continue;
             }
             int edgeCount = graph.getOutEdgeCount(nodeId);
@@ -222,7 +221,7 @@ public class ShortestPath extends GraphAlgorithm {
      *  Backtracks the prevEdges Array and calculates the actual path length
      *  returns the length of the found path in meters
      *
-     * @param dists
+     *
      * @param prevEdges
      * @param resultWay
      * @param srcId
@@ -230,7 +229,7 @@ public class ShortestPath extends GraphAlgorithm {
      * @return
      * @throws IllegalAccessException
      */
-    protected final int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int trgtId) throws IllegalAccessException {
+    protected final int backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
         // Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;

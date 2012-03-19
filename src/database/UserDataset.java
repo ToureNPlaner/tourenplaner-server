@@ -29,7 +29,7 @@ public class UserDataset {
       PRIMARY KEY (ID)
 	*/
 
-	public int userid = 0;
+	public int userid;
 	public String email;
 	public String firstName;
 	public String lastName;

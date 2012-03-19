@@ -23,7 +23,7 @@ public class TPSSslContextFactory {
 			algorithm = "SunX509";
 		}
 
-		SSLContext serverContext = null;
+		SSLContext serverContext;
 
 		try {
 			file = new File(cm.getEntryString("sslcert", "/home/user/sslcert"));
