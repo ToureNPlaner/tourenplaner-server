@@ -10,7 +10,8 @@ class Requester:
 
    def doRequest(self, url, method, request):
       resp, content = self.http.request(uri=url, method=method, body=json.dumps(request), headers=self.headers)
-      return resp, json.loads(str(content, "UTF-8"))
+      contentstr = str(content, "UTF-8")
+      return resp, json.loads(contentstr) if contentstr != '' else None 
    
    def setCredentials(self, name, password):
       self.headers['authorization'] = 'Basic ' + base64.b64encode(("%s:%s" % (name, password)).encode('utf-8')).strip().decode('utf-8')
@@ -20,21 +21,23 @@ class Requester:
          del self.headers['authorization']
 
 class User:
-   def __init__(self, email, password, firstName, lastName, address, admin, verified, indb, sendAuth = True):
+   def __init__(self, email, password, firstName, lastName, address, status, admin, indb, sendAuth = True):
       self.email = email
       self.password = password
       self.firstName = firstName
       self.lastName = lastName
       self.address = address
+      self.status = status
       self.admin = admin
-      self.verified = verified
       self.indb = indb
       self.sendAuth = sendAuth
+      self.userid = None
 
    def __str__(self):
       string = 'email: '+self.email+' pw: '+self.password+' fN: '+self.firstName+' lN: '+self.lastName
-      return string+' addr: '+self.address+' (admin, verified, indb) ('+str(self.admin)+','+str(self.verified)+','+str(self.indb)+')'
-
+      string = string+' addr: '+self.address+' status: '+self.status+'(admin, indb) ('+str(self.admin)+','+str(self.indb)+')'
+      return string +' sendAuth: '+str(self.sendAuth)+ ' userid: ' +str(self.userid)
+      
 class Test:
    def __init__(self, user):
       self.url = ''
@@ -45,6 +48,7 @@ class Test:
       self.content = None
 
    def doTest(self, requester, baseurl):
+      self.setup()
       if self.user.sendAuth:
          requester.setCredentials(self.user.email, self.user.password)
       else:
@@ -54,6 +58,9 @@ class Test:
       return self.verifyResponse(self.resp, self.content)
 
    def verifyResponse(self, resp, content):
+      pass
+      
+   def setup(self):
       pass
 
 class Tester:
@@ -93,3 +100,5 @@ def GetAllTests():
 def RunsBefore(testA, testB):
    if testClasses.index(testA) > testClasses.index(testB):
       raise Exception('Test execution constraint violated for '+testA.__name__+'  and '+testB.__name__)
+def GetTestUsers():
+   return testUsers
