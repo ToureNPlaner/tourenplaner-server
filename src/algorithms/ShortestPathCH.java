@@ -198,7 +198,8 @@ public class ShortestPathCH extends GraphAlgorithm {
             if (nodeDist > dists[nodeId]) {
                 continue;
             }
-            for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
+            int edgeCount = graph.getOutEdgeCount(nodeId);
+            for (int i = 0; i < edgeCount; i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 targetNode = graph.getTarget(edgeId);
 
@@ -223,14 +224,14 @@ public class ShortestPathCH extends GraphAlgorithm {
      * Backtracks the prevEdges Array and calculates the actual path length
      * returns the length of the found path in meters
      *
+     *
      * @param prevEdges
-     * @param dists
      * @param resultWay
      * @param srcId
      * @param destId
      * @throws IllegalAccessException
      */
-    protected final int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int destId) throws IllegalAccessException {
+    protected final int backtrack(int[] prevEdges, Way resultWay, int srcId, int destId) throws IllegalAccessException {
         int nodeLat;
         int nodeLon;
         int edgeId;
@@ -339,7 +340,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            distance += backtrack(dists, prevEdges, resultWays.get(pointIndex), srcId, destId);
+            distance += backtrack(prevEdges, resultWays.get(pointIndex), srcId, destId);
 
             long backtracktime = System.nanoTime();
 

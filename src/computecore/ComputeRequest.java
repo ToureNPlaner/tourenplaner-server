@@ -183,12 +183,12 @@ public class ComputeRequest {
 
 		gen.setCodec(mapper);
 		gen.writeStartObject();
-        gen.writeNumberField("requestid", this.getRequestID());
+        gen.writeNumberField("requestid", this.requestID);
         
-        gen.writeObjectField("constraints", this.getConstraints());
+        gen.writeObjectField("constraints", this.constraints);
 
 		gen.writeArrayFieldStart("points");
-		RequestPoints points = this.getPoints();
+		RequestPoints points = this.points;
 		for (int i = 0; i < points.size(); i++) {
 			pconsts = points.getConstraints(i);
 			gen.writeStartObject();
@@ -205,7 +205,7 @@ public class ComputeRequest {
 
 		gen.writeArrayFieldStart("way");
         if (writePath) {
-            for(Way way : this.getResultWays()){
+            for(Way way : this.resultWays){
                 gen.writeStartArray();
                 for (int i = 0; i < way.size(); i++) {
                     gen.writeStartObject();
@@ -226,7 +226,7 @@ public class ComputeRequest {
             }
         }
 		gen.writeEndArray();
-		gen.writeObjectField("misc", this.getMisc());
+		gen.writeObjectField("misc", this.misc);
 		gen.writeEndObject();
 		gen.close();
 	}

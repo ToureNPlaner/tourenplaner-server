@@ -59,7 +59,7 @@ public class HashNN implements NNSearcher {
 		long keyLat = lat / 1000;
 		long keyLon = lon / 1000;
 		long dist = Long.MAX_VALUE;
-		long tempDist = Long.MAX_VALUE;
+		long tempDist;
 		boolean found = false;
 		boolean finished = false;
 		int hops = 0;

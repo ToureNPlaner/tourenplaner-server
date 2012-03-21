@@ -19,6 +19,6 @@ public interface Algorithm {
 	 * 
 	 * @param req
 	 */
-	public void compute(ComputeRequest req) throws ComputeException;
+    void compute(ComputeRequest req) throws ComputeException;
 
 }

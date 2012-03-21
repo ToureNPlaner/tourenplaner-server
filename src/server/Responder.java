@@ -78,7 +78,6 @@ public class Responder {
      *
      * @return Returns the KeepAlive flag
      */
-    @SuppressWarnings("UnusedDeclaration")
     public boolean getKeepAlive() {
         return keepAlive;
     }
@@ -105,7 +104,6 @@ public class Responder {
     /**
      * Writes a HTTP Unauthorized answer to the wire and closes the connection
      */
-    @SuppressWarnings("UnusedDeclaration")
     public void writeUnauthorizedClose() {
         log.info("Writing unauthorized close");
         // Respond with Unauthorized Access

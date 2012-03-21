@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -25,6 +26,7 @@ import java.util.logging.Logger;
 public class Authorizer extends RequestHandler {
 
     private static Logger log = Logger.getLogger("server");
+    private static final Pattern COMPILE = Pattern.compile(" ");
 
     private final DatabaseManager dbm;
 
@@ -52,7 +54,7 @@ public class Authorizer extends RequestHandler {
      */
     protected String generateHash(final String salt, final String pw) {
         // Compute SHA1 of PW:SALT
-        String toHash = pw + ":" + salt;
+        String toHash = pw + ':' + salt;
 
         final byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
         // Convert to Hex String
@@ -141,7 +143,7 @@ public class Authorizer extends RequestHandler {
             return null;
         }
         // Basic Auth is: "realm BASE64OFPW"
-        String[] parts = emailandpw.split(" ");
+        String[] parts = COMPILE.split(emailandpw);
         if(parts.length != 2){
             log.warning("Wrong Basic Auth Syntax");
             return null;
@@ -173,7 +175,7 @@ public class Authorizer extends RequestHandler {
         // Compute SHA1 of PW:SALT
         final String toHash = generateHash(user.salt, pw);
 
-        log.fine(pw + ":" + user.salt + " : " + toHash);
+        log.fine(pw + ':' + user.salt + " : " + toHash);
         if (!user.passwordhash.equals(toHash)) {
             log.info("Wrong username or password");
             return null;

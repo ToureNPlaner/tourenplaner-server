@@ -16,7 +16,6 @@ public class RequestPoints {
     private List<RequestPoint> points;
 
     public RequestPoints() {
-        super();
         points = new ArrayList<RequestPoint>();
     }
     

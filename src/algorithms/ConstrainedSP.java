@@ -134,7 +134,7 @@ public class ConstrainedSP extends GraphAlgorithm {
                 ds.returnDistArray(false);
                 ds.returnHeap();
                 ds.returnPrevArray();
-                int distance = backtrack(dists, prevEdges, resultWay, srcId, trgtId);
+                int distance = backtrack(prevEdges, resultWay, srcId, trgtId);
                 return new int[]{altitudeDiff,distance};
 
 
@@ -155,7 +155,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
         }
         log.fine("path goes over " + altitudeDiff + " meters of altitude Difference");
-        int distance = backtrack(dists, prevEdges, resultWay, srcId, trgtId);
+        int distance = backtrack(prevEdges, resultWay, srcId, trgtId);
 
 
         ds.returnDistArray(false);
@@ -168,14 +168,14 @@ public class ConstrainedSP extends GraphAlgorithm {
      * Backtracks the prevEdges Array and calculates the actual path length
      *  returns the length of the found path in meters
      *
-     * @param dists
+     *
      * @param prevEdges
      * @param resultWay
      * @param srcId
      * @param trgtId
      * @return
      */
-    private int backtrack(int[] dists, int[] prevEdges, Way resultWay, int srcId, int trgtId) {
+    private int backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
         int resultAddIndex;// Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;
@@ -252,7 +252,8 @@ public class ConstrainedSP extends GraphAlgorithm {
             heap.removeMin();
             if (nodeId == trgtId) {
                 break DIJKSTRA;
-            } else if (nodeDist > dists[nodeId]) {
+            }
+            if (nodeDist > dists[nodeId]) {
                 continue;
             }
             for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {

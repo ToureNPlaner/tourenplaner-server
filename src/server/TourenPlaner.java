@@ -86,8 +86,8 @@ public class TourenPlaner {
                 ConfigManager.init(mapper, cliParser.getConfigFilePath());
             } catch (Exception e) {
                 // ConfigManager either didn't like the path or the config file at the path
-                log.severe("Error reading configuration file from file: " + cliParser.getConfigFilePath() + "\n" +
-                e.getMessage() + "\n" +
+                log.severe("Error reading configuration file from file: " + cliParser.getConfigFilePath() + '\n' +
+                e.getMessage() + '\n' +
                 "Using builtin configuration...");
             }
         } else {
@@ -105,7 +105,7 @@ public class TourenPlaner {
                 graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
                 gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
             } catch (IOException e) {
-                log.severe("IOError dumping graph to file: " + dumpName(graphfilename) + "\n" + e.getMessage());
+                log.severe("IOError dumping graph to file: " + dumpName(graphfilename) + '\n' + e.getMessage());
             } finally {
                 System.exit(0);
             }
@@ -154,7 +154,7 @@ public class TourenPlaner {
         // HashNN should be faster but needs more RAM
         log.info("Start creating NNSearcher");
         graph.setNNSearcher(new GridNN(graph));//new HashNN(graphRep);
-        System.gc();
+        //System.gc();
         log.info("Graph loaded");
 
         // Register Algorithms
@@ -195,7 +195,7 @@ public class TourenPlaner {
         // Create ServerInfo object
         Map<String, Object> serverInfo = getServerInfo(reg);
 
-        new HttpServer(cm, reg, serverInfo, comCore);
+        new HttpServer(cm, serverInfo, comCore);
     }
 
 }

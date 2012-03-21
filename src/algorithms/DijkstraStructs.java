@@ -38,12 +38,12 @@ public class DijkstraStructs {
 	// tree
 	private final int[] prevEdges;
 
-	private boolean heapBorrowed = false;
-	private boolean markedBorrowed = false;
-	private boolean visitedBorrowed = false;
-	private boolean dequeBorrowed = false;
-	private boolean distsBorrowed = false;
-	private boolean prevsBorrowed = false;
+	private boolean heapBorrowed;
+	private boolean markedBorrowed;
+	private boolean visitedBorrowed;
+	private boolean dequeBorrowed;
+	private boolean distsBorrowed;
+	private boolean prevsBorrowed;
 
 	/**
 	 * Creates a new DijkstraStructs instance usable for a new thread. This

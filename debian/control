@@ -1,0 +1,14 @@
+Source: tourenplaner
+Section: misc
+Priority: optional
+Maintainer: Niklas Schnelle <niklas@komani.de>
+Build-Depends: debhelper (>= 7), default-jdk, javahelper (>= 0.37ubuntu1) , ant
+Standards-Version: 3.9.2
+
+Package: tourenplaner
+Architecture: all
+Depends: ${java:Depends}, ${misc:Depends}
+Recommends: ${java:Recommends}
+Description: A routing server from the University of Stuttgart
+ A routing server using contraction hierarchies and capable of solving TSPs 
+ as well as CSPs

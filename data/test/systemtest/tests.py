@@ -2,8 +2,22 @@
 import httplib2
 import base64
 import urllib.parse
+import sys
 from tester import *
 
+
+# All tests needs the explicit ordering of the users
+TestUsers([
+         User('usernotindbnoauth@teufel.de', 'only4testing', 'NotInDBNoAuth', 'Teufel', '', 'needs_verification', admin=False, indb=False, sendAuth=False),
+         User('usernotindb@teufel.de', 'only4testing', 'NotInDB', 'Teufel','','needs_verification', admin=False, indb=False),
+         User('userinactivenotadmin@teufel.de', 'only4testing', 'InactiveNotAdmin', 'Teufel','', 'needs_verification', admin=False, indb=True),
+         User('userinactiveadmin@teufel.de', 'only4testing', 'InactiveAdmin', 'Teufel','', 'needs_verification', admin=True, indb=True),
+         User('useractivenotadmin@teufel.de', 'only4testing', 'ActiveNotAdmin', 'Teufel','', 'verified', admin=False, indb=True),
+         User('useractiveadmin@teufel.de', 'only4testing', 'ActiveAdmin', 'Teufel','', 'verified', admin=True, indb=True)
+         ])
+testRequestids = []
+         
+#All tests have as explicit ordering the implicit ordering. In the ordering they will be executed.
 @TestClass
 class SPTest(Test):
    def __init__(self, user):
@@ -17,10 +31,13 @@ class SPTest(Test):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       else:
-         return resp['status'] == '200' and content['misc']['distance'] > 640000 and content['misc']['distance'] < 670000
+         correct = resp['status'] == '200' and content['misc']['distance'] > 640000 and content['misc']['distance'] < 670000
+         if correct:
+            testRequestids.append(content['requestid'])
+         return correct
 
 @TestClass
 class AuthTest(Test):
@@ -34,19 +51,19 @@ class AuthTest(Test):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       else:
          return resp['status'] == '200' and content['email'] == self.user.email and content['firstname'] == self.user.firstName and content['lastname'] == self.user.lastName
 
 
 @TestClass
-class ListUserTestNormal(Test):
+class GetTestUserIdsTest(Test):
 
    def __init__(self, user):
       super().__init__(user)
-      self.limit = 4
-      self. offset = 1
+      self.limit = 2**31-1
+      self. offset = 0
       self.url = '/listusers?'+urllib.parse.urlencode({'limit':self.limit, 'offset': self.offset})
       self.method = 'GET'
 
@@ -54,17 +71,64 @@ class ListUserTestNormal(Test):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       elif not self.user.admin:
          return status == '403' and content['errorid'] == 'ENOTADMIN'
       else:
          # zero'th user is admin with userid==1
-         correct = status == '200' and len(content['users']) == self.limit
-         correct = correct and content['users'][0]['email'] == 'userinactivenotadmin@teufel.de'
-         correct = correct and content['users'][0]['status'] == 'needs_verification' and content['users'][1]['email'] == 'userinactiveadmin@teufel.de'
+         correct = status == '200'
+         #[user if user.indb for user in testUsers]
+         users = list(filter(lambda user: user.indb, testUsers))
+         if correct:
+            correct = False
+            for i in range(content['number'], 0, -1):
+               if len(users) > 0:
+                  for user in users:
+                     if user.email == content['users'][i-1]['email']:
+                        user.userid = content['users'][i-1]['userid']
+                        users.remove(user)
+                        if len(users) == 0:
+                           correct = True
+                        break
+               else:
+                  correct = True
+                  break
          return correct
 
+@TestClass
+class ListUserTestNormal(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      
+      self.limit = 2**31-1
+      self. offset = 0
+      self.url = '/listusers?'+urllib.parse.urlencode({'limit':self.limit, 'offset': self.offset})
+      self.method = 'GET'    
+      
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         users = list(filter(lambda user: user.email == 'userinactiveadmin@teufel.de', GetTestUsers()))
+         # zero'th user is admin with userid==1
+         correct = status == '200'
+         if correct:
+            correct = False
+            for i in range(content['number'], 0, -1):
+               if users[0].email == content['users'][i-1]['email']:
+                  correct = content['users'][i-1]['status'] == 'needs_verification'
+                  correct = correct and content['users'][i-1]['admin'] == users[0].admin and content['users'][i-1]['firstname'] == users[0].firstName
+                  correct = correct and content['users'][i-1]['lastname'] == users[0].lastName
+             
+         return correct         
+         
 @TestClass
 class ListUserTestWithoutLimit(Test):
 
@@ -78,7 +142,7 @@ class ListUserTestWithoutLimit(Test):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       elif not self.user.admin:
          return status == '403' and content['errorid'] == 'ENOTADMIN'
@@ -98,7 +162,7 @@ class ListUserTestWithoutOffset(Test):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       elif not self.user.admin:
          return status == '403' and content['errorid'] == 'ENOTADMIN'
@@ -118,7 +182,7 @@ class ListUserTestWithoutParams(Test):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       elif not self.user.admin:
          return status == '403' and content['errorid'] == 'ENOTADMIN'
@@ -138,37 +202,301 @@ class GetUserNoParamTest(Test):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       else:
          correct = status == '200' and content['email'] == self.user.email and content['firstname'] == self.user.firstName
-         correct = correct and content['lastname'] == self.user.lastName and content['status'] == 'verified' and content['address'] == self.user.address
+         correct = correct and content['lastname'] == self.user.lastName and content['status'] == self.user.status and content['address'] == self.user.address
          return correct
 
 
 @TestClass
 class GetUserWithParamTest(Test):
+   users = list(filter(lambda user: user.email == 'userinactiveadmin@teufel.de', GetTestUsers()))
+   def __init__(self, user):
+      super().__init__(user)
+      # asks for user data for user with  userinactiveadmin@teufel.de
+      self.method = 'GET'
+            
+   def setup(self):
+      self.url = '/getuser?'+urllib.parse.urlencode({'id':self.users[0].userid})
+      
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         correct = status == '200' and content['email'] == self.users[0].email and content['firstname'] == self.users[0].firstName
+         correct = correct and content['lastname'] == self.users[0].lastName and content['status'] == self.users[0].status
+         return correct
+
+
+
+@TestClass
+class ListRequestsTestNormalWithoutId(Test):
 
    def __init__(self, user):
       super().__init__(user)
-      # asks for user data for user with userid==3 which in the test db is userinactiveadmin@teufel.de
-      self.userid = 2
-      self.url = '/getuser?'+urllib.parse.urlencode({'id':3})
+      self.limit = 1
+      self.offset = 0
+      self.url = '/listrequests?'+urllib.parse.urlencode({'limit':self.limit, 'offset': self.offset})
       self.method = 'GET'
 
    def verifyResponse(self, resp, content):
       status = resp['status']
       if not self.user.indb:
          return status == '401' and content['errorid'] == 'EAUTH'
-      elif not self.user.verified:
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      else:
+         correct = status == '200' and len(content['requests']) == self.limit
+         correct = correct and content['requests'][0]['algorithm'] == 'sp'
+         correct = correct and content['requests'][0]['status'] == 'ok'
+         return correct
+
+@TestClass
+class ListRequestsTestWithoutLimitWithoutId(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 1
+      self.url = '/listrequests?'+urllib.parse.urlencode({'offset': self.offset})
+      self.method = 'GET'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      else:
+         return status == '400' and content['errorid'] == 'ELIMIT'
+
+@TestClass
+class ListRequestsTestWithoutOffsetWithoutId(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self.limit = 1
+      self.url = '/listrequests?'+urllib.parse.urlencode({'limit' :self.limit})
+      self.method = 'GET'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      else:
+         return status == '400' and content['errorid'] == 'EOFFSET'
+
+@TestClass
+class ListRequestsTestWithoutParamsWithoutId(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 0
+      self.url = '/listrequests'
+      self.method = 'GET'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      else:
+         return status == '400' and (content['errorid'] == 'ELIMIT' or content['errorid'] == 'EOFFSET')
+
+
+@TestClass
+class ListRequestsTestNormalWithId(Test):
+   users = list(filter(lambda user: user.email == 'useractivenotadmin@teufel.de', GetTestUsers()))
+   
+   def __init__(self, user):
+      super().__init__(user)
+      self.limit = 1
+      self.offset = 0
+      self.method = 'GET'
+
+   def setup(self):
+      self.url = '/listrequests?'+urllib.parse.urlencode({'id':self.users[0].userid ,'limit':self.limit, 'offset': self.offset})
+      
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
          return status == '403' and content['errorid'] == 'ENOTVERIFIED'
       elif not self.user.admin:
          return status == '403' and content['errorid'] == 'ENOTADMIN'
       else:
-         correct = status == '200' and content['email'] == 'userinactiveadmin@teufel.de' and content['firstname'] == 'InactiveAdmin'
-         correct = correct and content['lastname'] == 'Teufel' and content['status'] == 'needs_verification'
+         correct = status == '200' and len(content['requests']) == self.limit
+         correct = correct and content['requests'][0]['algorithm'] == 'sp'
+         correct = correct and content['requests'][0]['status'] == 'ok'
          return correct
 
+@TestClass
+class ListRequestsTestWithoutLimitWithId(Test):
+   users = list(filter(lambda user: user.email == 'useractivenotadmin@teufel.de', GetTestUsers()))
+   
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 0
+      self.method = 'GET'
+
+   def setup(self):
+      self.url = '/listrequests?'+urllib.parse.urlencode({'id':self.users[0].userid, 'offset': self.offset})
+      
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return (status == '403' and content['errorid'] == 'ENOTADMIN') or (status == '400' and content['errorid'] == 'ELIMIT')
+      else:
+         return status == '400' and content['errorid'] == 'ELIMIT'
+
+@TestClass
+class ListRequestsTestWithoutOffsetWithId(Test):
+   users = list(filter(lambda user: user.email == 'useractivenotadmin@teufel.de', GetTestUsers()))
+
+   def __init__(self, user):
+      super().__init__(user)
+      self.limit = 1
+      self.method = 'GET'
+      
+   def setup(self):
+      self.url = '/listrequests?'+urllib.parse.urlencode({'id':self.users[0].userid, 'limit' :self.limit})
+   
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return (status == '403' and content['errorid'] == 'ENOTADMIN') or (status == '400' and content['errorid'] == 'EOFFSET')
+      else:
+         return status == '400' and content['errorid'] == 'EOFFSET'
+
+@TestClass
+class ListRequestsTestWithoutParamsWithId(Test):
+   users = list(filter(lambda user: user.email == 'useractivenotadmin@teufel.de', GetTestUsers()))
+
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 1
+      self.method = 'GET'
+   
+   def setup(self):
+      self.url = '/listrequests?'+urllib.parse.urlencode({'id':self.users[0].userid})
+      
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return (status == '403' and content['errorid'] == 'ENOTADMIN') or (status == '400' and content['errorid'] == 'ELIMIT')
+      else:
+         return status == '400' and (content['errorid'] == 'ELIMIT' or content['errorid'] == 'EOFFSET')         
+
+@TestClass
+class GetRequestWithoutId(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 1
+      self.url = '/getrequest'
+      self.method = 'GET'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return (status == '403' and content['errorid'] == 'ENOTADMIN') or (status == '404' and content['errorid'] == 'ENOREQUESTID')
+      else:
+         return status == '404' and content['errorid'] == 'ENOREQUESTID'   
+
+@TestClass
+class GetRequestWithId(Test):
+   
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 1
+      self.method = 'GET'
+   
+   def setup(self):
+      self.url = '/getrequest?'+urllib.parse.urlencode({'id':testRequestids[1]})
+      
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         correct = status == '200' and len(content['points']) > 0
+         return correct 
+         
+@TestClass
+class GetResponsetWithoutId(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 1
+      self.url = '/getresponse'
+      self.method = 'GET'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return (status == '403' and content['errorid'] == 'ENOTADMIN') or (status == '404' and content['errorid'] == 'ENOREQUESTID')
+      else:
+         return status == '404' and content['errorid'] == 'ENOREQUESTID'   
+
+@TestClass
+class GetResponseWithId(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self. offset = 1
+      self.method = 'GET'
+      
+   def setup(self):
+      self.url = '/getresponse?'+urllib.parse.urlencode({'id':testRequestids[1]})
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         correct = status == '200' and len(content['points']) > 0 and len(content['way']) > 0 and len(content['misc']) > 0
+         return correct 
+         
+registeredUsers = []         
+         
 @TestClass
 class RegisterTest(Test):
 
@@ -187,21 +515,181 @@ class RegisterTest(Test):
          status = resp['status']
          if not self.user.indb and self.user.sendAuth:
             return status == '401' and content['errorid'] == 'EAUTH'
-         elif not self.user.verified and self.user.sendAuth:
-            return status == '403' and content['errorid'] == 'ENOTVERIFIED'      
+         elif not self.user.status == 'verified' and self.user.sendAuth:
+            return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+         elif not self.user.admin and self.user.sendAuth:
+            return status == '403' and content['errorid'] == 'ENOTADMIN'
          else:
-            print(content)
-            return True
+            correct = status == '200' and content['email'] == 'registeredBy'+self.user.firstName+'@teufel.de' and content['firstname'] == 'registredBy'+self.user.firstName
+            correct = correct and content['lastname'] == self.user.lastName and (content['status'] == 'verified' if self.user.admin else content['status'] == 'needs_verification')
+            if correct:
+               registeredUsers.append(content)
+
+            return correct
+
+@TestClass
+class GetUserRegisterResultTest(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self.method = 'GET'
+      
+   def setup(self):
+      self.url = '/getuser?'+urllib.parse.urlencode({'id':(registeredUsers[1]['userid'])})
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         correct = status == '200' and content['email'] == registeredUsers[1]['email'] and content['firstname'] == registeredUsers[1]['firstname']
+         correct = correct and content['lastname'] == registeredUsers[1]['lastname'] and content['status'] == registeredUsers[1]['status']
+         return correct
 
 
-TestUsers([
-         User('usernotindbnoauth@teufel.de', 'only4testing', 'NotInDBNoAuth', 'Teufel', '', admin=False, verified=False, indb=False, sendAuth=False),
-         User('usernotindb@teufel.de', 'only4testing', 'NotInDB', 'Teufel','', admin=False, verified=False, indb=False),
-         User('userinactivenotadmin@teufel.de', 'only4testing', 'InactiveNotAdmin', 'Teufel','', admin=False, verified=False, indb=True),
-         User('userinactiveadmin@teufel.de', 'only4testing', 'InactiveAdmin', 'Teufel','', admin=True, verified=False, indb=True),
-         User('useractivenotadmin@teufel.de', 'only4testing', 'ActiveNotAdmin', 'Teufel','', admin=False, verified=True, indb=True),
-         User('useractiveadmin@teufel.de', 'only4testing', 'ActiveAdmin', 'Teufel','', admin=True, verified=True, indb=True)
-         ])
+@TestClass
+class UpdateUserWithIdTest(Test):
+   def __init__(self, user):
+         super().__init__( user)
+        
+         self.method = 'POST'
+         self.userobject = {'email' : 'updatedBy'+self.user.firstName+'@teufel.de',
+         'password' : 'updatedonly4testing',
+         'firstname' : 'updatedBy'+self.user.firstName,
+         'lastname' : 'updatedTeufel',
+         'address' : 'update',
+         'admin' : True,
+         'status' : 'needs_verification'}
+         self.request = self.userobject
+
+   def setup(self):
+       self.url = '/updateuser?'+urllib.parse.urlencode({'id':(registeredUsers[1]['userid'])})
+
+   def verifyResponse(self, resp, content):
+         status = resp['status']
+         if not self.user.indb:
+            return status == '401' and content['errorid'] == 'EAUTH'
+         elif not self.user.status == 'verified':
+            return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+         elif not self.user.admin:
+            return status == '403' and content['errorid'] == 'ENOTADMIN'
+         else:
+            correct = status == '200' and content['email'] == 'updatedBy'+self.user.firstName+'@teufel.de' and content['firstname'] == 'updatedBy'+self.user.firstName
+            correct = correct and content['lastname'] == 'updated'+self.user.lastName and content['status'] == 'needs_verification' and content['admin']
+            registeredUsers[1] = content
+            return correct
+            
+@TestClass
+class GetUserUpdateUserResultTest(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self.method = 'GET'
+      
+   def setup(self):
+      self.url = '/getuser?'+urllib.parse.urlencode({'id':(registeredUsers[1]['userid'])})
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         correct = status == '200' and content['email'] == registeredUsers[1]['email'] and content['firstname'] == registeredUsers[1]['firstname']
+         correct = correct and content['lastname'] == registeredUsers[1]['lastname'] and content['status'] == registeredUsers[1]['status']
+         return correct
+
+@TestClass
+class DeleteUserWithoutIdTest(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self.method = 'GET'
+      
+   def setup(self):
+      self.url = '/deleteuser'
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin: 
+         return status == '403' and content['errorid'] == 'ENOTADMIN' or status == '404' and content['errorid'] == 'ENOUSERID' 
+      else:
+         return status == '404' and content['errorid'] == 'ENOUSERID'    
+         
+         
+@TestClass
+class DeleteUserWithIdTest(Test):
+
+   def __init__(self, user):
+      super().__init__(user)
+      self.method = 'GET'
+      
+   def setup(self):
+      self.url = '/deleteuser?'+urllib.parse.urlencode({'id':(registeredUsers[1]['userid'])})
+
+   def verifyResponse(self, resp, content):
+      status = resp['status']
+      if not self.user.indb:
+         return status == '401' and content['errorid'] == 'EAUTH'
+      elif not self.user.status == 'verified':
+         return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+      elif not self.user.admin:
+         return status == '403' and content['errorid'] == 'ENOTADMIN'
+      else:
+         return status == '200' and content == None
+
+         
+
+@TestClass
+class UpdateUserWithoutIdTest(Test):
+   def __init__(self, user):
+         super().__init__( user)
+         
+         
+         
+         self.method = 'POST'
+         self.userobject = {'email' : 'updated'+self.user.firstName+'@teufel.de',
+         'password' : 'updated'+self.user.password,
+         'firstname' : 'updated'+self.user.firstName,
+         'lastname' : 'updated'+self.user.lastName,
+         'address' : 'update',
+         'admin' : not self.user.admin,
+         'status' : 'needs_verification' if self.user.status == 'verified' else 'verified' }
+         self.request = self.userobject
+
+   def setup(self):
+       self.url = '/updateuser'
+
+   def verifyResponse(self, resp, content):
+         status = resp['status']
+         if not self.user.indb:
+            return status == '401' and content['errorid'] == 'EAUTH'
+         elif not self.user.status == 'verified':
+            return status == '403' and content['errorid'] == 'ENOTVERIFIED'
+         else:
+            correct = status == '200'
+            if self.user.admin:
+               correct = correct and content['email'] == 'updated'+self.user.firstName+'@teufel.de' and content['firstname'] == 'updated'+self.user.firstName 
+               correct = correct and content['lastname'] == 'updatedTeufel' and content['status'] == 'needs_verification' and not content['admin']
+            else:
+               correct = correct and content['email'] == self.user.email and content['firstname'] == self.user.firstName 
+               correct = correct and content['lastname'] == self.user.lastName and content['status'] == 'verified' and not content['admin']
+            return correct
+
+
+
+
 
 
 

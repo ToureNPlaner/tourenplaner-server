@@ -49,22 +49,22 @@ public class GraphRepBinaryWriter implements GraphRepWriter {
         // Write mapping
         int[] mappingInToOut = graphRep.getMappingInToOut();
 
-        for (int i = 0; i < mappingInToOut.length; i++) {
-            dout.writeInt(mappingInToOut[i]);
+        for (int aMappingInToOut : mappingInToOut) {
+            dout.writeInt(aMappingInToOut);
         }
 
         // Write offsetIn
         int[] offsetIn = graphRep.getOffsetIn();
 
-        for (int i = 0; i < offsetIn.length; i++) {
-            dout.writeInt(offsetIn[i]);
+        for (int anOffsetIn : offsetIn) {
+            dout.writeInt(anOffsetIn);
         }
 
         // Write offsetOut
         int[] offsetOut = graphRep.getOffsetOut();
 
-        for (int i = 0; i < offsetOut.length; i++) {
-            dout.writeInt(offsetOut[i]);
+        for (int anOffsetOut : offsetOut) {
+            dout.writeInt(anOffsetOut);
         }
 
         bout.flush();

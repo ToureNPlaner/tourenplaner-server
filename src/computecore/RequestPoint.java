@@ -17,7 +17,7 @@ public class RequestPoint {
         this.lat = lat;
         this.lon = lon;
         this.constraints = constraints;
-        this.setId(-1);
+        this.id = -1;
     }
 
     public int getLat() {
