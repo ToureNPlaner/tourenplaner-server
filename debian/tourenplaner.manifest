@@ -1,0 +1,3 @@
+usr/share/tourenplaner/tourenplaner-server.jar:
+ Main-Class: server.TourenPlaner
+ Debian-Java-Home: /usr/lib/jvm/default-java
