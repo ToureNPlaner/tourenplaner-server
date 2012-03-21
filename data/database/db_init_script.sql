@@ -1,6 +1,3 @@
-create database tourenplaner;
-use tourenplaner;
-
 CREATE TABLE Users (
   id                INT           NOT NULL AUTO_INCREMENT,
   Email             VARCHAR(255)  NOT NULL UNIQUE,
@@ -33,7 +30,3 @@ CREATE TABLE Requests (
   FOREIGN KEY (UserID) REFERENCES Users (id)
 );
 
-INSERT INTO Users (Email, Passwordhash, Salt, AdminFlag, Status, 
-  FirstName, LastName, Address, RegistrationDate, VerifiedDate) 
-  VALUES('root@tourenplaner.de', 'bef799d49eb5f183a7844da07467dbb2904a10ba', 'fe394f70a381403d4af33595823c7d733',
-    '1', 'verified', 'ro', 'ot', 'localhost', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
