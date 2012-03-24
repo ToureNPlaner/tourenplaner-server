@@ -28,7 +28,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  *          /org/jboss/netty/example/http/snoop/package-summary.html
  */
 public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
-    private static Logger log = Logger.getLogger("de/tourenplaner/server");
+    private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
     private final InfoHandler infoHandler;
 

@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  */
 public class Authorizer extends RequestHandler {
 
-    private static Logger log = Logger.getLogger("de/tourenplaner/server");
+    private static Logger log = Logger.getLogger("de.tourenplaner.server");
     private static final Pattern COMPILE = Pattern.compile(" ");
 
     private final DatabaseManager dbm;

@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class ComputeCore {
     
-    private static Logger log = Logger.getLogger(ComputeCore.class.getName());
+    private static Logger log = Logger.getLogger("de.tourenplaner.computecore");
 
     private final int numThreads;
 	private final BlockingQueue<ComputeRequest> reqQueue;

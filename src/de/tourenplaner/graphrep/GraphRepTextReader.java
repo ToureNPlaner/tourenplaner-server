@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 public class GraphRepTextReader implements GraphRepReader {
-    private static Logger log = Logger.getLogger("tourenplaner");
+    private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
     private static final Pattern COMPILE = Pattern.compile(" ");
 
     // see file format specification for a description of the format

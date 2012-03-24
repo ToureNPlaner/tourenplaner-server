@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 /**
  *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
- * Used to create instances of ShortestPathCH algorithm
+ * Shortest Path Algorithm taking advantage of Contraction Hierachies
  */
 public class ShortestPathCH extends GraphAlgorithm {
 

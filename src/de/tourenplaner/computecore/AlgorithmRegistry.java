@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  * 
  */
 public class AlgorithmRegistry {
-    private static Logger log = Logger.getLogger("tourenplaner");
+    private static Logger log = Logger.getLogger("de.tourenplaner.computecore");
 
 	private final HashMap<String, AlgorithmFactory> registry;
 

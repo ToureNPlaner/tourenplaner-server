@@ -26,7 +26,7 @@ import java.util.logging.Logger;
  */
 public class PrivateHandler extends RequestHandler {
 
-    private static Logger log = Logger.getLogger("de/tourenplaner/server");
+    private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
     private final DatabaseManager dbm;
 

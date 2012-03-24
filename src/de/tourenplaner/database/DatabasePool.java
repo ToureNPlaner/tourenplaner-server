@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  */
 public class DatabasePool {
 
-    private static Logger log = Logger.getLogger("databasepool");
+    private static Logger log = Logger.getLogger("de.tourenplaner.database");
 
     private String url;
     private String userName;

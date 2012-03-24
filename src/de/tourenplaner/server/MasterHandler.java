@@ -37,7 +37,7 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class MasterHandler extends SimpleChannelUpstreamHandler {
 
-    private static Logger log = Logger.getLogger("de/tourenplaner/server");
+    private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
     private boolean isPrivate;
 

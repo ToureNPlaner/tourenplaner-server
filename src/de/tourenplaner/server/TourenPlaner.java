@@ -23,7 +23,7 @@ import java.util.logging.Logger;
 
 public class TourenPlaner {
 
-    private static Logger log = Logger.getLogger("tourenplaner");
+    private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
     /**
      * @param graphName Original file name of the graph
@@ -60,7 +60,7 @@ public class TourenPlaner {
             }
             algList.add(algInfo);
         }
-        info.put("de.tourenplaner.algorithms", algList);
+        info.put("algorithms", algList);
 
         return info;
     }
@@ -149,6 +149,7 @@ public class TourenPlaner {
         // choose the NNSearcher here
         // DumbNN uses linear search and is slow.
         // HashNN should be faster but needs more RAM
+        // GridNN is even faster and uses less RAM
         log.info("Start creating NNSearcher");
         graph.setNNSearcher(new GridNN(graph));//new HashNN(graphRep);
         //System.gc();
@@ -171,10 +172,10 @@ public class TourenPlaner {
                         cm.getEntryString("dbpw", "toureNPlaner"),
                         cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver")).getNumberOfUsers();
             } catch (PropertyVetoException e) {
-                log.log(Level.SEVERE, "Couldn't establish de.tourenplaner.database connection", e);
+                log.log(Level.SEVERE, "Couldn't establish database connection", e);
                 System.exit(1);
             } catch (SQLException e) {
-                log.log(Level.SEVERE, "Couldn't establish de.tourenplaner.database connection. DatabaseManager.getNumberOfUsers() was called " +
+                log.log(Level.SEVERE, "Couldn't establish database connection. DatabaseManager.getNumberOfUsers() was called " +
                         "to test and initialize Pool, but an SQLException was thrown", e);
                 System.exit(1);
             }

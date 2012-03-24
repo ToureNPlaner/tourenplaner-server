@@ -30,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class ComputeThread extends Thread {
     
-    private static Logger log = Logger.getLogger("tourenplaner");
+    private static Logger log = Logger.getLogger("de.tourenplaner.computecore");
 
 	private final AlgorithmManager alm;
 	private final BlockingQueue<ComputeRequest> reqQueue;

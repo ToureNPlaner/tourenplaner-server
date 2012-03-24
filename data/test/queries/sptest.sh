@@ -7,4 +7,4 @@ then
    exit 1
 fi
 
-./curl.sh "$2" "$1" algmock root@tourenplaner.de toureNPlaner "$3"
+./curl.sh "$2" "$1" algsp root@tourenplaner.de toureNPlaner "$3"

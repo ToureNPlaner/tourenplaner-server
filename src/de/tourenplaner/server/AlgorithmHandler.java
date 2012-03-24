@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class AlgorithmHandler extends RequestHandler {
 
-    private static Logger log = Logger.getLogger("de/tourenplaner/server");
+    private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
     private static final class MapType extends TypeReference<Map<String, Object>> {
     }

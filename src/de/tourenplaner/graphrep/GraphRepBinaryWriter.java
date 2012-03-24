@@ -8,7 +8,7 @@ import java.nio.charset.Charset;
 import java.util.logging.Logger;
 
 public class GraphRepBinaryWriter implements GraphRepWriter {
-    private static Logger log = Logger.getLogger("tourenplaner");
+    private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
 
     private static final int version = 2;
 
