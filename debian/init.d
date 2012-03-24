@@ -16,8 +16,8 @@
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC=tourenplaner             # Introduce a short description here
 NAME=tourenplaner             # Introduce the short server's name here
-DAEMON=/usr/bin/tourenplaner      # Introduce the server's location here
-DAEMON_ARGS="-Xmx8g -Xincgc -c /etc/tourenplaner.conf -f dump"             # Arguments to run the daemon with
+DAEMON=/usr/bin/java      # Introduce the server's location here
+DAEMON_ARGS="-Xmx8g -Xincgc -jar /usr/bin/tourenplaner -c /etc/tourenplaner.conf -f dump"             # Arguments to run the daemon with
 PIDFILE=/var/run/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
