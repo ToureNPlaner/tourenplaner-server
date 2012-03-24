@@ -16,7 +16,7 @@ case "$1" in
     stat_busy "Starting tourenplaner-server"
     if [ ! -f /var/run/daemons/tourenplanerd ]
     then
-	 /usr/bin/tourenplaner-server &> /var/log/tourenplanerd &
+	 /usr/bin/tourenplaner-server &> /dev/null &
          TP_PID=$!
     fi
     if [ $? -gt 0 ]; then

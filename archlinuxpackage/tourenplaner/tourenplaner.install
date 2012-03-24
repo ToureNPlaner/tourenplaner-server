@@ -1,7 +1,9 @@
 tourenplanerdir=/var/lib/tourenplaner
+tourenplanerlogdir=/var/log/tourenplaner
 
 post_install() {
 	chown $(id -u http):nobody ${tourenplanerdir}
+   chown $(id -u http):nobody ${tourenplanerlogdir}
 	echo "	Please put your streetgraph.txt (optionally also streetgraph.txt.dat or your java keystore) in /var/lib/tourenplaner."
 	echo "	The files should be readable by the http user"
 }

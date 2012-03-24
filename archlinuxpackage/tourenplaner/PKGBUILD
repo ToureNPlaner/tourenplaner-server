@@ -49,6 +49,7 @@ build() {
   install -m 755 ${startdir}/tourenplanerd ${pkgdir}/etc/rc.d/tourenplanerd
 
   install -d ${pkgdir}/var/lib/tourenplaner
+  install -d ${pkgdir}/var/log/tourenplaner
 }
 
 package_sptogpx() {
