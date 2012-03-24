@@ -1,52 +1,54 @@
 {
-	"threads" : 4,
-	"queuelength" : 20,
-	"graphfilepath" : "/home/user/germany.txt",
-	"private" : true,
+        "threads" : 4,
+        "queuelength" : 20,
+        "graphfilepath" : "/var/tourenplaner/germany.txt",
+        "logfilepath" : "/var/log/tourenplaner/tourenplaner.log",
+        "loglevel" : "info",
+        "private" : false,
+        
+        "httpport" : 8080,
+        "sslport" : 8081,
+        "serverinfosslport" : 443,
+        "sslcert" : "~/keystore.jks",
+        "sslalias" : "tourenplaner",
+        "sslpw" : "toureNPlaner",
 
-	"dburi" : "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true",
-	"dbuser" : "tnpuser",
-	"dbpw" : "toureNPlaner",
-	"dbdriverclass" : "com.mysql.jdbc.Driver",
+        // cost per time unit in cents
+        "costpertimeunit" : 10,
+        // size of time unit in milliseconds
+        "timeunitsize" : 1000,
 
-	// how many times a database query should be retried
-	"maxdbtries" : 3,
+        "dburi" : "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true",
+        "dbuser" : "tnpuser",
+        "dbpw" : "toureNPlaner",
+        "dbdriverclass" : "com.mysql.jdbc.Driver",
 
-	// when "store-full-response" is false the result path will not be stored into database,
-	// but it will store the the start and end points of the sub paths
-	// "store-full-response" will have no effect if "private" is false
-	"store-full-response" : true,
+        // how many times a database query should be retried
+        "maxdbtries" : 3,
 
-	"c3p0" :
-	    {
-	        // key AND value have to be always Strings
+        // when "store-full-response" is false the result path will not be stored into database,
+        // but it will store the the start and end points of the sub paths
+        // "store-full-response" will have no effect if "private" is false
+        "store-full-response" : true,
 
-	        "acquireIncrement" : "3",
-	        "initialPoolSize" : "3",
-	        "maxPoolSize" : "15",
-	        "minPoolSize" : "3",
+        "c3p0" :
+            {
+                // key AND value have to be always Strings
 
-	        "maxConnectionAge" : "0",
-	        "maxIdleTime" : "0",
-	        "maxIdleTimeExcessConnections" : "0",
+                "acquireIncrement" : "3",
+                "initialPoolSize" : "3",
+                "maxPoolSize" : "15",
+                "minPoolSize" : "3",
 
-	        "maxStatements" : "0",
-	        "maxStatementsPerConnection" : "0",
+                "maxConnectionAge" : "0",
+                "maxIdleTime" : "0",
+                "maxIdleTimeExcessConnections" : "0",
 
-	        "acquireRetryAttempts" : "30",
-	        "acquireRetryDelay" : "1000",
-	        "breakAfterAcquireFailure" : "false"
-	    },
+                "maxStatements" : "0",
+                "maxStatementsPerConnection" : "0",
 
-	"httpport" : 8080,
-	"sslport" : 8081,
-    "serverinfosslport" : 443,
-	"sslcert" : "/home/user/keystore.jks",
-	"sslalias" : "tourenplaner",
-	"sslpw" : "toureNPlaner",
-
-	// cost per time unit in cents
-	"costpertimeunit" : 10,
-	// size of time unit in milliseconds
-	"timeunitsize" : 1000
+                "acquireRetryAttempts" : "30",
+                "acquireRetryDelay" : "1000",
+                "breakAfterAcquireFailure" : "false"
+            }
 }
