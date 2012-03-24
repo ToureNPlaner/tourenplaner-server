@@ -17,6 +17,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -185,7 +186,12 @@ public class AlgorithmHandler extends RequestHandler {
             // Only now read the request
             final ComputeRequest req = readComputeRequest(algName, responder, request);
 
+
             if (req != null) {
+                // Log what is requested
+                request.getContent().resetReaderIndex();
+                log.fine("\""+algName+"\": "+request.getContent().toString(CharsetUtil.UTF_8));
+                
                 int requestID = -1;
 
                 if (isPrivate && !algFac.isHidden()) {

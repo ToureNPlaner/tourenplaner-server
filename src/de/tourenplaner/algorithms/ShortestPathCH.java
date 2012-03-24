@@ -251,7 +251,7 @@ public class ShortestPathCH extends GraphAlgorithm {
         }
 
         // Unpack shortcuts "recursively"
-        log.fine("Start backtrack with " + deque.size() + " edges");
+        log.finer("Start backtrack with " + deque.size() + " edges");
         while (!deque.isEmpty()) {
             // Get the top edge and check if it's a shortcut that needs
             // further
@@ -350,7 +350,7 @@ public class ShortestPathCH extends GraphAlgorithm {
 
             oldDistance = distance;
 
-            log.fine("found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 + " dist[destid] = " + dists[destId] + "\n" +
+            log.finer("found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 + " dist[destid] = " + dists[destId] + "\n" +
                     "BFS: " + (bfsdonetime - starttime) / 1000000.0 + " ms with " + bfsNodes + " nodes and " + bfsEdges + " edges\n" + "Dijkstra: " + (dijkstratime - bfsdonetime) / 1000000.0 + " ms\n" + "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms");
 
             // Return/Reset the data structures

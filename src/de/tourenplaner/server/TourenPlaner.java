@@ -18,12 +18,14 @@ import java.beans.PropertyVetoException;
 import java.io.*;
 import java.sql.SQLException;
 import java.util.*;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.logging.XMLFormatter;
 
 public class TourenPlaner {
 
-    private static Logger log = Logger.getLogger("de.tourenplaner.server");
+    private static Logger log = Logger.getLogger("de.tourenplaner");
 
     /**
      * @param graphName Original file name of the graph
@@ -75,34 +77,45 @@ public class TourenPlaner {
         // TODO: check if we really want to enable comments since it's a nonstandard feature of JSON
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         GraphRep graph = null;
-        String graphfilename;
-
+        String graphFilename;
+        String logFilename;
         CLIParser cliParser = new CLIParser(args);
         if (cliParser.getConfigFilePath() != null) {
             try {
                 ConfigManager.init(mapper, cliParser.getConfigFilePath());
             } catch (Exception e) {
-                // ConfigManager either didn't like the path or the de.tourenplaner.config file at the path
+                // ConfigManager either didn't like the path or the .config file at the path
                 log.severe("Error reading configuration file from file: " + cliParser.getConfigFilePath() + '\n' +
                 e.getMessage() + '\n' +
                 "Using builtin configuration...");
             }
         } else {
-            log.severe("Usage: \n\tjava -jar tourenplaner-de.tourenplaner.server.jar -c \"de.tourenplaner.config file\" " +
+            log.severe("Usage: \n\tjava -jar tourenplaner-server.jar -c \"config file\" " +
                        "[-f dump|text] [dumpgraph]\nDefaults are: builtin configuration, -f text");
         }
         ConfigManager cm = ConfigManager.getInstance();
-        graphfilename = cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany-ch.txt");
+        graphFilename = cm.getEntryString("graphfilepath", System.getProperty("user.home") + "/germany.txt");
+        logFilename = cm.getEntryString("logfilepath", System.getProperty("user.home") + "/tourenplaner.log");
+
+        // Add log file as loggind handler
+        try{
+            FileHandler fh = new FileHandler(logFilename);
+            fh.setFormatter(new XMLFormatter());
+            log.addHandler(fh);
+            log.setLevel(Level.parse(cm.getEntryString("loglevel","info").toUpperCase()));
+        } catch (IOException ex) {
+            log.log(Level.WARNING,"Couldn't open log file "+logFilename, ex);
+        }
         GraphRepWriter gWriter = new GraphRepBinaryWriter();
 
-        // now that we have a de.tourenplaner.config (or not) we look if we only need to dump our graph and then exit
+        // now that we have a config (or not) we look if we only need to dump our graph and then exit
         if (cliParser.dumpgraph()) {
             log.info("Dumping Graph...");
             try {
-                graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
-                gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
+                graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
+                gWriter.writeGraphRep(new FileOutputStream(dumpName(graphFilename)), graph);
             } catch (IOException e) {
-                log.severe("IOError dumping graph to file: " + dumpName(graphfilename) + '\n' + e.getMessage());
+                log.severe("IOError dumping graph to file: " + dumpName(graphFilename) + '\n' + e.getMessage());
             } finally {
                 System.exit(0);
             }
@@ -111,30 +124,30 @@ public class TourenPlaner {
         //TODO there's an awful lot of duplicate logic and three layers of exception throwing code wtf
         try {
             if (cliParser.loadTextGraph()) {
-                graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
+                graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
             } else {
                 try {
-                    graph = new GraphRepBinaryReader().createGraphRep(new FileInputStream(dumpName(graphfilename)));
+                    graph = new GraphRepBinaryReader().createGraphRep(new FileInputStream(dumpName(graphFilename)));
                 } catch (InvalidClassException e) {
                     log.warning("Dumped Graph version does not match the required version: " + e.getMessage());
-                    log.info("Falling back to text reading from file: " + graphfilename + " (path provided by de.tourenplaner.config file)");
-                    graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
+                    log.info("Falling back to text reading from file: " + graphFilename + " (path provided by config file)");
+                    graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
                     
 
-                    if (graph != null && new File(dumpName(graphfilename)).delete()) {
+                    if (graph != null && new File(dumpName(graphFilename)).delete()) {
                         log.info("Graph successfully read. Now replacing old dumped graph");
                         try {
-                            gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
+                            gWriter.writeGraphRep(new FileOutputStream(dumpName(graphFilename)), graph);
                         }catch(IOException e1){
                             log.warning("writing dump failed (but graph loaded):\n" + e1.getMessage());
                         }
                     }
                 } catch (IOException e) {
                     log.log(Level.WARNING, "loading dumped graph failed", e);
-                    log.info("Falling back to text reading from file " + graphfilename + " (path provided by de.tourenplaner.config file)");
-                    graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphfilename));
+                    log.info("Falling back to text reading from file " + graphFilename + " (path provided by config file)");
+                    graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
                     log.info("Graph successfully read. Now writing new dump");
-                    gWriter.writeGraphRep(new FileOutputStream(dumpName(graphfilename)), graph);
+                    gWriter.writeGraphRep(new FileOutputStream(dumpName(graphFilename)), graph);
                 }
             }
         } catch (IOException e) {
@@ -186,9 +199,6 @@ public class TourenPlaner {
         ComputeCore comCore = new ComputeCore(reg, cm.getEntryInt("threads", 16), cm.getEntryInt("queuelength", 32));
         AlgorithmManagerFactory amFac = new SharingAMFactory(graph);
         comCore.start(amFac);
-
-
-
 
         // Create ServerInfo object
         Map<String, Object> serverInfo = getServerInfo(reg);

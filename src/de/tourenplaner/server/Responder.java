@@ -358,9 +358,6 @@ public class Responder {
             future.addListener(ChannelFutureListener.CLOSE);
         }
 
-        log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
-                + " compute result successfully written into response.");
-
         boolean storeFullResponse = ConfigManager.getInstance().getEntryBool("store-full-response", true);
 
         // if storeFullResponse is true and no smile is sent, the method will return the already existing resultStream
@@ -370,8 +367,6 @@ public class Responder {
             resultStream = new ByteArrayOutputStream();
             work.writeToStream(mapper, resultStream, storeFullResponse);
             resultStream.flush();
-            log.finest("Algorithm "+ work.getAlgorithmURLSuffix()
-                    + " compute result successfully written into stream.");
         }
 
         return resultStream;

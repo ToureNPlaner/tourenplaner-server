@@ -119,7 +119,7 @@ public class ComputeThread extends Thread {
 
                         cpuTime = finishTimeMeasurement(cpuTime, workIsPrivate);
 
-                        log.fine("Algorithm "+ work.getAlgorithmURLSuffix() + " successfully computed.");
+                        log.finer("Algorithm "+ work.getAlgorithmURLSuffix() + " successfully computed.");
 						
 						try {
 							baOutputStream = work.getResponder().writeComputeResult(work,

@@ -112,9 +112,6 @@ public class DatabaseManager {
                     hasKey = true;
                 }
                 generatedKeyResultSet.close();
-
-                log.fine("Database query successful");
-
             } catch (SQLException e) {
                 tryAgain = processTryAgainExceptionHandling(tryAgain, e);
             } catch (NullPointerException e) {
@@ -394,8 +391,6 @@ public class DatabaseManager {
                 pstUpdateRequest.setInt(10, request.requestID);
 
                 rowsAffected = pstUpdateRequest.executeUpdate();
-
-                log.fine("Database query successful");
                 return rowsAffected;
 
             } catch (SQLException e) {
@@ -452,8 +447,6 @@ public class DatabaseManager {
                 pstUpdateRequestWithComputeResult.setInt(6, requestID);
 
                 rowsAffected = pstUpdateRequestWithComputeResult.executeUpdate();
-
-                log.fine("Database query successful");
                 return rowsAffected;
 
             } catch (SQLException e) {
@@ -510,8 +503,6 @@ public class DatabaseManager {
                 pstUpdateRequestWithComputeResult.setInt(6, requestID);
 
                 rowsAffected = pstUpdateRequestWithComputeResult.executeUpdate();
-
-                log.fine("Database query successful");
                 return rowsAffected;
 
             } catch (SQLException e) {

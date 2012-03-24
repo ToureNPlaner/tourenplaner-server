@@ -118,7 +118,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         altitudeDiff = dijkstra(srcId, trgtId, lamda);
         // shortest path serves not the constraint
         if (altitudeDiff > maxAltitudeDifference) {
-            log.fine(
+            log.finer(
                     "There is no shortest path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                             maxAltitudeDifference
             );
@@ -127,7 +127,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             // exists there a path that serves the constraint
             altitudeDiff = dijkstra(srcId, trgtId, lamda);
             if (altitudeDiff > maxAltitudeDifference) {
-                log.fine("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
+                log.finer("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                         maxAltitudeDifference
                 );
                 misc.put("message", "Found Path with smallest altitude difference = " + altitudeDiff);
@@ -154,7 +154,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             }
             altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
         }
-        log.fine("path goes over " + altitudeDiff + " meters of altitude Difference");
+        log.finer("path goes over " + altitudeDiff + " meters of altitude Difference");
         int distance = backtrack(prevEdges, resultWay, srcId, trgtId);
 
 
@@ -184,7 +184,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             routeElements++;
             currNode = graph.getSource(prevEdges[currNode]);
         }
-        log.fine(
+        log.finer(
                 "path goes over " + routeElements + " nodes.");
         // Add points to the end
         resultAddIndex = resultWay.size();
@@ -287,7 +287,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             }
         }
         if (nodeId != trgtId) {
-            log.fine(
+            log.finer(
                     "There is no path from src: " + srcId + " to trgt: " + trgtId + "Dijkstra did not find the " +
                             "target"
             );

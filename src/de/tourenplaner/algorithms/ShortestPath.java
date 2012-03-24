@@ -143,7 +143,7 @@ public class ShortestPath extends GraphAlgorithm {
 
             oldDistance = distance;
 
-            log.fine(
+            log.finer(
                     "found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
                     " dist[destid] = " + dists[trgtId] + '\n' +
                     (dijkstratime - starttime) / 1000000.0 + " ms\n" +

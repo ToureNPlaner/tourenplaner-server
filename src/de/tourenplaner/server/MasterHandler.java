@@ -118,9 +118,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
         final String path = queryStringDecoder.getPath();
 
-        // DEBUG
-
-        log.fine("Request for: " + path);
+        log.finer("Request for: " + path);
         log.finer("Request: " + request.getContent().toString(CharsetUtil.UTF_8));
 
         responder.setKeepAlive(isKeepAlive(request));

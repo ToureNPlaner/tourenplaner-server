@@ -175,7 +175,7 @@ public class Authorizer extends RequestHandler {
         // Compute SHA1 of PW:SALT
         final String toHash = generateHash(user.salt, pw);
 
-        log.fine(pw + ':' + user.salt + " : " + toHash);
+        log.finer(pw + ':' + user.salt + " : " + toHash);
         if (!user.passwordhash.equals(toHash)) {
             log.info("Wrong username or password");
             return null;
