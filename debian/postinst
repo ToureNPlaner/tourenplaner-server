@@ -1,2 +1,3 @@
 #!/bin/sh
-chown www-data:www-data /var/lib/tourenplaner
+chown www-data:www-data /var/tourenplaner
+chown www-data:www-data /var/log/tourenplaner
