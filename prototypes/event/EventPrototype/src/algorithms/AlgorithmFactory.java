@@ -1,7 +1,7 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package algorithms;
+package de.tourenplaner.algorithms;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer

@@ -38,8 +38,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import computecore.ComputeCore;
-import computecore.ComputeRequest;
+import de.tourenplaner.computecore.ComputeCore;
+import de.tourenplaner.computecore.ComputeRequest;
 
 /**
  * *ToureNPlaner Event Based Prototype

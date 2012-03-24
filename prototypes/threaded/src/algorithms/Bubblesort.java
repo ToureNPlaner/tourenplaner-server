@@ -1,13 +1,13 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package algorithms;
+package de.tourenplaner.algorithms;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import computecore.ComputeRequest;
-import computecore.ComputeResult;
+import de.tourenplaner.computecore.ComputeRequest;
+import de.tourenplaner.computecore.ComputeResult;
 
 /**
  * @author Peter Vollmer

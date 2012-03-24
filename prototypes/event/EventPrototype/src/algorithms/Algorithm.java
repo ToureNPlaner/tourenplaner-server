@@ -1,10 +1,10 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package algorithms;
+package de.tourenplaner.algorithms;
 
-import computecore.ComputeRequest;
-import computecore.ComputeResult;
+import de.tourenplaner.computecore.ComputeRequest;
+import de.tourenplaner.computecore.ComputeResult;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer

@@ -2,7 +2,7 @@
  * $$\\ToureNPlaner\\$$
  */
 
-package server.threaded;
+package de.tourenplaner.server.threaded;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -28,8 +28,8 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import computecore.ComputeCore;
-import computecore.ComputeRequest;
+import de.tourenplaner.computecore.ComputeCore;
+import de.tourenplaner.computecore.ComputeRequest;
 
 /**
  * @author Christoph Haag, Peter Vollmer
@@ -124,7 +124,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 			final ComputeRequest req = new ComputeRequest(algName, objmap);
 			boolean sucess = comCore.submit(req);
 			if (!sucess) {
-				// TODO: send server overload message
+				// TODO: send de.tourenplaner.server overload message
 				reply(generalError);
 				return;
 			}
@@ -133,7 +133,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 				// semaphore is signaled when computation is complete
 				req.getWaitComputation().acquire();
 			} catch (InterruptedException e) {
-				// TODO if server is interrupted, shut down everything here
+				// TODO if de.tourenplaner.server is interrupted, shut down everything here
 				LoggerStub
 						.debugMsg(" RH: Interruption of Requesthandler. Shutting down...");
 				return;
@@ -214,7 +214,7 @@ public class TourenPlanerRequestHandler implements HttpRequestHandler {
 	 * Authenticats the request in the ChannelBuffer content with the parameters
 	 * given in params see: @link
 	 * https://gerbera.informatik.uni-stuttgart.de/projects
-	 * /server/wiki/Authentifizierung for a detailed explanation
+	 * /de.tourenplaner.server/wiki/Authentifizierung for a detailed explanation
 	 * 
 	 * @param params
 	 * @param content

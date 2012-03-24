@@ -9,12 +9,12 @@ import java.util.concurrent.Executors;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
-import algorithms.BubblesortFactory;
-import algorithms.DummyFactory;
-import algorithms.KnapsackFactory;
+import de.tourenplaner.algorithms.BubblesortFactory;
+import de.tourenplaner.algorithms.DummyFactory;
+import de.tourenplaner.algorithms.KnapsackFactory;
 
-import computecore.AlgorithmRegistry;
-import computecore.ComputeCore;
+import de.tourenplaner.computecore.AlgorithmRegistry;
+import de.tourenplaner.computecore.ComputeCore;
 
 /**
  * ToureNPlaner Event Based Prototype
@@ -27,7 +27,7 @@ import computecore.ComputeCore;
  */
 public class HttpServer {
     public static void main(String[] args) {
-        // Configure the server.
+        // Configure the de.tourenplaner.server.
         ServerBootstrap bootstrap = new ServerBootstrap(
                 new NioServerSocketChannelFactory( // Change to Nio* if you want NIO
                         Executors.newCachedThreadPool(),

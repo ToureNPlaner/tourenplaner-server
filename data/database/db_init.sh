@@ -19,12 +19,12 @@ $0 [-H mysqlhost] [-P mysqlport] [-U mysqluser]
 You need only to set options if you do not want to use the default values.
 
 -H mysqlhost
-    The default host address for the MySQL server is \"$DATABASE_HOST\".
+    The default host address for the MySQL de.tourenplaner.server is \"$DATABASE_HOST\".
 
     Use \"localhost\" if you are running this script $0 
-    on the host of the MySQL server.
+    on the host of the MySQL de.tourenplaner.server.
 
-    If the MySQL server is not at localhost you have to set this option.
+    If the MySQL de.tourenplaner.server is not at localhost you have to set this option.
 
 -P mysqlport
     The default port is \"$DATABASE_PORT\".
@@ -38,9 +38,9 @@ You need only to set options if you do not want to use the default values.
 
 Overview of the different tasks
 
-  * Create database
+  * Create de.tourenplaner.database
     
-    You can create the database, which you want to use for Tourenplaner.
+    You can create the de.tourenplaner.database, which you want to use for Tourenplaner.
 
     The user \"mysqluser\" must have the right to create databases.
 
@@ -49,23 +49,23 @@ Overview of the different tasks
     You can create all tables which you need for Tourenplaner.
 
     The user \"mysqluser\" needs the right to create tables for the 
-    database which you want to use for Tourenplaner.
+    de.tourenplaner.database which you want to use for Tourenplaner.
 
   * Insert admin user for Tourenplaner
 
-    You can insert the admin user for Tourenplaner into the database.
+    You can insert the admin user for Tourenplaner into the de.tourenplaner.database.
 
     The user \"mysqluser\" needs the right to execute insert statements
-    for the database which you want to use for Tourenplaner.
+    for the de.tourenplaner.database which you want to use for Tourenplaner.
     
   * Create or modify mysql user
 
-    You can create a new mysql user with all privileges for the database
+    You can create a new mysql user with all privileges for the de.tourenplaner.database
     which you want to use for Tourenplaner. If the user already exists,
-    this script will grant to the user all privileges for the database.
+    this script will grant to the user all privileges for the de.tourenplaner.database.
 
     The user \"mysqluser\" needs the right to grant to other users all 
-    privileges for the database which you want to use with Tourenplaner.
+    privileges for the de.tourenplaner.database which you want to use with Tourenplaner.
     The user \"mysqluser\" should also have the right to create new users.
 "
     exit 1
@@ -85,11 +85,11 @@ done
 echo "
 --- Database Initializing Script for Tourenplaner ---
 
-The MySQL server will be connected with following values: 
+The MySQL de.tourenplaner.server will be connected with following values:
 
-  MySQL server host: $DATABASE_HOST
-  MySQL server port: $DATABASE_PORT
-  MySQL server user: $DATABASE_USER
+  MySQL de.tourenplaner.server host: $DATABASE_HOST
+  MySQL de.tourenplaner.server port: $DATABASE_PORT
+  MySQL de.tourenplaner.server user: $DATABASE_USER
 
 See the help for command line options to change these values.
 To view the help start the script as follows: $0 --help
@@ -100,7 +100,7 @@ To quit the script, press CTRL+C."
 
 echo "
 
-Please enter the name of the database which Tourenplaner should use."
+Please enter the name of the de.tourenplaner.database which Tourenplaner should use."
 read -p "Database name (e.g. \"tourenplaner\"): " DATABASE_NAME
 
 echo "
@@ -108,17 +108,17 @@ Please enter the password for the mysql user $DATABASE_USER."
 read -s -p "Password: " DATABASE_PASSWORD
 
 read -p "
-Task \"Create database\":
+Task \"Create de.tourenplaner.database\":
 
-  Tourenplaner needs an own database to work in private mode.
+  Tourenplaner needs an own de.tourenplaner.database to work in private mode.
 
-  Do you want to create the database \"$DATABASE_NAME\"? 
+  Do you want to create the de.tourenplaner.database \"$DATABASE_NAME\"?
   Choose yes or no (y/n): " CHOSEN_OPTION
 if [ ${CHOSEN_OPTION,,} == "y" -o ${CHOSEN_OPTION,,} == "yes" ]
 then
   echo
   mysql -u $DATABASE_USER --password=$DATABASE_PASSWORD --verbose --force \
-    --host=$DATABASE_HOST --port=$DATABASE_PORT <<< "create database $DATABASE_NAME;"
+    --host=$DATABASE_HOST --port=$DATABASE_PORT <<< "create de.tourenplaner.database $DATABASE_NAME;"
 fi
 
 read -p "
@@ -126,9 +126,9 @@ Task \"Create tables\":
 
   Tourenplaner needs the tables to work in private mode.
 
-  The database \"$DATABASE_NAME\" must exists for this task.
+  The de.tourenplaner.database \"$DATABASE_NAME\" must exists for this task.
 
-  Do you want to create the tables for the database \"$DATABASE_NAME\"?
+  Do you want to create the tables for the de.tourenplaner.database \"$DATABASE_NAME\"?
   Choose yes or no (y/n): " CHOSEN_OPTION
 if [ ${CHOSEN_OPTION,,} == "y" -o ${CHOSEN_OPTION,,} == "yes" ]
 then
@@ -144,9 +144,9 @@ Task \"Insert admin user for Tourenplaner\":
 
   Tourenplaner needs the admin user to work in private mode.
 
-  The database \"$DATABASE_NAME\" and the tables must exist for this task.
+  The de.tourenplaner.database \"$DATABASE_NAME\" and the tables must exist for this task.
 
-  Do you want to insert the admin user for Tourenplaner into the database?
+  Do you want to insert the admin user for Tourenplaner into the de.tourenplaner.database?
   Choose yes or no (y/n): " CHOSEN_OPTION
 if [ ${CHOSEN_OPTION,,} == "y" -o ${CHOSEN_OPTION,,} == "yes" ]
 then
@@ -189,7 +189,7 @@ Task \"Create or modify mysql user\":
   This task is useful if you do not want to use Tourenplaner with the 
   root mysql user. 
 
-  This task will grant all privileges on the database \"$DATABASE_NAME\"
+  This task will grant all privileges on the de.tourenplaner.database \"$DATABASE_NAME\"
   to a mysql user. If the user does not exist, the task will create
   a new user. Therefore the task will ask you to enter the mysql user name.
 
@@ -224,7 +224,7 @@ then
 
   read -p "
   Should the mysql user $NEW_MYSQL_USER also have remote access? 
-  (needed if mysql server and Tourenplaner are not on the same host)
+  (needed if mysql de.tourenplaner.server and Tourenplaner are not on the same host)
   Choose yes or no (y/n): " CHOSEN_OPTION
   if [ ${CHOSEN_OPTION,,} == "y" -o ${CHOSEN_OPTION,,} == "yes" ]
   then
@@ -236,9 +236,9 @@ then
 fi
 
 echo "
-Executing database script done.
-Do not forget to edit the Tourenplaner config file and change 
-within the config file the values for the database user, database password
-and database url (contains the database name).
+Executing de.tourenplaner.database script done.
+Do not forget to edit the Tourenplaner de.tourenplaner.config file and change
+within the de.tourenplaner.config file the values for the de.tourenplaner.database user, de.tourenplaner.database password
+and de.tourenplaner.database url (contains the de.tourenplaner.database name).
 "
 

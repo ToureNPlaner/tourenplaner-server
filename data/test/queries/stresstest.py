@@ -5,6 +5,7 @@ import base64
 import threading
 import random
 import time
+import sys
 
 test_arr = []
 
@@ -26,7 +27,7 @@ class TestThread(threading.Thread):
 
         for i in range (0, self.queriesPerThread):
             self.test.prepareTest(self)
-            response, content = http.request(uri='https://gerbera:8081/' + self.uri, method='POST', body=json.dumps(self.request), headers=headers)
+            response, content = http.request(uri=sys.argv[1] + self.uri, method='POST', body=json.dumps(self.request), headers=headers)
             self.response_arr.append(response)
 
 class Test():
@@ -102,18 +103,14 @@ class GetUserWithoutInputTest(Test):
 
 def main():
 
-   i = 0
-   for t in test_arr:
-      print(str(i) + '\t' + t.name)
-      i += 1
 
-   chosen_test = int(input("\nChoose your test: "))
+   chosen_test = int(sys.argv[2])
 
    test = test_arr[chosen_test]
    test.initialize()
 
-   max = int(input("Max number of threads: "))
-   queries = int(input("Number of queries per thread: "))
+   max = int(sys.argv[3])
+   queries = int(sys.argv[4])
 
    thread_arr = []
 
@@ -124,7 +121,6 @@ def main():
       thread_arr.append(thread)
       i -= 1
 
-   print('Start time measurement')
    start = time.time()
 
    for t in thread_arr:
@@ -134,7 +130,6 @@ def main():
       t.join()
 
    end = time.time()
-   print('End time measurement')
 
    failure = 'false'
    failure_cnt = 0
@@ -154,8 +149,9 @@ def main():
    else:
       print('Failures: ' + str(failure_cnt) + ' / ' + str(max*queries))
 
+   
    print('Time needed: ' + str(end - start) + ' s')
-
+   print('QPS = '+str(max*queries/(end - start)))
 
 if __name__ == "__main__":
    main()

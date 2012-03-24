@@ -5,7 +5,7 @@
 	<property name="lib.dir" value="./../../../lib"/>
 	<property name="jar.dir" value="jar"/>
 	<property name="jar.temp.dir" value="${jar.dir}/temp"/>
-	<property name="main-class" value="tourenplaner.server.prototype.event.HttpServer"/>
+	<property name="main-class" value="tourenplaner.de.tourenplaner.server.prototype.event.HttpServer"/>
 	<property name="classpath" value="."/>
 	
 	<target name="clean">

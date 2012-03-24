@@ -1,7 +1,7 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package algorithms;
+package de.tourenplaner.algorithms;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer
@@ -10,7 +10,7 @@ package algorithms;
 public class KnapsackFactory extends AlgorithmFactory {
 
 	/**
-	 * @see algorithms.AlgorithmFactory#createAlgorithm()
+	 * @see de.tourenplaner.algorithms.AlgorithmFactory#createAlgorithm()
 	 */
 	@Override
 	public Algorithm createAlgorithm() {

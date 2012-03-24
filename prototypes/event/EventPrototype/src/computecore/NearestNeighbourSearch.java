@@ -1,14 +1,11 @@
 /**
  * 
  */
-package computecore;
+package de.tourenplaner.computecore;
 
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Random;
-import java.util.BitSet;
-
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
 /**
  * @author Sascha Meusel

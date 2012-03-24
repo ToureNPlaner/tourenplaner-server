@@ -2,12 +2,12 @@
  * $$\\ToureNPlaner\\$$
  */
 
-package computecore;
+package de.tourenplaner.computecore;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import algorithms.AlgorithmFactory;
+import de.tourenplaner.algorithms.AlgorithmFactory;
 
 /**
  * Singelton Pattern used

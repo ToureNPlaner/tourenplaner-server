@@ -11,7 +11,7 @@ import org.jboss.netty.handler.codec.http.HttpChunkAggregator;
 import org.jboss.netty.handler.codec.http.HttpRequestDecoder;
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 
-import computecore.ComputeCore;
+import de.tourenplaner.computecore.ComputeCore;
 
 /**
  * ToureNPlaner Event Based Prototype

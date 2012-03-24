@@ -1,12 +1,12 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package computecore;
+package de.tourenplaner.computecore;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import algorithms.Algorithm;
+import de.tourenplaner.algorithms.Algorithm;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer

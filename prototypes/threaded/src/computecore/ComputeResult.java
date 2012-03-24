@@ -1,7 +1,7 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package computecore;
+package de.tourenplaner.computecore;
 
 import java.util.HashMap;
 

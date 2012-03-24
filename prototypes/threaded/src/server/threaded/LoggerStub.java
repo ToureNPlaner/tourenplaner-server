@@ -1,4 +1,4 @@
-package server.threaded;
+package de.tourenplaner.server.threaded;
 
 public class LoggerStub {
 	public static boolean debugmsg = false;

@@ -2,7 +2,7 @@
  * $$\\ToureNPlaner\\$$
  */
 
-package server.threaded;
+package de.tourenplaner.server.threaded;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;

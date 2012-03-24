@@ -1,11 +1,11 @@
 /**
  * $$\\ToureNPlaner\\$$
  */
-package computecore;
+package de.tourenplaner.computecore;
 
 import java.util.concurrent.BlockingQueue;
 
-import algorithms.Algorithm;
+import de.tourenplaner.algorithms.Algorithm;
 
 /**
  * @author Niklas Schnelle, Peter Vollmer

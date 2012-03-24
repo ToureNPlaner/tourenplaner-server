@@ -2,7 +2,7 @@
  * $$\\ToureNPlaner\\$$
  */
 
-package server.threaded;
+package de.tourenplaner.server.threaded;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -25,12 +25,12 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 
-import algorithms.BubblesortFactory;
-import algorithms.DummyFactory;
-import algorithms.KnapsackFactory;
+import de.tourenplaner.algorithms.BubblesortFactory;
+import de.tourenplaner.algorithms.DummyFactory;
+import de.tourenplaner.algorithms.KnapsackFactory;
 
-import computecore.AlgorithmRegistry;
-import computecore.ComputeCore;
+import de.tourenplaner.computecore.AlgorithmRegistry;
+import de.tourenplaner.computecore.ComputeCore;
 
 /**
  * @author Christoph Haag, Peter Vollmer
@@ -52,7 +52,7 @@ public class HttpServer {
 		reg.registerAlgorithm("bsort", new BubblesortFactory());
 
 		// Create our ComputeCore that manages all ComputeThreads
-		// must be after algorithms have been registered
+		// must be after de.tourenplaner.algorithms have been registered
 		comCore = new ComputeCore(4, 20);
 		setuphttp();
 
@@ -62,7 +62,7 @@ public class HttpServer {
 			LoggerStub.errorLog("ServerSocket initialization error: "
 					+ e.getMessage());
 			e.printStackTrace();
-			// server cannot start
+			// de.tourenplaner.server cannot start
 			System.exit(1);
 		}
 

@@ -2,7 +2,7 @@
  * $$\\ToureNPlaner\\$$
  */
 
-package server.threaded;
+package de.tourenplaner.server.threaded;
 
 import java.io.File;
 import java.io.IOException;
@@ -48,11 +48,11 @@ import org.apache.http.protocol.ResponseServer;
 import org.apache.http.util.EntityUtils;
 
 /**
- * Basic, yet fully functional and spec compliant, HTTP/1.1 file server.
+ * Basic, yet fully functional and spec compliant, HTTP/1.1 file de.tourenplaner.server.
  * <p>
  * Please note the purpose of this application is demonstrate the usage of
  * HttpCore APIs. It is NOT intended to demonstrate the most efficient way of
- * building an HTTP file server.
+ * building an HTTP file de.tourenplaner.server.
  * 
  * 
  * @author Christoph Haag, Peter Vollmer

@@ -18,7 +18,7 @@ import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.util.CharsetUtil;
 import org.json.simple.JSONValue;
 
-import computecore.ComputeResult;
+import de.tourenplaner.computecore.ComputeResult;
 
 
 /**
