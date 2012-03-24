@@ -1,2 +1,2 @@
-var/tourenplaner
+var/lib/tourenplaner
 var/log/tourenplaner

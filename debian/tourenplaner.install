@@ -1,2 +1,2 @@
-jar/tourenplaner-server.jar usr/share/tourenplaner
-archlinuxpackage/tourenplaner/tourenplaner.conf etc/
+jar/tourenplaner-server.jar usr/share/tourenplaner/
+data/config/tourenplaner.conf etc/
