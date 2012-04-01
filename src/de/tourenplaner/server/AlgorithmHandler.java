@@ -193,8 +193,10 @@ public class AlgorithmHandler extends RequestHandler {
             if (req != null) {
                 // Log what is requested
                 request.getContent().resetReaderIndex();
-
-                String ip = ((InetSocketAddress) req.getResponder().getChannel().getRemoteAddress()).getAddress().getHostAddress();
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null) {
+                    ip = ((InetSocketAddress) req.getResponder().getChannel().getRemoteAddress()).getAddress().getHostAddress();
+                }
                 String day = String.valueOf(Calendar.getInstance().get(Calendar.YEAR)) + String.valueOf(Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
                 //TODO: (persistent?) random salt to make ip not bruteforceable
                 String anonident = SHA1.SHA1(ip + day + "somesalt");
