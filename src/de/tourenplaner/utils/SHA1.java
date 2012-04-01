@@ -1,6 +1,7 @@
 package de.tourenplaner.utils;
 
-import java.io.UnsupportedEncodingException;
+import org.jboss.netty.util.CharsetUtil;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -27,13 +28,8 @@ public class SHA1 {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        byte[] sha1hash = new byte[40];
-        try {
-            md.update(text.getBytes("iso-8859-1"), 0, text.length());
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-        sha1hash = md.digest();
+        md.update(text.getBytes(CharsetUtil.UTF_8), 0, text.length());
+        byte[] sha1hash = md.digest();
         return convertToHex(sha1hash);
     }
 }

@@ -3,6 +3,7 @@ package de.tourenplaner.server;
 import de.tourenplaner.database.DatabaseManager;
 import de.tourenplaner.database.UserDataset;
 import de.tourenplaner.database.UserStatusEnum;
+import de.tourenplaner.utils.SHA1;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.base64.Base64;
@@ -43,30 +44,6 @@ public class Authorizer extends RequestHandler {
             digester = null;
         }
     }
-
-
-    /**
-     * Generates a Hash of the given salt/pw combination
-     *
-     * @param salt The salt
-     * @param pw The password
-     * @return The generated hash
-     */
-    protected String generateHash(final String salt, final String pw) {
-        // Compute SHA1 of PW:SALT
-        String toHash = pw + ':' + salt;
-
-        final byte[] bindigest = digester.digest(toHash.getBytes(CharsetUtil.UTF_8));
-        // Convert to Hex String
-        final StringBuilder hexbuilder = new StringBuilder(bindigest.length * 2);
-        for (byte b : bindigest) {
-            hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
-            hexbuilder.append(Integer.toHexString(b & 0x0F));
-        }
-        toHash = hexbuilder.toString();
-        return toHash;
-    }
-
 
     /**
      * Generates a Salt, necessary for hash generation
@@ -173,7 +150,7 @@ public class Authorizer extends RequestHandler {
         }
 
         // Compute SHA1 of PW:SALT
-        final String toHash = generateHash(user.salt, pw);
+        final String toHash = SHA1.SHA1(pw + ':' + user.salt);
 
         log.finer(pw + ':' + user.salt + " : " + toHash);
         if (!user.passwordhash.equals(toHash)) {
