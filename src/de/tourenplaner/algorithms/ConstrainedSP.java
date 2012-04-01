@@ -128,7 +128,7 @@ public class ConstrainedSP extends GraphAlgorithm {
                 log.finer("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                         maxAltitudeDifference
                 );
-                misc.put("message", "Found Path with smallest altitude difference = " + altitudeDiff);
+                misc.put("message", "Not feasible, but found path with smallest altitude difference = "+ altitudeDiff+" m");
                 ds.returnDistArray(false);
                 ds.returnHeap();
                 ds.returnPrevArray();
