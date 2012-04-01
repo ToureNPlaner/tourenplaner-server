@@ -69,8 +69,17 @@ public class ShortestPathCH extends GraphAlgorithm {
             e.printStackTrace();
         }
 
+        // Calculate total time
+        int numWays = resultWays.size();
+        double totalTime = 0;
+        for (int i = 0; i < numWays; i++) {
+            totalTime += resultWays.get(i).getTravelTime();
+        }
+
         Map<String, Object> misc = new HashMap<String, Object>(1);
         misc.put("distance", distance);
+        misc.put("time", totalTime);
+
         req.setMisc(misc);
     }
 
@@ -231,11 +240,13 @@ public class ShortestPathCH extends GraphAlgorithm {
      * @param destId
      * @throws IllegalAccessException
      */
-    protected final int backtrack(int[] prevEdges, Way resultWay, int srcId, int destId) throws IllegalAccessException {
+    protected final void backtrack(int[] prevEdges, Way resultWay, int srcId, int destId) throws IllegalAccessException {
         int nodeLat;
         int nodeLon;
         int edgeId;
         int length = 0;
+        double time = 0;
+        final double travelTimeConstant = 36.1111111111111111;
         // backtracking and shortcut unpacking use dequeue as stack
         IntArrayDeque deque = ds.borrowDeque();
 
@@ -270,10 +281,13 @@ public class ShortestPathCH extends GraphAlgorithm {
                 nodeLon = graph.getNodeLon(currNode);
                 resultWay.addPoint(nodeLat, nodeLon);
                 length += graph.getEuclidianDist(edgeId);
+                time += ((double)graph.getDist(edgeId))/travelTimeConstant;
             }
         }
+        resultWay.setDistance(length);
+        resultWay.setTravelTime(time);
         ds.returnDeque();
-        return length;
+        return;
     }
 
     /**
@@ -292,9 +306,8 @@ public class ShortestPathCH extends GraphAlgorithm {
         int srcId = 0;
         int destId = 0;
 
-        int oldDistance = 0;
         int distance = 0;
-
+        int totalDistance = 0;
         // in meters
         double directDistance = 0.0;
 
@@ -340,17 +353,19 @@ public class ShortestPathCH extends GraphAlgorithm {
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            distance += backtrack(prevEdges, resultWays.get(pointIndex), srcId, destId);
+            backtrack(prevEdges, resultWays.get(pointIndex), srcId, destId);
+            distance = resultWays.get(pointIndex).getDistance();
+            totalDistance += distance;
 
             long backtracktime = System.nanoTime();
 
             // Save the distance to the last point at the target
             // wrap around at tour
-            points.getConstraints((pointIndex + 1) % points.size()).put("distToPrev", distance - oldDistance);
+            points.getConstraints((pointIndex + 1) % points.size()).put("distToPrev", distance);
+            points.getConstraints((pointIndex + 1) % points.size()).put("timeToPrev", resultWays.get(pointIndex).getTravelTime());
 
-            oldDistance = distance;
 
-            log.finer("found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 + " dist[destid] = " + dists[destId] + "\n" +
+            log.finer("found sp with dist = " + resultWays.get(pointIndex).getDistance() / 1000.0 + " km (direct distance: " + directDistance / 1000.0 + " dist[destid] = " + dists[destId] + "\n" +
                     "BFS: " + (bfsdonetime - starttime) / 1000000.0 + " ms with " + bfsNodes + " nodes and " + bfsEdges + " edges\n" + "Dijkstra: " + (dijkstratime - bfsdonetime) / 1000000.0 + " ms\n" + "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms");
 
             // Return/Reset the data structures
@@ -359,7 +374,7 @@ public class ShortestPathCH extends GraphAlgorithm {
             ds.returnMarkedSet();
         }
 
-        return distance;
+        return totalDistance;
     }
 
 }
