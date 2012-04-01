@@ -1,8 +1,8 @@
 package de.tourenplaner.algorithms;
 
 import de.tourenplaner.computecore.ComputeRequest;
-import de.tourenplaner.computecore.Way;
 import de.tourenplaner.computecore.RequestPoints;
+import de.tourenplaner.computecore.Way;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.HashMap;
@@ -66,11 +66,10 @@ public class ConstrainedSP extends GraphAlgorithm {
             throw new ComputeException("Couldn't read Maximum Altitude Difference, wrong type: " + e.getMessage());
         }
 
-        int[] result = cSP(points, resultWay, maxAltitudeDifference);
-        int altitudeDiff = result[0];
-        int distance = result[1];
-        
-        misc.put("distance", distance);
+        int altitudeDiff = cSP(points, resultWay, maxAltitudeDifference);
+
+        misc.put("distance", resultWay.getDistance());
+        misc.put("time", resultWay.getTravelTime());
         misc.put("altitude", altitudeDiff);
         req.setMisc(misc);
 
@@ -86,12 +85,11 @@ public class ConstrainedSP extends GraphAlgorithm {
      * @return
      * @throws ComputeException
      */
-    protected int[] cSP (RequestPoints points, Way resultWay, int maxAltitudeDifference) throws ComputeException {
+    protected int cSP (RequestPoints points, Way resultWay, int maxAltitudeDifference) throws ComputeException {
         int srclat, srclon;
         int destlat, destlon;
         int srcId, trgtId;
-        int resultAddIndex = 0;
-
+        int distance;
 
         try {
             heap = ds.borrowHeap();
@@ -134,8 +132,8 @@ public class ConstrainedSP extends GraphAlgorithm {
                 ds.returnDistArray(false);
                 ds.returnHeap();
                 ds.returnPrevArray();
-                int distance = backtrack(prevEdges, resultWay, srcId, trgtId);
-                return new int[]{altitudeDiff,distance};
+                backtrack(prevEdges, resultWay, srcId, trgtId);
+                return  altitudeDiff;
 
 
             }
@@ -155,13 +153,13 @@ public class ConstrainedSP extends GraphAlgorithm {
             altitudeDiff = dijkstra(srcId, trgtId, lamdaOfGood);
         }
         log.finer("path goes over " + altitudeDiff + " meters of altitude Difference");
-        int distance = backtrack(prevEdges, resultWay, srcId, trgtId);
+        backtrack(prevEdges, resultWay, srcId, trgtId);
 
 
         ds.returnDistArray(false);
         ds.returnHeap();
         ds.returnPrevArray();
-        return new int[]{altitudeDiff,distance};
+        return altitudeDiff;
     }
 
     /**
@@ -173,13 +171,12 @@ public class ConstrainedSP extends GraphAlgorithm {
      * @param resultWay
      * @param srcId
      * @param trgtId
-     * @return
      */
-    private int backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
+    private void backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
         int resultAddIndex;// Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;
-
+        double time = 0;
         while (currNode != srcId) {
             routeElements++;
             currNode = graph.getSource(prevEdges[currNode]);
@@ -197,8 +194,11 @@ public class ConstrainedSP extends GraphAlgorithm {
         // regard to the multiplier
         // only to the penultimate element (srcId)
         currNode = trgtId;
+        int prevEdge;
         while (routeElements > 1) {
-            distance += graph.getEuclidianDist(prevEdges[currNode]);
+            prevEdge = prevEdges[currNode];
+            distance += graph.getEuclidianDist(prevEdge);
+            time += graph.getDist(prevEdge)*graph.travelTimeConstant;
             routeElements--;
             resultWay.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
             resultWay.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
@@ -208,7 +208,9 @@ public class ConstrainedSP extends GraphAlgorithm {
         resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
         resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
 
-        return distance;
+        resultWay.setDistance(distance);
+        resultWay.setTravelTime(time);
+        return;
     }
 
 

@@ -259,7 +259,7 @@ public class ShortestPath extends GraphAlgorithm {
         while (routeElements > 1) {
             prevEdge = prevEdges[currNode];
             length += graph.getEuclidianDist(prevEdge);
-            time += graph.getDist(prevEdge)/graph.travelTimeConstant;
+            time += graph.getDist(prevEdge)*graph.travelTimeConstant;
             routeElements--;
 
             resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));

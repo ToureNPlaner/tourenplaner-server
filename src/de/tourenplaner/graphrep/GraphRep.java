@@ -123,10 +123,10 @@ public class GraphRep implements Serializable {
 
     /**
      * The constant used to compute time traveled on an edge from it's
-     * non euclidian distance value by time=getDist(edgeId)/travelTimeConstant
+     * non euclidian distance value by time=getDist(edgeId)*travelTimeConstant
      * time is in seconds
      */
-    public final double travelTimeConstant = 36.111111111;
+    public final double travelTimeConstant = 0.02769230769230769230769230769230769;
 
     /**
      * Index = "virtual" id for in edges

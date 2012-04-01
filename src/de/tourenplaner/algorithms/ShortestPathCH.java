@@ -280,7 +280,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 nodeLon = graph.getNodeLon(currNode);
                 resultWay.addPoint(nodeLat, nodeLon);
                 length += graph.getEuclidianDist(edgeId);
-                time += ((double)graph.getDist(edgeId))/graph.travelTimeConstant;
+                time += ((double)graph.getDist(edgeId))*graph.travelTimeConstant;
             }
         }
         resultWay.setDistance(length);
