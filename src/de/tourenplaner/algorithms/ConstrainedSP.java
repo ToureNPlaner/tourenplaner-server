@@ -37,11 +37,10 @@ public class ConstrainedSP extends GraphAlgorithm {
      */
     private int[] prevEdges;
 
-    private Map<String, Object> misc = new HashMap<String, Object>(1);
-
+    private Map<String, Object> misc;
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
-
+        misc = new HashMap<String, Object>(1);
 
         assert req != null : "We ended up without a request object in run";
         RequestPoints points = req.getPoints();
@@ -128,7 +127,7 @@ public class ConstrainedSP extends GraphAlgorithm {
                 log.finer("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                         maxAltitudeDifference
                 );
-                misc.put("message", "Found Path with smallest altitude difference = " + altitudeDiff);
+                misc.put("message", "Not feasible, but found path with smallest altitude difference = "+ altitudeDiff+" m");
                 ds.returnDistArray(false);
                 ds.returnHeap();
                 ds.returnPrevArray();
