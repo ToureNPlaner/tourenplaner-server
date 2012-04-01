@@ -99,7 +99,7 @@ public class TourenPlaner {
 
         // Add log file as loggind handler
         try{
-            FileHandler fh = new FileHandler(logFilename);
+            FileHandler fh = new FileHandler(logFilename, true);
             fh.setFormatter(new XMLFormatter());
             log.addHandler(fh);
             log.setLevel(Level.parse(cm.getEntryString("loglevel","info").toUpperCase()));
