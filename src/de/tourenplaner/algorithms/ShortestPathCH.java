@@ -283,6 +283,11 @@ public class ShortestPathCH extends GraphAlgorithm {
                 time += ((double)graph.getDist(edgeId))*graph.travelTimeConstant;
             }
         }
+        // Add destination node
+        nodeLat = graph.getNodeLat(destId);
+        nodeLon = graph.getNodeLon(destId);
+        resultWay.addPoint(nodeLat, nodeLon);
+
         resultWay.setDistance(length);
         resultWay.setTravelTime(time);
         ds.returnDeque();
@@ -320,8 +325,6 @@ public class ShortestPathCH extends GraphAlgorithm {
             } else if (tour) {
                 destId = points.getPointId(0);
             } else {
-                // Don't forget to add destination to the last subway (destId is still the last one)
-                resultWays.get(pointIndex-1).addPoint(graph.getNodeLat(destId), graph.getNodeLon(destId));
                 break;
             }
 
