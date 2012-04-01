@@ -110,8 +110,6 @@ public class ShortestPath extends GraphAlgorithm {
             } else if (tour) {
                 trgtId = points.getPointId(0);
             } else {
-                // Don't forget to add destination to prev. way (trgtId is still the last one)
-                resultWays.get(pointIndex-1).addPoint(graph.getNodeLat(trgtId), graph.getNodeLon(trgtId));
                 break;
             }
 
