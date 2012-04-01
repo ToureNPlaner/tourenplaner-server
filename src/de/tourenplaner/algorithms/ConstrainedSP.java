@@ -173,7 +173,6 @@ public class ConstrainedSP extends GraphAlgorithm {
      * @param trgtId
      */
     private void backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
-        int resultAddIndex;// Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;
         double time = 0;
@@ -181,10 +180,8 @@ public class ConstrainedSP extends GraphAlgorithm {
             routeElements++;
             currNode = graph.getSource(prevEdges[currNode]);
         }
-        log.finer(
-                "path goes over " + routeElements + " nodes.");
-        // Add points to the end
-        resultAddIndex = resultWay.size();
+        log.finer("path goes over " + routeElements + " nodes.");
+
         // Add them without values we set the values in the next step
         resultWay.addEmptyPoints(routeElements);
         int distance = 0;
@@ -200,13 +197,13 @@ public class ConstrainedSP extends GraphAlgorithm {
             distance += graph.getEuclidianDist(prevEdge);
             time += graph.getDist(prevEdge)*graph.travelTimeConstant;
             routeElements--;
-            resultWay.setPointLat(resultAddIndex + routeElements, graph.getNodeLat(currNode));
-            resultWay.setPointLon(resultAddIndex + routeElements, graph.getNodeLon(currNode));
+            resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
+            resultWay.setPointLon(routeElements, graph.getNodeLon(currNode));
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
-        resultWay.setPointLat(resultAddIndex, graph.getNodeLat(currNode));
-        resultWay.setPointLon(resultAddIndex, graph.getNodeLon(currNode));
+        resultWay.setPointLat(0, graph.getNodeLat(currNode));
+        resultWay.setPointLon(0, graph.getNodeLon(currNode));
 
         resultWay.setDistance(distance);
         resultWay.setTravelTime(time);
