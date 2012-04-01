@@ -1,6 +1,7 @@
 package de.tourenplaner.server;
 
 import de.tourenplaner.database.*;
+import de.tourenplaner.utils.SHA1;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -145,7 +146,7 @@ public class PrivateHandler extends RequestHandler {
 
         final String salt = authorizer.generateSalt();
 
-        final String toHash = authorizer.generateHash(salt, pw);
+        final String toHash = SHA1.SHA1(pw + ':' + salt);
 
 
         UserDataset newUser;
@@ -305,7 +306,7 @@ public class PrivateHandler extends RequestHandler {
 
         if (objmap.get("password") != null && (objmap.get("password") instanceof String)) {
             selectedUser.salt = authorizer.generateSalt();
-            selectedUser.passwordhash = authorizer.generateHash(selectedUser.salt, (String) objmap.get("password"));
+            selectedUser.passwordhash = SHA1.SHA1((String) objmap.get("password") + ':' + selectedUser.salt);
         }
 
         if (isAdmin) {
