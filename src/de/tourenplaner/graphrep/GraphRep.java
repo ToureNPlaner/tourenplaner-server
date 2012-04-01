@@ -122,6 +122,13 @@ public class GraphRep implements Serializable {
     protected int[] offsetIn;
 
     /**
+     * The constant used to compute time traveled on an edge from it's
+     * non euclidian distance value by time=getDist(edgeId)/travelTimeConstant
+     * time is in seconds
+     */
+    public final double travelTimeConstant = 36.111111111;
+
+    /**
      * Index = "virtual" id for in edges
      * <p/>
      * content = position in the edge array

@@ -246,7 +246,6 @@ public class ShortestPathCH extends GraphAlgorithm {
         int edgeId;
         int length = 0;
         double time = 0;
-        final double travelTimeConstant = 36.1111111111111111;
         // backtracking and shortcut unpacking use dequeue as stack
         IntArrayDeque deque = ds.borrowDeque();
 
@@ -281,7 +280,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 nodeLon = graph.getNodeLon(currNode);
                 resultWay.addPoint(nodeLat, nodeLon);
                 length += graph.getEuclidianDist(edgeId);
-                time += ((double)graph.getDist(edgeId))/travelTimeConstant;
+                time += ((double)graph.getDist(edgeId))/graph.travelTimeConstant;
             }
         }
         resultWay.setDistance(length);

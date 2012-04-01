@@ -64,8 +64,16 @@ public class ShortestPath extends GraphAlgorithm {
             e.printStackTrace();
         }
 
+        // Calculate total time
+        int numWays = resultWays.size();
+        double totalTime = 0;
+        for (int i = 0; i < numWays; i++) {
+            totalTime += resultWays.get(i).getTravelTime();
+        }
+
         Map<String, Object> misc = new HashMap<String, Object>(1);
         misc.put("distance", distance);
+        misc.put("time", totalTime);
         req.setMisc(misc);
     }
 
@@ -86,8 +94,9 @@ public class ShortestPath extends GraphAlgorithm {
         int srcId;
         int trgtId = 0;
 
-        int oldDistance = 0;
+        int totalDistance = 0;
         int distance = 0;
+        double time = 0;
 
         // in meters
         double directDistance = 0.0;
@@ -133,29 +142,29 @@ public class ShortestPath extends GraphAlgorithm {
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            distance += backtrack(prevEdges, resultWays.get(pointIndex), srcId, trgtId);
-
+            backtrack(prevEdges, resultWays.get(pointIndex), srcId, trgtId);
+            distance = resultWays.get(pointIndex).getDistance();
+            time = resultWays.get(pointIndex).getTravelTime();
             long backtracktime = System.nanoTime();
 
             // Save the distance to the last point at the target
             // wrap around at tour
-            points.getConstraints((pointIndex + 1) % points.size()).put("distToPrev", distance - oldDistance);
+            points.getConstraints((pointIndex + 1) % points.size()).put("distToPrev", distance);
+            points.getConstraints((pointIndex + 1) % points.size()).put("timeToPrev", time);
 
-            oldDistance = distance;
+            totalDistance += distance;
 
-            log.finer(
-                    "found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
+            log.finer("found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
                     " dist[destid] = " + dists[trgtId] + '\n' +
                     (dijkstratime - starttime) / 1000000.0 + " ms\n" +
-                    "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms"
-                    );
+                    "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms");
 
             // Return/Reset the data structures
             ds.returnDistArray(false);
             ds.returnPrevArray();
         }
 
-        return distance;
+        return totalDistance;
     }
 
 
@@ -226,15 +235,15 @@ public class ShortestPath extends GraphAlgorithm {
      * @param resultWay
      * @param srcId
      * @param trgtId
-     * @return
      * @throws IllegalAccessException
      */
-    protected final int backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
+    protected final void backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
         // Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;
 
         int length = 0;
+        double time = 0;
 
         while (currNode != srcId) {
             routeElements++;
@@ -246,8 +255,11 @@ public class ShortestPath extends GraphAlgorithm {
 
         // backtracking here
         currNode = trgtId;
+        int prevEdge;
         while (routeElements > 1) {
-            length += graph.getEuclidianDist(prevEdges[currNode]);
+            prevEdge = prevEdges[currNode];
+            length += graph.getEuclidianDist(prevEdge);
+            time += graph.getDist(prevEdge)/graph.travelTimeConstant;
             routeElements--;
 
             resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
@@ -258,8 +270,10 @@ public class ShortestPath extends GraphAlgorithm {
         // add source node to the result.
         resultWay.setPointLat(0, graph.getNodeLat(currNode));
         resultWay.setPointLon(0, graph.getNodeLon(currNode));
-        return length;
 
+        resultWay.setTravelTime(time);
+        resultWay.setDistance(length);
+        return;
     }
 
 }
