@@ -7,9 +7,10 @@ import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.database.DatabaseManager;
 import de.tourenplaner.database.UserDataset;
+import de.tourenplaner.utils.SHA1;
 import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
@@ -20,8 +21,10 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -190,7 +193,13 @@ public class AlgorithmHandler extends RequestHandler {
             if (req != null) {
                 // Log what is requested
                 request.getContent().resetReaderIndex();
-                log.fine("\""+algName+"\": "+request.getContent().toString(CharsetUtil.UTF_8));
+
+                String ip = ((InetSocketAddress) req.getResponder().getChannel().getRemoteAddress()).getAddress().getHostAddress();
+                String day = String.valueOf(Calendar.getInstance().get(Calendar.YEAR)) + String.valueOf(Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
+                //TODO: (persistent?) random salt to make ip not bruteforceable
+                String anonident = SHA1.SHA1(ip + day + "somesalt");
+                log.fine("\"" + algName + "\" for Client " + anonident + "  " +
+                         request.getContent().toString(CharsetUtil.UTF_8));
                 
                 int requestID = -1;
 
