@@ -6,6 +6,7 @@ package de.tourenplaner.database;
 import de.tourenplaner.config.ConfigManager;
 
 import javax.sql.DataSource;
+import java.beans.PropertyVetoException;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -21,13 +22,49 @@ public class DatabaseManager {
     private static Logger log = Logger.getLogger("de.tourenplaner.database");
 
     private final int maxTries = initMaxTries();
+    
+    private static DataSource dataSource = null;
 
-    private final DataSource dataSource;
+    /**
+     * You need to init the DatabaseManager class before you can construct a DatabaseManager object.
+     * If you call init more than one time, it will not have any additional effects.
+     * The DatabaseManager will always keep the values, which were given within the first call.
+     *
+     * @param url
+     *            A database driver specific url with the form
+     *            <i>jdbc:subprotocol:subname</i> where <i>subname</i> is the server address with
+     *            the database name (for example &quot;tourenplaner&quot;)
+     *            and at the end some connection properties if needed
+     *            (for example &quot;?autoReconnect=true&quot;)
+     *            </br> Example:
+     *            "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"
+     * @param userName
+     *            User name of the database user account
+     * @param password
+     *            To the user corresponding password
+     * @param driverClass
+     *            The driver class, for example: "com.mysql.jdbc.Driver"
+     *
+     * @see java.sql.DriverManager#getConnection(java.lang.String,java.lang.String, java.lang.String)
+     * @throws PropertyVetoException Thrown if driverClass String for the database is not correct
+     *         or if the driver is not accessible.
+     */
+    public static void initDatabaseManager(String url, String userName, String password, String driverClass)
+            throws PropertyVetoException {
+        if (dataSource == null) {
+            dataSource = DatabasePool.createDataSource(url, userName, password, driverClass);
+        }
+    }
 
-
-
-	protected DatabaseManager(DataSource dataSource) {
-        this.dataSource = dataSource;
+    /**
+     * Creates a DatabaseManager object. You need first to call DatabaseManager.initDatabaseManager
+     * before you can construct an object with this method.
+     */
+	public DatabaseManager() {
+        // instead of using static database methods, use DatabaseManager objects
+        // so not every method needs to check if dataSource is null
+        assert dataSource != null : "You must first call initDatabaseManager once " +
+                "before you are allowed to construct a DatabaseManager";
 	}
 
 

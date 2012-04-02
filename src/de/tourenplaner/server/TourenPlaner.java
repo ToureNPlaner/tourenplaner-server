@@ -9,7 +9,7 @@ import de.tourenplaner.computecore.AlgorithmRegistry;
 import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.computecore.SharingAMFactory;
 import de.tourenplaner.config.ConfigManager;
-import de.tourenplaner.database.DatabasePool;
+import de.tourenplaner.database.DatabaseManager;
 import de.tourenplaner.graphrep.*;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -176,20 +176,23 @@ public class TourenPlaner {
         reg.registerAlgorithm(new NNSearchFactory(graph));
         reg.registerAlgorithm(new ConstrainedSPFactory(graph));
 
-        // initialize DatabasePool
+        // initialize DatabaseManager
         if (cm.getEntryBool("private", false)) {
             try {
-                DatabasePool.getDatabaseManager(
+                DatabaseManager.initDatabaseManager(
                         cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
                         cm.getEntryString("dbuser", "tnpuser"),
                         cm.getEntryString("dbpw", "toureNPlaner"),
-                        cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver")).getNumberOfUsers();
-            } catch (PropertyVetoException e) {
-                log.log(Level.SEVERE, "Couldn't establish database connection", e);
-                System.exit(1);
+                        cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver"));
+                new DatabaseManager().getNumberOfUsers();
             } catch (SQLException e) {
-                log.log(Level.SEVERE, "Couldn't establish database connection. DatabaseManager.getNumberOfUsers() was called " +
-                        "to test and initialize Pool, but an SQLException was thrown", e);
+                log.log(Level.SEVERE, "Couldn't establish database connection. DatabaseManager.getNumberOfUsers() " +
+                        "was called to test and initialize database pool, but an SQLException was thrown", e);
+                System.exit(1);
+            } catch (PropertyVetoException e) {
+                log.log(Level.SEVERE, "Couldn't establish database connection: " +
+                        "could not set driver class of the database. The driver class is maybe wrong " +
+                        "or the driver is maybe not accessible (not installed or not in class path).", e);
                 System.exit(1);
             }
         }

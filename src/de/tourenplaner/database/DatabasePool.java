@@ -3,6 +3,7 @@ package de.tourenplaner.database;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import de.tourenplaner.config.ConfigManager;
 
+import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -15,27 +16,33 @@ public class DatabasePool {
 
     private static Logger log = Logger.getLogger("de.tourenplaner.database");
 
-    private String url;
-    private String userName;
-    private String password;
-    private String driverClass;
-
-    private ComboPooledDataSource cpds;
-
-    private static DatabasePool instance;
-    
-    private DatabasePool(String url, String userName, String password, String driverClass)
+    /**
+     * This method will create and return a DataSource object.
+     * The DataSource object has an underlying database pool,
+     * so you can get from it pooled connections.
+     *
+     * @param url
+     *            A de.tourenplaner.database driver specific url with the form
+     *            <i>jdbc:subprotocol:subname</i> where <i>subname</i> is the server address with
+     *            the database name (for example &quot;tourenplaner&quot;)
+     *            and at the end some connection properties if needed
+     *            (for example &quot;?autoReconnect=true&quot;)
+     *            </br> Example:
+     *            "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"
+     * @param userName
+     *            User name of the database user account
+     * @param password
+     *            To the user corresponding password
+     * @param driverClass
+     *            The driver class, for example: "com.mysql.jdbc.Driver"
+     * @return The corresponding DataSource object, but not null.
+     *
+     * @see java.sql.DriverManager#getConnection(java.lang.String,java.lang.String, java.lang.String)
+     * @throws PropertyVetoException Thrown if driverClass String for the database is not correct
+     *         or if the driver is not accessible.
+     */
+    public static DataSource createDataSource(String url, String userName, String password, String driverClass)
             throws PropertyVetoException {
-
-        this.url = url;
-        this.userName = userName;
-        this.password = password;
-        this.driverClass = driverClass;
-
-        init();
-    }
-
-    private void init() throws PropertyVetoException {
 
         Map<?, ?> map = ConfigManager.getInstance().getEntryMap("c3p0", null);
         if (map != null) {
@@ -50,93 +57,20 @@ public class DatabasePool {
             }
         }
 
-        cpds = new ComboPooledDataSource();
+        ComboPooledDataSource cpDataSource = new ComboPooledDataSource();
 
         try {
-            cpds.setDriverClass(driverClass);
+            cpDataSource.setDriverClass(driverClass);
         } catch (PropertyVetoException e) {
-            cpds = null;
-            instance = null;
+            log.severe("Cannot set driver class '" + driverClass + "' for the database pool, " +
+                    "thereby it is not possible to create the database pool.");
             throw e;
         }
-        cpds.setJdbcUrl(url);
-        cpds.setUser(userName);
-        cpds.setPassword(password);
-    }
+        cpDataSource.setJdbcUrl(url);
+        cpDataSource.setUser(userName);
+        cpDataSource.setPassword(password);
 
-    /**
-     * You need to init a de.tourenplaner.database pool before you can get a DatabaseManager object.
-     * If you call init more than one time, it will not have any effects.
-     * The DatabasePool will always keep the values, which were given within the first call.
-     *
-     * @param url
-     *            A de.tourenplaner.database driver specific url with the form
-     *            <i>jdbc:subprotocol:subname</i> where <i>subname</i> is the de.tourenplaner.server address with
-     *            the de.tourenplaner.database name (for example &quot;tourenplaner&quot;)
-     *            and at the end some connection properties if needed
-     *            (for example &quot;?autoReconnect=true&quot;)
-     *            </br> Example:
-     *            "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"
-     * @param userName
-     *            User name of the de.tourenplaner.database user account
-     * @param password
-     *            To the user corresponding password
-     * @param driverClass
-     *            The driver class, for example: "com.mysql.jdbc.Driver"
-     *
-     * @see java.sql.DriverManager#getConnection(java.lang.String,java.lang.String, java.lang.String)
-     * @throws PropertyVetoException Thrown if driverClass String for the de.tourenplaner.database is not correct.
-     * @return An object instance of the DatabasePool.
-     */
-    public synchronized static DatabasePool initDatabasePool(String url, String userName,
-                                   String password, String driverClass) throws PropertyVetoException {
-        if (instance == null) {
-            instance = new DatabasePool(url, userName, password, driverClass);
-        }
-        return instance;
-    }
-
-    /**
-     * Returns a DatabaseManager.
-     *
-     * @return A DatabaseManager
-     */
-    public synchronized DatabaseManager getDatabaseManager() {
-        // This class is a singleton, so there should be no NullPointerException
-        return new DatabaseManager(instance.cpds);
-    }
-
-    /**
-     * This method will init a de.tourenplaner.database pool if necessary and return a DatabaseManager object.
-     * If the de.tourenplaner.database pool is already initialized, the given parameters will be ignored.
-     * The DatabasePool will always keep the values, which were given within the first call.
-     *
-     * @param url
-     *            A de.tourenplaner.database driver specific url with the form
-     *            <i>jdbc:subprotocol:subname</i> where <i>subname</i> is the de.tourenplaner.server address with
-     *            the de.tourenplaner.database name (for example &quot;tourenplaner&quot;)
-     *            and at the end some connection properties if needed
-     *            (for example &quot;?autoReconnect=true&quot;)
-     *            </br> Example:
-     *            "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"
-     * @param userName
-     *            User name of the de.tourenplaner.database user account
-     * @param password
-     *            To the user corresponding password
-     * @param driverClass
-     *            The driver class, for example: "com.mysql.jdbc.Driver"
-     * @return The corresponding DatabaseManager, but not null.
-     *
-     * @see java.sql.DriverManager#getConnection(java.lang.String,java.lang.String, java.lang.String)
-     * @throws PropertyVetoException Thrown if driverClass String for the de.tourenplaner.database is not correct.
-     */
-    public synchronized static DatabaseManager getDatabaseManager(String url, String userName,
-                                              String password, String driverClass) throws PropertyVetoException {
-        initDatabasePool(url, userName, password, driverClass);
-        if (instance.cpds == null) {
-            instance.init();
-        }
-        return instance.getDatabaseManager();
+        return cpDataSource;
     }
 
 }

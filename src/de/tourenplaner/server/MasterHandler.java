@@ -7,12 +7,10 @@ package de.tourenplaner.server;
 import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.database.DatabaseManager;
-import de.tourenplaner.database.DatabasePool;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.util.CharsetUtil;
 
-import java.beans.PropertyVetoException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -50,8 +48,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
     private PrivateHandler privateHandler;
 
     private InfoHandler infoHandler;
-    
-    private DatabaseManager dbm;
 
     /**
      * Constructs a new RequestHandler using the given ComputeCore and
@@ -63,25 +59,14 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
     public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
         final ConfigManager cm = ConfigManager.getInstance();
         this.isPrivate = cm.getEntryBool("private", false);
-        this.dbm = null;
+        DatabaseManager dbm = null;
         authorizer = null;
         if (isPrivate){
-            try {
-                this.dbm = DatabasePool.getDatabaseManager(
-                        cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
-                        cm.getEntryString("dbuser", "tnpuser"),
-                        cm.getEntryString("dbpw", "toureNPlaner"),
-                        cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver"));
-
-                authorizer = new Authorizer(this.dbm);
-            } catch (PropertyVetoException e) {
-                // TODO falling back to public mode is maybe not a good behavior
-                log.log(Level.SEVERE, "Can't connect to de.tourenplaner.database falling back to public mode", e);
-                this.isPrivate = false;
-            }
+            dbm = new DatabaseManager();
+            authorizer = new Authorizer(dbm);
         }
-        this.algHandler = new AlgorithmHandler(authorizer, this.isPrivate, this.dbm, cCore);
-        this.privateHandler = new PrivateHandler(authorizer, this.dbm);
+        this.algHandler = new AlgorithmHandler(authorizer, this.isPrivate, dbm, cCore);
+        this.privateHandler = new PrivateHandler(authorizer, dbm);
         this.infoHandler = new InfoHandler(serverInfo);
     }
 

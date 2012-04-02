@@ -35,11 +35,12 @@ public class DatabaseManagerTest {
 	public final static void prepareTestRun() {
 		final ConfigManager cm = ConfigManager.getInstance();
 		try {
-            dbm = DatabasePool.getDatabaseManager(
+            DatabaseManager.initDatabaseManager(
                     cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
                     cm.getEntryString("dbuser", "tnpuser"),
                     cm.getEntryString("dbpw", "toureNPlaner"),
                     cm.getEntryString("dbdriverclass", "com.mysql.jdbc.Driver"));
+            dbm = new DatabaseManager();
 		} catch (PropertyVetoException e) {
             dbmFailureMessage = "No Database Connection established. "
                     + "Connection parameter:\n"
@@ -96,7 +97,7 @@ public class DatabaseManagerTest {
 
 	/**
 	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#DatabaseManager(javax.sql.DataSource)}
+	 * {@link de.tourenplaner.database.DatabaseManager#DatabaseManager()}
 	 * .
 	 */
 	@Test

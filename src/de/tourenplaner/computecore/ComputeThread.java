@@ -7,10 +7,8 @@ import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.database.DatabaseManager;
-import de.tourenplaner.database.DatabasePool;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import java.beans.PropertyVetoException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -53,28 +51,18 @@ public class ComputeThread extends Thread {
 		isPrivate = cm.getEntryBool("private", false);
 		threadMXBean = ManagementFactory.getThreadMXBean();
 		if (isPrivate) {
-            try {
-                int costPerTimeUnit = cm.getEntryInt("costpertimeunit", 10);
-                if (costPerTimeUnit < 0) {
-                    costPerTimeUnit = 0;
-                }
-                // size of time unit is in milliseconds
-                int timeUnitSize = cm.getEntryInt("timeunitsize", 1000);
-                if (timeUnitSize <= 0) {
-                    timeUnitSize = 1;
-                }
-                costPerMillisecond = ((double) costPerTimeUnit) / ((double) timeUnitSize);
-
-                this.dbm = DatabasePool.getDatabaseManager(
-                        cm.getEntryString("dburi","jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
-                        cm.getEntryString("dbuser","tnpuser"),
-                        cm.getEntryString("dbpw","toureNPlaner"),
-                        cm.getEntryString("dbdriverclass","com.mysql.jdbc.Driver"));
-            } catch (PropertyVetoException e) {
-                log.log(Level.SEVERE, "Couldn't establish de.tourenplaner.database connection", e);
-                System.exit(1);
+            int costPerTimeUnit = cm.getEntryInt("costpertimeunit", 10);
+            if (costPerTimeUnit < 0) {
+                costPerTimeUnit = 0;
             }
+            // size of time unit is in milliseconds
+            int timeUnitSize = cm.getEntryInt("timeunitsize", 1000);
+            if (timeUnitSize <= 0) {
+                timeUnitSize = 1;
+            }
+            costPerMillisecond = ((double) costPerTimeUnit) / ((double) timeUnitSize);
 
+            this.dbm = new DatabaseManager();
         }
 		this.setDaemon(true);
 	}
