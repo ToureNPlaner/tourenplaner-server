@@ -8,7 +8,7 @@ package de.tourenplaner.algorithms;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
 
  * This factory class is used to create Algorithm instances and to provide
- * information on the created Algorithm used by clients to adapt to the de.tourenplaner.server
+ * information on the created Algorithm used by clients to adapt to the server
  */
 public abstract class AlgorithmFactory {
 	/**

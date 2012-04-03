@@ -8,7 +8,7 @@ import de.tourenplaner.graphrep.GraphRep;
 /**
  *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
- * Used to create instances of shared de.tourenplaner.algorithms
+ * Used to create instances of shared algorithms
  */
 public abstract class SharingAlgorithmFactory extends GraphAlgorithmFactory {
 

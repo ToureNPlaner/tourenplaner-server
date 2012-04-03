@@ -12,7 +12,7 @@ import com.carrotsearch.hppc.IntArrayDeque;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  * 
  *         This class is used to share data structures used by several Dijkstra
- *         based de.tourenplaner.algorithms. This helps to prevent unnecessary memory usage and
+ *         based algorithms. This helps to prevent unnecessary memory usage and
  *         minimizes time spent in allocations.
  * 
  *         Instances of this class MUST only be shared within the same thread

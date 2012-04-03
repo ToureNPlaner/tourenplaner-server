@@ -30,7 +30,7 @@ public class NNSearch extends GraphAlgorithm {
 
 
     /**
-     * find the nearest neighbours to the given points in the de.tourenplaner.graphrep
+     * find the nearest neighbours to the given points in the graphrep
      *
      * @param points
      */
