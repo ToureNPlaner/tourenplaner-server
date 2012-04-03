@@ -26,6 +26,7 @@ public class ConstrainedSP extends GraphAlgorithm {
     public ConstrainedSP(GraphRep graph, DijkstraStructs dijkstraStructs) {
         super(graph);
         ds = dijkstraStructs;
+        misc = new HashMap<String, Object>(1);
     }
 
     // dists in this array are stored with the multiplier applied. They also are
@@ -40,7 +41,7 @@ public class ConstrainedSP extends GraphAlgorithm {
     private Map<String, Object> misc;
     @Override
     public void compute(ComputeRequest req) throws ComputeException {
-        misc = new HashMap<String, Object>(1);
+        misc.clear();
 
         assert req != null : "We ended up without a request object in run";
         RequestPoints points = req.getPoints();
