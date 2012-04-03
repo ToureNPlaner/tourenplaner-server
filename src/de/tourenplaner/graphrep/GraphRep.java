@@ -137,7 +137,7 @@ public class GraphRep implements Serializable {
 
     /**
      * A GraphRep is the representation of a graph used to perform several
-     * de.tourenplaner.algorithms on.
+     * algorithms on.
      * This constructor creates all internal data structures but the data needs
      * to be set with setEdgeDate, setShortcutData and setNodeData
      * then one can generate the offset arrays from this data.

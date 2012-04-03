@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * @author Peter Vollmer
  * 
- *         This de.tourenplaner.config manager loads configurations from a de.tourenplaner.config file which is
+ *         This config manager loads configurations from a config file which is
  *         formated in JSON.
  */
 public class ConfigManager {
@@ -25,7 +25,7 @@ public class ConfigManager {
 	private final Map<String, Object> confMap;
 
 	/**
-	 * Construct the ConfigManager and loads the de.tourenplaner.config from JSON file with the
+	 * Construct the ConfigManager and loads the config from JSON file with the
 	 * given file path.
 	 * 
 	 * @param mapper
@@ -42,14 +42,14 @@ public class ConfigManager {
 	}
 
 	/**
-	 * Used to construct an empty de.tourenplaner.config Manager that only returns defaults
+	 * Used to construct an empty config Manager that only returns defaults
 	 */
 	private ConfigManager() {
 		this.confMap = null;
 	}
 
 	/**
-	 * Initialize the de.tourenplaner.config management and construct the configManager. To do
+	 * Initialize the config management and construct the configManager. To do
 	 * before getInstance. If Init fails the ConfigManager can be used as an
 	 * empty Config that only returns the default
 	 * 
@@ -79,7 +79,7 @@ public class ConfigManager {
 				try {
 					value = (Double) confMap.get(key);
 				} catch (ClassCastException e) {
-					System.out.println("Failed to read de.tourenplaner.config value: "
+					System.out.println("Failed to read config value: "
 							+ e.getMessage());
 					e.printStackTrace();
 					return defaultValue;
@@ -110,7 +110,7 @@ public class ConfigManager {
 				try {
 					value = (Boolean) confMap.get(key);
 				} catch (ClassCastException e) {
-					System.out.println("Failed to read de.tourenplaner.config value: "
+					System.out.println("Failed to read config value: "
 							+ e.getMessage());
 					e.printStackTrace();
 					return defaultValue;
@@ -142,7 +142,7 @@ public class ConfigManager {
 				try {
 					value = (Long) confMap.get(key);
 				} catch (ClassCastException e) {
-					System.out.println("Failed to read de.tourenplaner.config value: "
+					System.out.println("Failed to read config value: "
 							+ e.getMessage());
 					e.printStackTrace();
 					return defaultValue;
@@ -174,7 +174,7 @@ public class ConfigManager {
 				try {
 					value = (java.lang.Number) confMap.get(key);
 				} catch (ClassCastException e) {
-					System.out.println("Failed to read de.tourenplaner.config value: "
+					System.out.println("Failed to read config value: "
 							+ e.getMessage());
 					e.printStackTrace();
 					return defaultValue;
@@ -206,7 +206,7 @@ public class ConfigManager {
 				try {
 					value = (String) confMap.get(key);
 				} catch (ClassCastException e) {
-					System.out.println("Failed to read de.tourenplaner.config value: "
+					System.out.println("Failed to read config value: "
 							+ e.getMessage());
 					e.printStackTrace();
 					return defaultValue;
@@ -252,7 +252,7 @@ public class ConfigManager {
                 try {
                     value = (Map<?, ?>) confMap.get(key);
                 } catch (ClassCastException e) {
-                    System.out.println("Failed to read de.tourenplaner.config value: "
+                    System.out.println("Failed to read config value: "
                             + e.getMessage());
                     e.printStackTrace();
                     return defaultValue;
