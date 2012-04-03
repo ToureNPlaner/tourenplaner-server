@@ -10,7 +10,6 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -34,9 +33,9 @@ public class ConstrainedSPTest {
         //shortest path is the best fittest
 
         Way resultWay = new Way();
-        int[] result = constrainedSP.cSP(points,resultWay,90);
-        assertEquals(80,result[0]);
-        assertEquals(7,result[1]);
+        int altitudeDiff = constrainedSP.cSP(points,resultWay,90);
+        assertEquals(80,altitudeDiff);
+        assertEquals(7, resultWay.getDistance());
         assertEquals(10000000,resultWay.getPointLat(0));
         assertEquals(10000000,resultWay.getPointLon(0));
         assertEquals(10000000,resultWay.getPointLat(1));
@@ -47,9 +46,9 @@ public class ConstrainedSPTest {
         //middle way
 
         resultWay = new Way();
-        result = constrainedSP.cSP(points,resultWay,60);
-        assertEquals(45,result[0]);
-        assertEquals(9,result[1]);
+        altitudeDiff = constrainedSP.cSP(points,resultWay,60);
+        assertEquals(45,altitudeDiff);
+        assertEquals(9, resultWay.getDistance());
         assertEquals(10000000,resultWay.getPointLat(0));
         assertEquals(10000000,resultWay.getPointLon(0));
         assertEquals(20000000,resultWay.getPointLat(1));
@@ -62,9 +61,9 @@ public class ConstrainedSPTest {
         //longest possible way
 
         resultWay = new Way();
-        result = constrainedSP.cSP(points,resultWay,44);
-        assertEquals(40,result[0]);
-        assertEquals(14,result[1]);
+        altitudeDiff = constrainedSP.cSP(points,resultWay,44);
+        assertEquals(40,altitudeDiff);
+        assertEquals(14, resultWay.getDistance());
         assertEquals(10000000,resultWay.getPointLat(0));
         assertEquals(10000000,resultWay.getPointLon(0));
         assertEquals(20000000,resultWay.getPointLat(1));
@@ -78,9 +77,9 @@ public class ConstrainedSPTest {
 
         //no possible way with a constraint. There should be the way with the least difference of altitude
         resultWay = new Way();
-        result = constrainedSP.cSP(points,resultWay,30);
-        assertEquals(40,result[0]);
-        assertEquals(14,result[1]);
+        altitudeDiff = constrainedSP.cSP(points,resultWay,30);
+        assertEquals(40,altitudeDiff);
+        assertEquals(14, resultWay.getDistance());
         assertEquals(10000000,resultWay.getPointLat(0));
         assertEquals(10000000,resultWay.getPointLon(0));
         assertEquals(20000000,resultWay.getPointLat(1));
