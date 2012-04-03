@@ -41,7 +41,7 @@ public class TPSSslContextFactory {
 			serverContext = SSLContext.getInstance(PROTOCOL);
 			serverContext.init(kmf.getKeyManagers(), null, null);
 		} catch (Exception e) {
-			throw new Error("Failed to initialize the de.tourenplaner.server-side SSLContext",
+			throw new Error("Failed to initialize the server-side SSLContext",
 					e);
 		}
 

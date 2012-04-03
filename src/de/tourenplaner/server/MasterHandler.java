@@ -160,7 +160,7 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
                 responder.writeErrorMessage("EUNKNOWNURL", "An unknown URL was requested", "unknown URL: " + path, HttpResponseStatus.NOT_FOUND);
             }
         } catch (SQLException exSQL) {
-            responder.writeErrorMessage("EDATABASE", "The de.tourenplaner.server can't contact its de.tourenplaner.database", null, HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage("EDATABASE", "The server can't contact its database", null, HttpResponseStatus.NOT_FOUND);
             exSQL.printStackTrace();
         }
     }

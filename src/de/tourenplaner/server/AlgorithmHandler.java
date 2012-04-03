@@ -161,7 +161,7 @@ public class AlgorithmHandler extends RequestHandler {
      * @param request HttpRequest
      * @param algName algorithm name as String
      * @throws SQLFeatureNotSupportedException Thrown if the id could not received or another function is not supported by driver.
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws JsonParseException Thrown if parsing json content fails
      * @throws JsonProcessingException Thrown if json generation processing fails
      * @throws IOException Thrown if error message sending or reading json fails
@@ -214,10 +214,10 @@ public class AlgorithmHandler extends RequestHandler {
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This de.tourenplaner.server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
+                    String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate && !algFac.isHidden()){
-                        // Write request with status failed into de.tourenplaner.database, failure cause is busy de.tourenplaner.server
+                        // Write request with status failed into database, failure cause is busy server
 
                         // already sent error message, we should throw no exception
                         // (MasterHandler would send an error message if it catches an SQLException)

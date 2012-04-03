@@ -85,7 +85,7 @@ public class PrivateHandler extends RequestHandler {
      * @throws SQLFeatureNotSupportedException
      *          Thrown if a function is not supported by driver.
      * @throws SQLException
-     *          Thrown if de.tourenplaner.database query fails
+     *          Thrown if database query fails
      * @throws JsonMappingException
      *          Thrown if mapping object to json fails
      * @throws JsonGenerationException
@@ -189,7 +189,7 @@ public class PrivateHandler extends RequestHandler {
      * Authenticates the client and sends the corresponding user object as json to the client.
      *
      * @param request HttpRequest
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws JsonMappingException Thrown if mapping object to json fails
      * @throws IOException Thrown if error message sending or writing json content fails
@@ -207,7 +207,7 @@ public class PrivateHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param parameters map with url parameters from client
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws JsonMappingException Thrown if mapping object to json fails
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if error message sending or writing json content fails
@@ -238,8 +238,8 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (selectedUser == null) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this de.tourenplaner.server",
-                    "The id is not in the de.tourenplaner.database", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
+                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
             return;
         }
 
@@ -254,7 +254,7 @@ public class PrivateHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param parameters map with url parameters from client
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws JsonMappingException Thrown if mapping object to json fails
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if error message sending or reading/writing json content fails
@@ -295,8 +295,8 @@ public class PrivateHandler extends RequestHandler {
             selectedUser = dbm.getUser(userID);
 
             if (selectedUser == null) {
-                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this de.tourenplaner.server",
-                        "The id is not in the de.tourenplaner.database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
                 return;
             }
         } else {
@@ -364,7 +364,7 @@ public class PrivateHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param parameters map with url parameters from client
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws IOException Thrown if error message sending or writing content fails
      */
     public void handleGetRequest(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
@@ -390,12 +390,12 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonRequest(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this de.tourenplaner.server",
-                        "The id is not in the de.tourenplaner.database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
                 return;
             }
         } else {
-            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this de.tourenplaner.server",
+            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
                     "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
             return;
         }
@@ -418,7 +418,7 @@ public class PrivateHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param parameters map with url parameters from client
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws IOException Thrown if error message sending or writing content fails
      */
     public void handleGetResponse(final HttpRequest request, Map<String, List<String>> parameters) throws IOException, SQLException {
@@ -444,12 +444,12 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonResponse(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this de.tourenplaner.server",
-                        "The id is not in the de.tourenplaner.database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
                 return;
             }
         } else {
-            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this de.tourenplaner.server",
+            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
                     "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
             return;
         }
@@ -471,7 +471,7 @@ public class PrivateHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param parameters map with url parameters from client
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws JsonMappingException Thrown if mapping object to json fails
      * @throws IOException Thrown if error message sending or writing json content fails
@@ -551,7 +551,7 @@ public class PrivateHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param parameters map with url parameters from client
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws JsonMappingException Thrown if mapping object to json fails
      * @throws IOException Thrown if error message sending or writing json content fails
@@ -607,7 +607,7 @@ public class PrivateHandler extends RequestHandler {
      * @param request HttpRequest
      * @param parameters map with url parameters from client
      * @throws IOException Thrown if error message sending fails
-     * @throws SQLException Thrown if de.tourenplaner.database query fails
+     * @throws SQLException Thrown if database query fails
      */
     public void handleDeleteUser(final HttpRequest request, Map<String, List<String>> parameters)
             throws IOException, SQLException {
@@ -628,7 +628,7 @@ public class PrivateHandler extends RequestHandler {
                 return;
             }
         } else {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this de.tourenplaner.server",
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
                     "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
             return;
         }
@@ -636,8 +636,8 @@ public class PrivateHandler extends RequestHandler {
         // the user with id = 1 should always be verified, so no status changing
         if (userID != 1) {
             if (dbm.updateUserStatusToDeleted(userID) != 1) {
-                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this de.tourenplaner.server",
-                        "The id is not in the de.tourenplaner.database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
+                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
                 return;
             }
         }
@@ -659,7 +659,7 @@ public class PrivateHandler extends RequestHandler {
     private int parseRequestIdParameter(String parameterValue) throws IOException {
 
         if (parameterValue == null) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this de.tourenplaner.server",
+            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
                     "The given id is null", HttpResponseStatus.NOT_FOUND);
             return -1;
         }
@@ -673,7 +673,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (requestID < 0) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this de.tourenplaner.server",
+            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
                     "The given id is not an allowed number (positive or zero)", HttpResponseStatus.NOT_FOUND);
             return requestID;
         }
@@ -706,7 +706,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (parameterValue == null) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this de.tourenplaner.server",
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
                     "The given id is null", HttpResponseStatus.NOT_FOUND);
             return -1;
         }
@@ -724,7 +724,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (userID < 0) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this de.tourenplaner.server",
+            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
                     "The given id is not an allowed number (positive or zero)", HttpResponseStatus.NOT_FOUND);
             return userID;
         }

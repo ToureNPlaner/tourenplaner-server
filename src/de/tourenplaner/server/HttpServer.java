@@ -17,7 +17,7 @@ import java.util.concurrent.Executors;
 /**
  * ToureNPlaner Event Based Server
  * 
- * This is the main class used to start the de.tourenplaner.server and construct utility objects
+ * This is the main class used to start the server and construct utility objects
  * like the GraphRep. and ConfigManager and ComputeCore
  * 
  * @author Niklas Schnelle
@@ -32,7 +32,7 @@ public class HttpServer {
 	public HttpServer(
             ConfigManager cm, Map<String, Object> serverInfo, ComputeCore comCore
                      ) {
-		// Configure the de.tourenplaner.server.
+		// Configure the server.
 
 		ServerBootstrap bootstrap = new ServerBootstrap(
 				new NioServerSocketChannelFactory( // Change to Oio* if you want

@@ -71,7 +71,7 @@ public class Authorizer extends RequestHandler {
      *
      * @param myReq HttpRequest
      * @return the UserDataset object of the user or null if auth failed
-     * @throws java.sql.SQLException Thrown if de.tourenplaner.database query fails
+     * @throws java.sql.SQLException Thrown if database query fails
      * @throws java.io.IOException Thrown if error message sending fails
      */
     public UserDataset auth(final HttpRequest myReq) throws SQLException, IOException {
@@ -105,7 +105,7 @@ public class Authorizer extends RequestHandler {
      *
      * @param myReq HttpRequest
      * @return the UserDataset object of the user or null if auth failed
-     * @throws java.sql.SQLException Thrown if de.tourenplaner.database query fails
+     * @throws java.sql.SQLException Thrown if database query fails
      */
     public UserDataset authNoResponse(final HttpRequest myReq) throws SQLException {
         String email, emailandpw, pw;

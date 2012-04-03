@@ -361,7 +361,7 @@ public class Responder {
         boolean storeFullResponse = ConfigManager.getInstance().getEntryBool("store-full-response", true);
 
         // if storeFullResponse is true and no smile is sent, the method will return the already existing resultStream
-        // if resultStream is a smile stream, we have to generate a new non smile stream to store it into the de.tourenplaner.database
+        // if resultStream is a smile stream, we have to generate a new non smile stream to store it into the database
         if (work.isAcceptsSmile() || !storeFullResponse) {
             // Closing a ByteArrayOutputStream has no effect (see javadoc), so there is no need to call close()
             resultStream = new ByteArrayOutputStream();
