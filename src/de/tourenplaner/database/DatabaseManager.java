@@ -64,7 +64,7 @@ public class DatabaseManager {
 
 
 	/**
-	 * Tries to insert a new request dataset into the de.tourenplaner.database. The inserted
+	 * Tries to insert a new request dataset into the database. The inserted
 	 * dataset will have the status pending and have 0 cost.<br />SQL
 	 * command: {@value SqlStatementConstants#strAddNewRequest}
 	 * 
@@ -75,7 +75,7 @@ public class DatabaseManager {
 	 * @param jsonRequest
 	 *            The request encoded as byte array
 	 * @return Returns the request id if the id could received
-	 *         from the de.tourenplaner.database and the insert was successful, else an
+	 *         from the database and the insert was successful, else an
 	 *         exception will be thrown. Request id should be > 0.
 	 * @throws SQLFeatureNotSupportedException
 	 *             Thrown if the id could not received or another function is
@@ -143,7 +143,7 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Tries to insert a new user dataset into the de.tourenplaner.database. <br />SQL command:
+	 * Tries to insert a new user dataset into the database. <br />SQL command:
 	 * {@value SqlStatementConstants#strAddNewUser}
 	 * 
 	 * @param email
@@ -167,7 +167,7 @@ public class DatabaseManager {
 	 * @param isAdmin
 	 *            True, if user is an admin, else false.
 	 * @return Returns the inserted user object only if the id could received
-	 *         from the de.tourenplaner.database and the insert was successful. If the insert
+	 *         from the database and the insert was successful. If the insert
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
 	 * @throws SQLFeatureNotSupportedException
@@ -185,7 +185,7 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Tries to insert a new user dataset into the de.tourenplaner.database, but request should
+	 * Tries to insert a new user dataset into the database, but request should
 	 * have legit admin authentication (will not be checked within this method).
 	 * New user will be verified. <br />SQL command: {@value SqlStatementConstants#strAddNewUser}
 	 * 
@@ -210,7 +210,7 @@ public class DatabaseManager {
 	 * @param isAdmin
 	 *            True, if user is an admin, else false.
 	 * @return Returns the inserted user object only if the id could received
-	 *         from the de.tourenplaner.database and the insert was successful. If the insert
+	 *         from the database and the insert was successful. If the insert
 	 *         was not successful because the email already existed, null will
 	 *         be returned.
 	 * @throws SQLFeatureNotSupportedException
@@ -332,7 +332,7 @@ public class DatabaseManager {
             generatedKeyResultSet.close();
 
             if (!hasKey) {
-                log.severe("Current de.tourenplaner.database doesn't support java.sql.Statement.getGeneratedKeys()");
+                log.severe("Current database doesn't support java.sql.Statement.getGeneratedKeys()");
                 user = this.getUser(email);
             }
         } catch (NullPointerException e) {
@@ -347,16 +347,16 @@ public class DatabaseManager {
 	/**
 	 * Updates the Requests table row with the id given through the parameter
 	 * (<b><code>request.id</code></b>). All values within the given object will
-	 * be written into the de.tourenplaner.database, so all old values within the row will be
+	 * be written into the database, so all old values within the row will be
 	 * overwritten. <b><code>request.id</code></b> has to be > 0 and must exists
-	 * within the de.tourenplaner.database table. <br />SQL command:
+	 * within the database table. <br />SQL command:
 	 * {@value SqlStatementConstants#strUpdateRequest}
 	 * 
 	 * @param request
-	 *            The request object to write into the de.tourenplaner.database.
+	 *            The request object to write into the database.
 	 * @throws SQLException
 	 *             Thrown if update fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int updateRequest(RequestDataset request) throws SQLException {
 
@@ -393,9 +393,9 @@ public class DatabaseManager {
 	/**
 	 * Updates the Requests table row with the id given through the parameter
 	 * (<b><code>requestID</code></b>). The given parameters will overwrite the
-	 * old values in the de.tourenplaner.database row. FinishedDate will be set to the current
+	 * old values in the database row. FinishedDate will be set to the current
 	 * timestamp. Status will be set to ok. <b><code>requestID</code></b> has to be > 0 and must exists
-	 * within the de.tourenplaner.database table. <br />SQL command:
+	 * within the database table. <br />SQL command:
 	 * {@value SqlStatementConstants#strUpdateRequestWithComputeResult}
 	 * 
 	 * @param requestID requestID
@@ -404,7 +404,7 @@ public class DatabaseManager {
 	 * @param cpuTime cpuTime
 	 * @throws SQLException
 	 *             Thrown if update fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int updateRequestWithComputeResult(int requestID,
 			byte[] jsonResponse, int cost, long cpuTime) throws SQLException {
@@ -443,17 +443,17 @@ public class DatabaseManager {
     /**
      * Updates the Requests table row with the id given through the parameter
      * <b><code>requestID</code></b>. The given parameter <b><code>jsonResponse</code></b>
-     * will overwrite the old values in the de.tourenplaner.database row. Cost and CPUTime will be set 0.
+     * will overwrite the old values in the database row. Cost and CPUTime will be set 0.
      * FinishedDate will be set to the current timestamp. Status will be set &quot;failed&quot;.
      * <b><code>requestID</code></b> has to be > 0 and must exists
-     * within the de.tourenplaner.database table. <br />SQL command:
+     * within the database table. <br />SQL command:
      * {@value SqlStatementConstants#strUpdateRequestWithComputeResult}
      *
      * @param requestID requestID
      * @param jsonResponse JSON response object with error message
      * @throws SQLException
      *             Thrown if update fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
      */
     public int updateRequestAsFailed(int requestID, byte[] jsonResponse) throws SQLException {
 
@@ -490,15 +490,15 @@ public class DatabaseManager {
     /**
 	 * Updates the Users table row with the id given through the parameter (<b>
 	 * <code>request.id</code></b>). All values within the given object will be
-	 * written into the de.tourenplaner.database, so all old values within the row will be
+	 * written into the database, so all old values within the row will be
 	 * overwritten. <b><code>user.userid</code></b> has to be > 0 and must exists
-	 * within the de.tourenplaner.database table. <br />SQL command: {@value SqlStatementConstants#strUpdateUser}
+	 * within the database table. <br />SQL command: {@value SqlStatementConstants#strUpdateUser}
 	 * 
 	 * @param user
-	 *            The user object to write into the de.tourenplaner.database.
+	 *            The user object to write into the database.
 	 * @throws SQLException
 	 *             Thrown if update fails.
-     * @return Number of de.tourenplaner.database rows changed (1 if successful, 0 if nothing has changed).
+     * @return Number of database rows changed (1 if successful, 0 if nothing has changed).
      *          If the email field of the user should be changed to another email which is already used
      *          by another user, then this method will return -1.
 	 */
@@ -545,13 +545,13 @@ public class DatabaseManager {
     /**
      * Changes the status of the user who has the given id to the status deleted. 
      * <b><code>userID</code></b> has to be >= 0 and must exists
-     * within the de.tourenplaner.database table. <br />SQL command: {@value SqlStatementConstants#strUpdateUserStatusToDeleted}
+     * within the database table. <br />SQL command: {@value SqlStatementConstants#strUpdateUserStatusToDeleted}
      *
      * @param userID
      *            The id of the user.
      * @throws SQLException
      *             Thrown if update fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
      */
     public int updateUserStatusToDeleted(int userID) throws SQLException {
 
@@ -583,7 +583,7 @@ public class DatabaseManager {
 	 *            Request id
 	 * @throws SQLException
 	 *             Thrown if delete fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteRequest(int id) throws SQLException {
 
@@ -614,7 +614,7 @@ public class DatabaseManager {
 	 *            User id of the user, whose requests should be deleted.
 	 * @throws SQLException
 	 *             Thrown if delete fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteRequestsOfUser(int userId) throws SQLException {
 
@@ -639,7 +639,7 @@ public class DatabaseManager {
 
 	/**
 	 * Deletes the Users table row with the given user id. Depending on the
-	 * de.tourenplaner.database configuration(for example strict mode) maybe the corresponding
+	 * database configuration(for example strict mode) maybe the corresponding
 	 * requests could be deleted too because of the FOREIGN KEY UserId within
 	 * the Requests table. </br>SQL command:
 	 * {@value SqlStatementConstants#strDeleteUserWithUserId}
@@ -648,7 +648,7 @@ public class DatabaseManager {
 	 *            User id
 	 * @throws SQLException
 	 *             Thrown if delete fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteUser(int userId) throws SQLException {
 
@@ -673,14 +673,14 @@ public class DatabaseManager {
 
 	/**
 	 * Deletes the Users table row with the given user email. Depending on the
-	 * de.tourenplaner.database configuration(for example strict mode) maybe the corresponding
+	 * database configuration(for example strict mode) maybe the corresponding
 	 * requests could be deleted too because of the FOREIGN KEY UserId within
 	 * the Requests table. </br>SQL command: {@value SqlStatementConstants#strDeleteUserWithEmail}
 	 * 
 	 * @param email The email of the user
 	 * @throws SQLException
 	 *             Thrown if delete fails.
-     * @return number of de.tourenplaner.database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (1 if successful, else 0)
 	 */
 	public int deleteUser(String email) throws SQLException {
 
@@ -710,7 +710,7 @@ public class DatabaseManager {
      * Gets a list with all requests within the Requests table with regard to
      * the limit and offset constraints. If no requests are found with the given
      * constraints or the table is empty, an empty list will be returned.
-     * The fields JSONRequest and JSONResponse will not get retrieved from de.tourenplaner.database.
+     * The fields JSONRequest and JSONResponse will not get retrieved from database.
      * </br>SQL command: {@value SqlStatementConstants#strGetAllRequestsNoJsonWithLimitOffset}
      *
      * @param limit
@@ -825,7 +825,7 @@ public class DatabaseManager {
      * @param id
      *            Request id
      * @return A JSONObject with a byte array and user id if the request with the request id exists.
-     *         The byte array can be null if the de.tourenplaner.database field is NULL.
+     *         The byte array can be null if the database field is NULL.
      *         The returned JSONObject itself is null if no entry is found for the given request id.
      * @throws SQLException
      *             Thrown if select fails.
@@ -872,7 +872,7 @@ public class DatabaseManager {
      * @param id
      *            Request id
      * @return A JSONObject with a byte array and user id if the request with the request id exists.
-     *         The byte array can be null if the de.tourenplaner.database field is NULL.
+     *         The byte array can be null if the database field is NULL.
      *         The returned JSONObject itself is null if no entry is found for the given request id.
      * @throws SQLException
      *             Thrown if select fails.
@@ -914,7 +914,7 @@ public class DatabaseManager {
      * given user id with regard to the limit and offset constraints. If no
      * requests are found with the given user id and given constraints or the
      * table is empty, an empty list will be returned.
-     * The fields JSONRequest and JSONResponse will not get retrieved from de.tourenplaner.database.
+     * The fields JSONRequest and JSONResponse will not get retrieved from database.
      * <br />SQL command:
      * {@value SqlStatementConstants#strGetRequestsNoJsonWithUserIdLimitOffset}
      *

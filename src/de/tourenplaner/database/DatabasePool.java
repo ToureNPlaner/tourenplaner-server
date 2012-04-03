@@ -22,7 +22,7 @@ public class DatabasePool {
      * so you can get from it pooled connections.
      *
      * @param url
-     *            A de.tourenplaner.database driver specific url with the form
+     *            A database driver specific url with the form
      *            <i>jdbc:subprotocol:subname</i> where <i>subname</i> is the server address with
      *            the database name (for example &quot;tourenplaner&quot;)
      *            and at the end some connection properties if needed
@@ -51,7 +51,7 @@ public class DatabasePool {
                 if (key instanceof String && value instanceof String) {
                     System.setProperty("c3p0." + key, (String) value);
                 } else {
-                    log.warning("The de.tourenplaner.config file has an error within the value of the key \"c3p0\". " +
+                    log.warning("The config file has an error within the value of the key \"c3p0\". " +
                             "The error is near the key " + key.toString());
                 }
             }

@@ -38,13 +38,13 @@ public class SqlStatement {
      * Creates a PreparedStatement with the given DataSource.
      * If the DataSource is created through a connection pool or similar,
      * the PreparedStatement might not be created more than one time per
-     * de.tourenplaner.database connection but instead retrieved from a PreparedStatement cache.
+     * database connection but instead retrieved from a PreparedStatement cache.
      * And do not forget to close the returned PreparedStatement with {@link #close(java.sql.PreparedStatement)},
      * this method will close the PreparedStatement and also close the connection.
      *
      * @param dataSource The data source, it must be not null
      * @return The prepared statement
-     * @throws SQLException Thrown if preparing fails through de.tourenplaner.database error
+     * @throws SQLException Thrown if preparing fails through database error
      */
     public PreparedStatement createPreparedStatement(DataSource dataSource) throws SQLException{
         return dataSource.getConnection().prepareStatement(sqlStatementString, generateKeysParameter);
@@ -52,7 +52,7 @@ public class SqlStatement {
 
 
     /**
-     * Closes the de.tourenplaner.database connection. Exceptions will be caught.
+     * Closes the database connection. Exceptions will be caught.
      * @param preparedStatement the PreparedStatement to close
      */
     public static void close(PreparedStatement preparedStatement) {
