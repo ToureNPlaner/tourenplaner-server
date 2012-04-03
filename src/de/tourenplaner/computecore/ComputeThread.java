@@ -87,18 +87,18 @@ public class ComputeThread extends Thread {
 				work = reqQueue.take();
 
                 // workIsPrivate should only be true if ComputeThread is private,
-                // else there is no de.tourenplaner.database connection available
+                // else there is no database connection available
                 boolean workIsPrivate = false;
                 if (this.isPrivate) {
                     workIsPrivate = work.isPrivate();
                 }
 
-                // check needed if availability of de.tourenplaner.algorithms changes
+                // check needed if availability of algorithms changes
 				alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
 				if (alg != null) {
 					try {
 
-                        // if de.tourenplaner.server is not private, work.getRequestID() should return -1
+                        // if server is not private, work.getRequestID() should return -1
                         requestID = work.getRequestID();
 
                         cpuTime = startTimeMeasurement(workIsPrivate);
@@ -117,7 +117,7 @@ public class ComputeThread extends Thread {
                             log.log(Level.WARNING, "There was an IOException", e);
                             // TODO define error and write to protocol specification
                             String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
-                                    "The de.tourenplaner.server could not send and not store the compute result", "",
+                                    "The server could not send and not store the compute result", "",
                                     HttpResponseStatus.INTERNAL_SERVER_ERROR);
 
                             writeIntoDatabase(requestID, errorMessage, "IOException", workIsPrivate);

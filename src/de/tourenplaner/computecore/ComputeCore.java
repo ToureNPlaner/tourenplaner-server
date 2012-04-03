@@ -43,7 +43,7 @@ public class ComputeCore {
 	 * Starts the ComputeThreads
 	 * 
 	 * @throws SQLException
-	 *             Thrown only in private mode, and only if de.tourenplaner.database connection
+	 *             Thrown only in private mode, and only if database connection
 	 *             could not be established.
 	 * 
 	 */
