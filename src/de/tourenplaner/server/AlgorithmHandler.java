@@ -214,7 +214,7 @@ public class AlgorithmHandler extends RequestHandler {
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fullfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
+                    String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fulfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate && !algFac.isHidden()){
                         // Write request with status failed into database, failure cause is busy server
