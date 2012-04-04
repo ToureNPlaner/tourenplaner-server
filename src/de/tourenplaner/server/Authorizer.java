@@ -78,18 +78,16 @@ public class Authorizer extends RequestHandler {
         UserDataset user = authNoResponse(myReq);
 
         if (user == null) {
-            responder.writeErrorMessage("EAUTH", "Wrong username or password", null, HttpResponseStatus.UNAUTHORIZED);
+            responder.writeErrorMessage(ErrorId.EAUTH);
             return null;
         }
 
         if (user.status != UserStatusEnum.verified) {
             if (user.status == UserStatusEnum.needs_verification) {
-                responder.writeErrorMessage("ENOTVERIFIED", "User account is not verified",
-                        null, HttpResponseStatus.FORBIDDEN);
+                responder.writeErrorMessage(ErrorId.ENOTVERIFIED);
             } else {
                 // for example if user is marked as deleted
-                responder.writeErrorMessage("EAUTH", "Wrong username or password", null,
-                        HttpResponseStatus.UNAUTHORIZED);
+                responder.writeErrorMessage(ErrorId.EAUTH);
             }
             return null;
         }

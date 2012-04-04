@@ -255,7 +255,7 @@ public class Responder {
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if writing json onto the output fails
      */
-    public void writeErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
+    private void writeErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
             throws IOException
     {
         log.info("Writing Error Message: " + message + " --- " + details);
@@ -301,6 +301,31 @@ public class Responder {
 
     /**
      * Sends an error to the client, the connection will be closed afterwards
+     *
+     * @param errorId an enum value of ErrorId
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if writing json onto the output fails
+     */
+    public void writeErrorMessage(ErrorId errorId) throws IOException {
+        writeErrorMessage(errorId.errorId, errorId.message, "", errorId.status);
+    }
+
+    /**
+     * Sends an error to the client, the connection will be closed afterwards
+     *
+     * @param errorId an enum value of ErrorId
+     * @param details more detailed error information
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if writing json onto the output fails
+     */
+    public void writeErrorMessage(ErrorId errorId, String details) throws IOException {
+        writeErrorMessage(errorId.errorId, errorId.message, details, errorId.status);
+    }
+
+
+
+    /**
+     * Sends an error to the client, the connection will be closed afterwards <br />
      * A String representing the error response will be returned
      *
      * @param errorId error id (see protocol specification), for example ENOTADMIN
@@ -311,13 +336,44 @@ public class Responder {
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if writing json onto the output fails
      */
-    public String writeAndReturnErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
+    private String writeAndReturnErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
             throws IOException
     {
         this.writeErrorMessage(errorId, message, details, status);
         return  "{\"errorid\":\"" + errorId +
                 "\",\"message\":\"" + message +
                 "\",\"details\":\"" + details + "\"}";
+    }
+
+
+    /**
+     * Sends an error to the client, the connection will be closed afterwards <br />
+     * A String representing the error response will be returned
+     *
+     * @param errorId an enum value of ErrorId
+     * @return A String representing the error response
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if writing json onto the output fails
+     */
+    public String writeAndReturnErrorMessage(ErrorId errorId) throws IOException {
+        return writeAndReturnErrorMessage(errorId.errorId, errorId.message, "", errorId.status);
+    }
+
+    /**
+     * Sends an error to the client, the connection will be closed afterwards <br />
+     * A String representing the error response will be returned <br /> <br />
+     *
+     * Use this method, if you want to send an error message whose text you
+     * knows not until runtime.
+     *
+     * @param errorId an enum value of ErrorId
+     * @param message corresponding error message
+     * @return A String representing the error response
+     * @throws JsonGenerationException Thrown if generating json fails
+     * @throws IOException Thrown if writing json onto the output fails
+     */
+    public String writeAndReturnSpecifiedErrorMessage(ErrorId errorId, String message) throws IOException {
+        return writeAndReturnErrorMessage(errorId.errorId, message, "", errorId.status);
     }
 
 

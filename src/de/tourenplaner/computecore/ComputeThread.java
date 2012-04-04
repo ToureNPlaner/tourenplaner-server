@@ -7,6 +7,7 @@ import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.database.DatabaseManager;
+import de.tourenplaner.server.ErrorId;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.ByteArrayOutputStream;
@@ -116,9 +117,8 @@ public class ComputeThread extends Thread {
 						} catch (IOException e) {
                             log.log(Level.WARNING, "There was an IOException", e);
                             // TODO define error and write to protocol specification
-                            String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
-                                    "The server could not send and not store the compute result", "",
-                                    HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                            String errorMessage = work.getResponder().writeAndReturnSpecifiedErrorMessage(
+                                    ErrorId.ECOMPUTE, "The server could not send and not store the compute result");
 
                             writeIntoDatabase(requestID, errorMessage, "IOException", workIsPrivate);
 
@@ -140,17 +140,16 @@ public class ComputeThread extends Thread {
 					} catch (ComputeException e) {
 						log.log(Level.WARNING, "There was a ComputeException", e);
                         //TODO maybe wrong response status (is algorithm responsible for exception or bad user parameter input?)
-                        String errorMessage = work.getResponder().writeAndReturnErrorMessage("ECOMPUTE",
-								e.getMessage(), "", HttpResponseStatus.INTERNAL_SERVER_ERROR);
+                        String errorMessage = work.getResponder().writeAndReturnSpecifiedErrorMessage(
+                                ErrorId.ECOMPUTE, e.getMessage());
 
                         writeIntoDatabase(requestID, errorMessage, "ComputeException", workIsPrivate);
 					}
 				} else {
 					log.warning("Unsupported algorithm " + work.getAlgorithmURLSuffix() + " requested");
-					String errorMessage = work.getResponder().writeAndReturnErrorMessage("EUNKNOWNALG",
-							"An unknown algorithm was requested", null, HttpResponseStatus.NOT_FOUND);
+					String errorMessage = work.getResponder().writeAndReturnErrorMessage(ErrorId.EUNKNOWNALG);
 
-                    writeIntoDatabase(requestID, errorMessage, "EUNKNOWNALG", workIsPrivate);
+                    writeIntoDatabase(requestID, errorMessage, "UNKNOWNALG", workIsPrivate);
 				}
 
 			} catch (InterruptedException e) {

@@ -61,14 +61,12 @@ public class PrivateHandler extends RequestHandler {
                 objmap = mapper.readValue(new ChannelBufferInputStream(content), new TypeReference<Map<String, Object>>() {
                 });
             } catch (JsonParseException e) {
-                responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", e.getMessage(),
-                        HttpResponseStatus.BAD_REQUEST);
+                responder.writeErrorMessage(ErrorId.EBADJSON, e.getMessage());
                 objmap = null;
             }
 
         } else {
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", "Content is empty",
-                    HttpResponseStatus.BAD_REQUEST);
+            responder.writeErrorMessage(ErrorId.EBADJSON, "Content is empty");
         }
 
         return objmap;
@@ -106,8 +104,8 @@ public class PrivateHandler extends RequestHandler {
             }
 
             if (!authenticatedUser.admin) {
-                responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
-                        "A logged in user has to be admin to register users.", HttpResponseStatus.FORBIDDEN);
+                responder.writeErrorMessage(ErrorId.ENOTADMIN,
+                        "A logged in user has to be admin to register users.");
                 return;
             }
         }
@@ -125,9 +123,8 @@ public class PrivateHandler extends RequestHandler {
         if ( !(objmap.get("email") instanceof String) || !(objmap.get("password") instanceof String)
                 || !(objmap.get("firstname") instanceof String) || !(objmap.get("lastname") instanceof String)
                 || !(objmap.get("address") instanceof String) ) {
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
-                    HttpResponseStatus.BAD_REQUEST);
+            responder.writeErrorMessage(ErrorId.EBADJSON, 
+                    "JSON user object was not correct (needs email, password, firstname, lastname, address)");
             return;
         }
 
@@ -138,9 +135,8 @@ public class PrivateHandler extends RequestHandler {
         final String address = (String) objmap.get("address");
 
         if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)",
-                    HttpResponseStatus.BAD_REQUEST);
+            responder.writeErrorMessage(ErrorId.EBADJSON, 
+                    "JSON user object was not correct (needs email, password, firstname, lastname, address)");
             return;
         }
 
@@ -163,9 +159,8 @@ public class PrivateHandler extends RequestHandler {
                 // if (objmap.get("admin") is null, then "instanceof Boolean" would be always false
                 // so following check makes only sense if objmap.get("admin") != null
                 if ( !(objmap.get("admin") instanceof Boolean) ) {
-                    responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                            "JSON user object was not correct (\"admin\" should be boolean)",
-                            HttpResponseStatus.BAD_REQUEST);
+                    responder.writeErrorMessage(ErrorId.EBADJSON, 
+                            "JSON user object was not correct (\"admin\" should be boolean)");
                     return;
                 }
                 adminFlag = (Boolean) objmap.get("admin");
@@ -174,8 +169,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if ( newUser == null) {
-            responder.writeErrorMessage("EREGISTERED", "This email is already registered", null,
-                    HttpResponseStatus.FORBIDDEN);
+            responder.writeErrorMessage(ErrorId.EREGISTERED);
             return;
         }
 
@@ -238,8 +232,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (selectedUser == null) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
             return;
         }
 
@@ -295,8 +288,7 @@ public class PrivateHandler extends RequestHandler {
             selectedUser = dbm.getUser(userID);
 
             if (selectedUser == null) {
-                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
                 return;
             }
         } else {
@@ -335,9 +327,8 @@ public class PrivateHandler extends RequestHandler {
                 try {
                     selectedUser.status = UserStatusEnum.valueOf(status);
                 } catch (IllegalArgumentException e) {
-                    responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON",
-                            "JSON user object was not correct (\"status\" was not a valid value)",
-                            HttpResponseStatus.BAD_REQUEST);
+                    responder.writeErrorMessage(ErrorId.EBADJSON,
+                            "JSON user object was not correct (\"status\" was not a valid value)");
                     return;
                 }
 
@@ -350,8 +341,7 @@ public class PrivateHandler extends RequestHandler {
 
         int rowsChanged = dbm.updateUser(selectedUser);
         if (rowsChanged == -1) {
-            responder.writeErrorMessage("EREGISTERED", "This email is already registered", null,
-                    HttpResponseStatus.FORBIDDEN);
+            responder.writeErrorMessage(ErrorId.EREGISTERED);
             return;
         }
         responder.writeJSON(selectedUser, HttpResponseStatus.OK);
@@ -390,20 +380,17 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonRequest(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The id is not in the database");
                 return;
             }
         } else {
-            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
-                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "You must send an id parameter");
             return;
         }
 
         if (user.userid != jsonObject.getUserID() && !user.admin) {
-            responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
-                    "You cannot view the json object of another user because you are not an admin",
-                    HttpResponseStatus.FORBIDDEN);
+            responder.writeErrorMessage(ErrorId.ENOTADMIN, 
+                    "You cannot view the json object of another user because you are not an admin");
             return;
         }
 
@@ -444,20 +431,17 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonResponse(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The id is not in the database");
                 return;
             }
         } else {
-            responder.writeErrorMessage("ENOREQUESTID", "The request request id is unknown to this server",
-                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "You must send an id parameter");
             return;
         }
 
         if (user.userid != jsonObject.getUserID() && !user.admin) {
-            responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
-                    "You cannot view the json object of another user because you are not an admin",
-                    HttpResponseStatus.FORBIDDEN);
+            responder.writeErrorMessage(ErrorId.ENOTADMIN,
+                    "You cannot view the json object of another user because you are not an admin");
             return;
         }
 
@@ -488,7 +472,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
 
-        int limit = extractNaturalIntParameter(parameters, "limit");
+        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -496,7 +480,7 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int offset = extractNaturalIntParameter(parameters, "offset");
+        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -566,12 +550,11 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (!user.admin) {
-            responder.writeErrorMessage("ENOTADMIN", "You are not an admin", "You must be admin to list users",
-                    HttpResponseStatus.FORBIDDEN);
+            responder.writeErrorMessage(ErrorId.ENOTADMIN, "You must be admin to list users");
             return;
         }
 
-        int limit = extractNaturalIntParameter(parameters, "limit");
+        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -579,7 +562,7 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int offset = extractNaturalIntParameter(parameters, "offset");
+        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -628,16 +611,14 @@ public class PrivateHandler extends RequestHandler {
                 return;
             }
         } else {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "You must send an id parameter", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOUSERID, "You must send an id parameter");
             return;
         }
 
         // the user with id = 1 should always be verified, so no status changing
         if (userID != 1) {
             if (dbm.updateUserStatusToDeleted(userID) != 1) {
-                responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                        "The id is not in the database", HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
                 return;
             }
         }
@@ -659,8 +640,7 @@ public class PrivateHandler extends RequestHandler {
     private int parseRequestIdParameter(String parameterValue) throws IOException {
 
         if (parameterValue == null) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                    "The given id is null", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The given id is null");
             return -1;
         }
 
@@ -673,8 +653,8 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (requestID < 0) {
-            responder.writeErrorMessage("ENOREQUESTID", "The given request id is unknown to this server",
-                    "The given id is not an allowed number (positive or zero)", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOREQUESTID,
+                    "The given id is not an allowed number (positive or zero)");
             return requestID;
         }
 
@@ -700,14 +680,13 @@ public class PrivateHandler extends RequestHandler {
                                            boolean valueAllIsAllowed) throws IOException {
 
         if (!authenticatedUser.admin) {
-            responder.writeErrorMessage("ENOTADMIN", "You are not an admin",
-                    "You must be admin if you want to use the id parameter", HttpResponseStatus.FORBIDDEN);
+            responder.writeErrorMessage(ErrorId.ENOTADMIN,
+                    "You must be admin if you want to use the id parameter");
             return -1;
         }
 
         if (parameterValue == null) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "The given id is null", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOUSERID, "The given id is null");
             return -1;
         }
 
@@ -724,8 +703,8 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (userID < 0) {
-            responder.writeErrorMessage("ENOUSERID", "The given user id is unknown to this server",
-                    "The given id is not an allowed number (positive or zero)", HttpResponseStatus.NOT_FOUND);
+            responder.writeErrorMessage(ErrorId.ENOUSERID,
+                    "The given id is not an allowed number (positive or zero)");
             return userID;
         }
 
@@ -738,15 +717,16 @@ public class PrivateHandler extends RequestHandler {
      * and will then response to request with error message.
      * @param parameters map with url parameters from client
      * @param name the name of the parameter
+     * @param errorId the corresponding ErrorId to the parameter
      * @return Returns the parsed number or -1 if parameter is invalid (missing or not a natural number)
      * @throws IOException Thrown if error message sending fails
      */
-    private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name) throws IOException {
+    private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name, ErrorId errorId)
+            throws IOException {
         int param = -1;
 
         if (!parameters.containsKey(name)) {
-            responder.writeErrorMessage('E' + name.toUpperCase(), "The given " + name + " is invalid",
-                    "You must send a " + name + " parameter", HttpResponseStatus.BAD_REQUEST);
+            responder.writeErrorMessage(errorId, "You must send a " + name + " parameter");
             return -1;
         }
 
@@ -759,8 +739,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (param < 0) {
-            responder.writeErrorMessage('E' + name.toUpperCase(), "The given " + name + " is invalid",
-                    "You must send a " + name + " parameter", HttpResponseStatus.BAD_REQUEST);
+            responder.writeErrorMessage(errorId, "You must send a " + name + " parameter");
 
             return -1;
         }

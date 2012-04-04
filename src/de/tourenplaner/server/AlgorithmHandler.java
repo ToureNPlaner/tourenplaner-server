@@ -147,8 +147,7 @@ public class AlgorithmHandler extends RequestHandler {
             }
 
         } else {
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", "Content is empty",
-                    HttpResponseStatus.BAD_REQUEST);
+            responder.writeErrorMessage(ErrorId.EBADJSON, "Content is empty");
             return null;
         }
 
@@ -182,8 +181,7 @@ public class AlgorithmHandler extends RequestHandler {
             AlgorithmFactory algFac = algReg.getAlgByURLSuffix(algName);
             if (algFac == null) {
                 log.warning("Unsupported algorithm " + algName + " requested");
-                responder.writeErrorMessage("EUNKNOWNALG", "An unknown algorithm was requested", null,
-                        HttpResponseStatus.NOT_FOUND);
+                responder.writeErrorMessage(ErrorId.EUNKNOWNALG);
                 return;
             }
             // Only now read the request
@@ -214,7 +212,7 @@ public class AlgorithmHandler extends RequestHandler {
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    String errorMessage = responder.writeAndReturnErrorMessage("EBUSY", "This server is currently too busy to fulfill the request", null, HttpResponseStatus.SERVICE_UNAVAILABLE);
+                    String errorMessage = responder.writeAndReturnErrorMessage(ErrorId.EBUSY);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate && !algFac.isHidden()){
                         // Write request with status failed into database, failure cause is busy server
@@ -231,7 +229,7 @@ public class AlgorithmHandler extends RequestHandler {
                 }
             }
         } catch (JsonParseException e) {
-            responder.writeErrorMessage("EBADJSON", "Could not parse supplied JSON", e.getMessage(), HttpResponseStatus.UNAUTHORIZED);
+            responder.writeErrorMessage(ErrorId.EBADJSON, e.getMessage());
         }
 
     }
