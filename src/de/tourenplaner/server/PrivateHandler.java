@@ -66,7 +66,7 @@ public class PrivateHandler extends RequestHandler {
             }
 
         } else {
-            responder.writeErrorMessage(ErrorId.EBADJSON, "Content is empty");
+            responder.writeErrorMessage(ErrorId.EBADJSON_NOCONTENT);
         }
 
         return objmap;
@@ -123,8 +123,7 @@ public class PrivateHandler extends RequestHandler {
         if ( !(objmap.get("email") instanceof String) || !(objmap.get("password") instanceof String)
                 || !(objmap.get("firstname") instanceof String) || !(objmap.get("lastname") instanceof String)
                 || !(objmap.get("address") instanceof String) ) {
-            responder.writeErrorMessage(ErrorId.EBADJSON, 
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)");
+            responder.writeErrorMessage(ErrorId.EBADJSON_INCORRECT_USER_OBJ);
             return;
         }
 
@@ -135,8 +134,7 @@ public class PrivateHandler extends RequestHandler {
         final String address = (String) objmap.get("address");
 
         if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
-            responder.writeErrorMessage(ErrorId.EBADJSON, 
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)");
+            responder.writeErrorMessage(ErrorId.EBADJSON_INCORRECT_USER_OBJ);
             return;
         }
 
@@ -159,8 +157,7 @@ public class PrivateHandler extends RequestHandler {
                 // if (objmap.get("admin") is null, then "instanceof Boolean" would be always false
                 // so following check makes only sense if objmap.get("admin") != null
                 if ( !(objmap.get("admin") instanceof Boolean) ) {
-                    responder.writeErrorMessage(ErrorId.EBADJSON, 
-                            "JSON user object was not correct (\"admin\" should be boolean)");
+                    responder.writeErrorMessage(ErrorId.EBADJSON_INCORRECT_USER_OBJ_ADMIN);
                     return;
                 }
                 adminFlag = (Boolean) objmap.get("admin");
@@ -327,8 +324,7 @@ public class PrivateHandler extends RequestHandler {
                 try {
                     selectedUser.status = UserStatusEnum.valueOf(status);
                 } catch (IllegalArgumentException e) {
-                    responder.writeErrorMessage(ErrorId.EBADJSON,
-                            "JSON user object was not correct (\"status\" was not a valid value)");
+                    responder.writeErrorMessage(ErrorId.EBADJSON_INCORRECT_USER_OBJ_STATUS);
                     return;
                 }
 
@@ -472,7 +468,8 @@ public class PrivateHandler extends RequestHandler {
         }
 
 
-        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT);
+        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT_MISSING, 
+                ErrorId.ELIMIT_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -480,7 +477,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET);
+        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET_MISSING, 
+                ErrorId.EOFFSET_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -554,7 +552,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT);
+        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT_MISSING,
+                ErrorId.ELIMIT_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -562,7 +561,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET);
+        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET_MISSING, 
+                ErrorId.EOFFSET_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -717,29 +717,29 @@ public class PrivateHandler extends RequestHandler {
      * and will then response to request with error message.
      * @param parameters map with url parameters from client
      * @param name the name of the parameter
-     * @param errorId the corresponding ErrorId to the parameter
+     * @param eMissing the corresponding ErrorId to the parameter if parameter is missing
+     * @param eNotNaturalNumber the corresponding ErrorId to the parameter if parameter is not a natural number
      * @return Returns the parsed number or -1 if parameter is invalid (missing or not a natural number)
      * @throws IOException Thrown if error message sending fails
      */
-    private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name, ErrorId errorId)
+    private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name, 
+                                           ErrorId eMissing, ErrorId eNotNaturalNumber)
             throws IOException {
-        int param = -1;
+        int param;
 
-        if (!parameters.containsKey(name)) {
-            responder.writeErrorMessage(errorId, "You must send a " + name + " parameter");
+        if (!parameters.containsKey(name) || parameters.get(name).get(0) == null) {
+            responder.writeErrorMessage(eMissing);
             return -1;
         }
 
-        if  (parameters.get(name).get(0) != null) {
-            try {
-                param = Integer.parseInt(parameters.get(name).get(0));
-            } catch (NumberFormatException e) {
-                param = -1;
-            }
+        try {
+            param = Integer.parseInt(parameters.get(name).get(0));
+        } catch (NumberFormatException e) {
+            param = -1;
         }
 
         if (param < 0) {
-            responder.writeErrorMessage(errorId, "You must send a " + name + " parameter");
+            responder.writeErrorMessage(eNotNaturalNumber);
 
             return -1;
         }

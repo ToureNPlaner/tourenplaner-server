@@ -307,7 +307,7 @@ public class Responder {
      * @throws IOException Thrown if writing json onto the output fails
      */
     public void writeErrorMessage(ErrorId errorId) throws IOException {
-        writeErrorMessage(errorId.errorId, errorId.message, "", errorId.status);
+        writeErrorMessage(errorId.errorId, errorId.message, errorId.detail, errorId.status);
     }
 
     /**
@@ -356,7 +356,7 @@ public class Responder {
      * @throws IOException Thrown if writing json onto the output fails
      */
     public String writeAndReturnErrorMessage(ErrorId errorId) throws IOException {
-        return writeAndReturnErrorMessage(errorId.errorId, errorId.message, "", errorId.status);
+        return writeAndReturnErrorMessage(errorId.errorId, errorId.message, errorId.detail, errorId.status);
     }
 
     /**
@@ -373,7 +373,7 @@ public class Responder {
      * @throws IOException Thrown if writing json onto the output fails
      */
     public String writeAndReturnSpecifiedErrorMessage(ErrorId errorId, String message) throws IOException {
-        return writeAndReturnErrorMessage(errorId.errorId, message, "", errorId.status);
+        return writeAndReturnErrorMessage(errorId.errorId, message, errorId.detail, errorId.status);
     }
 
 

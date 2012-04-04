@@ -117,8 +117,8 @@ public class ComputeThread extends Thread {
 						} catch (IOException e) {
                             log.log(Level.WARNING, "There was an IOException", e);
                             // TODO define error and write to protocol specification
-                            String errorMessage = work.getResponder().writeAndReturnSpecifiedErrorMessage(
-                                    ErrorId.ECOMPUTE, "The server could not send and not store the compute result");
+                            String errorMessage = work.getResponder().writeAndReturnErrorMessage(
+                                    ErrorId.ECOMPUTE_RESULT_NOT_SENT_OR_STORED);
 
                             writeIntoDatabase(requestID, errorMessage, "IOException", workIsPrivate);
 

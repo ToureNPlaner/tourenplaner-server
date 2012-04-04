@@ -147,7 +147,7 @@ public class AlgorithmHandler extends RequestHandler {
             }
 
         } else {
-            responder.writeErrorMessage(ErrorId.EBADJSON, "Content is empty");
+            responder.writeErrorMessage(ErrorId.EBADJSON_NOCONTENT);
             return null;
         }
 
