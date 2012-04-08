@@ -141,6 +141,7 @@ public class ShortestPath extends GraphAlgorithm {
             }
             // Backtrack to get the actual path
             backtrack(prevEdges, resultWays.get(pointIndex), srcId, trgtId);
+            resultWays.get(pointIndex).setTravelTime(dists[trgtId] * graph.travelTimeConstant);
             distance = resultWays.get(pointIndex).getDistance();
             time = resultWays.get(pointIndex).getTravelTime();
             long backtracktime = System.nanoTime();
@@ -241,7 +242,6 @@ public class ShortestPath extends GraphAlgorithm {
         int routeElements = 1;
 
         int length = 0;
-        double time = 0;
 
         while (currNode != srcId) {
             routeElements++;
@@ -257,7 +257,6 @@ public class ShortestPath extends GraphAlgorithm {
         while (routeElements > 1) {
             prevEdge = prevEdges[currNode];
             length += graph.getEuclidianDist(prevEdge);
-            time += graph.getDist(prevEdge)*graph.travelTimeConstant;
             routeElements--;
 
             resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
@@ -268,8 +267,6 @@ public class ShortestPath extends GraphAlgorithm {
         // add source node to the result.
         resultWay.setPointLat(0, graph.getNodeLat(currNode));
         resultWay.setPointLon(0, graph.getNodeLon(currNode));
-
-        resultWay.setTravelTime(time);
         resultWay.setDistance(length);
         return;
     }
