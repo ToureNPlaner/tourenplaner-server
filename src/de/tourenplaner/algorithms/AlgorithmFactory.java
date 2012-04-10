@@ -54,7 +54,7 @@ public abstract class AlgorithmFactory {
     /**
      * Gets the Constraints not bound to any Point
      *
-     * @return
+     * @return A List of Maps with the constraints or null
      */
     public abstract List<Map<String, Object>> getConstraints();
 
@@ -63,7 +63,7 @@ public abstract class AlgorithmFactory {
      * this includes whether the algorithm has sourceIsTarget
      * and the minimal number of points
      *
-     * @return
+     * @return A map with the details or null
      */
     public abstract Map<String, Object> getDetails();
 }

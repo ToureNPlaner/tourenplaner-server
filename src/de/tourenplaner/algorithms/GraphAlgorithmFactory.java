@@ -27,7 +27,7 @@ public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
 	/**
 	 * Gets the List of PointConstraints in a jsonserializable Map format
 	 * 
-	 * @return
+	 * @return A list of maps of pointconstraints or null
 	 */
 	public abstract List<Map<String, Object>> getPointConstraints();
 }
