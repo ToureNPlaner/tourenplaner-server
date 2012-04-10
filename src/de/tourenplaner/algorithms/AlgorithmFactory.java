@@ -3,6 +3,9 @@
  */
 package de.tourenplaner.algorithms;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -47,4 +50,20 @@ public abstract class AlgorithmFactory {
 	 * 
 	 */
 	public abstract boolean isHidden();
+
+    /**
+     * Gets the Constraints not bound to any Point
+     *
+     * @return
+     */
+    public abstract List<Map<String, Object>> getConstraints();
+
+    /**
+     * Gets Details for the the algorithm
+     * this includes whether the algorithm has sourceIsTarget
+     * and the minimal number of points
+     *
+     * @return
+     */
+    public abstract Map<String, Object> getDetails();
 }

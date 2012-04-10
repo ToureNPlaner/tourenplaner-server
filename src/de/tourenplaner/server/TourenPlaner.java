@@ -55,15 +55,16 @@ public class TourenPlaner {
             algInfo.put("version", alg.getVersion());
             algInfo.put("name", alg.getAlgName());
             algInfo.put("urlsuffix", alg.getURLSuffix());
+            if (alg instanceof AlgorithmFactory) {
+                algInfo.put("constraints", alg.getConstraints());
+                algInfo.put("details", alg.getDetails());
+            } // instance of GraphAlgorithmFactory implies also instance of AlgorithmFactory
             if (alg instanceof GraphAlgorithmFactory) {
                 algInfo.put("pointconstraints", ((GraphAlgorithmFactory) alg).getPointConstraints());
-                algInfo.put("constraints", ((GraphAlgorithmFactory) alg).getConstraints());
-                algInfo.put("details", ((GraphAlgorithmFactory) alg).getDetails());
             }
             algList.add(algInfo);
         }
         info.put("algorithms", algList);
-
         return info;
     }
 
