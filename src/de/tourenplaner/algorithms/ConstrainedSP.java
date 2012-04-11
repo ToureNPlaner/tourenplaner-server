@@ -154,7 +154,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         }
         log.finer("path goes over " + altitudeDiff + " meters of altitude Difference");
         backtrack(prevEdges, resultWay, srcId, trgtId);
-
+        resultWay.setTravelTime(dists[trgtId] * graph.travelTimeConstant);
 
         ds.returnDistArray(false);
         ds.returnHeap();
@@ -175,7 +175,6 @@ public class ConstrainedSP extends GraphAlgorithm {
     private void backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
         int currNode = trgtId;
         int routeElements = 1;
-        double time = 0;
         while (currNode != srcId) {
             routeElements++;
             currNode = graph.getSource(prevEdges[currNode]);
@@ -195,7 +194,6 @@ public class ConstrainedSP extends GraphAlgorithm {
         while (routeElements > 1) {
             prevEdge = prevEdges[currNode];
             distance += graph.getEuclidianDist(prevEdge);
-            time += graph.getDist(prevEdge)*graph.travelTimeConstant;
             routeElements--;
             resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
             resultWay.setPointLon(routeElements, graph.getNodeLon(currNode));
@@ -206,7 +204,6 @@ public class ConstrainedSP extends GraphAlgorithm {
         resultWay.setPointLon(0, graph.getNodeLon(currNode));
 
         resultWay.setDistance(distance);
-        resultWay.setTravelTime(time);
         return;
     }
 

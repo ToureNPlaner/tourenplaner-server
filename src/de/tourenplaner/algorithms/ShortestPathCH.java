@@ -80,6 +80,7 @@ public class ShortestPathCH extends GraphAlgorithm {
         misc.put("distance", distance);
         misc.put("time", totalTime);
 
+
         req.setMisc(misc);
     }
 
@@ -245,7 +246,6 @@ public class ShortestPathCH extends GraphAlgorithm {
         int nodeLon;
         int edgeId;
         int length = 0;
-        double time = 0;
         // backtracking and shortcut unpacking use dequeue as stack
         IntArrayDeque deque = ds.borrowDeque();
 
@@ -280,7 +280,6 @@ public class ShortestPathCH extends GraphAlgorithm {
                 nodeLon = graph.getNodeLon(currNode);
                 resultWay.addPoint(nodeLat, nodeLon);
                 length += graph.getEuclidianDist(edgeId);
-                time += ((double)graph.getDist(edgeId))*graph.travelTimeConstant;
             }
         }
         // Add destination node
@@ -289,7 +288,6 @@ public class ShortestPathCH extends GraphAlgorithm {
         resultWay.addPoint(nodeLat, nodeLon);
 
         resultWay.setDistance(length);
-        resultWay.setTravelTime(time);
         ds.returnDeque();
         return;
     }
@@ -356,6 +354,7 @@ public class ShortestPathCH extends GraphAlgorithm {
             }
             // Backtrack to get the actual path
             backtrack(prevEdges, resultWays.get(pointIndex), srcId, destId);
+            resultWays.get(pointIndex).setTravelTime(dists[destId] * graph.travelTimeConstant);
             distance = resultWays.get(pointIndex).getDistance();
             totalDistance += distance;
 
@@ -369,6 +368,8 @@ public class ShortestPathCH extends GraphAlgorithm {
 
             log.finer("found sp with dist = " + resultWays.get(pointIndex).getDistance() / 1000.0 + " km (direct distance: " + directDistance / 1000.0 + " dist[destid] = " + dists[destId] + "\n" +
                     "BFS: " + (bfsdonetime - starttime) / 1000000.0 + " ms with " + bfsNodes + " nodes and " + bfsEdges + " edges\n" + "Dijkstra: " + (dijkstratime - bfsdonetime) / 1000000.0 + " ms\n" + "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms");
+
+
 
             // Return/Reset the data structures
             ds.returnDistArray(false);
