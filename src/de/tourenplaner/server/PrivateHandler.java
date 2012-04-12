@@ -104,8 +104,7 @@ public class PrivateHandler extends RequestHandler {
             }
 
             if (!authenticatedUser.admin) {
-                responder.writeErrorMessage(ErrorId.ENOTADMIN,
-                        "A logged in user has to be admin to register users.");
+                responder.writeErrorMessage(ErrorId.ENOTADMIN_REGISTER_USER);
                 return;
             }
         }
@@ -229,7 +228,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (selectedUser == null) {
-            responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
+            responder.writeErrorMessage(ErrorId.ENOUSERID_NOT_IN_DB);
             return;
         }
 
@@ -285,7 +284,7 @@ public class PrivateHandler extends RequestHandler {
             selectedUser = dbm.getUser(userID);
 
             if (selectedUser == null) {
-                responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorId.ENOUSERID_NOT_IN_DB);
                 return;
             }
         } else {
@@ -376,17 +375,16 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonRequest(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorId.ENOREQUESTID_NOT_IN_DB);
                 return;
             }
         } else {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "You must send an id parameter");
+            responder.writeErrorMessage(ErrorId.ENOREQUESTID_MISSING);
             return;
         }
 
         if (user.userid != jsonObject.getUserID() && !user.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN, 
-                    "You cannot view the json object of another user because you are not an admin");
+            responder.writeErrorMessage(ErrorId.ENOTADMIN_OTHER_USER_REQUEST);
             return;
         }
 
@@ -427,17 +425,16 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonResponse(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorId.ENOREQUESTID_NOT_IN_DB);
                 return;
             }
         } else {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "You must send an id parameter");
+            responder.writeErrorMessage(ErrorId.ENOREQUESTID_MISSING);
             return;
         }
 
         if (user.userid != jsonObject.getUserID() && !user.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN,
-                    "You cannot view the json object of another user because you are not an admin");
+            responder.writeErrorMessage(ErrorId.ENOTADMIN_OTHER_USER_REQUEST);
             return;
         }
 
@@ -548,7 +545,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (!user.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN, "You must be admin to list users");
+            responder.writeErrorMessage(ErrorId.ENOTADMIN_LIST_USERS);
             return;
         }
 
@@ -611,14 +608,14 @@ public class PrivateHandler extends RequestHandler {
                 return;
             }
         } else {
-            responder.writeErrorMessage(ErrorId.ENOUSERID, "You must send an id parameter");
+            responder.writeErrorMessage(ErrorId.ENOUSERID_MISSING);
             return;
         }
 
         // the user with id = 1 should always be verified, so no status changing
         if (userID != 1) {
             if (dbm.updateUserStatusToDeleted(userID) != 1) {
-                responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorId.ENOUSERID_NOT_IN_DB);
                 return;
             }
         }
@@ -639,11 +636,6 @@ public class PrivateHandler extends RequestHandler {
      */
     private int parseRequestIdParameter(String parameterValue) throws IOException {
 
-        if (parameterValue == null) {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The given id is null");
-            return -1;
-        }
-
         int requestID;
 
         try {
@@ -653,8 +645,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (requestID < 0) {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID,
-                    "The given id is not an allowed number (positive or zero)");
+            responder.writeErrorMessage(ErrorId.ENOREQUESTID_NOT_NAT_NUMBER);
             return requestID;
         }
 
@@ -680,13 +671,7 @@ public class PrivateHandler extends RequestHandler {
                                            boolean valueAllIsAllowed) throws IOException {
 
         if (!authenticatedUser.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN,
-                    "You must be admin if you want to use the id parameter");
-            return -1;
-        }
-
-        if (parameterValue == null) {
-            responder.writeErrorMessage(ErrorId.ENOUSERID, "The given id is null");
+            responder.writeErrorMessage(ErrorId.ENOTADMIN_USER_ID_PARAM);
             return -1;
         }
 
@@ -703,8 +688,11 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (userID < 0) {
-            responder.writeErrorMessage(ErrorId.ENOUSERID,
-                    "The given id is not an allowed number (positive or zero)");
+            if (valueAllIsAllowed) {
+                responder.writeErrorMessage(ErrorId.ENOUSERID_NOT_NAT_NUMBER_OR_ALL);
+            } else {
+                responder.writeErrorMessage(ErrorId.ENOUSERID_NOT_NAT_NUMBER);
+            }
             return userID;
         }
 

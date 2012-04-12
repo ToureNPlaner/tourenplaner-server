@@ -140,7 +140,7 @@ public class ComputeThread extends Thread {
 					} catch (ComputeException e) {
 						log.log(Level.WARNING, "There was a ComputeException", e);
                         //TODO maybe wrong response status (is algorithm responsible for exception or bad user parameter input?)
-                        String errorMessage = work.getResponder().writeAndReturnSpecifiedErrorMessage(
+                        String errorMessage = work.getResponder().writeAndReturnErrorMessage(
                                 ErrorId.ECOMPUTE, e.getMessage());
 
                         writeIntoDatabase(requestID, errorMessage, "ComputeException", workIsPrivate);
