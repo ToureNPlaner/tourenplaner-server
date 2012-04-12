@@ -334,12 +334,13 @@ public class PrivateHandler extends RequestHandler {
             }
         }
 
+        userID = selectedUser.userid;
         int rowsChanged = dbm.updateUser(selectedUser);
         if (rowsChanged == -1) {
             responder.writeErrorMessage(ErrorMessage.EREGISTERED);
             return;
         }
-        responder.writeJSON(selectedUser, HttpResponseStatus.OK);
+        responder.writeJSON(dbm.getUser(userID), HttpResponseStatus.OK);
         log.finest("UpdateUser successful.");
     }
 
