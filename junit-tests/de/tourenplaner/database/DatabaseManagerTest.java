@@ -87,8 +87,7 @@ public class DatabaseManagerTest {
 	public final static void cleanUpAfterTestRun() {
 		if (dbm != null) {
 			try {
-				dbm.deleteRequestsOfUser(testUserID);
-				dbm.deleteUser("1337testuser@tourenplaner");
+				dbm.deleteUser(testUserID);
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -189,15 +188,6 @@ public class DatabaseManagerTest {
 	 */
 	@Test
 	public final void testDeleteUserInt() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#deleteUser(java.lang.String)}.
-	 */
-	@Test
-	public final void testDeleteUserString() {
 		fail("Not yet implemented"); // TODO
 	}
 

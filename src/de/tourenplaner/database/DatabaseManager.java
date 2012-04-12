@@ -614,7 +614,7 @@ public class DatabaseManager {
 	 *            User id of the user, whose requests should be deleted.
 	 * @throws SQLException
 	 *             Thrown if delete fails.
-     * @return number of database rows changed (1 if successful, else 0)
+     * @return number of database rows changed (greater equal than 1 if successful, else 0)
 	 */
 	public int deleteRequestsOfUser(int userId) throws SQLException {
 
@@ -638,10 +638,8 @@ public class DatabaseManager {
 	}
 
 	/**
-	 * Deletes the Users table row with the given user id. Depending on the
-	 * database configuration(for example strict mode) maybe the corresponding
-	 * requests could be deleted too because of the FOREIGN KEY UserId within
-	 * the Requests table. </br>SQL command:
+	 * Deletes the Users table row with the given user id. This method will
+     * also delete all to the user corresponding requests.</br>SQL command:
 	 * {@value SqlStatementConstants#strDeleteUserWithUserId}
 	 * 
 	 * @param userId
@@ -652,6 +650,8 @@ public class DatabaseManager {
 	 */
 	public int deleteUser(int userId) throws SQLException {
 
+        deleteRequestsOfUser(userId);
+        
         PreparedStatement pstDeleteUserWithUserId = null;
 
         try {
@@ -669,40 +669,6 @@ public class DatabaseManager {
         }
 
         return 0;
-	}
-
-	/**
-	 * Deletes the Users table row with the given user email. Depending on the
-	 * database configuration(for example strict mode) maybe the corresponding
-	 * requests could be deleted too because of the FOREIGN KEY UserId within
-	 * the Requests table. </br>SQL command: {@value SqlStatementConstants#strDeleteUserWithEmail}
-	 * 
-	 * @param email The email of the user
-	 * @throws SQLException
-	 *             Thrown if delete fails.
-     * @return number of database rows changed (1 if successful, else 0)
-	 */
-	public int deleteUser(String email) throws SQLException {
-
-        PreparedStatement pstDeleteUserWithEmail = null;
-
-        try {
-
-            pstDeleteUserWithEmail
-                    = SqlStatementConstants.DeleteUserWithEmail.createPreparedStatement(dataSource);
-
-            pstDeleteUserWithEmail.setString(1, email);
-
-            return pstDeleteUserWithEmail.executeUpdate();
-
-        } catch (NullPointerException e) {
-            wrapNullPointerException(e);
-        } finally {
-            SqlStatement.close(pstDeleteUserWithEmail);
-        }
-
-        return 0;
-
 	}
 
 

@@ -105,8 +105,6 @@ public class SqlStatementConstants {
 
     public final static String strDeleteUserWithUserId = "DELETE FROM Users WHERE id = ?";
 
-    public final static String strDeleteUserWithEmail = "DELETE FROM Users WHERE Email = ?";
-
 
 
 
@@ -164,9 +162,6 @@ public class SqlStatementConstants {
 
     public final static SqlStatement DeleteUserWithUserId =
             new SqlStatement(strDeleteUserWithUserId);
-
-    public final static SqlStatement DeleteUserWithEmail =
-            new SqlStatement(strDeleteUserWithEmail);
 
     // SELECT statements with limit and offset
 
