@@ -36,8 +36,8 @@ public enum ErrorMessage {
             HttpResponseStatus.SERVICE_UNAVAILABLE),
 
     ECOMPUTE (
-            "An error occurred during computation or result message generation",
-            HttpResponseStatus.INTERNAL_SERVER_ERROR),
+            "The computation could not be completed",
+            HttpResponseStatus.BAD_REQUEST),
 
     ECOMPUTE_RESULT_NOT_SENT_OR_STORED (
             ECOMPUTE,
