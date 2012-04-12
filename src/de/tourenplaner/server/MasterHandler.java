@@ -157,10 +157,10 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
             } else {
                 // Unknown request, close connection
                 log.warning("An unknown URL was requested: " + path);
-                responder.writeErrorMessage(ErrorId.EUNKNOWNURL, "unknown URL: " + path);
+                responder.writeErrorMessage(ErrorMessage.EUNKNOWNURL, "unknown URL: " + path);
             }
         } catch (SQLException exSQL) {
-            responder.writeErrorMessage(ErrorId.EDATABASE);
+            responder.writeErrorMessage(ErrorMessage.EDATABASE);
             log.log(Level.SEVERE, "SQLException caught", exSQL);
         }
     }

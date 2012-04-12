@@ -147,7 +147,7 @@ public class  AlgorithmHandler extends RequestHandler {
             }
 
         } else {
-            responder.writeErrorMessage(ErrorId.EBADJSON_NOCONTENT);
+            responder.writeErrorMessage(ErrorMessage.EBADJSON_NOCONTENT);
             return null;
         }
 
@@ -181,7 +181,7 @@ public class  AlgorithmHandler extends RequestHandler {
             AlgorithmFactory algFac = algReg.getAlgByURLSuffix(algName);
             if (algFac == null) {
                 log.warning("Unsupported algorithm " + algName + " requested");
-                responder.writeErrorMessage(ErrorId.EUNKNOWNALG);
+                responder.writeErrorMessage(ErrorMessage.EUNKNOWNALG);
                 return;
             }
             // Only now read the request
@@ -216,7 +216,7 @@ public class  AlgorithmHandler extends RequestHandler {
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    String errorMessage = responder.writeAndReturnErrorMessage(ErrorId.EBUSY);
+                    String errorMessage = responder.writeAndReturnErrorMessage(ErrorMessage.EBUSY);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate && !algFac.isHidden()){
                         // Write request with status failed into database, failure cause is busy server
@@ -233,7 +233,7 @@ public class  AlgorithmHandler extends RequestHandler {
                 }
             }
         } catch (JsonParseException e) {
-            responder.writeErrorMessage(ErrorId.EBADJSON, e.getMessage());
+            responder.writeErrorMessage(ErrorMessage.EBADJSON, e.getMessage());
         }
 
     }

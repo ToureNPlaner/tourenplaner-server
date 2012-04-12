@@ -5,7 +5,7 @@ import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 /**
  *  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public enum ErrorId {
+public enum ErrorMessage {
 
     // json errors
 
@@ -168,14 +168,14 @@ public enum ErrorId {
     public final HttpResponseStatus status;
 
     /**
-     * Use this method if you want to create an ErrorId with a specified message,
+     * Use this method if you want to create an ErrorMessage with a specified message,
      * specified details and a specified status.
      *
      * @param message The error message
      * @param details The error details
      * @param status The error status
      */
-    private ErrorId(String message, String details, HttpResponseStatus status) {
+    private ErrorMessage(String message, String details, HttpResponseStatus status) {
         this.errorId = this.name();
         this.message = message;
         this.details = details;
@@ -183,25 +183,25 @@ public enum ErrorId {
     }
 
     /**
-     * Use this method if you want to create an ErrorId with a specified message
+     * Use this method if you want to create an ErrorMessage with a specified message
      * and a specified status. The details will be an empty string.
      *
      * @param message The error message
      * @param status The error status
      */
-    private ErrorId(String message, HttpResponseStatus status) {
+    private ErrorMessage(String message, HttpResponseStatus status) {
         this(message, "", status);
     }
 
     /**
-     * Use this method if you want to create an ErrorId with the message
-     * and status of another ErrorId and then add the given details.
+     * Use this method if you want to create an ErrorMessage with the message
+     * and status of another ErrorMessage and then add the given details.
      *
-     * @param errorId The errorId
+     * @param errorMessage The ErrorMessage
      * @param details The error details
      */
-    private ErrorId(ErrorId errorId, String details) {
-        this(errorId.message, details, errorId.status);
+    private ErrorMessage(ErrorMessage errorMessage, String details) {
+        this(errorMessage.message, details, errorMessage.status);
     }
 
 }
