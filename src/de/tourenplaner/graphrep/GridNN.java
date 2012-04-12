@@ -135,7 +135,7 @@ public class GridNN implements NNSearcher {
             Inner: for (int j = left; j < right; j++) {
                 list = grid[toIndex(i,j)];
                 if (list == null)
-                    break Inner;
+                    continue Inner;
 
                 for (int index = 0; index < list.size(); index++){
                     nodeId = list.get(index);
