@@ -30,18 +30,10 @@ public class Authorizer extends RequestHandler {
 
     private final DatabaseManager dbm;
 
-    private MessageDigest digester;
-
 
     public Authorizer(DatabaseManager dbm) {
         super(null);
         this.dbm = dbm;
-        try {
-            digester = MessageDigest.getInstance("SHA-1");
-        } catch (NoSuchAlgorithmException e) {
-            log.log(Level.SEVERE, "Can't load SHA-1 Digester", e);
-            digester = null;
-        }
     }
 
     /**
