@@ -128,7 +128,7 @@ public class Responder {
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
+            response.setHeader(CONTENT_LENGTH, 0);
         }
 
         // Write the response.
