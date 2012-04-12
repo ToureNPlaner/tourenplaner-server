@@ -246,19 +246,19 @@ public class Responder {
 
 
     /**
-     * Sends an error to the client, the connection will be closed afterwards
+     * Sends an error to the client, the connection will be closed afterwards<br /><br />
      *
-     * @param errorId error id (see protocol specification), for example ENOTADMIN
-     * @param message corresponding error message (see protocol specification)
+     * Use this method if your details text is dynamically created
+     *
+     * @param errorMessage error id (see protocol specification), for example ENOTADMIN
      * @param details more detailed error information
-     * @param status HttpResponseStatus
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if writing json onto the output fails
      */
-    private void writeErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
+    public void writeErrorMessage(ErrorMessage errorMessage, String details)
             throws IOException
     {
-        log.info("Writing Error Message: " + message + " --- " + details);
+        log.info("Writing Error Message: " + errorMessage.message + " --- " + details);
 
         // Allocate buffer if not already done
         // do this here because we are in a worker thread
@@ -270,19 +270,19 @@ public class Responder {
         OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
         JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(resultStream);
         gen.writeStartObject();
-        gen.writeStringField("errorid", errorId);
-        gen.writeStringField("message", message);
+        gen.writeStringField("errorid", errorMessage.errorId);
+        gen.writeStringField("message", errorMessage.message);
         gen.writeStringField("details", details);
         gen.writeEndObject();
         gen.close();
         resultStream.flush();
 
         // Build the response object.
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, errorMessage.status);
 
         response.setHeader("Access-Control-Allow-Origin", "*");
         // Add header so that clients know how they can authenticate
-        if(status == HttpResponseStatus.UNAUTHORIZED){
+        if(errorMessage.status == HttpResponseStatus.UNAUTHORIZED){
             response.setHeader("WWW-Authenticate","Basic realm=\"touenplaner\"");
         }
 
@@ -300,80 +300,51 @@ public class Responder {
 
 
     /**
-     * Sends an error to the client, the connection will be closed afterwards
+     * Sends an error to the client, the connection will be closed afterwards<br /><br />
      *
-     * @param errorId an enum value of ErrorId
+     * Use this method if your details text is stored within errorMessage
+     *
+     * @param errorMessage an enum value of ErrorMessage
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if writing json onto the output fails
      */
-    public void writeErrorMessage(ErrorId errorId) throws IOException {
-        writeErrorMessage(errorId.errorId, errorId.message, "", errorId.status);
+    public void writeErrorMessage(ErrorMessage errorMessage) throws IOException {
+        writeErrorMessage(errorMessage, errorMessage.details);
     }
-
-    /**
-     * Sends an error to the client, the connection will be closed afterwards
-     *
-     * @param errorId an enum value of ErrorId
-     * @param details more detailed error information
-     * @throws JsonGenerationException Thrown if generating json fails
-     * @throws IOException Thrown if writing json onto the output fails
-     */
-    public void writeErrorMessage(ErrorId errorId, String details) throws IOException {
-        writeErrorMessage(errorId.errorId, errorId.message, details, errorId.status);
-    }
-
 
 
     /**
      * Sends an error to the client, the connection will be closed afterwards <br />
-     * A String representing the error response will be returned
+     * A String representing the error response will be returned<br /><br />
      *
-     * @param errorId error id (see protocol specification), for example ENOTADMIN
-     * @param message corresponding error message (see protocol specification)
+     * Use this method if your details text is dynamically created
+     *
+     * @param errorMessage an enum value of ErrorMessage
      * @param details more detailed error information
-     * @param status HttpResponseStatus
      * @return A String representing the error response
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if writing json onto the output fails
      */
-    private String writeAndReturnErrorMessage(String errorId, String message, String details, HttpResponseStatus status)
-            throws IOException
-    {
-        this.writeErrorMessage(errorId, message, details, status);
-        return  "{\"errorid\":\"" + errorId +
-                "\",\"message\":\"" + message +
+    public String writeAndReturnErrorMessage(ErrorMessage errorMessage, String details) throws IOException {
+        this.writeErrorMessage(errorMessage, details);
+        return  "{\"errorid\":\"" + errorMessage.errorId +
+                "\",\"message\":\"" + errorMessage.message +
                 "\",\"details\":\"" + details + "\"}";
     }
 
-
     /**
      * Sends an error to the client, the connection will be closed afterwards <br />
-     * A String representing the error response will be returned
+     * A String representing the error response will be returned<br /><br />
      *
-     * @param errorId an enum value of ErrorId
+     * Use this method if your details text is stored within errorMessage
+     *
+     * @param errorMessage an enum value of ErrorMessage
      * @return A String representing the error response
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if writing json onto the output fails
      */
-    public String writeAndReturnErrorMessage(ErrorId errorId) throws IOException {
-        return writeAndReturnErrorMessage(errorId.errorId, errorId.message, "", errorId.status);
-    }
-
-    /**
-     * Sends an error to the client, the connection will be closed afterwards <br />
-     * A String representing the error response will be returned <br /> <br />
-     *
-     * Use this method, if you want to send an error message whose text you
-     * knows not until runtime.
-     *
-     * @param errorId an enum value of ErrorId
-     * @param message corresponding error message
-     * @return A String representing the error response
-     * @throws JsonGenerationException Thrown if generating json fails
-     * @throws IOException Thrown if writing json onto the output fails
-     */
-    public String writeAndReturnSpecifiedErrorMessage(ErrorId errorId, String message) throws IOException {
-        return writeAndReturnErrorMessage(errorId.errorId, message, "", errorId.status);
+    public String writeAndReturnErrorMessage(ErrorMessage errorMessage) throws IOException {
+        return writeAndReturnErrorMessage(errorMessage, errorMessage.details);
     }
 
 

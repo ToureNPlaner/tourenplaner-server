@@ -8,7 +8,6 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBuffers;
 import org.jboss.netty.handler.codec.base64.Base64;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
@@ -78,16 +77,16 @@ public class Authorizer extends RequestHandler {
         UserDataset user = authNoResponse(myReq);
 
         if (user == null) {
-            responder.writeErrorMessage(ErrorId.EAUTH);
+            responder.writeErrorMessage(ErrorMessage.EAUTH);
             return null;
         }
 
         if (user.status != UserStatusEnum.verified) {
             if (user.status == UserStatusEnum.needs_verification) {
-                responder.writeErrorMessage(ErrorId.ENOTVERIFIED);
+                responder.writeErrorMessage(ErrorMessage.ENOTVERIFIED);
             } else {
                 // for example if user is marked as deleted
-                responder.writeErrorMessage(ErrorId.EAUTH);
+                responder.writeErrorMessage(ErrorMessage.EAUTH);
             }
             return null;
         }

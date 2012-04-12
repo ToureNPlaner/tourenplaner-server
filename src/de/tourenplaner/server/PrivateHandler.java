@@ -61,12 +61,12 @@ public class PrivateHandler extends RequestHandler {
                 objmap = mapper.readValue(new ChannelBufferInputStream(content), new TypeReference<Map<String, Object>>() {
                 });
             } catch (JsonParseException e) {
-                responder.writeErrorMessage(ErrorId.EBADJSON, e.getMessage());
+                responder.writeErrorMessage(ErrorMessage.EBADJSON, e.getMessage());
                 objmap = null;
             }
 
         } else {
-            responder.writeErrorMessage(ErrorId.EBADJSON, "Content is empty");
+            responder.writeErrorMessage(ErrorMessage.EBADJSON_NOCONTENT);
         }
 
         return objmap;
@@ -104,8 +104,7 @@ public class PrivateHandler extends RequestHandler {
             }
 
             if (!authenticatedUser.admin) {
-                responder.writeErrorMessage(ErrorId.ENOTADMIN,
-                        "A logged in user has to be admin to register users.");
+                responder.writeErrorMessage(ErrorMessage.ENOTADMIN_REGISTER_USER);
                 return;
             }
         }
@@ -123,8 +122,7 @@ public class PrivateHandler extends RequestHandler {
         if ( !(objmap.get("email") instanceof String) || !(objmap.get("password") instanceof String)
                 || !(objmap.get("firstname") instanceof String) || !(objmap.get("lastname") instanceof String)
                 || !(objmap.get("address") instanceof String) ) {
-            responder.writeErrorMessage(ErrorId.EBADJSON, 
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)");
+            responder.writeErrorMessage(ErrorMessage.EBADJSON_INCORRECT_USER_OBJ);
             return;
         }
 
@@ -135,8 +133,7 @@ public class PrivateHandler extends RequestHandler {
         final String address = (String) objmap.get("address");
 
         if ((pw == null) || (email == null) || (firstName == null) || (lastName == null) || (address == null)) {
-            responder.writeErrorMessage(ErrorId.EBADJSON, 
-                    "JSON user object was not correct (needs email, password, firstname, lastname, address)");
+            responder.writeErrorMessage(ErrorMessage.EBADJSON_INCORRECT_USER_OBJ);
             return;
         }
 
@@ -159,8 +156,7 @@ public class PrivateHandler extends RequestHandler {
                 // if (objmap.get("admin") is null, then "instanceof Boolean" would be always false
                 // so following check makes only sense if objmap.get("admin") != null
                 if ( !(objmap.get("admin") instanceof Boolean) ) {
-                    responder.writeErrorMessage(ErrorId.EBADJSON, 
-                            "JSON user object was not correct (\"admin\" should be boolean)");
+                    responder.writeErrorMessage(ErrorMessage.EBADJSON_INCORRECT_USER_OBJ_ADMIN);
                     return;
                 }
                 adminFlag = (Boolean) objmap.get("admin");
@@ -169,7 +165,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if ( newUser == null) {
-            responder.writeErrorMessage(ErrorId.EREGISTERED);
+            responder.writeErrorMessage(ErrorMessage.EREGISTERED);
             return;
         }
 
@@ -232,7 +228,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (selectedUser == null) {
-            responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
+            responder.writeErrorMessage(ErrorMessage.ENOUSERID_NOT_IN_DB);
             return;
         }
 
@@ -288,7 +284,7 @@ public class PrivateHandler extends RequestHandler {
             selectedUser = dbm.getUser(userID);
 
             if (selectedUser == null) {
-                responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorMessage.ENOUSERID_NOT_IN_DB);
                 return;
             }
         } else {
@@ -327,8 +323,7 @@ public class PrivateHandler extends RequestHandler {
                 try {
                     selectedUser.status = UserStatusEnum.valueOf(status);
                 } catch (IllegalArgumentException e) {
-                    responder.writeErrorMessage(ErrorId.EBADJSON,
-                            "JSON user object was not correct (\"status\" was not a valid value)");
+                    responder.writeErrorMessage(ErrorMessage.EBADJSON_INCORRECT_USER_OBJ_STATUS);
                     return;
                 }
 
@@ -341,7 +336,7 @@ public class PrivateHandler extends RequestHandler {
 
         int rowsChanged = dbm.updateUser(selectedUser);
         if (rowsChanged == -1) {
-            responder.writeErrorMessage(ErrorId.EREGISTERED);
+            responder.writeErrorMessage(ErrorMessage.EREGISTERED);
             return;
         }
         responder.writeJSON(selectedUser, HttpResponseStatus.OK);
@@ -380,17 +375,16 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonRequest(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorMessage.ENOREQUESTID_NOT_IN_DB);
                 return;
             }
         } else {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "You must send an id parameter");
+            responder.writeErrorMessage(ErrorMessage.ENOREQUESTID_MISSING);
             return;
         }
 
         if (user.userid != jsonObject.getUserID() && !user.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN, 
-                    "You cannot view the json object of another user because you are not an admin");
+            responder.writeErrorMessage(ErrorMessage.ENOTADMIN_OTHER_USER_REQUEST);
             return;
         }
 
@@ -431,17 +425,16 @@ public class PrivateHandler extends RequestHandler {
             jsonObject = dbm.getJsonResponse(requestID);
 
             if (jsonObject == null) {
-                responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorMessage.ENOREQUESTID_NOT_IN_DB);
                 return;
             }
         } else {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "You must send an id parameter");
+            responder.writeErrorMessage(ErrorMessage.ENOREQUESTID_MISSING);
             return;
         }
 
         if (user.userid != jsonObject.getUserID() && !user.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN,
-                    "You cannot view the json object of another user because you are not an admin");
+            responder.writeErrorMessage(ErrorMessage.ENOTADMIN_OTHER_USER_REQUEST);
             return;
         }
 
@@ -472,7 +465,8 @@ public class PrivateHandler extends RequestHandler {
         }
 
 
-        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT);
+        int limit = extractNaturalIntParameter(parameters, "limit", ErrorMessage.ELIMIT_MISSING,
+                ErrorMessage.ELIMIT_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -480,7 +474,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET);
+        int offset = extractNaturalIntParameter(parameters, "offset", ErrorMessage.EOFFSET_MISSING,
+                ErrorMessage.EOFFSET_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -550,11 +545,12 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (!user.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN, "You must be admin to list users");
+            responder.writeErrorMessage(ErrorMessage.ENOTADMIN_LIST_USERS);
             return;
         }
 
-        int limit = extractNaturalIntParameter(parameters, "limit", ErrorId.ELIMIT);
+        int limit = extractNaturalIntParameter(parameters, "limit", ErrorMessage.ELIMIT_MISSING,
+                ErrorMessage.ELIMIT_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -562,7 +558,8 @@ public class PrivateHandler extends RequestHandler {
             return;
         }
 
-        int offset = extractNaturalIntParameter(parameters, "offset", ErrorId.EOFFSET);
+        int offset = extractNaturalIntParameter(parameters, "offset", ErrorMessage.EOFFSET_MISSING,
+                ErrorMessage.EOFFSET_NOT_NAT_NUMBER);
         // if parameter is invalid, an error response is sent from extractNaturalIntParameter.
         // the if and return is needed exactly here, because following methods could send more responses,
         // but only one response per http request is allowed (else Exceptions will be thrown)
@@ -611,14 +608,14 @@ public class PrivateHandler extends RequestHandler {
                 return;
             }
         } else {
-            responder.writeErrorMessage(ErrorId.ENOUSERID, "You must send an id parameter");
+            responder.writeErrorMessage(ErrorMessage.ENOUSERID_MISSING);
             return;
         }
 
         // the user with id = 1 should always be verified, so no status changing
         if (userID != 1) {
             if (dbm.updateUserStatusToDeleted(userID) != 1) {
-                responder.writeErrorMessage(ErrorId.ENOUSERID, "The id is not in the database");
+                responder.writeErrorMessage(ErrorMessage.ENOUSERID_NOT_IN_DB);
                 return;
             }
         }
@@ -639,11 +636,6 @@ public class PrivateHandler extends RequestHandler {
      */
     private int parseRequestIdParameter(String parameterValue) throws IOException {
 
-        if (parameterValue == null) {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID, "The given id is null");
-            return -1;
-        }
-
         int requestID;
 
         try {
@@ -653,8 +645,7 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (requestID < 0) {
-            responder.writeErrorMessage(ErrorId.ENOREQUESTID,
-                    "The given id is not an allowed number (positive or zero)");
+            responder.writeErrorMessage(ErrorMessage.ENOREQUESTID_NOT_NAT_NUMBER);
             return requestID;
         }
 
@@ -680,13 +671,7 @@ public class PrivateHandler extends RequestHandler {
                                            boolean valueAllIsAllowed) throws IOException {
 
         if (!authenticatedUser.admin) {
-            responder.writeErrorMessage(ErrorId.ENOTADMIN,
-                    "You must be admin if you want to use the id parameter");
-            return -1;
-        }
-
-        if (parameterValue == null) {
-            responder.writeErrorMessage(ErrorId.ENOUSERID, "The given id is null");
+            responder.writeErrorMessage(ErrorMessage.ENOTADMIN_USER_ID_PARAM);
             return -1;
         }
 
@@ -703,8 +688,11 @@ public class PrivateHandler extends RequestHandler {
         }
 
         if (userID < 0) {
-            responder.writeErrorMessage(ErrorId.ENOUSERID,
-                    "The given id is not an allowed number (positive or zero)");
+            if (valueAllIsAllowed) {
+                responder.writeErrorMessage(ErrorMessage.ENOUSERID_NOT_NAT_NUMBER_OR_ALL);
+            } else {
+                responder.writeErrorMessage(ErrorMessage.ENOUSERID_NOT_NAT_NUMBER);
+            }
             return userID;
         }
 
@@ -717,29 +705,29 @@ public class PrivateHandler extends RequestHandler {
      * and will then response to request with error message.
      * @param parameters map with url parameters from client
      * @param name the name of the parameter
-     * @param errorId the corresponding ErrorId to the parameter
+     * @param eMissing the corresponding ErrorMessage to the parameter if parameter is missing
+     * @param eNotNaturalNumber the corresponding ErrorMessage to the parameter if parameter is not a natural number
      * @return Returns the parsed number or -1 if parameter is invalid (missing or not a natural number)
      * @throws IOException Thrown if error message sending fails
      */
-    private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name, ErrorId errorId)
+    private int extractNaturalIntParameter(Map<String, List<String>> parameters, String name, 
+                                           ErrorMessage eMissing, ErrorMessage eNotNaturalNumber)
             throws IOException {
-        int param = -1;
+        int param;
 
-        if (!parameters.containsKey(name)) {
-            responder.writeErrorMessage(errorId, "You must send a " + name + " parameter");
+        if (!parameters.containsKey(name) || parameters.get(name).get(0) == null) {
+            responder.writeErrorMessage(eMissing);
             return -1;
         }
 
-        if  (parameters.get(name).get(0) != null) {
-            try {
-                param = Integer.parseInt(parameters.get(name).get(0));
-            } catch (NumberFormatException e) {
-                param = -1;
-            }
+        try {
+            param = Integer.parseInt(parameters.get(name).get(0));
+        } catch (NumberFormatException e) {
+            param = -1;
         }
 
         if (param < 0) {
-            responder.writeErrorMessage(errorId, "You must send a " + name + " parameter");
+            responder.writeErrorMessage(eNotNaturalNumber);
 
             return -1;
         }

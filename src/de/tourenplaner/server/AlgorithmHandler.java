@@ -5,6 +5,7 @@ import de.tourenplaner.computecore.AlgorithmRegistry;
 import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
+import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.database.DatabaseManager;
 import de.tourenplaner.database.UserDataset;
 import de.tourenplaner.utils.SHA1;
@@ -17,23 +18,22 @@ import org.codehaus.jackson.type.TypeReference;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.jboss.netty.buffer.ChannelBufferInputStream;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
  */
-public class AlgorithmHandler extends RequestHandler {
+public class  AlgorithmHandler extends RequestHandler {
 
     private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
@@ -147,7 +147,7 @@ public class AlgorithmHandler extends RequestHandler {
             }
 
         } else {
-            responder.writeErrorMessage(ErrorId.EBADJSON, "Content is empty");
+            responder.writeErrorMessage(ErrorMessage.EBADJSON_NOCONTENT);
             return null;
         }
 
@@ -181,7 +181,7 @@ public class AlgorithmHandler extends RequestHandler {
             AlgorithmFactory algFac = algReg.getAlgByURLSuffix(algName);
             if (algFac == null) {
                 log.warning("Unsupported algorithm " + algName + " requested");
-                responder.writeErrorMessage(ErrorId.EUNKNOWNALG);
+                responder.writeErrorMessage(ErrorMessage.EUNKNOWNALG);
                 return;
             }
             // Only now read the request
@@ -195,12 +195,16 @@ public class AlgorithmHandler extends RequestHandler {
                 if (ip == null) {
                     ip = ((InetSocketAddress) req.getResponder().getChannel().getRemoteAddress()).getAddress().getHostAddress();
                 }
-                String day = String.valueOf(Calendar.getInstance().get(Calendar.YEAR)) + String.valueOf(Calendar.getInstance().get(Calendar.DAY_OF_YEAR));
-                //TODO: (persistent?) random salt to make ip not bruteforceable
-                String anonident = SHA1.SHA1(ip + day + "somesalt");
-                log.fine("\"" + algName + "\" for Client " + anonident + "  " +
-                         request.getContent().toString(CharsetUtil.UTF_8));
-                
+
+                if (Level.parse(ConfigManager.getInstance().getEntryString("loglevel", "info").toUpperCase())
+                         .intValue() <= Level.FINE.intValue()) {
+                    // time in milliseconds / 1000 = unix time / 86400 = one day
+                    long day = (System.currentTimeMillis() / 86400000L);
+                    //TODO: (persistent?) random salt to make ip not bruteforceable
+                    String anonident = SHA1.SHA1(ip + day + "somesalt");
+                    log.fine("\"" + algName + "\" for Client " + anonident + "  " +
+                             request.getContent().toString(CharsetUtil.UTF_8));
+                }
                 int requestID = -1;
 
                 if (isPrivate && !algFac.isHidden()) {
@@ -212,7 +216,7 @@ public class AlgorithmHandler extends RequestHandler {
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    String errorMessage = responder.writeAndReturnErrorMessage(ErrorId.EBUSY);
+                    String errorMessage = responder.writeAndReturnErrorMessage(ErrorMessage.EBUSY);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
                     if(isPrivate && !algFac.isHidden()){
                         // Write request with status failed into database, failure cause is busy server
@@ -229,7 +233,7 @@ public class AlgorithmHandler extends RequestHandler {
                 }
             }
         } catch (JsonParseException e) {
-            responder.writeErrorMessage(ErrorId.EBADJSON, e.getMessage());
+            responder.writeErrorMessage(ErrorMessage.EBADJSON, e.getMessage());
         }
 
     }
