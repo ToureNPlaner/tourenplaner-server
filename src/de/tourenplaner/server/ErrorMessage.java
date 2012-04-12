@@ -167,41 +167,34 @@ public enum ErrorMessage {
     public final String details;
     public final HttpResponseStatus status;
 
-    /**
-     * Use this method if you want to create an ErrorMessage with a specified message,
-     * specified details and a specified status.
-     *
-     * @param message The error message
-     * @param details The error details
-     * @param status The error status
-     */
-    private ErrorMessage(String message, String details, HttpResponseStatus status) {
-        this.errorId = this.name();
-        this.message = message;
-        this.details = details;
-        this.status = status;
-    }
 
     /**
      * Use this method if you want to create an ErrorMessage with a specified message
-     * and a specified status. The details will be an empty string.
+     * and a specified status. The details will be an empty string, the errorId will
+     * be the name of the enum.
      *
      * @param message The error message
      * @param status The error status
      */
     private ErrorMessage(String message, HttpResponseStatus status) {
-        this(message, "", status);
+        this.errorId = this.name();
+        this.message = message;
+        this.details = "";
+        this.status = status;
     }
 
     /**
-     * Use this method if you want to create an ErrorMessage with the message
+     * Use this method if you want to create an ErrorMessage with the errorId, message
      * and status of another ErrorMessage and then add the given details.
      *
      * @param errorMessage The ErrorMessage
      * @param details The error details
      */
     private ErrorMessage(ErrorMessage errorMessage, String details) {
-        this(errorMessage.message, details, errorMessage.status);
+        this.errorId = errorMessage.name();
+        this.message = errorMessage.message;
+        this.details = details;
+        this.status = errorMessage.status;
     }
 
 }
