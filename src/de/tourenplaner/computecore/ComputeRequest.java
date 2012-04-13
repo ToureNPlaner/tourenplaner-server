@@ -183,7 +183,9 @@ public class ComputeRequest {
 
 		gen.setCodec(mapper);
 		gen.writeStartObject();
-        gen.writeNumberField("requestid", this.requestID);
+        if (isPrivate()) {
+            gen.writeNumberField("requestid", this.requestID);
+        }
         
         gen.writeObjectField("constraints", this.constraints);
 
