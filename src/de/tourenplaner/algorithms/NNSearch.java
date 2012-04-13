@@ -16,7 +16,7 @@ public class NNSearch extends GraphAlgorithm {
 	}
 
 	@Override
-	public void compute(ComputeRequest req) throws ComputeException {
+	public void compute(ComputeRequest req) throws ComputeException, InternalException {
 		assert req != null : "We ended up without a request object in run";
 
 		// TODO: send error messages to client

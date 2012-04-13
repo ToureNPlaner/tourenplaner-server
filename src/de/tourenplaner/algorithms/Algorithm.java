@@ -17,8 +17,11 @@ public interface Algorithm {
 	/**
 	 * Runs the Algorithm instance on the given ComputeRequest
 	 * 
-	 * @param req
+	 *
+     * @param req The compute request
+     * @throws ComputeException see java doc of exception
+     * @throws InternalException see java doc of exception
 	 */
-    void compute(ComputeRequest req) throws ComputeException;
+    void compute(ComputeRequest req) throws ComputeException, InternalException;
 
 }

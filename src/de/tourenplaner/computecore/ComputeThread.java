@@ -129,6 +129,7 @@ public class ComputeThread extends Thread {
 
                         writeIntoDatabase(requestID, errorMessage, "ComputeException", workIsPrivate);
                     } catch (Exception e) {
+                        // InternalExceptions will be caught here
                         log.log(Level.WARNING, "Exception in Algorithm", e);
                         // Don't give too much info to client as we probably got a programming mistake
                         String errorMessage = work.getResponder().writeAndReturnErrorMessage(

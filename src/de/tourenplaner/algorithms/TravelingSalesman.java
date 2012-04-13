@@ -57,7 +57,7 @@ public class TravelingSalesman extends GraphAlgorithm {
     }
 
     @Override
-    public void compute(ComputeRequest req) throws ComputeException {
+    public void compute(ComputeRequest req) throws ComputeException, InternalException {
 
         // Map points to ids
         RequestPoints points = req.getPoints();
