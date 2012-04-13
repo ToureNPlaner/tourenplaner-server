@@ -224,8 +224,7 @@ public class  AlgorithmHandler extends RequestHandler {
                         // already sent error message, we should throw no exception
                         // (MasterHandler would send an error message if it catches an SQLException)
                         try {
-                            // TODO maybe a better method should be used to convert a string to a byte array
-                            dbm.updateRequestAsFailed(requestID, errorMessage.getBytes());
+                            dbm.updateRequestAsFailed(requestID, errorMessage.getBytes(CharsetUtil.UTF_8));
                         } catch (SQLException ignored) {
                         }
                     }
