@@ -105,9 +105,9 @@ public class ComputeThread extends Thread {
 
                         log.finer("Algorithm " + work.getAlgorithmURLSuffix() + " successfully computed.");
 
-
+                        // IOException will be handled as EINTERNAL
                         baOutputStream = work.getResponder().writeComputeResult(work,
-                                    HttpResponseStatus.OK);
+                                HttpResponseStatus.OK);
 
                         if (workIsPrivate) {
 
@@ -127,21 +127,20 @@ public class ComputeThread extends Thread {
                         String errorMessage = work.getResponder().writeAndReturnErrorMessage(
                                 ErrorMessage.ECOMPUTE, e.getMessage());
 
-                        writeIntoDatabase(requestID, errorMessage, "ComputeException", workIsPrivate);
+                        writeErrorIntoDatabase(requestID, errorMessage, "ECOMPUTE", workIsPrivate);
                     } catch (Exception e) {
-                        // InternalExceptions will be caught here
-                        log.log(Level.WARNING, "Exception in Algorithm", e);
+                        log.log(Level.WARNING, "Internal server exception (caused by algorithm or result writing)", e);
                         // Don't give too much info to client as we probably got a programming mistake
                         String errorMessage = work.getResponder().writeAndReturnErrorMessage(
-                                ErrorMessage.ECOMPUTE, "Unspecified Exception in Algorithm");
+                                ErrorMessage.EINTERNAL_UNSPECIFIED);
 
-                        writeIntoDatabase(requestID, errorMessage, "Exception in Algorithm", workIsPrivate);
+                        writeErrorIntoDatabase(requestID, errorMessage, "EINTERNAL", workIsPrivate);
                     }
                 } else {
                     log.warning("Unsupported algorithm " + work.getAlgorithmURLSuffix() + " requested");
                     String errorMessage = work.getResponder().writeAndReturnErrorMessage(ErrorMessage.EUNKNOWNALG);
 
-                    writeIntoDatabase(requestID, errorMessage, "UNKNOWNALG", workIsPrivate);
+                    writeErrorIntoDatabase(requestID, errorMessage, "UNKNOWNALG", workIsPrivate);
                 }
 
             } catch (InterruptedException e) {
@@ -153,7 +152,7 @@ public class ComputeThread extends Thread {
         }
     }
 
-    private void writeIntoDatabase(int requestID, String errorMessage, String errorName, boolean workIsPrivate) {
+    private void writeErrorIntoDatabase(int requestID, String errorMessage, String errorName, boolean workIsPrivate) {
         if (workIsPrivate) {
             try {
                 // TODO change failDescription to user friendly message?

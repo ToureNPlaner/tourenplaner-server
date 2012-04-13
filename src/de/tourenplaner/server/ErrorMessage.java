@@ -29,19 +29,27 @@ public enum ErrorMessage {
             EBADJSON,
             "JSON user object was not correct (\"status\" was not a valid value)"),
 
+    // compute errors
+
+    ECOMPUTE (
+            "The computation could not be completed",
+            HttpResponseStatus.BAD_REQUEST),
+
     // server errors
 
     EBUSY (
             "This server is currently too busy to fulfill the request",
             HttpResponseStatus.SERVICE_UNAVAILABLE),
 
-    ECOMPUTE (
-            "The computation could not be completed",
-            HttpResponseStatus.BAD_REQUEST),
 
-    ECOMPUTE_RESULT_NOT_SENT_OR_STORED (
-            ECOMPUTE,
-            "The server could not send and not store the compute result"),
+    EINTERNAL (
+            "An internal server error occurred",
+            HttpResponseStatus.INTERNAL_SERVER_ERROR),
+
+    EINTERNAL_UNSPECIFIED (
+            EINTERNAL,
+            "Unspecified server exception"),
+
 
     EDATABASE (
             "The server cannot contact its database or a database error occurred",
