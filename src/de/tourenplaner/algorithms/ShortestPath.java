@@ -43,7 +43,7 @@ public class ShortestPath extends GraphAlgorithm {
 	}
 
     @Override
-    public void compute(ComputeRequest req) throws ComputeException, InternalException {
+    public void compute(ComputeRequest req) throws ComputeException, Exception {
         assert req != null : "We ended up without a request object in run";
 
         RequestPoints points = req.getPoints();
