@@ -218,12 +218,22 @@ public class ComputeRequest {
                 gen.writeEndArray();
             }
         } else {
-            for (int i = 0; i < points.size(); i++) {
+            // do not use  this.points to determine airlines between the points
+            // some algorithms would maybe not compute paths between the points in this.points
+            // example: search a bicycle tour within a certain radius of a point
+            for(Way way : this.resultWays){
                 gen.writeStartArray();
+
                 gen.writeStartObject();
-                gen.writeNumberField("lt", points.getPointLat(i));
-                gen.writeNumberField("ln", points.getPointLon(i));
+                gen.writeNumberField("lt", way.getPointLat(0));
+                gen.writeNumberField("ln", way.getPointLon(0));
                 gen.writeEndObject();
+
+                gen.writeStartObject();
+                gen.writeNumberField("lt", way.getPointLat(way.size() - 1));
+                gen.writeNumberField("ln", way.getPointLon(way.size() - 1));
+                gen.writeEndObject();
+
                 gen.writeEndArray();
             }
         }
