@@ -5,7 +5,6 @@ import de.tourenplaner.config.ConfigManager;
 
 import javax.sql.DataSource;
 import java.beans.PropertyVetoException;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -44,19 +43,6 @@ public class DatabasePool {
     public static DataSource createDataSource(String url, String userName, String password, String driverClass)
             throws PropertyVetoException {
 
-        Map<?, ?> map = ConfigManager.getInstance().getEntryMap("c3p0", null);
-        if (map != null) {
-            for (Object key : map.keySet()) {
-                Object value = map.get(key);
-                if (key instanceof String && value instanceof String) {
-                    System.setProperty("c3p0." + key, (String) value);
-                } else {
-                    log.warning("The config file has an error within the value of the key \"c3p0\". " +
-                            "The error is near the key " + key.toString());
-                }
-            }
-        }
-
         ComboPooledDataSource cpDataSource = new ComboPooledDataSource();
 
         try {
@@ -69,6 +55,31 @@ public class DatabasePool {
         cpDataSource.setJdbcUrl(url);
         cpDataSource.setUser(userName);
         cpDataSource.setPassword(password);
+
+        /*
+            Some config options and their default values for the database pool c3p0
+            See http://www.mchange.com/projects/c3p0/#configuration_properties for more details and options
+
+            "acquireIncrement" : 3,
+            "initialPoolSize" : 3,
+            "maxPoolSize" : 15,
+            "minPoolSize" : 3,
+
+            "maxConnectionAge" : 0,
+            "maxIdleTime" : 0,
+            "maxIdleTimeExcessConnections" : 0,
+
+            "maxStatements" : 0,
+            "maxStatementsPerConnection" : 0,
+
+            "acquireRetryAttempts" : 30,
+            "acquireRetryDelay" : 1000,
+            "breakAfterAcquireFailure" : false
+         */
+
+        ConfigManager configManager = ConfigManager.getInstance().getEntryMap("databasepool", null);
+        cpDataSource.setInitialPoolSize(configManager.getEntryInt("initialPoolSize", 3));
+        cpDataSource.setMaxPoolSize(configManager.getEntryInt("maxPoolSize", 15));
 
         return cpDataSource;
     }
