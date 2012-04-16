@@ -131,31 +131,36 @@ public class TravelingSalesman extends GraphAlgorithm {
 
     private final int[] twoOpt(int[][] distmat, int[] currTour) {
         int[] shiftedTour = currTour.clone();
-
-
         int[] bestTour = shiftedTour.clone();
-        int bestLength = calcTourLength(distmat, bestTour);
-        for (int i = 0; i < shiftedTour.length; i++) {
-            for (int j = 1; j < shiftedTour.length - 1; j++) {
-                int[] neighborTour = shiftedTour.clone();
-                StaticMath.reverse(neighborTour, 0, j + 1);
-                int length = calcTourLength(distmat, neighborTour);
-                if (length < bestLength) {
-                    bestTour = neighborTour.clone();
-                }
+        int betterLength;
+        int bestLength;
+        betterLength = calcTourLength(distmat, bestTour);
+        do {
+            bestLength = betterLength;
+            for (int i = 0; i < shiftedTour.length; i++) {
+                for (int j = 1; j < shiftedTour.length - 1; j++) {
+                    int[] neighborTour = shiftedTour.clone();
+                    StaticMath.reverse(neighborTour, 0, j + 1);
+                    int length = calcTourLength(distmat, neighborTour);
+                    if (length < bestLength) {
+                        bestTour = neighborTour.clone();
+                    }
 
-                neighborTour = shiftedTour.clone();
-                StaticMath.reverse(neighborTour, j, shiftedTour.length);
-                length = calcTourLength(distmat, neighborTour);
-                if (length < bestLength) {
-                    bestTour = neighborTour.clone();
+                    neighborTour = shiftedTour.clone();
+                    StaticMath.reverse(neighborTour, j, shiftedTour.length);
+                    length = calcTourLength(distmat, neighborTour);
+                    if (length < bestLength) {
+                        bestTour = neighborTour.clone();
+                    }
                 }
+                // shift  array to the left
+                int first = shiftedTour[0];
+                System.arraycopy(shiftedTour, 1, shiftedTour, 0, shiftedTour.length - 1);
+                shiftedTour[shiftedTour.length - 1] = first;
             }
-            // shift  array to the left
-            int first = shiftedTour[0];
-            System.arraycopy(shiftedTour, 1, shiftedTour, 0, shiftedTour.length - 1);
-            shiftedTour[shiftedTour.length - 1] = first;
-        }
+            betterLength = calcTourLength(distmat, bestTour);
+            shiftedTour = bestTour.clone();
+        } while (betterLength < bestLength);
 
         return bestTour;
     }
