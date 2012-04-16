@@ -133,7 +133,6 @@ public class ConstrainedSP extends GraphAlgorithm {
                 ds.returnHeap();
                 ds.returnPrevArray();
                 backtrack(prevEdges, resultWay, srcId, trgtId);
-                resultWay.setTravelTime(dists[trgtId] * graph.travelTimeConstant);
                 return  altitudeDiff;
 
 
@@ -155,7 +154,6 @@ public class ConstrainedSP extends GraphAlgorithm {
         }
         log.finer("path goes over " + altitudeDiff + " meters of altitude Difference");
         backtrack(prevEdges, resultWay, srcId, trgtId);
-        resultWay.setTravelTime(dists[trgtId] * graph.travelTimeConstant);
 
         ds.returnDistArray(false);
         ds.returnHeap();
@@ -185,6 +183,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         // Add them without values we set the values in the next step
         resultWay.addEmptyPoints(routeElements);
         int distance = 0;
+        int multdistance = 0;
         // backtracking here
         // Don't read distance from multipliedDist[], because there are
         // distances with
@@ -195,6 +194,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         while (routeElements > 1) {
             prevEdge = prevEdges[currNode];
             distance += graph.getEuclidianDist(prevEdge);
+            multdistance += graph.getDist(prevEdge);
             routeElements--;
             resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
             resultWay.setPointLon(routeElements, graph.getNodeLon(currNode));
@@ -203,7 +203,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         // add source node to the result.
         resultWay.setPointLat(0, graph.getNodeLat(currNode));
         resultWay.setPointLon(0, graph.getNodeLon(currNode));
-
+        resultWay.setTravelTime(multdistance * graph.travelTimeConstant);
         resultWay.setDistance(distance);
         return;
     }
