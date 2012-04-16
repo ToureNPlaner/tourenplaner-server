@@ -133,6 +133,7 @@ public class ConstrainedSP extends GraphAlgorithm {
                 ds.returnHeap();
                 ds.returnPrevArray();
                 backtrack(prevEdges, resultWay, srcId, trgtId);
+                resultWay.setTravelTime(dists[trgtId] * graph.travelTimeConstant);
                 return  altitudeDiff;
 
 
