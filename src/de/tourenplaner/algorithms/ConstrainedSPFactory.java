@@ -58,6 +58,11 @@ public class ConstrainedSPFactory extends SharingAlgorithmFactory {
     }
 
     @Override
+    public String getDescription(){
+        return "Calculates, if possible, a short route between the two supplied points, that climbs less than the supplied maximum altitude over it's length";
+    }
+
+    @Override
     public Map<String, Object> getDetails() {
         return details;
     }

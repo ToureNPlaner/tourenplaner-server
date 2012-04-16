@@ -75,6 +75,7 @@ public class TourenPlaner {
             algInfo = new HashMap<String, Object>(5);
             algInfo.put("version", alg.getVersion());
             algInfo.put("name", alg.getAlgName());
+            algInfo.put("description", alg.getDescription());
             algInfo.put("urlsuffix", alg.getURLSuffix());
             if (alg instanceof AlgorithmFactory) {
                 algInfo.put("constraints", alg.getConstraints());

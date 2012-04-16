@@ -57,6 +57,11 @@ public class NNSearchFactory extends GraphAlgorithmFactory {
         return details;
     }
 
+    @Override
+    public String getDescription() {
+        return "Finds the nearest point on a road for the given coordinates";
+    }
+
     /*
       * (non-Javadoc)
       * 

@@ -78,4 +78,12 @@ public abstract class AlgorithmFactory {
      * @return A map with the details or null
      */
     public abstract Map<String, Object> getDetails();
+
+    /**
+     * Gets a human readable (english) description of the implemented
+     * algorithm. Clients should provide translations for common algorithms
+     *
+     * @return A description of the algorithm
+     */
+    public abstract String getDescription();
 }

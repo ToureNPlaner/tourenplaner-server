@@ -47,6 +47,11 @@ public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
     }
 
     @Override
+    public String getDescription() {
+        return "Calculates a short tour visiting each of the supplied points";
+    }
+
+    @Override
     public Algorithm createAlgorithm(DijkstraStructs rs) {
         return new TravelingSalesman(graph, rs);
     }

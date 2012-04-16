@@ -43,6 +43,12 @@ public class ShortestPathFactory extends SharingAlgorithmFactory {
     }
 
     @Override
+    public String getDescription() {
+        return "Calculates the shortest path visiting the given points in the order they are supplied";
+    }
+
+
+    @Override
     public Map<String, Object> getDetails() {
         return details;
     }

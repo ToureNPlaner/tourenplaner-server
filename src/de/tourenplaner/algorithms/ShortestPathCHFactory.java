@@ -41,6 +41,11 @@ public class ShortestPathCHFactory extends SharingAlgorithmFactory {
 
     }
 
+    @Override
+    public String getDescription(){
+        return "Calculates the shortest path visiting the given points in the order they are supplied";
+    }
+
 	@Override
 	public Algorithm createAlgorithm(DijkstraStructs rs) {
 		return new ShortestPathCH(graph, rs);
