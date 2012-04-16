@@ -25,6 +25,14 @@ import java.util.logging.XMLFormatter;
 
 public class TourenPlaner {
 
+    private static void registerAlgorithms(AlgorithmRegistry reg, GraphRep graph) {
+        // reg.registerAlgorithm(new ShortestPathFactory(graph));
+        reg.registerAlgorithm(new ShortestPathCHFactory(graph));
+        reg.registerAlgorithm(new TravelingSalesmenFactory(graph));
+        reg.registerAlgorithm(new NNSearchFactory(graph));
+        reg.registerAlgorithm(new ConstrainedSPFactory(graph));
+    }
+
     private static Logger log = Logger.getLogger("de.tourenplaner");
 
     /**
@@ -171,11 +179,7 @@ public class TourenPlaner {
 
         // Register Algorithms
         AlgorithmRegistry reg = new AlgorithmRegistry();
-        // reg.registerAlgorithm(new ShortestPathFactory(graph));
-        reg.registerAlgorithm(new ShortestPathCHFactory(graph));
-        reg.registerAlgorithm(new TravelingSalesmenFactory(graph));
-        reg.registerAlgorithm(new NNSearchFactory(graph));
-        reg.registerAlgorithm(new ConstrainedSPFactory(graph));
+        registerAlgorithms(reg, graph);
 
         // initialize DatabaseManager
         if (cm.getEntryBool("private", false)) {
@@ -209,5 +213,4 @@ public class TourenPlaner {
 
         new HttpServer(cm, serverInfo, comCore);
     }
-
 }
