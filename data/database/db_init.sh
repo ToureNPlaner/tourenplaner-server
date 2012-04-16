@@ -171,7 +171,7 @@ then
     fi
   done
 
-  TNP_USER_SALT=`dd if=/dev/urandom bs=4K count=1 2> /dev/null| shasum | grep -o -e '[[:alnum:]]*'`
+  TNP_USER_SALT=`openssl rand -hex 32`
 
   TNP_USER_PW_HASH=`echo -n "$TNP_USER_PW:$TNP_USER_SALT" | shasum | grep -o -e '[[:alnum:]]*'`
 
