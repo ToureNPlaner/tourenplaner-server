@@ -35,12 +35,10 @@ public class ErrorMessagesToAsciiDoc {
             String idAttribute = errorIdLowerCase + "_id";
             String statusAttribute = errorIdLowerCase + "_status";
             String messageAttribute = errorIdLowerCase + "_message";
-            String descriptionAttribute = errorIdLowerCase + "_description";
             
             System.out.println(":" + idAttribute + ": " + errorId);
             System.out.println(":" + statusAttribute + ": " + table.get(errorId).get(0));
             System.out.println(":" + messageAttribute + ": " + table.get(errorId).get(1));
-            System.out.println(":" + descriptionAttribute + ": ");
             
             System.out.println(":" + errorIdLowerCase + ": " +
                     "<<{" + idAttribute + "},{" + idAttribute + "}>>" +
@@ -54,9 +52,9 @@ public class ErrorMessagesToAsciiDoc {
         System.out.println();
         System.out.println("== Errors");
         
-        System.out.println("[options=\"header,autowidth\",cols=\"4*\"]");
+        System.out.println("[options=\"header,autowidth\",cols=\"3*\"]");
         System.out.println("|==================================");
-        System.out.println("|Error ID |Http Statuscode |Message and possible Details |Description");
+        System.out.println("|Error ID |Http Statuscode |Message and possible Details");
 
         
         
@@ -66,8 +64,6 @@ public class ErrorMessagesToAsciiDoc {
             String idAttribute = "{" + errorIdLowerCase + "_id}";
             String statusAttribute = "{" + errorIdLowerCase + "_status}";
             String messageAttribute = "{" + errorIdLowerCase + "_message}";
-            String descriptionAttribute = "{" + errorIdLowerCase + "_description}";
-            
             System.out.print("|" + idAttribute + "[[" + idAttribute+ "]] |" + statusAttribute + "|" + messageAttribute);
 
             for (int i=2; i < table.get(errorId).size(); i++) {
@@ -79,9 +75,7 @@ public class ErrorMessagesToAsciiDoc {
             } else {
                 System.out.print(" ");
             }
-
-            System.out.println("|" + descriptionAttribute);
-            
+            System.out.println();
         }
 
 
