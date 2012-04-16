@@ -1,7 +1,5 @@
 package de.tourenplaner.config;
 
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -15,16 +13,13 @@ import static org.junit.Assert.fail;
  */
 public class ConfigManagerTest {
 
+
     private void readConfigFile(String configName) throws Exception {
         String configPath =
                 ConfigManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() +
                         "../data/test/configfiles/" + configName;
         System.out.println("Loading config file " + configPath);
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-
-        ConfigManager.init(mapper, configPath);
+        ConfigManager.init(configPath);
 
     }
 

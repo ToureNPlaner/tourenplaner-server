@@ -3,6 +3,7 @@
  */
 package de.tourenplaner.config;
 
+import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
@@ -56,14 +57,15 @@ public class ConfigManager {
 	 * Construct the ConfigManager and loads the config from JSON file with the
 	 * given file path.
 	 * 
-	 * @param mapper
-	 *            shared ObjectMapper
-	 * @param configPath the file system path to the config file
-	 * @throws Exception Thrown if mapping of config file fails, for example
+	 *
+     * @param configPath the file system path to the config file
+     * @throws Exception Thrown if mapping of config file fails, for example
      *      because the file was not found or the file has a bad syntax
 	 */
-	private ConfigManager(ObjectMapper mapper, String configPath)
+	private ConfigManager(String configPath)
 			throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
 		this.confMap = mapper.readValue(new File(configPath),
 				new TypeReference<Map<String, Object>>() {
 				});
@@ -95,16 +97,14 @@ public class ConfigManager {
 	 * Initialize the config management and construct the configManager. To do
 	 * before getInstance. If Init fails the ConfigManager can be used as an
 	 * empty Config that only returns the default
-	 * 
-	 * @param mapper the JSON mapper, must have comments enabled
+	 *
      * @param configPath the file system path to the config file
-	 * 
 	 * @throws Exception Thrown if mapping of config file fails, for example
      *      because the file was not found or the file has a bad syntax
 	 */
-	public static void init(ObjectMapper mapper, String configPath)
+	public static void init(String configPath)
 			throws Exception {
-		instance = new ConfigManager(mapper, configPath);
+		instance = new ConfigManager(configPath);
 	}
 
 	/**
