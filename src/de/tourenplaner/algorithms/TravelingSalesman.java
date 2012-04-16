@@ -32,7 +32,7 @@ import java.util.Map;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *         <p/>
+ *
  *         Used to create instances of TravelingSalesman algorithm
  */
 public class TravelingSalesman extends GraphAlgorithm {

@@ -17,9 +17,8 @@
 package de.tourenplaner.server;
 
 /**
- * User: Niklas Schnelle
- * Date: 12/27/11
- * Time: 12:59 AM
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  */
 public abstract class RequestHandler {
 

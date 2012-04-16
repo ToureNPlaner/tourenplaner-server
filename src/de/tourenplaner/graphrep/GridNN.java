@@ -21,7 +21,7 @@ import com.carrotsearch.hppc.IntArrayList;
 import java.util.logging.Logger;
 
 /**
- * @author Niklas Schnelle
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class GridNN implements NNSearcher {
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");

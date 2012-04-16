@@ -37,7 +37,7 @@ import java.util.logging.Logger;
  * queue of it's associated ComputeCore using Algorithms known to it's
  * AlgorithmManager
  *
- * @author Niklas Schnelle, Peter Vollmer, Sascha Meusel
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ComputeThread extends Thread {
 

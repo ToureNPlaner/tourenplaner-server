@@ -19,6 +19,9 @@ package de.tourenplaner.computecore;
 import com.carrotsearch.hppc.IntArrayList;
 
 /**
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  * Class used to store the route between two
  * requested points
  */

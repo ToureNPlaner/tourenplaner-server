@@ -20,6 +20,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  * The interface implemented by classes that read a GraphRep from an InputStream
  */
 public interface GraphRepReader {

@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author Peter Vollmer
+ *  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  * 
  *         This config manager loads configurations from a config file which is
  *         formated in JSON.

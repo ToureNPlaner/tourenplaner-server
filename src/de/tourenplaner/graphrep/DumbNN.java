@@ -17,9 +17,10 @@
 package de.tourenplaner.graphrep;
 
 /**
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  * does the same as KDTreeNN, but dumber (linear search)
- * 
- * @author Christoph Haag
  */
 public class DumbNN implements NNSearcher {
 	private static final long serialVersionUID = 1L;

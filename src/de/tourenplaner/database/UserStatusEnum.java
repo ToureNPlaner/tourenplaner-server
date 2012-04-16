@@ -20,7 +20,7 @@
 package de.tourenplaner.database;
 
 /**
- * @author Sascha Meusel
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
  */
 public enum UserStatusEnum {

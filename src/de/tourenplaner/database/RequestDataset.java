@@ -24,7 +24,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import java.util.Date;
 
 /**
- * @author Sascha Meusel
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
  */
 public class RequestDataset {
