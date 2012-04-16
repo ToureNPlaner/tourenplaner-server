@@ -271,6 +271,7 @@ public class ConfigManager {
      *
      * Returns a ConfigManager instance based on the hash map value of a given key
      * or based on the defaultValue if there is a cast error or the key is not found.
+     * If defaultValue is null, a ConfigManager that only returns defaults will be returned.
      *
      * @param key the key
      * @param defaultValue the default value
