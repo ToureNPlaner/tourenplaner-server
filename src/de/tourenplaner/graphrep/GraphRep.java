@@ -19,6 +19,8 @@ package de.tourenplaner.graphrep;
 import java.io.Serializable;
 
 /**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
  * Class GraphRep
  */
 public class GraphRep implements Serializable {

@@ -23,6 +23,10 @@ import java.io.InputStreamReader;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ */
 public class GraphRepTextReader implements GraphRepReader {
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
     private static final Pattern COMPILE = Pattern.compile(" ");

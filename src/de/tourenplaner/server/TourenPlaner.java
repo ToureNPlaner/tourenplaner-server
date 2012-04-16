@@ -36,6 +36,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.XMLFormatter;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ *
+ */
 public class TourenPlaner {
 
     private static void registerAlgorithms(AlgorithmRegistry reg, GraphRep graph) {
