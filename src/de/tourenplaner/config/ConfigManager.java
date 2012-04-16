@@ -96,7 +96,7 @@ public class ConfigManager {
 	 * before getInstance. If Init fails the ConfigManager can be used as an
 	 * empty Config that only returns the default
 	 * 
-	 * @param mapper the JSON mapper
+	 * @param mapper the JSON mapper, must have comments enabled
      * @param configPath the file system path to the config file
 	 * 
 	 * @throws Exception Thrown if mapping of config file fails, for example
@@ -333,5 +333,12 @@ public class ConfigManager {
 
 		return instance;
 	}
+
+    /**
+     * Resets the ConfigManager as if it would not have been initialized
+     */
+    public static void resetConfigManager() {
+        instance = null;
+    }
 
 }
