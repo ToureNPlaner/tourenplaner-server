@@ -23,6 +23,8 @@ import org.codehaus.jackson.type.TypeReference;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This config manager loads configurations from a config file which is
@@ -33,6 +35,8 @@ import java.util.Map;
 public class ConfigManager {
 
 	private static volatile ConfigManager instance;
+
+    private static Logger log = Logger.getLogger("de.tourenplaner.config");
 
 	/**
 	 * Storage of configuration entries
@@ -137,9 +141,7 @@ public class ConfigManager {
 				try {
 					value = (Double) confMap.get(key);
 				} catch (ClassCastException e) {
-                    System.out.println("Failed to read config value for the key "
-                            + this.keyPathBase + key + ": " + e.getMessage());
-					e.printStackTrace();
+                    log.log(Level.WARNING, "Failed to read value from config manager", e);
 					return defaultValue;
 				}
 			} else {
@@ -168,9 +170,7 @@ public class ConfigManager {
 				try {
 					value = (Boolean) confMap.get(key);
 				} catch (ClassCastException e) {
-                    System.out.println("Failed to read config value for the key "
-                            + this.keyPathBase + key + ": " + e.getMessage());
-					e.printStackTrace();
+                    log.log(Level.WARNING, "Failed to read value from config manager", e);
 					return defaultValue;
 				}
 			} else {
@@ -200,9 +200,7 @@ public class ConfigManager {
 				try {
 					value = (Long) confMap.get(key);
 				} catch (ClassCastException e) {
-                    System.out.println("Failed to read config value for the key "
-                            + this.keyPathBase + key + ": " + e.getMessage());
-					e.printStackTrace();
+                    log.log(Level.WARNING, "Failed to read value from config manager", e);
 					return defaultValue;
 				}
 			} else {
@@ -232,9 +230,7 @@ public class ConfigManager {
 				try {
 					value = (java.lang.Number) confMap.get(key);
 				} catch (ClassCastException e) {
-                    System.out.println("Failed to read config value for the key "
-                            + this.keyPathBase + key + ": " + e.getMessage());
-					e.printStackTrace();
+                    log.log(Level.WARNING, "Failed to read value from config manager", e);
 					return defaultValue;
 				}
 			} else {
@@ -264,9 +260,7 @@ public class ConfigManager {
 				try {
 					value = (String) confMap.get(key);
 				} catch (ClassCastException e) {
-                    System.out.println("Failed to read config value for the key "
-                            + this.keyPathBase + key + ": " + e.getMessage());
-					e.printStackTrace();
+                    log.log(Level.WARNING, "Failed to read value from config manager", e);
 					return defaultValue;
 				}
 			} else {
@@ -309,17 +303,14 @@ public class ConfigManager {
                         if (subKey instanceof String) {
                             newMap.put((String) subKey, map.get(subKey));
                         } else {
-                            System.out.println("Failed to read config value for the key "
-                                    + this.keyPathBase + key + ": A key of the hash map was not a string.");
+                            log.log(Level.WARNING, "Failed to read value in subconfig");
                             return defaultConfigManager;
                         }
                     }
 
                     value = new ConfigManager(newMap, newKeyPathBase);
                 } catch (ClassCastException e) {
-                    System.out.println("Failed to read config value for the key "
-                            + this.keyPathBase + key + ": " + e.getMessage());
-                    e.printStackTrace();
+                    log.log(Level.WARNING, "Failed to read value from config manager", e);
                     return defaultConfigManager;
                 }
             } else {

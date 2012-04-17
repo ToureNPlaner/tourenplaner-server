@@ -27,17 +27,12 @@ import java.security.NoSuchAlgorithmException;
 public class SHA1 {
 
     private static String convertToHex(byte[] data) {
-        StringBuffer buf = new StringBuffer();
-        for (int i = 0; i < data.length; i++) {
-            int halfbyte = (data[i] >>> 4) & 0x0F;
-            int two_halfs = 0;
-            do {
-                if ((0 <= halfbyte) && (halfbyte <= 9)) buf.append((char) ('0' + halfbyte));
-                else buf.append((char) ('a' + (halfbyte - 10)));
-                halfbyte = data[i] & 0x0F;
-            } while (two_halfs++ < 1);
+        final StringBuilder hexbuilder = new StringBuilder(data.length * 2);
+        for (byte b : data) {
+            hexbuilder.append(Integer.toHexString((b >>> 4) & 0x0F));
+            hexbuilder.append(Integer.toHexString(b & 0x0F));
         }
-        return buf.toString();
+        return hexbuilder.toString();
     }
 
     public static String SHA1(String text)  {
