@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012 ToureNPlaner
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package de.tourenplaner.algorithms;
 
 import com.carrotsearch.hppc.BitSet;
@@ -16,7 +32,7 @@ import java.util.Map;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *         <p/>
+ *
  *         Used to create instances of TravelingSalesman algorithm
  */
 public class TravelingSalesman extends GraphAlgorithm {
@@ -131,31 +147,36 @@ public class TravelingSalesman extends GraphAlgorithm {
 
     private final int[] twoOpt(int[][] distmat, int[] currTour) {
         int[] shiftedTour = currTour.clone();
-
-
         int[] bestTour = shiftedTour.clone();
-        int bestLength = calcTourLength(distmat, bestTour);
-        for (int i = 0; i < shiftedTour.length; i++) {
-            for (int j = 1; j < shiftedTour.length - 1; j++) {
-                int[] neighborTour = shiftedTour.clone();
-                StaticMath.reverse(neighborTour, 0, j + 1);
-                int length = calcTourLength(distmat, neighborTour);
-                if (length < bestLength) {
-                    bestTour = neighborTour.clone();
-                }
+        int betterLength;
+        int bestLength;
+        betterLength = calcTourLength(distmat, bestTour);
+        do {
+            bestLength = betterLength;
+            for (int i = 0; i < shiftedTour.length; i++) {
+                for (int j = 1; j < shiftedTour.length - 1; j++) {
+                    int[] neighborTour = shiftedTour.clone();
+                    StaticMath.reverse(neighborTour, 0, j + 1);
+                    int length = calcTourLength(distmat, neighborTour);
+                    if (length < bestLength) {
+                        bestTour = neighborTour.clone();
+                    }
 
-                neighborTour = shiftedTour.clone();
-                StaticMath.reverse(neighborTour, j, shiftedTour.length);
-                length = calcTourLength(distmat, neighborTour);
-                if (length < bestLength) {
-                    bestTour = neighborTour.clone();
+                    neighborTour = shiftedTour.clone();
+                    StaticMath.reverse(neighborTour, j, shiftedTour.length);
+                    length = calcTourLength(distmat, neighborTour);
+                    if (length < bestLength) {
+                        bestTour = neighborTour.clone();
+                    }
                 }
+                // shift  array to the left
+                int first = shiftedTour[0];
+                System.arraycopy(shiftedTour, 1, shiftedTour, 0, shiftedTour.length - 1);
+                shiftedTour[shiftedTour.length - 1] = first;
             }
-            // shift  array to the left
-            int first = shiftedTour[0];
-            System.arraycopy(shiftedTour, 1, shiftedTour, 0, shiftedTour.length - 1);
-            shiftedTour[shiftedTour.length - 1] = first;
-        }
+            betterLength = calcTourLength(distmat, bestTour);
+            shiftedTour = bestTour.clone();
+        } while (betterLength < bestLength);
 
         return bestTour;
     }

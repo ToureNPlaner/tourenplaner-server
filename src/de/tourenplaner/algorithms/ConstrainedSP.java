@@ -1,3 +1,19 @@
+/*
+ * Copyright 2012 ToureNPlaner
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package de.tourenplaner.algorithms;
 
 import de.tourenplaner.computecore.ComputeRequest;
@@ -128,7 +144,7 @@ public class ConstrainedSP extends GraphAlgorithm {
                 log.finer("There is no path from src: " + srcId + " to trgt: " + trgtId + "with constraint" +
                         maxAltitudeDifference
                 );
-                misc.put("message", "Not feasible, but found path with smallest altitude difference = "+ altitudeDiff+" m");
+                misc.put("message", "Not feasible, but found path with smallest altitude difference = " + altitudeDiff + " m");
                 ds.returnDistArray(false);
                 ds.returnHeap();
                 ds.returnPrevArray();
@@ -154,7 +170,6 @@ public class ConstrainedSP extends GraphAlgorithm {
         }
         log.finer("path goes over " + altitudeDiff + " meters of altitude Difference");
         backtrack(prevEdges, resultWay, srcId, trgtId);
-        resultWay.setTravelTime(dists[trgtId] * graph.travelTimeConstant);
 
         ds.returnDistArray(false);
         ds.returnHeap();
@@ -184,6 +199,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         // Add them without values we set the values in the next step
         resultWay.addEmptyPoints(routeElements);
         int distance = 0;
+        int multdistance = 0;
         // backtracking here
         // Don't read distance from multipliedDist[], because there are
         // distances with
@@ -194,6 +210,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         while (routeElements > 1) {
             prevEdge = prevEdges[currNode];
             distance += graph.getEuclidianDist(prevEdge);
+            multdistance += graph.getDist(prevEdge);
             routeElements--;
             resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
             resultWay.setPointLon(routeElements, graph.getNodeLon(currNode));
@@ -202,7 +219,7 @@ public class ConstrainedSP extends GraphAlgorithm {
         // add source node to the result.
         resultWay.setPointLat(0, graph.getNodeLat(currNode));
         resultWay.setPointLon(0, graph.getNodeLon(currNode));
-
+        resultWay.setTravelTime(multdistance * graph.travelTimeConstant);
         resultWay.setDistance(distance);
         return;
     }
