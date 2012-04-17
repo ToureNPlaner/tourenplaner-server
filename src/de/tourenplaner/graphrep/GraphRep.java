@@ -20,6 +20,8 @@ import java.io.Serializable;
 
 /**
  * Class GraphRep
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class GraphRep implements Serializable {
     private static final long serialVersionUID = 15L;

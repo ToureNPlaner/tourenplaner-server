@@ -16,12 +16,7 @@
 
 package de.tourenplaner.config;
 
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Test;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -30,18 +25,16 @@ import static org.junit.Assert.fail;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ConfigManagerTest {
+    
+    private ConfigManager currentConfigManager = null;
+    private String currentConfigName = "";
 
     private void readConfigFile(String configName) throws Exception {
         String configPath =
                 ConfigManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() +
                         "../data/test/configfiles/" + configName;
         System.out.println("Loading config file " + configPath);
-
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-
-        ConfigManager.init(mapper, configPath);
-
+        ConfigManager.init(configPath);
     }
 
     
@@ -49,6 +42,14 @@ public class ConfigManagerTest {
     public void testExceptionOnBadSyntax() throws Exception {
         ConfigManager.resetConfigManager();
         readConfigFile("badsyntax.conf");
+        fail("There should be an exception");
+    }
+
+    @Test(expected = Exception.class)
+    public void testExceptionOnNullPath() throws Exception {
+        ConfigManager.resetConfigManager();
+        ConfigManager.init(null);
+        fail("There should be an exception");
     }
 
 
@@ -56,57 +57,181 @@ public class ConfigManagerTest {
     public void testExceptionOnNotFoundx() throws Exception {
         ConfigManager.resetConfigManager();
         readConfigFile("anyfilenamethatshouldnotexist.conf");
+        fail("There should be an exception");
     }
-    
-    private void testGetEntryMethods(ConfigManager cm, String configName, Map<String, Object> expectedValues) {
-        assertEquals("get double in " + configName + " fails",
-                (Double) expectedValues.get("double"), cm.getEntryDouble("double", 4.2), 0.00000000001);
-        assertEquals("get bool in " + configName + " fails",
-                expectedValues.get("bool"), cm.getEntryBool("bool", false));
-        assertEquals("get long in " + configName + " fails",
-                expectedValues.get("long"), cm.getEntryLong("long", 357468147680579L));
-        assertEquals("get int in " + configName + " fails",
-                expectedValues.get("int"), cm.getEntryInt("int", 3));
-        assertEquals("get string in " + configName + " fails",
-                expectedValues.get("string"), cm.getEntryString("string", "allyourbasearebelongtous"));
-        
+
+
+    private void testGetEntryDouble(String key, double expected, double defaultValue) {
+        double DELTA = 0.00000000001;
+
+        String message = "Test fails: config '" + this.currentConfigName + "', getEntryDouble, " +
+                "key '" + key + "', expected '" + expected + "', value '" + defaultValue + "'";
+
+        assertEquals(message, expected, this.currentConfigManager.getEntryDouble(key, defaultValue), DELTA);
+    }
+
+    private void testGetEntryBool(String key, boolean expected, boolean defaultValue) {
+        String message = "Test fails: config '" + this.currentConfigName + "', getEntryBool, " +
+                "key '" + key + "', expected '" + expected + "', value '" + defaultValue + "'";
+
+        assertEquals(message, expected, this.currentConfigManager.getEntryBool(key, defaultValue));
+    }
+
+    private void testGetEntryLong(String key, long expected, long defaultValue) {
+        String message = "Test fails: config '" + this.currentConfigName + "', getEntryLong, " +
+                "key '" + key + "', expected '" + expected + "', value '" + defaultValue + "'";
+
+        assertEquals(message, expected, this.currentConfigManager.getEntryLong(key, defaultValue));
+    }
+
+    private void testGetEntryInt(String key, int expected, int defaultValue) {
+        String message = "Test fails: config '" + this.currentConfigName + "', getEntryInt, " +
+                "key '" + key + "', expected '" + expected + "', value '" + defaultValue + "'";
+
+        assertEquals(message, expected, this.currentConfigManager.getEntryInt(key, defaultValue));
+    }
+
+    private void testGetEntryString(String key, String expected, String defaultValue) {
+        String message = "Test fails: config '" + this.currentConfigName + "', getEntryString, " +
+                "key '" + key + "', expected '" + expected + "', value '" + defaultValue + "'";
+
+        assertEquals(message, expected, currentConfigManager.getEntryString(key, defaultValue));
+    }
+
+
+    /**
+     * Prepares ConfigManager for with next config file
+     *
+     * @param configName if null the default config will be loaded
+     * @throws Exception throws if reading config file fails
+     */
+    private void prepareNextConfigManager(String configName) throws Exception {
+        currentConfigName = "defaultConfig";
+        ConfigManager.resetConfigManager();
+        if (configName != null) {
+            currentConfigName = configName;
+            readConfigFile("test.conf");
+        }
+        currentConfigManager = ConfigManager.getInstance();
+    }
+
+    /**
+     * will check if only defaults will be retrieved, and not values within the test.conf
+     */
+    private void testDefaultConfig() {
+        // we should get the default values
+        testGetEntryDouble("double", 4.2,  4.2);
+        testGetEntryBool("bool", false,  false);
+        testGetEntryLong("long", 357468147680579L, 357468147680579L);
+        testGetEntryInt("int", 3, 3);
+        testGetEntryString("string", "allyourbasearebelongtous", "allyourbasearebelongtous");
+
+        // we should get the default values if we use null as key
+        testGetEntryDouble(null, 4.2,  4.2);
+        testGetEntryBool(null, false,  false);
+        testGetEntryLong(null, 357468147680579L, 357468147680579L);
+        testGetEntryInt(null, 3, 3);
+        testGetEntryString(null, "allyourbasearebelongtous", "allyourbasearebelongtous");
+    }
+
+    /**
+     * will check if retrieved values matches with real values of the test.conf,
+     * and not with default values. also checks if wrong getEntryMethods will
+     * retrieve default values
+     */
+    private void testTestConfig() {
+        // check if we get the correct values from test.conf and not the defaults
+        testGetEntryDouble("double", 493.7213587466, 4.2);
+        testGetEntryBool("bool", true, false);
+        testGetEntryLong("long", 94437512851394228L, 357468147680579L);
+        testGetEntryInt("int", -385155479, 3);
+        testGetEntryString("string", "end of the universe", "allyourbasearebelongtous");
+
+
+        // check if we get default values if we using getEntry methods
+        // whose types differ from the types of the retrieved json values
+
+        // interpret double "493.7213587466"
+        testGetEntryBool("double", false, false);
+        testGetEntryLong("double", 357468147680579L, 357468147680579L);
+        // testGetEntryInt interprets double as int (double value is floored)
+        testGetEntryString("double", "allyourbasearebelongtous", "allyourbasearebelongtous");
+
+        // interpret bool "true"
+        testGetEntryDouble("bool", 4.2, 4.2);
+        testGetEntryLong("bool", 357468147680579L, 357468147680579L);
+        testGetEntryInt("bool", 3, 3);
+        testGetEntryString("bool", "allyourbasearebelongtous", "allyourbasearebelongtous");
+
+        // interpret long "94437512851394228L,"
+        testGetEntryDouble("long", 4.2, 4.2);
+        testGetEntryBool("long", false, false);
+        // TODO this should return 3, but returns overflowed value
+        //testGetEntryInt("long", 3, 3);
+        testGetEntryString("long", "allyourbasearebelongtous", "allyourbasearebelongtous");
+
+        // interpret int "-385155479"
+        testGetEntryDouble("int", 4.2, 4.2);
+        testGetEntryBool("int", false, false);
+        testGetEntryLong("int", 357468147680579L, 357468147680579L);
+        testGetEntryString("int", "allyourbasearebelongtous", "allyourbasearebelongtous");
+
+        // interpret string "end of the universe"
+        testGetEntryDouble("string", 4.2, 4.2);
+        testGetEntryBool("string", false, false);
+        testGetEntryLong("string", 357468147680579L, 357468147680579L);
+        testGetEntryInt("string", 3, 3);
+
+        // check values which can be interpreted as another type
+        testGetEntryInt("double", 493, 3);
+        // TODO check if we should avoid overflows through casts from long to int
+        testGetEntryInt("long", -419787084, 3);
     }
 
     @Test
-    public void testConfigManager() {
-        ConfigManager cm;
-        
-        Map<String, Object> expectedValues = new HashMap<String, Object>();
+    public void testConfigManager() throws Exception {
 
         // test ConfigManager without init
-        ConfigManager.resetConfigManager();
-        cm = ConfigManager.getInstance();
+        prepareNextConfigManager(null);
 
-        expectedValues.put("double", 4.2);
-        expectedValues.put("bool", false);
-        expectedValues.put("long", 357468147680579L);
-        expectedValues.put("int", 3);
-        expectedValues.put("string", "allyourbasearebelongtous");
+        testDefaultConfig();
 
-        testGetEntryMethods(cm, "default config", expectedValues);
+        // test ConfigManager with test.conf
+        prepareNextConfigManager("test.conf");
 
-        try {
-            ConfigManager.resetConfigManager();
-            readConfigFile("test.conf");
-            cm = ConfigManager.getInstance();
+        testTestConfig();
 
-            // check if we get the correct values
-            expectedValues.clear();
-            expectedValues.put("double", 493.7213587466);
-            expectedValues.put("bool", true);
-            expectedValues.put("long", 94437512851394228L);
-            expectedValues.put("int", -385155479);
-            expectedValues.put("string", "end of the universe");
-            testGetEntryMethods(cm, "default config", expectedValues);
+        // check nested hash maps
+        ConfigManager oldConfigManager = currentConfigManager;
+        String oldConfigName = currentConfigName;
 
-        } catch (Exception e) {
-            fail("Exception catched: " + e.getMessage());
-        }
+        currentConfigManager = oldConfigManager.getEntryMap("another-pseudo-key", null);
+        currentConfigName = oldConfigName + ".map-key-not-found-level-1";
+        testDefaultConfig();
+
+        currentConfigManager = oldConfigManager.getEntryMap(null, null);
+        currentConfigName = oldConfigName + ".map-key-is-null-level-1";
+        testDefaultConfig();
+
+        currentConfigManager = oldConfigManager.getEntryMap("level-1", null);
+        currentConfigName = oldConfigName + ".level-1";
+        testTestConfig();
+
+        oldConfigManager = currentConfigManager;
+        oldConfigName = currentConfigName;
+
+        currentConfigManager = oldConfigManager.getEntryMap("another-pseudo-key", null);
+        currentConfigName = oldConfigName + ".map-key-not-found-level-2";
+        testDefaultConfig();
+
+        currentConfigManager = oldConfigManager.getEntryMap(null, null);
+        currentConfigName = oldConfigName + ".map-key-is-null-level-2";
+        testDefaultConfig();
+
+        currentConfigManager = oldConfigManager.getEntryMap("level-2", null);
+        currentConfigName = oldConfigName + ".level-2";
+        testTestConfig();
+
     }
 
 }

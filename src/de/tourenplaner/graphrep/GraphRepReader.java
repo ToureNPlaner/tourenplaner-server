@@ -21,6 +21,8 @@ import java.io.InputStream;
 
 /**
  * The interface implemented by classes that read a GraphRep from an InputStream
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public interface GraphRepReader {
 

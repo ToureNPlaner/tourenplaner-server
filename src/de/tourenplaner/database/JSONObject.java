@@ -18,8 +18,8 @@ package de.tourenplaner.database;
 
 /**
  * Class to bundle a json byte array and the corresponding user id.
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class JSONObject {
 

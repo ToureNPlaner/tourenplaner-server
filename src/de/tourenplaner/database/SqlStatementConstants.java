@@ -20,7 +20,6 @@ import com.mysql.jdbc.Statement;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public class SqlStatementConstants {
 

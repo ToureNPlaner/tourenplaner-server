@@ -19,7 +19,7 @@ package de.tourenplaner.server;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 /**
- *  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public enum ErrorMessage {
 

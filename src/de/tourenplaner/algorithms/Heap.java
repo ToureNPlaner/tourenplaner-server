@@ -20,10 +20,9 @@ import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * provides heap structures for a minimum heap for ints
  *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class Heap {
     private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");

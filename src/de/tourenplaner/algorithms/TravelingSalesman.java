@@ -31,9 +31,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Used to create instances of TravelingSalesman algorithm
+ *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *         <p/>
- *         Used to create instances of TravelingSalesman algorithm
  */
 public class TravelingSalesman extends GraphAlgorithm {
     private static final int SMALL = 12;

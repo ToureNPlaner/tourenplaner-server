@@ -21,9 +21,9 @@ import de.tourenplaner.graphrep.GraphRep;
 import java.util.*;
 
 /**
- *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Used to create instances of ShortestPath algorithm
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ShortestPathFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;
@@ -41,6 +41,12 @@ public class ShortestPathFactory extends SharingAlgorithmFactory {
         details.put("sourceistarget", false);
 
     }
+
+    @Override
+    public String getDescription() {
+        return "Calculates the shortest path visiting the given points in the order they are supplied";
+    }
+
 
     @Override
     public Map<String, Object> getDetails() {

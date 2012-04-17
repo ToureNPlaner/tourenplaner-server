@@ -50,7 +50,6 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * clients
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public class Responder {
 

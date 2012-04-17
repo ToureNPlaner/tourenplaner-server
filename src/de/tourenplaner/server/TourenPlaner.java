@@ -24,8 +24,6 @@ import de.tourenplaner.computecore.SharingAMFactory;
 import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.database.DatabaseManager;
 import de.tourenplaner.graphrep.*;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.beans.PropertyVetoException;
 import java.io.*;
@@ -36,6 +34,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.XMLFormatter;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ */
 public class TourenPlaner {
 
     private static void registerAlgorithms(AlgorithmRegistry reg, GraphRep graph) {
@@ -75,6 +76,7 @@ public class TourenPlaner {
             algInfo = new HashMap<String, Object>(5);
             algInfo.put("version", alg.getVersion());
             algInfo.put("name", alg.getAlgName());
+            algInfo.put("description", alg.getDescription());
             algInfo.put("urlsuffix", alg.getURLSuffix());
             if (alg instanceof AlgorithmFactory) {
                 algInfo.put("constraints", alg.getConstraints());
@@ -94,17 +96,13 @@ public class TourenPlaner {
      * handler and creates the httpserver
      */
     public static void main(String[] args) {
-        // Create ObjectMapper so we reuse it's data structures
-        ObjectMapper mapper = new ObjectMapper();
-        // TODO: check if we really want to enable comments since it's a nonstandard feature of JSON
-        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
         GraphRep graph = null;
         String graphFilename;
         String logFilename;
         CLIParser cliParser = new CLIParser(args);
         if (cliParser.getConfigFilePath() != null) {
             try {
-                ConfigManager.init(mapper, cliParser.getConfigFilePath());
+                ConfigManager.init(cliParser.getConfigFilePath());
             } catch (Exception e) {
                 // ConfigManager either didn't like the path or the .config file at the path
                 log.severe("Error reading configuration file from file: " + cliParser.getConfigFilePath() + '\n' +

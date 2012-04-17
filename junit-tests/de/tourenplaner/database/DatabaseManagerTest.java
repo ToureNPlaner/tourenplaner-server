@@ -14,9 +14,6 @@
  *    limitations under the License.
  */
 
-/**
- * 
- */
 package de.tourenplaner.database;
 
 import static org.junit.Assert.assertFalse;
@@ -34,11 +31,12 @@ import org.junit.Test;
 import de.tourenplaner.config.ConfigManager;
 
 /**
- * @author Sascha Meusel
- * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class DatabaseManagerTest {
 
+    static boolean doTest = false;
+    
 	static DatabaseManager dbm = null;
 	static String dbmFailureMessage = null;
 	static int testUserID = -1;
@@ -48,8 +46,30 @@ public class DatabaseManagerTest {
 	 * Prepares test run.
 	 */
 	@BeforeClass
-	public final static void prepareTestRun() {
-		final ConfigManager cm = ConfigManager.getInstance();
+	public static void prepareTestRun() {
+        String configPath = DatabaseManagerTest.class.getProtectionDomain().getCodeSource().getLocation().getPath() +
+                        "../data/test/database-junit.conf";
+
+        try {
+            ConfigManager.init(configPath);
+        } catch (Exception e) {
+            return;
+        }
+
+        final ConfigManager cm = ConfigManager.getInstance();
+        doTest = cm.getEntryBool("private", false);
+
+        System.out.println();
+        if (doTest) {
+            System.out.println("### Database JUnit test will not be executed. ###");
+
+        } else {
+            System.out.println("### Database JUnit test will not be executed. ###");
+
+        }
+        System.out.println();
+        
+        
 		try {
             DatabaseManager.initDatabaseManager(
                     cm.getEntryString("dburi", "jdbc:mysql://localhost:3306/tourenplaner?autoReconnect=true"),
@@ -100,7 +120,7 @@ public class DatabaseManagerTest {
 	 * Cleaning up after test run.
 	 */
 	@AfterClass
-	public final static void cleanUpAfterTestRun() {
+	public static void cleanUpAfterTestRun() {
 		if (dbm != null) {
 			try {
 				dbm.deleteUser(testUserID);
@@ -133,12 +153,9 @@ public class DatabaseManagerTest {
 			assertFalse("dbm is null", dbm == null);
 			assertFalse("returned request id should never be <= 0", requestID <= 0);
 		} catch (SQLFeatureNotSupportedException e) {
-			e.printStackTrace();
 			fail(e.getLocalizedMessage());
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			fail("Not yet implemented"); // TODO
+            fail(e.getLocalizedMessage());
 		}
 
 	}
@@ -151,119 +168,6 @@ public class DatabaseManagerTest {
 	@Test
 	public final void testAddNewUser() {
 		assertTrue(userFailureMessage, userFailureMessage == null);
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#addNewVerifiedUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)}
-	 * .
-	 */
-	@Test
-	public final void testAddNewVerifiedUser() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#updateRequest(de.tourenplaner.database.RequestDataset)}.
-	 */
-	@Test
-	public final void testUpdateRequest() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#updateUser(de.tourenplaner.database.UserDataset)}.
-	 */
-	@Test
-	public final void testUpdateUser() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link de.tourenplaner.database.DatabaseManager#deleteRequest(int)}.
-	 */
-	@Test
-	public final void testDeleteRequest() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#deleteRequestsOfUser(int)}.
-	 */
-	@Test
-	public final void testDeleteRequestsOfUser() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link de.tourenplaner.database.DatabaseManager#deleteUser(int)}.
-	 */
-	@Test
-	public final void testDeleteUserInt() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link de.tourenplaner.database.DatabaseManager#getAllRequests(int, int)}
-	 * .
-	 */
-	@Test
-	public final void testGetAllRequestsIntInt() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link de.tourenplaner.database.DatabaseManager#getRequest(int)}.
-	 */
-	@Test
-	public final void testGetRequest() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#getRequests(int, int, int)}.
-	 */
-	@Test
-	public final void testGetRequestsIntIntInt() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link de.tourenplaner.database.DatabaseManager#getAllUsers()}.
-	 */
-	@Test
-	public final void testGetAllUsers() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link de.tourenplaner.database.DatabaseManager#getAllUsers(int, int)}.
-	 */
-	@Test
-	public final void testGetAllUsersIntInt() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#getUser(java.lang.String)}.
-	 */
-	@Test
-	public final void testGetUserString() {
-		fail("Not yet implemented"); // TODO
-	}
-
-	/**
-	 * Test method for {@link de.tourenplaner.database.DatabaseManager#getUser(int)}.
-	 */
-	@Test
-	public final void testGetUserInt() {
-		fail("Not yet implemented"); // TODO
 	}
 
 }

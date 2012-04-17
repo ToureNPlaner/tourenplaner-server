@@ -32,13 +32,12 @@ import java.util.concurrent.Executors;
  * 
  * This is the main class used to start the server and construct utility objects
  * like the GraphRep. and ConfigManager and ComputeCore
- * 
- * @author Niklas Schnelle
- * @version 0.1 Prototype
- * 
+ * <p>
  *          Initially based on:
- *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty
- *          /example/http/snoop/package-summary.html
+ *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
+ * </p>
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class HttpServer {
 

@@ -27,9 +27,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Provides an implementation of resource constrained shortest path algorithm.
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ConstrainedSP extends GraphAlgorithm {
     private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");

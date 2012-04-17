@@ -24,9 +24,8 @@ import java.util.logging.Logger;
 /**
  * The ComputeCore keeps a thread pool of ComputeThreads and allows new
  * computations to be scheduled for execution by adding them to it's queue
- * 
- * @author Niklas Schnelle, Peter Vollmer
- * 
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ComputeCore {
     

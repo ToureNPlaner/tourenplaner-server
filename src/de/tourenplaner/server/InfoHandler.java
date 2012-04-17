@@ -25,9 +25,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * User: Niklas Schnelle
- * Date: 12/26/11
- * Time: 11:33 PM
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class InfoHandler {
     private final Map<String, Object> serverInfo;

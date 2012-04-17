@@ -22,8 +22,7 @@ import de.tourenplaner.algorithms.DijkstraStructs;
 import de.tourenplaner.algorithms.SharingAlgorithmFactory;
 
 /**
- * @author Niklas Schnelle
- * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ShareEnabledAM extends AlgorithmManager {
 	private final DijkstraStructs rs;

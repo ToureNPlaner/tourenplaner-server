@@ -19,8 +19,7 @@ package de.tourenplaner.computecore;
 import de.tourenplaner.graphrep.GraphRep;
 
 /**
- * @author Niklas Schnelle
- * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class SharingAMFactory extends AlgorithmManagerFactory {
 

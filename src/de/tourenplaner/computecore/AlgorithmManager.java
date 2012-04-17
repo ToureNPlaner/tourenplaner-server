@@ -26,8 +26,7 @@ import java.util.Map;
  * An AlgorithmManager manages the Algorithm instances used by a single
  * ComputeThread @see de.tourenplaner.computecore.ComputeThread
  * 
- * @author Niklas Schnelle, Peter Vollmer
- * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class AlgorithmManager {
 

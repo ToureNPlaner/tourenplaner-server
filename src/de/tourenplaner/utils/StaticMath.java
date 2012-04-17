@@ -17,10 +17,10 @@
 package de.tourenplaner.utils;
 
 /**
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Class used to store static math functions for example for
  * dealing with permutations
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class StaticMath {
     /**

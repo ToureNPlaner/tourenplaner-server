@@ -14,9 +14,6 @@
  *    limitations under the License.
  */
 
-/**
- *
- */
 package de.tourenplaner.algorithms;
 
 import de.tourenplaner.graphrep.GraphRep;
@@ -24,9 +21,9 @@ import de.tourenplaner.graphrep.GraphRep;
 import java.util.*;
 
 /**
- *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Used to create instances of ConstraintShortestPath algorithm
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ConstrainedSPFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;
@@ -55,6 +52,11 @@ public class ConstrainedSPFactory extends SharingAlgorithmFactory {
         details.put("maxpoints", 2);
         details.put("sourceistarget", false);
 
+    }
+
+    @Override
+    public String getDescription(){
+        return "Calculates, if possible, a short route between the two supplied points, that climbs less than the supplied maximum altitude over it's length";
     }
 
     @Override

@@ -21,9 +21,9 @@ import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.graphrep.GraphRep;
 
 /**
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Provides an implementation of NNSearch to find nearest neighbours for given points.
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class NNSearch extends GraphAlgorithm {
 

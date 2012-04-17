@@ -19,6 +19,9 @@ package de.tourenplaner.computecore;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ */
 public class WayTest {
 
     @Test

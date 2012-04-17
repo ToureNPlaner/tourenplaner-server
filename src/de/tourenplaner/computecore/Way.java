@@ -21,6 +21,8 @@ import com.carrotsearch.hppc.IntArrayList;
 /**
  * Class used to store the route between two
  * requested points
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class Way {
 	private final IntArrayList points;

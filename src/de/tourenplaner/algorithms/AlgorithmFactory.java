@@ -13,17 +13,17 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
+
 package de.tourenplaner.algorithms;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- *
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
-
  * This factory class is used to create Algorithm instances and to provide
  * information on the created Algorithm used by clients to adapt to the server
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public abstract class AlgorithmFactory {
 	/**
@@ -78,4 +78,12 @@ public abstract class AlgorithmFactory {
      * @return A map with the details or null
      */
     public abstract Map<String, Object> getDetails();
+
+    /**
+     * Gets a human readable (english) description of the implemented
+     * algorithm. Clients should provide translations for common algorithms
+     *
+     * @return A description of the algorithm
+     */
+    public abstract String getDescription();
 }

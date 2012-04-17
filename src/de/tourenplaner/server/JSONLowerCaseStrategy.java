@@ -22,12 +22,8 @@ import org.codehaus.jackson.map.introspect.AnnotatedField;
 import org.codehaus.jackson.map.introspect.AnnotatedMethod;
 
 /**
-* Created by IntelliJ IDEA.
-* User: chris
-* Date: 26.12.11
-* Time: 19:34
-* To change this template use File | Settings | File Templates.
-*/
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ */
 class JSONLowerCaseStrategy extends PropertyNamingStrategy {
     @Override
     public String nameForGetterMethod(MapperConfig<?> config, AnnotatedMethod method, String defaultName) {

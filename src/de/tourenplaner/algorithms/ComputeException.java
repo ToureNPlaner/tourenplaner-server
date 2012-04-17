@@ -14,7 +14,6 @@
  *    limitations under the License.
  */
 
-
 package de.tourenplaner.algorithms;
 
 /**
@@ -24,7 +23,6 @@ package de.tourenplaner.algorithms;
  * or faulty algorithm code.
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
  */
 public class ComputeException extends Exception {
 

@@ -14,9 +14,6 @@
  *    limitations under the License.
  */
 
-/**
- * 
- */
 package de.tourenplaner.database;
 
 import javax.sql.DataSource;
@@ -28,7 +25,6 @@ import java.util.logging.Logger;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public class DatabaseManager {
     

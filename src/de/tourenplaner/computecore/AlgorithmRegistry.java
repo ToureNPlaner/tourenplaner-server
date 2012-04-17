@@ -27,9 +27,8 @@ import java.util.logging.Logger;
  * there specific Factory Objects. Every registered Algorithm will be available
  * to ComputeThreads through their AlgorithmManagers and will be listed as
  * available Algorithm in the ServerInfo
- * 
- * @author Niklas Schnelle, Peter Vollmer
- * 
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class AlgorithmRegistry {
     private static Logger log = Logger.getLogger("de.tourenplaner.computecore");

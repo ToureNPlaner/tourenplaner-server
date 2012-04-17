@@ -38,12 +38,12 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * This handler handles HTTP Requests on the normal operation socket including *
+ * <p>
+ *          Initially based on:
+ *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
+ * </p>
  *
- * @author Niklas Schnelle, Peter Vollmer, Sascha Meusel
- * @version 0.1
- *          <p/>
- *          Initially based on: http://docs.jboss.org/netty/3.2/xref
- *          /org/jboss/netty/example/http/snoop/package-summary.html
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class MasterHandler extends SimpleChannelUpstreamHandler {
 

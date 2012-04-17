@@ -20,13 +20,12 @@ import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.List;
 import java.util.Map;
+
 /**
- *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * This class is used to construct Graphalgorithms
  * and provides additional information only used by Graphalgorithms
  *
- *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
 	

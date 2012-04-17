@@ -14,9 +14,6 @@
  *    limitations under the License.
  */
 
-/**
- * 
- */
 package de.tourenplaner.graphrep;
 
 import com.carrotsearch.hppc.IntArrayList;
@@ -24,8 +21,7 @@ import com.carrotsearch.hppc.LongObjectOpenHashMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
 
 /**
- * @author nino
- * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class HashNN implements NNSearcher {
 

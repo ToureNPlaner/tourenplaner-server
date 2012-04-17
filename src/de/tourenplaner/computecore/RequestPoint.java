@@ -19,9 +19,7 @@ package de.tourenplaner.computecore;
 import java.util.Map;
 
 /**
- * Author: Niklas Schnelle
- * Date: 12/26/11
- * Time: 4:46 PM
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class RequestPoint {
     private int lat;

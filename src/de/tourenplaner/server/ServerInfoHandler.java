@@ -32,12 +32,12 @@ import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * This handler is used when a socket must only handle "/info" requests
+ * <p>
+ *          Initially based on:
+ *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
+ * </p>
  *
- * @author Niklas Schnelle, Peter Vollmer
- * @version 0.1 Prototype
- *          <p/>
- *          Initially based on: http://docs.jboss.org/netty/3.2/xref
- *          /org/jboss/netty/example/http/snoop/package-summary.html
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
     private static Logger log = Logger.getLogger("de.tourenplaner.server");

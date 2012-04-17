@@ -18,12 +18,11 @@ package de.tourenplaner.algorithms;
 
 import de.tourenplaner.computecore.ComputeRequest;
 
- /**
- *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+/**
+ * A class implementing this interface can be used by the ComputeCore to
+ * do Computations
  *
- *         A class implementing this interface can be used by the ComputeCore to
- *         do Computations
- * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public interface Algorithm {
 

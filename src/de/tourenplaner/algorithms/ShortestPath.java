@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Provides an implementation of ShortestPath algorithm.
+ * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ShortestPath extends GraphAlgorithm {
 

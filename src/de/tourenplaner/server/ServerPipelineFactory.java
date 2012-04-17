@@ -33,13 +33,12 @@ import static org.jboss.netty.channel.Channels.pipeline;
 
 /**
  * This class is used to create the ServerPipeline
- *
- * @author Niklas Schnelle, Peter Vollmer
- * @version 0.1 Prototype
- *          <p/>
+ * <p>
  *          Initially based on:
- *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty
- *          /example/http/snoop/package-summary.html
+ *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
+ * </p>
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ServerPipelineFactory implements ChannelPipelineFactory {
     private final ComputeCore cCore;
