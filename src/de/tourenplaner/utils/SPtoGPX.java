@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ import java.util.Map;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class SPtoGPX {
-
+    @SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		if (args.length != 1) {
 			System.err
@@ -68,6 +67,7 @@ public class SPtoGPX {
 
 			for (Object subway : subways) {
                 System.out.println("<trkseg>");
+
                 points = (List<Map<String, Object>>) subway;
                 for (Map<String, Object> point : points) {
                     System.out.println("<trkpt lat=\""
