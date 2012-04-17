@@ -23,8 +23,6 @@ import org.codehaus.jackson.map.introspect.AnnotatedMethod;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
- * To change this template use File | Settings | File Templates.
  */
 class JSONLowerCaseStrategy extends PropertyNamingStrategy {
     @Override

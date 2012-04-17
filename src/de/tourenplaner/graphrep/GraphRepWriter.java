@@ -20,9 +20,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * The interface implemented by classes that writing a GraphRep to an OutputStream
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public interface GraphRepWriter {
     void writeGraphRep(OutputStream out, GraphRep graphRep) throws IOException;

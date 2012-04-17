@@ -34,8 +34,7 @@ import org.junit.Test;
 import de.tourenplaner.config.ConfigManager;
 
 /**
- * @author Sascha Meusel
- * 
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class DatabaseManagerTest {
 

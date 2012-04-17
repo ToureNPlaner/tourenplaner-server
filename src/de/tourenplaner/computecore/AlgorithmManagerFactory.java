@@ -18,7 +18,6 @@ package de.tourenplaner.computecore;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
  */
 public abstract class AlgorithmManagerFactory {
 	public abstract AlgorithmManager createAlgorithmManager();

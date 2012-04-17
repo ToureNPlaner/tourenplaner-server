@@ -14,18 +14,15 @@
  *    limitations under the License.
  */
 
-/**
- * 
- */
 package de.tourenplaner.database;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public enum RequestStatusEnum {
 
     ok,
     failed,
     pending
+
 }

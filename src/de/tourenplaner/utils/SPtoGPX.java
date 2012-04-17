@@ -29,9 +29,8 @@ import java.util.Map;
 /**
  * This utility class is used to convert the result of a /algsp request to gpx
  * and prints it on stdout
- * 
- * @author Niklas Schnelle
- * 
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class SPtoGPX {
 

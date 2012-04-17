@@ -18,7 +18,6 @@ package de.tourenplaner.server;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public abstract class RequestHandler {
 

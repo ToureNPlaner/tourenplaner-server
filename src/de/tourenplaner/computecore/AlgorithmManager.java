@@ -27,7 +27,6 @@ import java.util.Map;
  * ComputeThread @see de.tourenplaner.computecore.ComputeThread
  * 
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
  */
 public class AlgorithmManager {
 

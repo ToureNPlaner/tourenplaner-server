@@ -21,9 +21,9 @@ import de.tourenplaner.graphrep.GraphRep;
 import java.util.*;
 
 /**
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Provides an implementation of resource NNSearch algorithm.
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class NNSearchFactory extends GraphAlgorithmFactory {
     private final Map<String, Object> details;

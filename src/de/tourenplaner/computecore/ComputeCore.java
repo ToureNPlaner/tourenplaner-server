@@ -26,7 +26,6 @@ import java.util.logging.Logger;
  * computations to be scheduled for execution by adding them to it's queue
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
  */
 public class ComputeCore {
     

@@ -22,6 +22,9 @@ import org.junit.Test;
 
 import de.tourenplaner.algorithms.Heap;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ */
 public class HeapTest {
 
 	@Test

@@ -26,10 +26,8 @@ import javax.net.ssl.SSLContext;
 
 import de.tourenplaner.config.ConfigManager;
 
-
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public class TPSSslContextFactory {
 	private static final String PROTOCOL = "TLS";

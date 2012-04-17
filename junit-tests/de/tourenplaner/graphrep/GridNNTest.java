@@ -16,9 +16,11 @@
 
 package de.tourenplaner.graphrep;
 
-
 import org.junit.Test;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ */
 public class GridNNTest extends NNTest{
 
     @Test

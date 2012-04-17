@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public class GraphRepBinaryReader implements GraphRepReader {
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");

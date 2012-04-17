@@ -29,9 +29,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 /**
- *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ * Shortest Path Algorithm taking advantage of Contraction Hierarchies
  *
- * Shortest Path Algorithm taking advantage of Contraction Hierachies
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ShortestPathCH extends GraphAlgorithm {
 

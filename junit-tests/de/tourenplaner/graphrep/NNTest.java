@@ -21,6 +21,9 @@ import org.junit.Before;
 
 import java.util.Random;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ */
 public abstract class NNTest {
     
     protected GraphRep graph;

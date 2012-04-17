@@ -21,9 +21,9 @@ import de.tourenplaner.graphrep.GraphRep;
 import java.util.*;
 
 /**
- *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Used to create instances of ShortestPathCH algorithm
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ShortestPathCHFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;
@@ -38,7 +38,6 @@ public class ShortestPathCHFactory extends SharingAlgorithmFactory {
         details.put("hidden", this.isHidden());
         details.put("minpoints", 2);
         details.put("sourceistarget", false);
-
     }
 
     @Override

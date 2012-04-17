@@ -20,7 +20,6 @@ import de.tourenplaner.graphrep.GraphRep;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
  */
 public class SharingAMFactory extends AlgorithmManagerFactory {
 

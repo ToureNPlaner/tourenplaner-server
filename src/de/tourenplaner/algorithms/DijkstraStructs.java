@@ -22,15 +22,14 @@ import com.carrotsearch.hppc.IntArrayDeque;
 import java.util.Arrays;
 
 /**
+ * This class is used to share data structures used by several Dijkstra
+ * based algorithms. This helps to prevent unnecessary memory usage and
+ * minimizes time spent in allocations.<br /><br />
+ * 
+ * Instances of this class MUST only be shared within the same thread
+ * and can only be used by one algorithm at a time
+ *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
- *         This class is used to share data structures used by several Dijkstra
- *         based algorithms. This helps to prevent unnecessary memory usage and
- *         minimizes time spent in allocations.
- * 
- *         Instances of this class MUST only be shared within the same thread
- *         and can only be used by one algorithm at a time
- * 
  */
 public class DijkstraStructs {
 	// Heap used as priority queue in Dijkstra

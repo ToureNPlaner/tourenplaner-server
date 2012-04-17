@@ -14,9 +14,6 @@
  *    limitations under the License.
  */
 
-/**
- * 
- */
 package de.tourenplaner.config;
 
 import org.codehaus.jackson.JsonParser;
@@ -28,10 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
- *         This config manager loads configurations from a config file which is
- *         formated in JSON.
+ * This config manager loads configurations from a config file which is
+ * formatted in JSON.
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ConfigManager {
 

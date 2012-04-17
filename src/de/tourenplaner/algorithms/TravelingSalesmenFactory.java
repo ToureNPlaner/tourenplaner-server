@@ -21,9 +21,9 @@ import de.tourenplaner.graphrep.GraphRep;
 import java.util.*;
 
 /**
- *  @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  * Used to create instances of TravelingSalesmen algorithm
+ *
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
     private final Map<String, Object> details;

@@ -29,12 +29,12 @@ import static org.jboss.netty.channel.Channels.pipeline;
  * This class is used to construct a Pipeline that only handles "/info" requests
  * as required for handling these requests on a non SSL Socket even for private
  * servers
+ * <p>
+ *          Initially based on:
+ *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty/example/http/snoop/package-summary.html
+ * </p>
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
- *          Initially based on:
- *          http://docs.jboss.org/netty/3.2/xref/org/jboss/netty
- *          /example/http/snoop/package-summary.html
  */
 public class ServerInfoOnlyPipelineFactory implements ChannelPipelineFactory {
 	private final Map<String, Object> info;

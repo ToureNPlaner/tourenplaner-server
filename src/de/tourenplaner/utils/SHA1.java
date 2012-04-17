@@ -21,6 +21,9 @@ import org.jboss.netty.util.CharsetUtil;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+/**
+ * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ */
 public class SHA1 {
 
     private static String convertToHex(byte[] data) {

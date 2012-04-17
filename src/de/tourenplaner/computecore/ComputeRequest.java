@@ -33,7 +33,6 @@ import java.util.Map.Entry;
  * This class is used to represent a request for computation
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
  */
 public class ComputeRequest {
 

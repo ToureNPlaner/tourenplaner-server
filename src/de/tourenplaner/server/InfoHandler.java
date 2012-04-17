@@ -26,7 +26,6 @@ import java.util.Map;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- *
  */
 public class InfoHandler {
     private final Map<String, Object> serverInfo;

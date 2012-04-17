@@ -29,7 +29,6 @@ import java.util.logging.Logger;
  * available Algorithm in the ServerInfo
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
- * 
  */
 public class AlgorithmRegistry {
     private static Logger log = Logger.getLogger("de.tourenplaner.computecore");
