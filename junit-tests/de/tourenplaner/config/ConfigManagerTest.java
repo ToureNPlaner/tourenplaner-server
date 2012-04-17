@@ -189,15 +189,23 @@ public class ConfigManagerTest {
     }
 
     @Test
-    public void testConfigManager() throws Exception {
+    public void testConfigManager() {
 
         // test ConfigManager without init
-        prepareNextConfigManager(null);
+        try {
+            prepareNextConfigManager(null);
+        } catch (Exception e) {
+            fail("Exception thrown: " + e.getMessage());
+        }
 
         testDefaultConfig();
 
         // test ConfigManager with test.conf
-        prepareNextConfigManager("test.conf");
+        try {
+            prepareNextConfigManager("test.conf");
+        } catch (Exception e) {
+            fail("Exception thrown: " + e.getMessage());
+        }
 
         testTestConfig();
 
