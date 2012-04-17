@@ -16,10 +16,6 @@
 
 package de.tourenplaner.database;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.beans.PropertyVetoException;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
@@ -29,6 +25,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.tourenplaner.config.ConfigManager;
+
+import static org.junit.Assert.*;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -61,13 +59,19 @@ public class DatabaseManagerTest {
 
         System.out.println();
         if (doTest) {
-            System.out.println("### Database JUnit test will not be executed. ###");
-
+            System.out.println("### Database JUnit test will be executed. ###");
+            System.out.println();
+            System.out.println("If the test should not be executed, set the value 'private' to false within ");
+            System.out.println("the config file " + configPath);
+            System.out.println();
         } else {
-            System.out.println("### Database JUnit test will not be executed. ###");
-
+            System.out.println("### Database JUnit test will _NOT_ be executed. ###");
+            System.out.println();
+            System.out.println("If the test should be executed, set the value 'private' to true within ");
+            System.out.println("the config file " + configPath);
+            System.out.println();
+            return;
         }
-        System.out.println();
         
         
 		try {
@@ -121,53 +125,91 @@ public class DatabaseManagerTest {
 	 */
 	@AfterClass
 	public static void cleanUpAfterTestRun() {
+        if (!doTest) return;
 		if (dbm != null) {
 			try {
+                UserDataset user = dbm.getUser("1337testuser@tourenplaner");
+                if (user != null) {
+                    dbm.deleteUser(user.userid);
+                }
 				dbm.deleteUser(testUserID);
 			} catch (SQLException e) {
-				e.printStackTrace();
+                fail(e.getMessage());
 			}
 		}
 	}
 
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#DatabaseManager()}
-	 * .
-	 */
+
 	@Test
 	public final void testDatabaseManager() {
+        if (!doTest) return;
 		assertTrue(dbmFailureMessage, (dbm != null)
 				&& (dbmFailureMessage == null));
 	}
 
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#addNewRequest(int, String, byte[])}.
-	 */
+
 	@Test
-	public final void testAddNewRequest() {
+	public final void testRequest() {
+        if (!doTest) return;
 		try {
 			int requestID = dbm.addNewRequest(testUserID,
-					"testRequest", "jsonRequestTestBlob".getBytes());
+					"testAlgorithm", "jsonRequestTestBlob".getBytes());
 			assertFalse("dbm is null", dbm == null);
 			assertFalse("returned request id should never be <= 0", requestID <= 0);
+            
+            RequestDataset req = dbm.getRequest(requestID);
+            assertEquals("userid not correct", testUserID, req.userID);
+            assertEquals("algorithm not correct", "testAlgorithm", req.algorithm);
+            // JSONObjects will not get retrieved through getRequest
+            assertEquals("request not correct", null, req.jsonRequest);
+            
+            // test if sql syntax errors occur
+            dbm.updateRequest(req);
+            dbm.updateRequestWithComputeResult(requestID, "some byte array".getBytes(), 10, 1337);
+            dbm.updateRequestAsFailed(requestID, "an error message".getBytes());
+            
+            dbm.getAllRequests(10, 20);
+            dbm.getJsonRequest(requestID);
+            dbm.getJsonResponse(requestID);
+            dbm.getRequests(testUserID, 10, 20);
+            
+            dbm.getNumberOfRequests();
+            dbm.getNumberOfRequestsWithUserId(testUserID);
+            
 		} catch (SQLFeatureNotSupportedException e) {
-			fail(e.getLocalizedMessage());
+			fail(e.getMessage());
 		} catch (SQLException e) {
-            fail(e.getLocalizedMessage());
+            fail(e.getMessage());
 		}
 
 	}
 
-	/**
-	 * Test method for
-	 * {@link de.tourenplaner.database.DatabaseManager#addNewUser(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, boolean)}
-	 * .
-	 */
+    
 	@Test
-	public final void testAddNewUser() {
+	public final void testUser() {
+        if (!doTest) return;
 		assertTrue(userFailureMessage, userFailureMessage == null);
-	}
+        try {
+            UserDataset user = dbm.getUser(testUserID);
+
+            assertEquals("email not correct", "1337testuser@tourenplaner", user.email);
+            assertEquals("passwordhash not correct", "DmGT9B354DFasH673aGFBM3", user.passwordhash);
+            assertEquals("salt not correct", "hmAhgAN68sdKNfdA9sd876k0", user.salt);
+            assertEquals("firstName not correct", "John", user.firstName);
+            assertEquals("lastName not correct", "Doe", user.lastName);
+            assertEquals("address not correct", "Musterstraße 42", user.address);
+            assertEquals("admin not correct", false, user.admin);
+
+            // test if sql syntax errors occur
+            dbm.getAllUsers();
+            dbm.getAllUsers(10, 20);
+            dbm.getNumberOfUsers();
+            
+
+        } catch (SQLException e) {
+            fail(e.getMessage());
+        }
+
+    }
 
 }
