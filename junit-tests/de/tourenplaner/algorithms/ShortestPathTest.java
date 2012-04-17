@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -107,31 +108,52 @@ public class ShortestPathTest {
     private void runTestCases() throws ComputeException, IllegalAccessException {
         runTestCase(2, false);
         runTestCase(2, true);
+        runTestCase(2, false);
+        runTestCase(2, true);
+        runTestCase(2, false);
+        runTestCase(2, true);
+
         runTestCase(3, false);
         runTestCase(3, true);
+        runTestCase(3, false);
+        runTestCase(3, true);
+        runTestCase(3, false);
+        runTestCase(3, true);
+
+        runTestCase(4, false);
+        runTestCase(4, true);
+        runTestCase(4, false);
+        runTestCase(4, true);
         runTestCase(4, false);
         runTestCase(4, true);
     }
 
     @Test
-    public void testShortestPath() throws Exception {
+    public void testShortestPath() {
         prepareTestRun();
         GraphAlgorithmFactory fac = new ShortestPathFactory(graph);
         shortestPath = (ShortestPath) fac.createAlgorithm();
         shortestPathCH = null;
 
-        runTestCases();
+        try {
+            runTestCases();
+        } catch (Exception e) {
+            fail("Failed with exception: " + e.getMessage());
+        }
     }
 
     @Test
-    public void testShortestPathCH() throws Exception {
+    public void testShortestPathCH() {
         prepareTestRun();
-        //GraphAlgorithmFactory fac = new ShortestPathCHFactory(graph);
-        //shortestPath = null;
-        // TODO check if ShortestPathCHFactory should really return not SP CH but normal SP (but seems buggy)
-        // shortestPathCH = (ShortestPathCH) fac.createAlgorithm();
+        GraphAlgorithmFactory fac = new ShortestPathCHFactory(graph);
+        shortestPath = null;
+        shortestPathCH = (ShortestPathCH) fac.createAlgorithm();
 
-        //runTestCases();
+        try {
+            runTestCases();
+        } catch (Exception e) {
+            fail("Failed with exception: " + e.getMessage());
+        }
     }
 }
                             
