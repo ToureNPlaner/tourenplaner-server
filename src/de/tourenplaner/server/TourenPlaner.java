@@ -59,7 +59,7 @@ public class TourenPlaner {
 
     private static Map<String, Object> getServerInfo(AlgorithmRegistry reg) {
         Map<String, Object> info = new HashMap<String, Object>(4);
-        info.put("version", new Float(0.1));
+        info.put("version", new Float(1.0));
         info.put("servertype", ConfigManager.getInstance().getEntryBool("private", false) ? "private" : "public");
 
         // when serverinfosslport is available then use that in the serverinfo, else use sslport
