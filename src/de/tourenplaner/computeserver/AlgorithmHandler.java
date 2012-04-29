@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.server;
+package de.tourenplaner.computeserver;
 
 import de.tourenplaner.algorithms.AlgorithmFactory;
 import de.tourenplaner.computecore.AlgorithmRegistry;
@@ -22,8 +22,9 @@ import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.config.ConfigManager;
-import de.tourenplaner.database.DatabaseManager;
-import de.tourenplaner.database.UserDataset;
+import de.tourenplaner.server.ErrorMessage;
+import de.tourenplaner.server.RequestHandler;
+import de.tourenplaner.server.Responder;
 import de.tourenplaner.utils.SHA1;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
@@ -38,8 +39,6 @@ import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -57,19 +56,13 @@ public class  AlgorithmHandler extends RequestHandler {
 
     private static final MapType JSONOBJECT = new MapType();
     private static final ObjectMapper mapper = new ObjectMapper();
-    private final boolean isPrivate;
-    private final DatabaseManager dbm;
     private final ComputeCore computer;
-    private final Authorizer authorizer;
     private final AlgorithmRegistry algReg;
 
 
-    protected AlgorithmHandler(Authorizer auth, boolean isPrivate, DatabaseManager dbm, ComputeCore computer) {
+    protected AlgorithmHandler(ComputeCore computer) {
         super(null);
-        this.isPrivate = isPrivate;
-        this.dbm = dbm;
         this.computer = computer;
-        this.authorizer = auth;
         this.algReg = computer.getAlgorithmRegistry();
     }
 
@@ -174,22 +167,11 @@ public class  AlgorithmHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param algName algorithm name as String
-     * @throws SQLFeatureNotSupportedException Thrown if the id could not received or another function is not supported by driver.
-     * @throws SQLException Thrown if database query fails
      * @throws JsonParseException Thrown if parsing json content fails
      * @throws JsonProcessingException Thrown if json generation processing fails
      * @throws IOException Thrown if error message sending or reading json fails
      */
-    public void handleAlg(HttpRequest request, String algName) throws IOException, SQLException {
-        UserDataset userDataset = null;
-
-        if (isPrivate) {
-            userDataset = authorizer.auth(request);
-            if (userDataset == null) {
-                // auth closes connection and sends error
-                return;
-            }
-        }
+    public void handleAlg(HttpRequest request, String algName) throws IOException {
 
         try {
             // Get the AlgorithmFactory for this Alg to check if it's registered and not isHidden
@@ -220,29 +202,12 @@ public class  AlgorithmHandler extends RequestHandler {
                     log.fine("\"" + algName + "\" for Client " + anonident + "  " +
                              request.getContent().toString(CharsetUtil.UTF_8));
                 }
-                int requestID = -1;
-
-                if (isPrivate && !algFac.isHidden()) {
-                    byte[] jsonRequest = request.getContent().array();
-                    requestID = dbm.addNewRequest(userDataset.userid, algName, jsonRequest);
-                    req.setRequestID(requestID);
-                }
 
                 final boolean success = computer.submit(req);
 
                 if (!success) {
                     String errorMessage = responder.writeAndReturnErrorMessage(ErrorMessage.EBUSY);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
-                    if(isPrivate && !algFac.isHidden()){
-                        // Write request with status failed into database, failure cause is busy server
-
-                        // already sent error message, we should throw no exception
-                        // (MasterHandler would send an error message if it catches an SQLException)
-                        try {
-                            dbm.updateRequestAsFailed(requestID, errorMessage.getBytes(CharsetUtil.UTF_8));
-                        } catch (SQLException ignored) {
-                        }
-                    }
 
                 }
             }

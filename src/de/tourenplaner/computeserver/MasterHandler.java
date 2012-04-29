@@ -14,17 +14,18 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.server;
+package de.tourenplaner.computeserver;
 
 import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.config.ConfigManager;
-import de.tourenplaner.database.DatabaseManager;
+import de.tourenplaner.server.ErrorMessage;
+import de.tourenplaner.server.InfoHandler;
+import de.tourenplaner.server.Responder;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -49,15 +50,11 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
     private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
-    private boolean isPrivate;
-
     private Responder responder;
 
-    private Authorizer authorizer;
-
-    private PrivateHandler privateHandler;
-
     private InfoHandler infoHandler;
+
+    private AlgorithmHandler algHandler;
 
     /**
      * Constructs a new RequestHandler using the given ComputeCore and
@@ -68,25 +65,15 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
      */
     public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
         final ConfigManager cm = ConfigManager.getInstance();
-        this.isPrivate = cm.getEntryBool("private", false);
-        DatabaseManager dbm = null;
-        authorizer = null;
-        if (isPrivate){
-            dbm = new DatabaseManager();
-            authorizer = new Authorizer(dbm);
-        }
-        this.privateHandler = new PrivateHandler(authorizer, dbm);
         this.infoHandler = new InfoHandler(serverInfo);
+        this.algHandler = new AlgorithmHandler(cCore);
     }
 
 
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         responder = new Responder(e.getChannel());
-        if(authorizer != null){
-            authorizer.setResponder(responder);
-        }
-        privateHandler.setResponder(responder);
+        algHandler.setResponder(responder);
         infoHandler.setResponder(responder);
     }
 
@@ -116,61 +103,20 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
         responder.setKeepAlive(isKeepAlive(request));
 
-        try {
             if ("/info".equals(path)) {
 
                 infoHandler.handleInfo(request);
 
             } else if (path.startsWith("/alg")) {
 
-                // TODO forward requests to backend ComputeServer
-                log.severe("You are running the splitserver branch, private mode is unsupported");
-
-            } else if (isPrivate && "/registeruser".equals(path)) {
-
-                privateHandler.handleRegisterUser(request);
-
-            } else if (isPrivate && "/authuser".equals(path)) {
-
-                privateHandler.handleAuthUser(request);
-
-            } else if (isPrivate && "/getuser".equals(path)) {
-
-                privateHandler.handleGetUser(request, queryStringDecoder.getParameters());
-
-            } else if (isPrivate && "/updateuser".equals(path)) {
-
-                privateHandler.handleUpdateUser(request, queryStringDecoder.getParameters());
-
-            } else if (isPrivate && "/listrequests".equals(path)) {
-
-                privateHandler.handleListRequests(request, queryStringDecoder.getParameters());
-
-            } else if (isPrivate && "/getrequest".equals(path)) {
-
-                privateHandler.handleGetRequest(request, queryStringDecoder.getParameters());
-
-            } else if (isPrivate && "/getresponse".equals(path)) {
-
-                privateHandler.handleGetResponse(request, queryStringDecoder.getParameters());
-
-            } else if (isPrivate && "/listusers".equals(path)) {
-
-                privateHandler.handleListUsers(request, queryStringDecoder.getParameters());
-
-            } else if (isPrivate && "/deleteuser".equals(path)) {
-
-                privateHandler.handleDeleteUser(request, queryStringDecoder.getParameters());
+                final String algName = queryStringDecoder.getPath().substring(4);
+                algHandler.handleAlg(request, algName);
 
             } else {
                 // Unknown request, close connection
                 log.warning("An unknown URL was requested: " + path);
                 responder.writeErrorMessage(ErrorMessage.EUNKNOWNURL, "unknown URL: " + path);
             }
-        } catch (SQLException exSQL) {
-            responder.writeErrorMessage(ErrorMessage.EDATABASE);
-            log.log(Level.SEVERE, "SQLException caught", exSQL);
-        }
     }
 
     /**
