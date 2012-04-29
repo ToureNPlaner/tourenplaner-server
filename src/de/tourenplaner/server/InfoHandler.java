@@ -19,20 +19,16 @@ package de.tourenplaner.server;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class InfoHandler {
-    private final Map<String, Object> serverInfo;
     private Responder responder;
 
-    public InfoHandler(Map<String, Object> serverInfo) {
-        this.serverInfo = serverInfo;
+    public InfoHandler() {
     }
 
     /**
@@ -46,6 +42,7 @@ public class InfoHandler {
     }
 
     public void handleInfo(final HttpRequest request) throws JsonGenerationException, JsonMappingException, IOException {
-        responder.writeJSON(serverInfo, HttpResponseStatus.OK);
+        // TODO: proxy to backend ComputeServer
+        //responder.writeJSON(serverInfo, HttpResponseStatus.OK);
     }
 }

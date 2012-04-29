@@ -16,8 +16,6 @@
 
 package de.tourenplaner.server;
 
-import de.tourenplaner.computecore.ComputeCore;
-import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.database.DatabaseManager;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
@@ -26,7 +24,6 @@ import org.jboss.netty.util.CharsetUtil;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,8 +46,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
     private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
-    private boolean isPrivate;
-
     private Responder responder;
 
     private Authorizer authorizer;
@@ -59,33 +54,22 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
     private InfoHandler infoHandler;
 
+
     /**
-     * Constructs a new RequestHandler using the given ComputeCore and
-     * ServerInfo
-     *
-     * @param cCore ComputeCore
-     * @param serverInfo String-Object-Map
+     * Constructs a new MasterHandler
      */
-    public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
-        final ConfigManager cm = ConfigManager.getInstance();
-        this.isPrivate = cm.getEntryBool("private", false);
-        DatabaseManager dbm = null;
-        authorizer = null;
-        if (isPrivate){
-            dbm = new DatabaseManager();
-            authorizer = new Authorizer(dbm);
-        }
+    public MasterHandler() {
+        DatabaseManager dbm = new DatabaseManager();
+        authorizer = new Authorizer(dbm);
         this.privateHandler = new PrivateHandler(authorizer, dbm);
-        this.infoHandler = new InfoHandler(serverInfo);
+        this.infoHandler = new InfoHandler();
     }
 
 
     @Override
     public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {
         responder = new Responder(e.getChannel());
-        if(authorizer != null){
-            authorizer.setResponder(responder);
-        }
+        authorizer.setResponder(responder);
         privateHandler.setResponder(responder);
         infoHandler.setResponder(responder);
     }
@@ -126,39 +110,39 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
                 // TODO forward requests to backend ComputeServer
                 log.severe("You are running the splitserver branch, private mode is unsupported");
 
-            } else if (isPrivate && "/registeruser".equals(path)) {
+            } else if ("/registeruser".equals(path)) {
 
                 privateHandler.handleRegisterUser(request);
 
-            } else if (isPrivate && "/authuser".equals(path)) {
+            } else if ("/authuser".equals(path)) {
 
                 privateHandler.handleAuthUser(request);
 
-            } else if (isPrivate && "/getuser".equals(path)) {
+            } else if ("/getuser".equals(path)) {
 
                 privateHandler.handleGetUser(request, queryStringDecoder.getParameters());
 
-            } else if (isPrivate && "/updateuser".equals(path)) {
+            } else if ("/updateuser".equals(path)) {
 
                 privateHandler.handleUpdateUser(request, queryStringDecoder.getParameters());
 
-            } else if (isPrivate && "/listrequests".equals(path)) {
+            } else if ("/listrequests".equals(path)) {
 
                 privateHandler.handleListRequests(request, queryStringDecoder.getParameters());
 
-            } else if (isPrivate && "/getrequest".equals(path)) {
+            } else if ("/getrequest".equals(path)) {
 
                 privateHandler.handleGetRequest(request, queryStringDecoder.getParameters());
 
-            } else if (isPrivate && "/getresponse".equals(path)) {
+            } else if ("/getresponse".equals(path)) {
 
                 privateHandler.handleGetResponse(request, queryStringDecoder.getParameters());
 
-            } else if (isPrivate && "/listusers".equals(path)) {
+            } else if ("/listusers".equals(path)) {
 
                 privateHandler.handleListUsers(request, queryStringDecoder.getParameters());
 
-            } else if (isPrivate && "/deleteuser".equals(path)) {
+            } else if ("/deleteuser".equals(path)) {
 
                 privateHandler.handleDeleteUser(request, queryStringDecoder.getParameters());
 

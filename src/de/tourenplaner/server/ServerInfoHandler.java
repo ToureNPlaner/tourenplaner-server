@@ -20,7 +20,6 @@ import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,8 +46,8 @@ public class ServerInfoHandler extends SimpleChannelUpstreamHandler {
 
     private Responder responder;
 
-    public ServerInfoHandler(Map<String, Object> sInfo) {
-        this.infoHandler = new InfoHandler(sInfo);
+    public ServerInfoHandler() {
+        this.infoHandler = new InfoHandler();
     }
 
     @Override
