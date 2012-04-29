@@ -18,7 +18,6 @@ package de.tourenplaner.computeserver;
 
 import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.config.ConfigManager;
-import de.tourenplaner.server.ServerPipelineFactory;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
@@ -50,7 +49,7 @@ public class HttpComputeServer {
                 Executors.newCachedThreadPool(), Executors.newCachedThreadPool()));
 
         // Set up the event pipeline factory without ssl
-        bootstrap.setPipelineFactory(new ServerPipelineFactory(comCore, serverInfo));
+        bootstrap.setPipelineFactory(new ComputeServerPipelineFactory(comCore, serverInfo));
         // Bind and start to accept incoming connections.
         bootstrap.bind(new InetSocketAddress(cm.getEntryInt("httpport", 8080)));
     }

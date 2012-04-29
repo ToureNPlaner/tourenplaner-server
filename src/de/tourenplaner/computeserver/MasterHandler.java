@@ -19,7 +19,6 @@ package de.tourenplaner.computeserver;
 import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.server.ErrorMessage;
-import de.tourenplaner.server.InfoHandler;
 import de.tourenplaner.server.Responder;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.handler.codec.http.*;
