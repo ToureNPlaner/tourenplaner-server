@@ -17,7 +17,6 @@
 package de.tourenplaner.server;
 
 import de.tourenplaner.computecore.ComputeRequest;
-import de.tourenplaner.config.ConfigManager;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -34,7 +33,6 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Logger;
@@ -68,10 +66,11 @@ public class Responder {
         mapper.setPropertyNamingStrategy(new JSONLowerCaseStrategy());
         // Makes jackson use: ISO-8601
         mapper.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
-        
+
         // The mapper used for smile
         smileMapper = new ObjectMapper(new SmileFactory());
     }
+
     /**
      * Constructs a new Responder from the given Channel
      *
@@ -85,6 +84,7 @@ public class Responder {
 
 
     // TODO should we keep this unused method here?
+
     /**
      * Gets the KeepAlive flag
      *
@@ -113,6 +113,7 @@ public class Responder {
     }
 
     // TODO should we keep this unused method here?
+
     /**
      * Writes a HTTP Unauthorized answer to the wire and closes the connection
      */
@@ -129,6 +130,7 @@ public class Responder {
 
     /**
      * Writes a HTTP status answer to the wire and closes the connection if it is not a keep-alive connection
+     *
      * @param status HttpResponseStatus
      */
     public void writeStatusResponse(HttpResponseStatus status) {
@@ -159,10 +161,10 @@ public class Responder {
      * writes it onto the wire
      *
      * @param toWrite json compatible object
-     * @param status HttpResponseStatus
-     * @throws JsonMappingException Thrown if mapping object to json fails
+     * @param status  HttpResponseStatus
+     * @throws JsonMappingException    Thrown if mapping object to json fails
      * @throws JsonGenerationException Thrown if generating json fails
-     * @throws IOException Thrown if writing json onto the output fails
+     * @throws IOException             Thrown if writing json onto the output fails
      */
     public void writeJSON(Object toWrite, HttpResponseStatus status) throws IOException {
 
@@ -214,8 +216,9 @@ public class Responder {
      * Writes a given byte array onto the wire. The given byte array should be a json object,
      * because this method will write &quot;application/json&quot; as content type into the
      * response header. If the byte array is null this method will sent an empty response content.
+     *
      * @param byteArray A json object as byte array
-     * @param status HttpResponseStatus
+     * @param status    HttpResponseStatus
      * @throws IOException Thrown if writing onto the output fails
      */
     public void writeByteArray(byte[] byteArray, HttpResponseStatus status) throws IOException {
@@ -256,20 +259,18 @@ public class Responder {
     }
 
 
-
     /**
      * Sends an error to the client, the connection will be closed afterwards<br /><br />
-     *
+     * <p/>
      * Use this method if your details text is dynamically created
      *
      * @param errorMessage error id (see protocol specification), for example ENOTADMIN
-     * @param details more detailed error information
+     * @param details      more detailed error information
      * @throws JsonGenerationException Thrown if generating json fails
-     * @throws IOException Thrown if writing json onto the output fails
+     * @throws IOException             Thrown if writing json onto the output fails
      */
     public void writeErrorMessage(ErrorMessage errorMessage, String details)
-            throws IOException
-    {
+            throws IOException {
         log.info("Writing Error Message: " + errorMessage.message + " --- " + details);
 
         // Allocate buffer if not already done
@@ -294,8 +295,8 @@ public class Responder {
 
         response.setHeader("Access-Control-Allow-Origin", "*");
         // Add header so that clients know how they can authenticate
-        if(errorMessage.status == HttpResponseStatus.UNAUTHORIZED){
-            response.setHeader("WWW-Authenticate","Basic realm=\"touenplaner\"");
+        if (errorMessage.status == HttpResponseStatus.UNAUTHORIZED) {
+            response.setHeader("WWW-Authenticate", "Basic realm=\"touenplaner\"");
         }
 
         response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
@@ -313,12 +314,12 @@ public class Responder {
 
     /**
      * Sends an error to the client, the connection will be closed afterwards<br /><br />
-     *
+     * <p/>
      * Use this method if your details text is stored within errorMessage
      *
      * @param errorMessage an enum value of ErrorMessage
      * @throws JsonGenerationException Thrown if generating json fails
-     * @throws IOException Thrown if writing json onto the output fails
+     * @throws IOException             Thrown if writing json onto the output fails
      */
     public void writeErrorMessage(ErrorMessage errorMessage) throws IOException {
         writeErrorMessage(errorMessage, errorMessage.details);
@@ -328,18 +329,18 @@ public class Responder {
     /**
      * Sends an error to the client, the connection will be closed afterwards <br />
      * A String representing the error response will be returned<br /><br />
-     *
+     * <p/>
      * Use this method if your details text is dynamically created
      *
      * @param errorMessage an enum value of ErrorMessage
-     * @param details more detailed error information
+     * @param details      more detailed error information
      * @return A String representing the error response
      * @throws JsonGenerationException Thrown if generating json fails
-     * @throws IOException Thrown if writing json onto the output fails
+     * @throws IOException             Thrown if writing json onto the output fails
      */
     public String writeAndReturnErrorMessage(ErrorMessage errorMessage, String details) throws IOException {
         this.writeErrorMessage(errorMessage, details);
-        return  "{\"errorid\":\"" + errorMessage.errorId +
+        return "{\"errorid\":\"" + errorMessage.errorId +
                 "\",\"message\":\"" + errorMessage.message +
                 "\",\"details\":\"" + details + "\"}";
     }
@@ -347,13 +348,13 @@ public class Responder {
     /**
      * Sends an error to the client, the connection will be closed afterwards <br />
      * A String representing the error response will be returned<br /><br />
-     *
+     * <p/>
      * Use this method if your details text is stored within errorMessage
      *
      * @param errorMessage an enum value of ErrorMessage
      * @return A String representing the error response
      * @throws JsonGenerationException Thrown if generating json fails
-     * @throws IOException Thrown if writing json onto the output fails
+     * @throws IOException             Thrown if writing json onto the output fails
      */
     public String writeAndReturnErrorMessage(ErrorMessage errorMessage) throws IOException {
         return writeAndReturnErrorMessage(errorMessage, errorMessage.details);
@@ -364,25 +365,32 @@ public class Responder {
      * Creates the response for the ComputeResult. Returns a
      * ByteArrayOutputStream which contains the json object of this response.
      *
-     * @param work ComputeRequest
+     * @param work   ComputeRequest
      * @param status HttpResponseStatus
-     * @return Returns a ByteArrayOutputStream which contains the json object of this response.
      * @throws IOException Thrown if writing json onto the output or onto the returned ByteArrayOutputStream fails
      */
-    public ByteArrayOutputStream writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
-        ObjectMapper useMapper = (work.isAcceptsSmile()) ? smileMapper: mapper;
-        
+    public void writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
+        ObjectMapper useMapper = (work.isAcceptsSmile()) ? smileMapper : mapper;
+
+        // Allocate buffer if not already done
+        // do this here because we are in a worker thread
+        if (outputBuffer == null) {
+            outputBuffer = ChannelBuffers.dynamicBuffer(4096);
+        }
+
+        outputBuffer.clear();
+        OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
 
         response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader(CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile": "application/json; charset=UTF-8");
+        response.setHeader(CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile" : "application/json; charset=UTF-8");
 
-        ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
+
         work.writeToStream(useMapper, resultStream, true);
         resultStream.flush();
 
-        response.setContent(ChannelBuffers.wrappedBuffer(resultStream.toByteArray()));
+        response.setContent(outputBuffer);
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
             response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
@@ -396,20 +404,7 @@ public class Responder {
         if (!keepAlive) {
             future.addListener(ChannelFutureListener.CLOSE);
         }
-
-        boolean storeFullResponse = ConfigManager.getInstance().getEntryBool("store-full-response", true);
-
-        // if storeFullResponse is true and no smile is sent, the method will return the already existing resultStream
-        // if resultStream is a smile stream, we have to generate a new non smile stream to store it into the database
-        if (work.isAcceptsSmile() || !storeFullResponse) {
-            // Closing a ByteArrayOutputStream has no effect (see javadoc), so there is no need to call close()
-            resultStream = new ByteArrayOutputStream();
-            work.writeToStream(mapper, resultStream, storeFullResponse);
-            resultStream.flush();
-        }
-
-        return resultStream;
-
+        return;
     }
 
 }
