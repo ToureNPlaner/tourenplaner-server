@@ -180,6 +180,7 @@ public class ClientSideDev {
                 edgeId = ic.value;
                 cg.addEdge(edgeId, graph.getSource(edgeId), graph.getTarget(edgeId), graph.getDist(edgeId));
             }
+            //TODO target needs to be added extra
 
             System.out.println("Write Client Graph to file "+args[1]);
             ObjectMapper mapper = new ObjectMapper(new SmileFactory());
