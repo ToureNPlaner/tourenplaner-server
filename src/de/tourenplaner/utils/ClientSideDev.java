@@ -1,20 +1,16 @@
 package de.tourenplaner.utils;
 
 import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.algorithms.DijkstraStructs;
-import de.tourenplaner.algorithms.ShortestPath;
-import de.tourenplaner.computecore.RequestPoints;
-import de.tourenplaner.computecore.Way;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.graphrep.GraphRepBinaryReader;
-import de.tourenplaner.graphrep.GraphRepBinaryWriter;
 import de.tourenplaner.graphrep.GridNN;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.smile.SmileFactory;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 /**
  * Development test class for client side computation
@@ -172,56 +168,24 @@ public class ClientSideDev {
             }
 
 
+
+
             System.out.println("Marked edges (union): " + edgeIds.size()+ " should be near "+pbuilder.bfsEdges);
             System.out.println("Marked nodes (union): " + nodeIds.size() + " should be less than (sum) " + pbuilder.bfsNodes);
 
-            System.out.println("Generate a Graph from the union");
-            ClientSideGraphRep sg = new ClientSideGraphRep(nodeIds.size(), edgeIds.size());
-            for (int i=0; i < nodeIds.size(); i++){
-                sg.setNodeData(i, graph.getNodeLat(nodeIds.get(i)), graph.getNodeLon(nodeIds.get(i)), graph.getNodeHeight(nodeIds.get(i)));
-                sg.setNodeRank(i, graph.getNodeRank(nodeIds.get(i)));
-                sg.setOrigNodeId(i, nodeIds.get(i));
+            System.out.println("Build a hash map based client graph");
+            ClientSideGraphRep cg = new ClientSideGraphRep();
+            int edgeId;
+            for (IntCursor ic : edgeIds){
+                edgeId = ic.value;
+                cg.addEdge(edgeId, graph.getSource(edgeId), graph.getTarget(edgeId), graph.getDist(edgeId));
             }
 
-            for (int i = 0; i < edgeIds.size(); i++) {
-                sg.setEdgeData(i, origNodeIdToNewNodeId.get(graph.getSource(edgeIds.get(i))),
-                        origNodeIdToNewNodeId.get(graph.getTarget(edgeIds.get(i))),
-                        graph.getDist(edgeIds.get(i)),
-                        graph.getEuclidianDist(edgeIds.get(i)));
-                sg.setShortcutData(i,
-                        origEdgeIdToNewEdgeId.get(graph.getFirstShortcuttedEdge(edgeIds.get(i))),
-                        origEdgeIdToNewEdgeId.get(graph.getSecondShortcuttedEdge(edgeIds.get(i))));
-                sg.setOrigEdgeId(i,edgeIds.get(i));
-            }
+            System.out.println("Write Client Graph to file "+args[1]);
+            ObjectMapper mapper = new ObjectMapper(new SmileFactory());
 
-            sg.generateOffsets();
-            System.out.println("Run a ShortestPath on the client side Graph, can't do unpacking");
-            ShortestPath sp = new ShortestPath(sg, new DijkstraStructs(sg.getNodeCount(), sg.getEdgeCount()));
-            // Build request
-            RequestPoints points = new RequestPoints();
-            // Stuttgart
-            points.addPoint(487786110, 91794440, new HashMap<String, Object>());
-            // Hamburg
-            points.addPoint(535652780, 100013890, new HashMap<String, Object>());
-            // First let's map the RequestPoints to Ids
-            points.setIdsFromGraph(sg);
-            // Add constraints object
-
-            List<Way> resultWays = new ArrayList<Way>();
-            int length = sp.shortestPath(points, resultWays, false);
-            System.out.println("Length "+length);
-
-            System.out.println("The following way was found");
-            for (Way way : resultWays){
-                for(int i=0; i< way.size(); i++){
-                    System.out.println(way.getPointLat(i) + ", " + way.getPointLon(i));
-                }
-            }
-
-            System.out.println("Write the subgraph to disk as "+args[1]);
-            GraphRepBinaryWriter gwriter = new GraphRepBinaryWriter();
             FileOutputStream fo = new FileOutputStream(args[1]);
-            gwriter.writeGraphRep(fo, sg);
+            cg.writeToStream(mapper, fo);
             fo.flush();
 
         } catch (Exception e){
