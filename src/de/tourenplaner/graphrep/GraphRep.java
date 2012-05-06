@@ -196,7 +196,7 @@ public class GraphRep implements Serializable {
      * @param lon    in degrees*10^7
      * @param height
      */
-    protected final void setNodeData(int id, int lat, int lon, int height) {
+    public final void setNodeData(int id, int lat, int lon, int height) {
         this.lat[id] = lat;
         this.lon[id] = lon;
         this.height[id] = height;
@@ -209,8 +209,17 @@ public class GraphRep implements Serializable {
      * @param id
      * @param rank
      */
-    protected final void setNodeRank(int id, int rank) {
+    public final void setNodeRank(int id, int rank) {
         this.rank[id] = rank;
+    }
+
+    /**
+     * Gets the rank of the node given by it's id
+     *
+     * @param id
+     */
+    public final int getNodeRank(int id) {
+        return this.rank[id];
     }
 
     /**
@@ -221,7 +230,7 @@ public class GraphRep implements Serializable {
      * @param target
      * @param dist
      */
-    protected final void setEdgeData(int index, int source, int target, int dist, int euclidianDist) {
+    public final void setEdgeData(int index, int source, int target, int dist, int euclidianDist) {
         this.src[index] = source;
         this.trgt[index] = target;
         this.dist[index] = dist;
@@ -239,7 +248,7 @@ public class GraphRep implements Serializable {
      * @param shortedEdge2
      * @paramn shortedEdge1
      */
-    protected final void setShortcutData(int id, int shortedEdge1, int shortedEdge2) {
+    public final void setShortcutData(int id, int shortedEdge1, int shortedEdge2) {
         this.shortedEdge1[id] = shortedEdge1;
         this.shortedEdge2[id] = shortedEdge2;
     }
@@ -252,7 +261,7 @@ public class GraphRep implements Serializable {
      *
      * @param newOffsetOut
      */
-    protected final void setOffsetOut(int[] newOffsetOut) {
+    public final void setOffsetOut(int[] newOffsetOut) {
         this.offsetOut = newOffsetOut;
     }
 
@@ -305,7 +314,7 @@ public class GraphRep implements Serializable {
     /**
      * Regenerates the offset arrays from the current edge arrays
      */
-    protected final void generateOffsets() {
+    public final void generateOffsets() {
         this.mappingInToOut = new int[edgeCount];
         this.offsetOut = new int[nodeCount + 1];
         this.offsetIn = new int[nodeCount + 1];

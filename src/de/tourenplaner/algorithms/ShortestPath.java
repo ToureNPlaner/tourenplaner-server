@@ -105,7 +105,7 @@ public class ShortestPath extends GraphAlgorithm {
      * @throws ComputeException
      * @throws IllegalAccessException
      */
-    protected int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException {
+    public int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException {
 
         int srcId;
         int trgtId = 0;
@@ -169,7 +169,7 @@ public class ShortestPath extends GraphAlgorithm {
 
             totalDistance += distance;
 
-            log.finer("found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
+            log.info("found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
                     " dist[destid] = " + dists[trgtId] + '\n' +
                     (dijkstratime - starttime) / 1000000.0 + " ms\n" +
                     "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms");
@@ -195,7 +195,7 @@ public class ShortestPath extends GraphAlgorithm {
      * @return
      * @throws IllegalAccessException
      */
-    protected final boolean dijkstraStopAtDest(int[] dists, int[] prevEdges, int srcId, int trgtId )
+    public final boolean dijkstraStopAtDest(int[] dists, int[] prevEdges, int srcId, int trgtId )
             throws IllegalAccessException {
 
         dists[srcId] = 0;
@@ -222,9 +222,9 @@ public class ShortestPath extends GraphAlgorithm {
             for (int i = 0; i < edgeCount; i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 // Ignore Shortcuts
-                if (graph.getFirstShortcuttedEdge(edgeId) != -1) {
-                    continue;
-                }
+                //if (graph.getFirstShortcuttedEdge(edgeId) != -1) {
+                //    continue;
+                //}
                 targetNode = graph.getTarget(edgeId);
 
                 // with multiplier = shortest path
@@ -252,7 +252,7 @@ public class ShortestPath extends GraphAlgorithm {
      * @param trgtId
      * @throws IllegalAccessException
      */
-    protected final void backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
+    public final void backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
         // Find out how much space to allocate
         int currNode = trgtId;
         int routeElements = 1;
