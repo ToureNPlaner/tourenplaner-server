@@ -118,7 +118,7 @@ class GetUserWithoutInputTest(Test):
 
 def main():
 
-   if len(sys.argv) < 4:
+   if len(sys.argv) < 5:
       print("Parameter 1: url\nParameter 2: # of test\n\t" + "\n\t".join(map(lambda x: "" + str(test_arr.index(x)) + ": " + x.name, test_arr)) + "\nParameter 3: # threads\nParameter 4: # queries")
       return 1
 
