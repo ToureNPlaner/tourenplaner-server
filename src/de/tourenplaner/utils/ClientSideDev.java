@@ -1,6 +1,8 @@
 package de.tourenplaner.utils;
 
-import com.carrotsearch.hppc.*;
+import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.IntArrayDeque;
+import com.carrotsearch.hppc.IntOpenHashSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.algorithms.DijkstraStructs;
 import de.tourenplaner.graphrep.GraphRep;
@@ -29,17 +31,27 @@ public class ClientSideDev {
             bfsNodes = 0;
         }
 
+        protected final ClientSideGraphRep generateSubGraph(int srcId, int targetId) throws IllegalAccessException{
+            IntOpenHashSet edgeIds = new IntOpenHashSet();
+            ClientSideGraphRep result = new ClientSideGraphRep();
+            this.bfsMarkUp(edgeIds, srcId);
+            this.bfsMarkDown(edgeIds, targetId);
+            for (IntCursor edgeId : edgeIds){
+                result.addEdge(edgeId.value, graph.getSource(edgeId.value), graph.getTarget(edgeId.value), graph.getDist(edgeId.value));
+            }
+            return result;
+        }
+
         /**
          * Marks the G_down edges by doing a BFS from the target node for
          * consideration !G_down edges are always before G_up edges! That's why we
          * can break the inner loop early
          *
          * @param markedEdges
-         * @param markedNodes
          * @param targetId
          * @throws IllegalAccessException
          */
-        protected final void bfsMarkDown(BitSet markedEdges, BitSet markedNodes, int targetId) throws IllegalAccessException {
+        protected final void bfsMarkDown(IntOpenHashSet markedEdges, int targetId) throws IllegalAccessException {
             int edgeId;
             int currNode;
             int sourceNode;
@@ -47,7 +59,6 @@ public class ClientSideDev {
             BitSet visited = ds.borrowVisitedSet();
             deque.addLast(targetId);
             visited.set(targetId);
-            markedNodes.set(targetId);
             while (!deque.isEmpty()) {
                 currNode = deque.removeLast();
                 bfsNodes++;
@@ -59,10 +70,9 @@ public class ClientSideDev {
                     if (graph.getRankSlope(edgeId) <= 0) {
                         bfsEdges++;
                         // Mark the edge
-                        markedEdges.set(edgeId);
+                        markedEdges.add(edgeId);
                         if (!visited.get(sourceNode)) {
                             visited.set(sourceNode);
-                            markedNodes.set(sourceNode);
                             // Add source for exploration
                             deque.addFirst(sourceNode);
                         }
@@ -82,11 +92,10 @@ public class ClientSideDev {
          * can't break the inner loop early
          *
          * @param markedEdges
-         * @param markedNodes
          * @param targetId
          * @throws IllegalAccessException
          */
-        protected final void bfsMarkUp(BitSet markedEdges, BitSet markedNodes, int targetId) throws IllegalAccessException {
+        protected final void bfsMarkUp(IntOpenHashSet markedEdges, int targetId) throws IllegalAccessException {
             int edgeId;
             int currNode;
             int targetNode;
@@ -94,7 +103,6 @@ public class ClientSideDev {
             BitSet visited = ds.borrowVisitedSet();
             deque.addLast(targetId);
             visited.set(targetId);
-            markedNodes.set(targetId);
             while (!deque.isEmpty()) {
                 currNode = deque.removeLast();
                 bfsNodes++;
@@ -106,10 +114,9 @@ public class ClientSideDev {
                     if (graph.getRankSlope(edgeId) >= 0) {
                         bfsEdges++;
                         // Mark the edge
-                        markedEdges.set(edgeId);
+                        markedEdges.add(edgeId);
                         if (!visited.get(targetNode)) {
                             visited.set(targetNode);
-                            markedNodes.set(targetNode);
                             // Add target for exploration
                             deque.addFirst(targetNode);
                         }
@@ -139,47 +146,9 @@ public class ClientSideDev {
             int hambId = graph.getIdForCoordinates(535652780, 100013890);
 
             GraphPacketBuilder pbuilder = new GraphPacketBuilder(graph);
-            BitSet markedEdges = new BitSet();
-            BitSet markedNodes = new BitSet();
-            pbuilder.bfsMarkUp(markedEdges, markedNodes , stgtId);
-            pbuilder.bfsMarkDown(markedEdges, markedNodes, hambId);
-
-
-            IntArrayList edgeIds = new IntArrayList();
-            IntArrayList nodeIds = new IntArrayList();
-            IntIntOpenHashMap origEdgeIdToNewEdgeId = new IntIntOpenHashMap();
-            IntIntOpenHashMap origNodeIdToNewNodeId = new IntIntOpenHashMap();
-
-            BitSetIterator iter = markedEdges.iterator();
-            int bitIndex;
-            int newEdgeId=0;
-            while (BitSetIterator.NO_MORE != (bitIndex = iter.nextSetBit())) {
-                edgeIds.add(bitIndex);
-                origEdgeIdToNewEdgeId.put(bitIndex, newEdgeId);
-                newEdgeId++;
-            }
-
-            iter = markedNodes.iterator();
-            int newNodeId = 0;
-            while (BitSetIterator.NO_MORE != (bitIndex = iter.nextSetBit())) {
-                nodeIds.add(bitIndex);
-                origNodeIdToNewNodeId.put(bitIndex, newNodeId);
-                newNodeId++;
-            }
-
-
-
-
-            System.out.println("Marked edges (union): " + edgeIds.size()+ " should be near "+pbuilder.bfsEdges);
-            System.out.println("Marked nodes (union): " + nodeIds.size() + " should be less than (sum) " + pbuilder.bfsNodes);
-
             System.out.println("Build a hash map based client graph");
-            ClientSideGraphRep cg = new ClientSideGraphRep();
-            int edgeId;
-            for (IntCursor ic : edgeIds){
-                edgeId = ic.value;
-                cg.addEdge(edgeId, graph.getSource(edgeId), graph.getTarget(edgeId), graph.getDist(edgeId));
-            }
+            ClientSideGraphRep cg = pbuilder.generateSubGraph(stgtId, hambId);
+
             //TODO target needs to be added extra
 
             System.out.println("Write Client Graph to file "+args[1]);
