@@ -14,6 +14,8 @@ import java.io.OutputStream;
  */
 public class ClientSideGraphRep {
 
+    private int edgeCount;
+
     private static class OutEdges {
         public IntArrayList oridIds;
         public IntArrayList targetIds;
@@ -24,6 +26,30 @@ public class ClientSideGraphRep {
 
     public ClientSideGraphRep(){
         graph = new IntObjectOpenHashMap<OutEdges>();
+    }
+
+    public int getEdgeCount(){
+        return edgeCount;
+    }
+
+    public int getNodeCount(){
+        return graph.size();
+    }
+
+    public int getOutEdgeCount(int nodeId){
+        return graph.get(nodeId).targetIds.size();
+    }
+
+    public int getOutEdgeId(int nodeId, int edgeNum) {
+        return graph.get(nodeId).oridIds.get(edgeNum);
+    }
+
+    public int getOutDist(int nodeId, int edgeNum){
+        return graph.get(nodeId).dists.get(edgeNum);
+    }
+
+    public int getOutTarget(int nodeId, int edgeNum){
+        return graph.get(nodeId).targetIds.get(edgeNum);
     }
 
     public void addEdge(int origId, int sourceId,int targetId, int dist){
@@ -38,7 +64,9 @@ public class ClientSideGraphRep {
         outEdges.oridIds.add(origId);
         outEdges.targetIds.add(targetId);
         outEdges.dists.add(dist);
+        edgeCount++;
     }
+
 
     public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
         JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);

@@ -2,9 +2,11 @@ package de.tourenplaner.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
+import com.carrotsearch.hppc.IntIntOpenHashMap;
 import com.carrotsearch.hppc.IntOpenHashSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.Heap;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.graphrep.GraphRepBinaryReader;
 import de.tourenplaner.graphrep.GridNN;
@@ -18,6 +20,46 @@ import java.io.FileOutputStream;
  * Development test class for client side computation
  */
 public class ClientSideDev {
+
+    protected static boolean ClientSideDijkstra(ClientSideGraphRep graph,IntIntOpenHashMap dists, IntIntOpenHashMap prevEdges, int srcId, int trgtId){
+
+        dists.put(srcId, 0);
+        Heap heap = new Heap();
+        heap.insert(srcId, 0);
+
+        int nodeDist;
+        int edgeId;
+        int tempDist;
+        int targetNode;
+        int nodeId = srcId;
+        DIJKSTRA:
+        while (!heap.isEmpty()) {
+            nodeId = heap.peekMinId();
+            nodeDist = heap.peekMinDist();
+            heap.removeMin();
+            if (nodeId == trgtId) {
+                break DIJKSTRA;
+            }
+            if (nodeDist > dists.get(nodeId)) {
+                continue;
+            }
+            int edgeCount = graph.getOutEdgeCount(nodeId);
+            for (int i = 0; i < edgeCount; i++) {
+                edgeId = graph.getOutEdgeId(nodeId, i);
+                targetNode = graph.getOutTarget(nodeId, i);
+
+                // with multiplier = shortest path
+                tempDist = dists.get(nodeId) + graph.getOutDist(nodeId, i);
+
+                if (tempDist < dists.get(targetNode) || !dists.containsKey(targetNode)) {
+                    dists.put(targetNode, tempDist);
+                    prevEdges.put(targetNode, edgeId);
+                    heap.insert(targetNode, dists.get(targetNode));
+                }
+            }
+        }
+        return nodeId == trgtId;
+    }
 
     public static class GraphPacketBuilder {
         private DijkstraStructs ds;
@@ -148,7 +190,15 @@ public class ClientSideDev {
             GraphPacketBuilder pbuilder = new GraphPacketBuilder(graph);
             System.out.println("Build a hash map based client graph");
             ClientSideGraphRep cg = pbuilder.generateSubGraph(stgtId, hambId);
+            IntIntOpenHashMap dists = new IntIntOpenHashMap();
+            IntIntOpenHashMap prevEdges = new IntIntOpenHashMap();
 
+            boolean found = ClientSideDijkstra(cg, dists, prevEdges, stgtId, hambId);
+            if (found){
+                System.out.println("Found path with dist: "+dists.get(hambId));
+            } else {
+                System.out.println("Could not find a path");
+            }
             //TODO target needs to be added extra
 
             System.out.println("Write Client Graph to file "+args[1]);
