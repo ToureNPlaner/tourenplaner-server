@@ -17,7 +17,6 @@
 package de.tourenplaner.server;
 
 import de.tourenplaner.computecore.ComputeRequest;
-import de.tourenplaner.config.ConfigManager;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonMappingException;
@@ -361,15 +360,13 @@ public class Responder {
 
 
     /**
-     * Creates the response for the ComputeResult. Returns a
-     * ByteArrayOutputStream which contains the json object of this response.
+     * Creates the response for the ComputeResult.
      *
      * @param work ComputeRequest
      * @param status HttpResponseStatus
-     * @return Returns a ByteArrayOutputStream which contains the json object of this response.
      * @throws IOException Thrown if writing json onto the output or onto the returned ByteArrayOutputStream fails
      */
-    public ByteArrayOutputStream writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
+    public void writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
         ObjectMapper useMapper = (work.isAcceptsSmile()) ? smileMapper: mapper;
         
         // Build the response object.
@@ -397,18 +394,8 @@ public class Responder {
             future.addListener(ChannelFutureListener.CLOSE);
         }
 
-        boolean storeFullResponse = ConfigManager.getInstance().getEntryBool("store-full-response", true);
 
-        // if storeFullResponse is true and no smile is sent, the method will return the already existing resultStream
-        // if resultStream is a smile stream, we have to generate a new non smile stream to store it into the database
-        if (work.isAcceptsSmile() || !storeFullResponse) {
-            // Closing a ByteArrayOutputStream has no effect (see javadoc), so there is no need to call close()
-            resultStream = new ByteArrayOutputStream();
-            work.writeToStream(mapper, resultStream, storeFullResponse);
-            resultStream.flush();
-        }
-
-        return resultStream;
+        return;
 
     }
 
