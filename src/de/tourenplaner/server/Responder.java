@@ -33,7 +33,6 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponse;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Logger;
@@ -367,6 +366,12 @@ public class Responder {
      * @throws IOException Thrown if writing json onto the output or onto the returned ByteArrayOutputStream fails
      */
     public void writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
+        // Allocate buffer if not already done
+        // do this here because we are in a worker thread
+        if (outputBuffer == null) {
+            outputBuffer = ChannelBuffers.dynamicBuffer(4096);
+        }
+
         ObjectMapper useMapper = (work.isAcceptsSmile()) ? smileMapper: mapper;
         
         // Build the response object.
@@ -375,11 +380,15 @@ public class Responder {
         response.setHeader("Access-Control-Allow-Origin", "*");
         response.setHeader(CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile": "application/json; charset=UTF-8");
 
-        ByteArrayOutputStream resultStream = new ByteArrayOutputStream();
+        outputBuffer.clear();
+        OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+
         work.writeToStream(useMapper, resultStream, true);
         resultStream.flush();
 
-        response.setContent(ChannelBuffers.wrappedBuffer(resultStream.toByteArray()));
+        resultStream.flush();
+        response.setContent(outputBuffer);
+        
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
             response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
