@@ -79,7 +79,7 @@ public class UpGraphPacket extends GraphAlgorithm {
             pointId = points.getPointId(pointIndex);
             bfsMarkUp(edges, pointId);
         }
-
+        req.setResultObject(new SubgraphResult(graph, edges));
 
     }
 }

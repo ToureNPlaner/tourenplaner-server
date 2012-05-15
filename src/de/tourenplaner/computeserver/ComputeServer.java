@@ -43,6 +43,8 @@ public class ComputeServer {
         reg.registerAlgorithm(new TravelingSalesmenFactory(graph));
         reg.registerAlgorithm(new NNSearchFactory(graph));
         reg.registerAlgorithm(new ConstrainedSPFactory(graph));
+        reg.registerAlgorithm(new UpGraphFactory(graph));
+        reg.registerAlgorithm(new DownGraphFactory(graph));
     }
 
     private static Logger log = Logger.getLogger("de.tourenplaner");

@@ -81,6 +81,6 @@ public class DownGraphPacket extends GraphAlgorithm {
             pointId = points.getPointId(pointIndex);
             bfsMarkDown(edges, pointId);
         }
-
+        req.setResultObject(new SubgraphResult(graph, edges));
     }
 }
