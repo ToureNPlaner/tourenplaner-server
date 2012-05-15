@@ -78,8 +78,7 @@ public class ComputeThread extends Thread {
                         log.finer("Algorithm " + work.getAlgorithmURLSuffix() + " successfully computed.");
 
                         // IOException will be handled as EINTERNAL
-                        work.getResponder().writeComputeResult(work,
-                                HttpResponseStatus.OK);
+                        work.getResponder().writeComputeResult(work, HttpResponseStatus.OK);
 
                     } catch (ComputeException e) {
                         log.log(Level.WARNING, "There was a ComputeException", e);

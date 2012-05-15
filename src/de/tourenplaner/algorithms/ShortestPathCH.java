@@ -21,6 +21,7 @@ import com.carrotsearch.hppc.IntArrayDeque;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
+import de.tourenplaner.computecore.WayResult;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.HashMap;
@@ -69,8 +70,8 @@ public class ShortestPathCH extends GraphAlgorithm {
         if (points.size() < 2) {
             throw new ComputeException("Not enough points, need at least 2");
         }
-
-        List<Way> resultWays = req.getResultWays();
+        WayResult res = new WayResult(req.getPoints(), req.getConstraints());
+        List<Way> resultWays = res.getResultWays();
         int distance = 0;
         try {
             // First let's map the RequestPoints to Ids
@@ -94,7 +95,10 @@ public class ShortestPathCH extends GraphAlgorithm {
         misc.put("time", totalTime);
 
 
-        req.setMisc(misc);
+        res.setMisc(misc);
+
+        // Set result
+        req.setResultObject(res);
     }
 
     /**

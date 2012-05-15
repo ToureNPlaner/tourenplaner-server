@@ -19,6 +19,7 @@ package de.tourenplaner.algorithms;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
+import de.tourenplaner.computecore.WayResult;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.HashMap;
@@ -66,9 +67,11 @@ public class ConstrainedSP extends GraphAlgorithm {
         if (points.size() != 2) {
             throw new ComputeException("Not enough points or too much points, need 2");
         }
+
+        WayResult res = new WayResult(req.getPoints(), req.getConstraints());
         // We can only do 1-1 ways so just create and use one Way
-        req.getResultWays().add(new Way());
-        Way resultWay = req.getResultWays().get(0);
+        res.getResultWays().add(new Way());
+        Way resultWay = res.getResultWays().get(0);
 
         // Check for Constraint
         int maxAltitudeDifference;
@@ -87,9 +90,10 @@ public class ConstrainedSP extends GraphAlgorithm {
         misc.put("distance", resultWay.getDistance());
         misc.put("time", resultWay.getTravelTime());
         misc.put("altitude", altitudeDiff);
-        req.setMisc(misc);
+        res.setMisc(misc);
 
-
+        // Save the result
+        req.setResultObject(res);
     }
 
     /**

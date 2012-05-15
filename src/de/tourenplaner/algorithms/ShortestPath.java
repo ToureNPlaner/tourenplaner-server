@@ -19,6 +19,7 @@ package de.tourenplaner.algorithms;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
+import de.tourenplaner.computecore.WayResult;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.HashMap;
@@ -68,7 +69,9 @@ public class ShortestPath extends GraphAlgorithm {
             throw new ComputeException("Not enough points, need at least 2");
         }
 
-        List<Way> resultWays = req.getResultWays();
+        WayResult res = new WayResult(req.getPoints(), req.getConstraints());
+
+        List<Way> resultWays = res.getResultWays();
         int distance = 0;
         try {
             // First let's map the RequestPoints to Ids
@@ -90,7 +93,10 @@ public class ShortestPath extends GraphAlgorithm {
         Map<String, Object> misc = new HashMap<String, Object>(1);
         misc.put("distance", distance);
         misc.put("time", totalTime);
-        req.setMisc(misc);
+        res.setMisc(misc);
+
+        // Save the result
+        req.setResultObject(res);
     }
 
     /**

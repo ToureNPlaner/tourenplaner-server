@@ -18,10 +18,7 @@ package de.tourenplaner.algorithms;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntOpenHashSet;
-import de.tourenplaner.computecore.ComputeRequest;
-import de.tourenplaner.computecore.RequestPoint;
-import de.tourenplaner.computecore.RequestPoints;
-import de.tourenplaner.computecore.Way;
+import de.tourenplaner.computecore.*;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.utils.StaticMath;
 
@@ -105,8 +102,9 @@ public class TravelingSalesman extends GraphAlgorithm {
                 pointStore.add(requestPointList.get(currTourEntry));
             }
             req.getPoints().setStore(pointStore);
+            WayResult res = new WayResult(req.getPoints(), req.getConstraints());
             // Now build real paths
-            List<Way> resultWays = req.getResultWays();
+            List<Way> resultWays = res.getResultWays();
             int distance = chdijks.shortestPath(points, resultWays, true);
             // Calculate total time
             int numWays = resultWays.size();
@@ -118,7 +116,10 @@ public class TravelingSalesman extends GraphAlgorithm {
             Map<String, Object> misc = new HashMap<String, Object>(1);
             misc.put("distance", distance);
             misc.put("time", totalTime);
-            req.setMisc(misc);
+            res.setMisc(misc);
+
+            // Set the result
+            req.setResultObject(res);
 
         } catch (IllegalAccessException e) {
             throw new ComputeException("Illegal Access: " + e.getMessage());
