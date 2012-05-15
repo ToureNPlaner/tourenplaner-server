@@ -146,13 +146,11 @@ public class ComputeRequest {
 	 * 
 	 * @param mapper Jackson ObjectMapper
 	 * @param stream OutputStream
-     * @param writePath Determines if the result path should be written into the stream or
-     *                  if no path but the start and end points of the sub paths should be written into the stream
 	 * @throws JsonGenerationException Thrown if generating json fails
      * @throws JsonProcessingException Thrown if json generation processing fails
      * @throws IOException Thrown if writing json onto the stream fails
 	 */
-	public void writeToStream(ObjectMapper mapper, OutputStream stream, boolean writePath) throws IOException {
+	public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
 
 		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
 		Map<String, Object> pconsts;
@@ -178,40 +176,15 @@ public class ComputeRequest {
 		gen.writeEndArray();
 
 		gen.writeArrayFieldStart("way");
-        if (writePath) {
-            for(Way way : this.resultWays){
-                gen.writeStartArray();
-                for (int i = 0; i < way.size(); i++) {
-                    gen.writeStartObject();
-                    gen.writeNumberField("lt", way.getPointLat(i));
-                    gen.writeNumberField("ln", way.getPointLon(i));
-                    gen.writeEndObject();
-                }
-                gen.writeEndArray();
-            }
-        } else {
-            // do not use  this.points to determine airlines between the points
-            // some algorithms would maybe not compute paths between the points in this.points
-            // example: search a bicycle tour within a certain radius of a point
-            for(Way way : this.resultWays){
-                gen.writeStartArray();
-
+        for(Way way : this.resultWays){
+            gen.writeStartArray();
+            for (int i = 0; i < way.size(); i++) {
                 gen.writeStartObject();
-                gen.writeNumberField("lt", way.getPointLat(0));
-                gen.writeNumberField("ln", way.getPointLon(0));
+                gen.writeNumberField("lt", way.getPointLat(i));
+                gen.writeNumberField("ln", way.getPointLon(i));
                 gen.writeEndObject();
-
-                gen.writeStartObject();
-                gen.writeNumberField("lt", way.getPointLat(way.size() - 1));
-                gen.writeNumberField("ln", way.getPointLon(way.size() - 1));
-                gen.writeEndObject();
-
-                gen.writeEndArray();
             }
+            gen.writeEndArray();
         }
-		gen.writeEndArray();
-		gen.writeObjectField("misc", this.misc);
-		gen.writeEndObject();
-		gen.close();
-	}
+    }
 }

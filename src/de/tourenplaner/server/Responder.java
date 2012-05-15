@@ -383,7 +383,7 @@ public class Responder {
         outputBuffer.clear();
         OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
 
-        work.writeToStream(useMapper, resultStream, true);
+        work.writeToStream(useMapper, resultStream);
         resultStream.flush();
 
         resultStream.flush();
