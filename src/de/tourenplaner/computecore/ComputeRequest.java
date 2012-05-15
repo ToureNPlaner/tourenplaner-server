@@ -42,14 +42,11 @@ public class ComputeRequest {
 	private Map<String, Object> misc;
 	private final String algName;
 	private final Responder responder;
-	private int requestID;
     private final boolean acceptsSmile;
 
 	/**
 	 * Constructs a new ComputeRequest using the given Responder, Points and
-	 * Constraints. The requestID of the constructed ComputeRequest object is
-	 * -1, must be set with {@link #setRequestID(int)} if server is private. If
-	 * server is not private the requestID must remain -1.
+	 * Constraints.
 	 *
      * @param responder The to this compute request corresponding Responder
      * @param algName The algorithm name
@@ -65,7 +62,6 @@ public class ComputeRequest {
 		this.constraints = constraints;
 		this.responder = responder;
 		this.misc = null;
-		this.requestID = -1;
         this.acceptsSmile = acceptsSmile;
 	}
 
@@ -136,38 +132,6 @@ public class ComputeRequest {
 		this.misc = misc;
 	}
 
-	/**
-	 * Sets the requestID. The requestID must be -1 if server is not in private
-	 * mode. If the requestID is not explicitly set, it is -1. <br /> This
-	 * attribute should cointain the requestID of the corresponding
-	 * RequestDataset within the database. Must be set after construction of the
-	 * ComputeRequest object if server is in private mode.
-	 *
-     * @param requestID The requestID to set
-     */
-	public void setRequestID(int requestID) {
-		this.requestID = requestID;
-	}
-
-	/**
-	 * Gets the requestID, should be -1 if server is not in private mode. This
-	 * attribute should contain the requestID of the corresponding
-	 * RequestDataset within the database.
-	 * 
-	 * @return Returns the requestID
-	 */
-	public int getRequestID() {
-		return this.requestID;
-	}
-
-    /**
-     * Returns if request was constructed in private or public mode
-     * @return true if request was constructed in private mode
-     */
-    public boolean isPrivate() {
-        return requestID != -1;
-    }
-
     /**
      * Returns if request comes from a client accepting "application/x-jackson-smile"
      * @return Returns if client is accepting smile
@@ -195,10 +159,6 @@ public class ComputeRequest {
 
 		gen.setCodec(mapper);
 		gen.writeStartObject();
-        if (isPrivate()) {
-            gen.writeNumberField("requestid", this.requestID);
-        }
-        
         gen.writeObjectField("constraints", this.constraints);
 
 		gen.writeArrayFieldStart("points");
