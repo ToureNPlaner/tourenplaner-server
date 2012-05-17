@@ -17,6 +17,7 @@
 package de.tourenplaner.algorithms;
 
 import com.carrotsearch.hppc.BitSet;
+import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntOpenHashSet;
 import de.tourenplaner.computecore.*;
 import de.tourenplaner.graphrep.GraphRep;
@@ -50,9 +51,12 @@ public class TravelingSalesman extends GraphAlgorithm {
         BitSet markedEdges = ds.borrowMarkedSet();
 
         // BfsMark all points
+        IntArrayDeque toMark = ds.borrowDeque();
         for (int i = 0; i < points.size(); i++) {
-            chdijks.bfsMark(markedEdges, points.getPointId(i));
+            toMark.addLast(points.getPointId(i));
         }
+        chdijks.bfsMarkAll(markedEdges, toMark);
+        ds.returnDeque();
 
         // Calculate the distance matrix rows
         for (int i = 0; i < points.size(); i++) {
