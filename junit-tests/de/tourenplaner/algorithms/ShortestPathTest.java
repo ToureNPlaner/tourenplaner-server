@@ -84,8 +84,9 @@ public class ShortestPathTest {
             while (queue.size() > 0) {
                 int currentNode = queue.remove(0);
                 for (int edge=0; edge < graph.getOutEdgeCount(currentNode); edge++) {
-                    int targetId = graph.getTarget(graph.getOutEdgeId(currentNode, edge));
-                    int tempDist = dist[currentNode] + graph.getOutDist(currentNode, edge);
+                    int tempEdgeId = graph.getOutEdgeId(currentNode, edge);
+                    int targetId = graph.getTarget(tempEdgeId);
+                    int tempDist = dist[currentNode] + graph.getDist(tempEdgeId);
                     if (tempDist < dist[targetId] && tempDist <= totalDist) {
                         dist[targetId] = tempDist;
                         queue.add(targetId);
