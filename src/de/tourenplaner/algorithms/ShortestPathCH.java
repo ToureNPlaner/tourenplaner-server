@@ -18,6 +18,7 @@ package de.tourenplaner.algorithms;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
@@ -143,6 +144,50 @@ public class ShortestPathCH extends GraphAlgorithm {
         ds.returnDeque();
         ds.returnVisitedSet();
     }
+
+    /**
+     * Marks the G_down edges by doing a BFS like search for G_down edges from all target nodes
+     * consideration !G_down edges are always before G_up edges! That's why we
+     * can break the inner loop early
+     *
+     * @param markedEdges
+     * @param deque filled with the target nodes
+     * @throws IllegalAccessException
+     */
+    public final void bfsMarkAll(BitSet markedEdges, IntArrayDeque deque) throws IllegalAccessException {
+        int edgeId;
+        int currNode;
+        int sourceNode;
+        BitSet visited = ds.borrowVisitedSet();
+        // Set all nodes already in the deque as visited
+        for (IntCursor nodeId: deque){
+            visited.set(nodeId.value);
+        }
+        while (!deque.isEmpty()) {
+            currNode = deque.removeLast();
+            bfsNodes++;
+            Inner:
+            for (int i = 0; i < graph.getInEdgeCount(currNode); i++) {
+                edgeId = graph.getInEdgeId(currNode, i);
+                sourceNode = graph.getSource(edgeId);
+                // Check if G_down
+                if (graph.getRankSlope(edgeId) <= 0) {
+                    bfsEdges++;
+                    // Mark the edge
+                    markedEdges.set(edgeId);
+                    if (!visited.get(sourceNode)) {
+                        visited.set(sourceNode);
+                        // Add source for exploration
+                        deque.addFirst(sourceNode);
+                    }
+                } else {
+                    break Inner;
+                }
+            }
+        }
+        ds.returnVisitedSet();
+    }
+
 
     /**
      * Performs the Dijkstra Search on E_up U E_marked stopping when
