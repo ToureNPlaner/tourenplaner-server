@@ -186,5 +186,9 @@ public class ComputeRequest {
             }
             gen.writeEndArray();
         }
+        gen.writeEndArray();
+        gen.writeObjectField("misc", this.misc);
+        gen.writeEndObject();
+        gen.close();
     }
 }
