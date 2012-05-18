@@ -17,18 +17,13 @@
 package de.tourenplaner.server;
 
 
-import de.tourenplaner.computecore.AlgorithmManagerFactory;
-import de.tourenplaner.computecore.AlgorithmRegistry;
-import de.tourenplaner.computecore.ComputeCore;
-import de.tourenplaner.computecore.SharingAMFactory;
 import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.database.DatabaseManager;
-import de.tourenplaner.graphrep.GridNN;
 
 import java.beans.PropertyVetoException;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Map;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,7 +46,7 @@ public class TourenPlaner {
         CLIParser cliParser = new CLIParser(args);
         if (cliParser.getConfigFilePath() != null) {
             try {
-                ConfigManager.init(cliParser.getConfigFilePath());
+                ConfigManager.init(new FileInputStream(cliParser.getConfigFilePath()));
             } catch (Exception e) {
                 // ConfigManager either didn't like the path or the .config file at the path
                 log.severe("Error reading configuration file from file: " + cliParser.getConfigFilePath() + '\n' +

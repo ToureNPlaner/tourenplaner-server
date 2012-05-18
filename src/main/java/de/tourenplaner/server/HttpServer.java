@@ -16,13 +16,11 @@
 
 package de.tourenplaner.server;
 
-import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.config.ConfigManager;
 import org.jboss.netty.bootstrap.ServerBootstrap;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.concurrent.Executors;
 
 // TODO: maybe move more of this to the main TourenPlaner

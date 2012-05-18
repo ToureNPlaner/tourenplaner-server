@@ -34,19 +34,18 @@ public class GraphRepBinaryReaderTest {
     public final void testCreateGraphRep() {
 
         try {
-            GraphRep graphRep = (new TestGraphReader()).readTestGraph();
+            GraphRep graphRepInitial = (new TestGraphReader()).readTestGraph();
 
             // dump
             ByteArrayOutputStream byteArrayOutputStreamDump = new ByteArrayOutputStream();
-            (new GraphRepBinaryWriter()).writeGraphRep(byteArrayOutputStreamDump, graphRep);
+            (new GraphRepBinaryWriter()).writeGraphRep(byteArrayOutputStreamDump, graphRepInitial);
 
             // load dumped
             GraphRepBinaryReader reader = new GraphRepBinaryReader();
             ByteArrayInputStream
                     testDumpFileByteArrayStream =
                     new ByteArrayInputStream(byteArrayOutputStreamDump.toByteArray());
-            GraphRep graphRepDump;
-            graphRepDump = reader.createGraphRep(testDumpFileByteArrayStream);
+            GraphRep graphRep = reader.createGraphRep(testDumpFileByteArrayStream);
 
             assertEquals(14505, graphRep.getNodeCount());
             assertEquals(59600, graphRep.getEdgeCount());

@@ -30,11 +30,7 @@ public class ConfigManagerTest {
     private String currentConfigName = "";
 
     private void readConfigFile(String configName) throws Exception {
-        String configPath =
-                ConfigManager.class.getProtectionDomain().getCodeSource().getLocation().getPath() +
-                        "../data/test/configfiles/" + configName;
-        System.out.println("Loading config file " + configPath);
-        ConfigManager.init(configPath);
+        ConfigManager.init(getClass().getResourceAsStream("/configfiles/"+configName));
     }
 
     

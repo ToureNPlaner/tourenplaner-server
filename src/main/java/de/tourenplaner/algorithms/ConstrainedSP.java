@@ -105,7 +105,6 @@ public class ConstrainedSP extends GraphAlgorithm {
         int srclat, srclon;
         int destlat, destlon;
         int srcId, trgtId;
-        int distance;
 
         try {
             heap = ds.borrowHeap();

@@ -206,7 +206,7 @@ public class  AlgorithmHandler extends RequestHandler {
                 final boolean success = computer.submit(req);
 
                 if (!success) {
-                    String errorMessage = responder.writeAndReturnErrorMessage(ErrorMessage.EBUSY);
+                    responder.writeErrorMessage(ErrorMessage.EBUSY);
                     log.warning("Server had to deny algorithm request because of OVERLOAD");
 
                 }

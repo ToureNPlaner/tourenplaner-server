@@ -16,11 +16,14 @@
 
 package de.tourenplaner.config;
 
+import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
+import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 
-import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -76,14 +79,16 @@ public class ConfigManager {
 	 * 
 	 *
      * @param configPath the file system path to the config file
+	 * @throws IOException 
+	 * @throws JsonMappingException 
+	 * @throws JsonParseException 
      * @throws Exception Thrown if mapping of config file fails, for example
      *      because the file was not found or the file has a bad syntax
 	 */
-	private ConfigManager(String configPath)
-			throws Exception {
+	private ConfigManager(InputStream inputStream) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
-		this.confMap = mapper.readValue(new File(configPath),
+		this.confMap = mapper.readValue(inputStream,
 				new TypeReference<Map<String, Object>>() {
 				});
         this.keyPathBase = "";
@@ -119,9 +124,9 @@ public class ConfigManager {
 	 * @throws Exception Thrown if mapping of config file fails, for example
      *      because the file was not found or the file has a bad syntax
 	 */
-	public static void init(String configPath)
+	public static void init(InputStream inputStream)
 			throws Exception {
-		instance = new ConfigManager(configPath);
+		instance = new ConfigManager(inputStream);
 	}
 
 	/**

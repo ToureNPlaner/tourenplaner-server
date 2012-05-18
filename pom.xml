@@ -8,7 +8,7 @@
   <packaging>jar</packaging>
 
   <name>tourenplaner-server</name>
-  <url>http://maven.apache.org</url>
+  <url>http://tourenplaner.github.com</url>
   
   <developers>
     <developer>
@@ -59,6 +59,12 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sonar-maven-plugin</artifactId>
+        <version>2.0</version>
+      </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>

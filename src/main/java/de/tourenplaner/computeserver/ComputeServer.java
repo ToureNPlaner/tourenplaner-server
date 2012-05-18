@@ -100,7 +100,7 @@ public class ComputeServer {
         CLIParser cliParser = new CLIParser(args);
         if (cliParser.getConfigFilePath() != null) {
             try {
-                ConfigManager.init(cliParser.getConfigFilePath());
+                ConfigManager.init(new FileInputStream(cliParser.getConfigFilePath()));
             } catch (Exception e) {
                 // ConfigManager either didn't like the path or the .config file at the path
                 log.severe("Error reading configuration file from file: " + cliParser.getConfigFilePath() + '\n' +

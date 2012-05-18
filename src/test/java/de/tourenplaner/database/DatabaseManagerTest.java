@@ -45,11 +45,8 @@ public class DatabaseManagerTest {
 	 */
 	@BeforeClass
 	public static void prepareTestRun() {
-        String configPath = DatabaseManagerTest.class.getProtectionDomain().getCodeSource().getLocation().getPath() +
-                        "../data/test/database-junit.conf";
-
         try {
-            ConfigManager.init(configPath);
+            ConfigManager.init(DatabaseManagerTest.class.getResourceAsStream("/database-junit.conf"));
         } catch (Exception e) {
             return;
         }
@@ -58,17 +55,18 @@ public class DatabaseManagerTest {
         doTest = cm.getEntryBool("private", false);
 
         System.out.println();
+        String fileUrl = DatabaseManagerTest.class.getResource("/database-junit.conf").toString();
         if (doTest) {
             System.out.println("### Database JUnit test will be executed. ###");
             System.out.println();
             System.out.println("If the test should not be executed, set the value 'private' to false within ");
-            System.out.println("the config file " + configPath);
+            System.out.println("the config file "+fileUrl);
             System.out.println();
         } else {
             System.out.println("### Database JUnit test will _NOT_ be executed. ###");
             System.out.println();
             System.out.println("If the test should be executed, set the value 'private' to true within ");
-            System.out.println("the config file " + configPath);
+            System.out.println("the config file "+fileUrl);
             System.out.println();
             return;
         }

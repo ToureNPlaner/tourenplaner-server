@@ -17,7 +17,6 @@
 package de.tourenplaner.computeserver;
 
 import de.tourenplaner.computecore.ComputeCore;
-import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.server.ErrorMessage;
 import de.tourenplaner.server.Responder;
 import org.jboss.netty.channel.*;
@@ -63,7 +62,6 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
      * @param serverInfo String-Object-Map
      */
     public MasterHandler(final ComputeCore cCore, final Map<String, Object> serverInfo) {
-        final ConfigManager cm = ConfigManager.getInstance();
         this.infoHandler = new InfoHandler(serverInfo);
         this.algHandler = new AlgorithmHandler(cCore);
     }

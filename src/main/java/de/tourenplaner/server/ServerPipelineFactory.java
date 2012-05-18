@@ -16,7 +16,6 @@
 
 package de.tourenplaner.server;
 
-import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.config.ConfigManager;
 import org.jboss.netty.channel.ChannelPipeline;
 import org.jboss.netty.channel.ChannelPipelineFactory;
@@ -27,7 +26,6 @@ import org.jboss.netty.handler.codec.http.HttpResponseEncoder;
 import org.jboss.netty.handler.ssl.SslHandler;
 
 import javax.net.ssl.SSLEngine;
-import java.util.Map;
 
 import static org.jboss.netty.channel.Channels.pipeline;
 
