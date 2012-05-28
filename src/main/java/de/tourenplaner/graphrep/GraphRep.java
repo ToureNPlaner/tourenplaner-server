@@ -16,6 +16,9 @@
 
 package de.tourenplaner.graphrep;
 
+import de.tourenplaner.utils.SortAdapter;
+import de.tourenplaner.utils.Sorter;
+
 import java.io.Serializable;
 
 /**
@@ -30,79 +33,37 @@ public class GraphRep implements Serializable {
      * This class is used internally to sort the edge arrays
      * it's a heap sort implementation using a ternary heap.
      */
-    private static class Sorter {
-        private static void sort(GraphRep graphRep) {
+    private static class MappingSortAdapter extends SortAdapter {
+        private GraphRep graph;
 
-            heapify(graphRep);
-            int endI = graphRep.trgt.length - 1;
-            while (endI > 0) {
-                swap(graphRep, endI, 0);
-                siftDown(graphRep, 0, endI - 1);
-                endI--;
-            }
+        public MappingSortAdapter(GraphRep graph) {
+            this.graph = graph;
         }
 
-        private static void swap(GraphRep graphRep, int i, int j) {
-            int temp = graphRep.mappingInToOut[i];
-            graphRep.mappingInToOut[i] = graphRep.mappingInToOut[j];
-            graphRep.mappingInToOut[j] = temp;
-        }
-
-        /**
-         * @param graphRep
-         * @param i
-         * @param j
-         * @return
-         */
-        private static boolean less(GraphRep graphRep, int i, int j) {
+        @Override
+        public boolean less(int i, int j) {
             int edgeI, edgeJ;
             int targetI, targetJ;
             int sourceRankI, sourceRankJ;
-            edgeI = graphRep.mappingInToOut[i];
-            edgeJ = graphRep.mappingInToOut[j];
-            targetI = graphRep.trgt[edgeI];
-            targetJ = graphRep.trgt[edgeJ];
-            sourceRankI = graphRep.getRank(graphRep.src[edgeI]);
-            sourceRankJ = graphRep.getRank(graphRep.src[edgeJ]);
+            edgeI = graph.mappingInToOut[i];
+            edgeJ = graph.mappingInToOut[j];
+            targetI = graph.trgt[edgeI];
+            targetJ = graph.trgt[edgeJ];
+            sourceRankI = graph.getRank(graph.src[edgeI]);
+            sourceRankJ = graph.getRank(graph.src[edgeJ]);
             return targetI < targetJ || (targetI == targetJ && sourceRankI > sourceRankJ);
         }
 
-        private static void heapify(GraphRep graphRep) {
-            int pos = graphRep.trgt.length - 1;
-            while (pos >= 0) {
-                siftDown(graphRep, pos, graphRep.trgt.length - 1);
-                pos--;
-            }
+        @Override
+        public void swap(int i, int j) {
+            int temp = graph.mappingInToOut[i];
+            graph.mappingInToOut[i] = graph.mappingInToOut[j];
+            graph.mappingInToOut[j] = temp;
         }
 
-        private static void siftDown(GraphRep graphRep, int topI, int endI) {
-            int cLI;
-            int cMI;
-            int cRI;
-            int cMaxI;
-
-            while (topI * 3 + 1 <= endI) {
-                cLI = topI * 3 + 1;
-                cMI = cLI + 1;
-                cRI = cLI + 2;
-                cMaxI = topI;
-
-                if (less(graphRep, cMaxI, cLI)) {
-                    cMaxI = cLI;
-                }
-                if (cMI <= endI && less(graphRep, cMaxI, cMI)) {
-                    cMaxI = cMI;
-                }
-                if (cRI <= endI && less(graphRep, cMaxI, cRI)) {
-                    cMaxI = cRI;
-                }
-                if (cMaxI != topI) {
-                    swap(graphRep, cMaxI, topI);
-                    topI = cMaxI;
-                } else {
-                    return;
-                }
-            }
+        @Override
+        public int length() {
+            return graph.mappingInToOut.length;
         }
     }
 
@@ -342,7 +303,7 @@ public class GraphRep implements Serializable {
             offsetOut[cnt] = offsetOut[cnt + 1];
         }
 
-        Sorter.sort(this);
+        Sorter.sort(new MappingSortAdapter(this));
 
         int currentDest;
         int prevDest = -1;
