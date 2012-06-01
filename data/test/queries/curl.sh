@@ -25,7 +25,7 @@ if [ "NOJSON" == $2 ]
 then
     JSON_OPTION=""
 else
-    JSON_OPTION="-H 'Accept: application/json' --data-binary @$2"
+    JSON_OPTION="-H 'Accept: application/x-jackson-smile' --data-binary @$2"
 fi
 
 if [ "HTTPS" == "$6" ]
@@ -59,18 +59,12 @@ HTTP_CODE='\n\nHttpStatusCode:\t%{http_code}\n'
 
 if [ "YES" == "$USER_AUTH" ]
 then
-    curl -s $HTTPS_OPTION $JSON_OPTION -u "$USER_OPTION" "$1/$3" -w $HTTP_CODE
+    curl -s $HTTPS_OPTION $JSON_OPTION -u "$USER_OPTION" "$1/$3"
 
-    echo "";
-    echo "END OF curl -sL" $HTTPS_OPTION $JSON_OPTION -u "$USER_OPTION" \"$1/$3\" -w $HTTP_CODE
-    echo "";
 
 else
-    curl -s $HTTPS_OPTION $JSON_OPTION "$1/$3" -w $HTTP_CODE
+    curl -H 'Accept: application/x-jackson-smile' -s $HTTPS_OPTION $JSON_OPTION "$1/$3" 
 
-    echo "";
-    echo "END OF curl -sL" $HTTPS_OPTION $JSON_OPTION \"$1/$3\" -w $HTTP_CODE
-    echo "";
 fi
 
 
