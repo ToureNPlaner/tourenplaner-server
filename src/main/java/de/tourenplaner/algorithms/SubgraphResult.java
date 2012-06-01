@@ -1,7 +1,9 @@
 package de.tourenplaner.algorithms;
 
 import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.IntObjectOpenHashMap;
 import com.carrotsearch.hppc.cursors.IntCursor;
+import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import de.tourenplaner.computecore.StreamJsonWriter;
 import de.tourenplaner.graphrep.GraphRep;
 import org.codehaus.jackson.JsonGenerator;
@@ -16,12 +18,14 @@ import java.io.OutputStream;
  */
 public class SubgraphResult implements StreamJsonWriter {
 
-    private final GraphRep graph;
-    private final IntArrayList edges;
 
-    public SubgraphResult(GraphRep graphRep, IntArrayList edges){
+
+    private final GraphRep graph;
+    private final IntObjectOpenHashMap<IntArrayList> cgraph;
+
+    public SubgraphResult(GraphRep graphRep, IntObjectOpenHashMap<IntArrayList> cgraph) {
         this.graph = graphRep;
-        this.edges = edges;
+        this.cgraph = cgraph;
     }
 
     @Override
@@ -29,11 +33,16 @@ public class SubgraphResult implements StreamJsonWriter {
         JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
         gen.writeStartObject();
         gen.writeArrayFieldStart("edges");
-        for (IntCursor edge : edges){
+        for (IntObjectCursor node : cgraph){
             gen.writeStartArray();
-            gen.writeNumber(graph.getSource(edge.value));
-            gen.writeNumber(graph.getTarget(edge.value));
-            gen.writeNumber(graph.getDist(edge.value));
+            gen.writeNumber(node.key);
+            gen.writeStartArray();
+            IntArrayList values = (IntArrayList)node.value;
+            for (IntCursor edgeId : values) {
+                gen.writeNumber(graph.getTarget(edgeId.value));
+                gen.writeNumber(graph.getDist(edgeId.value));
+            }
+            gen.writeEndArray();
             gen.writeEndArray();
         }
         gen.writeEndArray();

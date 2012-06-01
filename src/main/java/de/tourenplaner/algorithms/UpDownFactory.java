@@ -8,15 +8,15 @@ import java.util.Map;
 /**
  * @author Niklas Schnelle
  */
-public class UpGraphFactory extends  SharingAlgorithmFactory {
+public class UpDownFactory extends  SharingAlgorithmFactory {
 
-    public UpGraphFactory(GraphRep graphRep){
+    public UpDownFactory(GraphRep graphRep){
         super(graphRep);
     }
 
     @Override
     public Algorithm createAlgorithm(DijkstraStructs rs) {
-        return new UpGraphPacket(graph, rs);
+        return new UpDownGraphPacket(graph, rs);
     }
 
     @Override
@@ -26,17 +26,17 @@ public class UpGraphFactory extends  SharingAlgorithmFactory {
 
     @Override
     public Algorithm createAlgorithm() {
-        return new UpGraphPacket(graph, new DijkstraStructs(graph.getNodeCount(), graph.getEdgeCount()));
+        return new UpDownGraphPacket(graph, new DijkstraStructs(graph.getNodeCount(), graph.getEdgeCount()));
     }
 
     @Override
     public String getURLSuffix() {
-        return "upg";
+        return "updowng";
     }
 
     @Override
     public String getAlgName() {
-        return "Upwards Graph";
+        return "Upwards+Downwards Graph";
     }
 
     @Override

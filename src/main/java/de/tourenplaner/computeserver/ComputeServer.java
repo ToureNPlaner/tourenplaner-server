@@ -43,7 +43,7 @@ public class ComputeServer {
         reg.registerAlgorithm(new TravelingSalesmenFactory(graph));
         reg.registerAlgorithm(new NNSearchFactory(graph));
         reg.registerAlgorithm(new ConstrainedSPFactory(graph));
-        reg.registerAlgorithm(new UpGraphFactory(graph));
+        reg.registerAlgorithm(new UpDownFactory(graph));
         reg.registerAlgorithm(new DownGraphFactory(graph));
     }
 
