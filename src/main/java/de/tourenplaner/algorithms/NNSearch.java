@@ -18,6 +18,7 @@ package de.tourenplaner.algorithms;
 
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
+import de.tourenplaner.computecore.WayResult;
 import de.tourenplaner.graphrep.GraphRep;
 
 /**
@@ -35,6 +36,8 @@ public class NNSearch extends GraphAlgorithm {
 	public void compute(ComputeRequest req) throws ComputeException, Exception {
 		assert req != null : "We ended up without a request object in run";
 
+        WayResult res = new WayResult(req.getPoints(), req.getConstraints());
+
 		// TODO: send error messages to client
 		RequestPoints points = req.getPoints();
 		// Check if we have enough points to do something useful
@@ -42,6 +45,7 @@ public class NNSearch extends GraphAlgorithm {
 			throw new ComputeException("Not enough points, need at least 1");
 		}
 		nearestNeighbourLookup(points);
+        req.setResultObject(res);
 	}
 
 
@@ -52,6 +56,7 @@ public class NNSearch extends GraphAlgorithm {
      */
 	public void nearestNeighbourLookup(RequestPoints points) {
 		int nodeID;
+
 
 		for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
 			nodeID = graph.getIdForCoordinates(points.getPointLat(pointIndex),
