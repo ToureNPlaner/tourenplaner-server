@@ -278,6 +278,9 @@ public class ConfigManager {
 		return value;
 	}
 
+    public boolean isEntryAvailable(String key) {
+        return  (confMap != null) && (confMap.get(key) != null);
+    }
 
     /**
      *

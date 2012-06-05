@@ -60,8 +60,8 @@ public class ComputeServer {
         info.put("version", new Float(1.0));
         info.put("servertype", ConfigManager.getInstance().getEntryBool("private", false) ? "private" : "public");
 
-        // when serverinfosslport is available then use that in the serverinfo, else use sslport
-        int sslport = ConfigManager.getInstance().getEntryInt("serverinfosslport", 1) == 1 ?
+        // when serverinfosslport is available then put it in the serverinfo, instead of the sslport we really use
+        int sslport = ConfigManager.getInstance().isEntryAvailable("serverinfosslport") ?
                       ConfigManager.getInstance().getEntryInt("sslport", 8081) :
                       ConfigManager.getInstance().getEntryInt("serverinfosslport", 8081);
 
