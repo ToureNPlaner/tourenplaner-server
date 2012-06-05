@@ -62,6 +62,7 @@ public class ComputeThread extends Thread {
         Algorithm alg;
 
         while (!Thread.interrupted()) {
+            //TODO: unused variables and returned error messages. wat.
             long cpuTime;
             int requestID = -1;
             ByteArrayOutputStream baOutputStream;

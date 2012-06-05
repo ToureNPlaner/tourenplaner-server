@@ -292,7 +292,7 @@ public class Responder {
 
         response.setHeader("Access-Control-Allow-Origin", "*");
         // Add header so that clients know how they can authenticate
-        if(errorMessage.status == HttpResponseStatus.UNAUTHORIZED){
+        if(errorMessage.status.equals(HttpResponseStatus.UNAUTHORIZED)){
             response.setHeader("WWW-Authenticate","Basic realm=\"touenplaner\"");
         }
 

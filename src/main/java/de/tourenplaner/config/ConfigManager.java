@@ -78,7 +78,7 @@ public class ConfigManager {
 	 * given file path.
 	 * 
 	 *
-     * @param configPath the file system path to the config file
+     * @param inputStream an input stream the config file can be read from
 	 * @throws IOException 
 	 * @throws JsonMappingException 
 	 * @throws JsonParseException 
@@ -120,7 +120,7 @@ public class ConfigManager {
 	 * before getInstance. If Init fails the ConfigManager can be used as an
 	 * empty Config that only returns the default
 	 *
-     * @param configPath the file system path to the config file
+     * @param inputStream an input stream the config file can be read from
 	 * @throws Exception Thrown if mapping of config file fails, for example
      *      because the file was not found or the file has a bad syntax
 	 */
@@ -278,6 +278,9 @@ public class ConfigManager {
 		return value;
 	}
 
+    public boolean isEntryAvailable(String key) {
+        return  (confMap != null) && (confMap.get(key) != null);
+    }
 
     /**
      *

@@ -16,7 +16,6 @@
 
 package de.tourenplaner.computecore;
 
-import java.sql.SQLException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Logger;
@@ -53,11 +52,6 @@ public class ComputeCore {
 
 	/**
 	 * Starts the ComputeThreads
-	 * 
-	 * @throws SQLException
-	 *             Thrown only in private mode, and only if database connection
-	 *             could not be established.
-	 * 
 	 */
 	public void start(AlgorithmManagerFactory amFac) {
 		ComputeThread curr;

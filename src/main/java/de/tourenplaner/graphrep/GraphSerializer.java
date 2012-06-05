@@ -19,6 +19,7 @@ package de.tourenplaner.graphrep;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.util.logging.Logger;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -30,6 +31,6 @@ public class GraphSerializer implements GraphRepWriter{
         ObjectOutputStream oos = new ObjectOutputStream(out);
         oos.writeObject(graphRep);
         oos.close();
-        System.out.println("Successfully dumped graph");
+        Logger.getLogger("de.tourenplaner.server").fine("Successfully dumped graph");
     }
 }

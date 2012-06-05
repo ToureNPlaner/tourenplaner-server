@@ -61,8 +61,8 @@ public class ComputeServer {
         info.put("version", new Float(1.0));
         info.put("servertype", ConfigManager.getInstance().getEntryBool("private", false) ? "private" : "public");
 
-        // when serverinfosslport is available then use that in the serverinfo, else use sslport
-        int sslport = ConfigManager.getInstance().getEntryInt("serverinfosslport", 1) == 1 ?
+        // when serverinfosslport is available then put it in the serverinfo, instead of the sslport we really use
+        int sslport = ConfigManager.getInstance().isEntryAvailable("serverinfosslport") ?
                       ConfigManager.getInstance().getEntryInt("sslport", 8081) :
                       ConfigManager.getInstance().getEntryInt("serverinfosslport", 8081);
 
@@ -77,10 +77,12 @@ public class ComputeServer {
             algInfo.put("name", alg.getAlgName());
             algInfo.put("description", alg.getDescription());
             algInfo.put("urlsuffix", alg.getURLSuffix());
-            if (alg instanceof AlgorithmFactory) {
-                algInfo.put("constraints", alg.getConstraints());
-                algInfo.put("details", alg.getDetails());
-            } // instance of GraphAlgorithmFactory implies also instance of AlgorithmFactory
+
+            // stuff every alg has (should have):
+            algInfo.put("constraints", alg.getConstraints());
+            algInfo.put("details", alg.getDetails());
+
+             // if the alg is a graph algorithm it may additionally have pointconstraints
             if (alg instanceof GraphAlgorithmFactory) {
                 algInfo.put("pointconstraints", ((GraphAlgorithmFactory) alg).getPointConstraints());
             }

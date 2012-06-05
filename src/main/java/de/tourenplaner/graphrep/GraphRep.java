@@ -207,7 +207,7 @@ public class GraphRep implements Serializable {
      *
      * @param id
      * @param shortedEdge2
-     * @paramn shortedEdge1
+     * @param shortedEdge1
      */
     public final void setShortcutData(int id, int shortedEdge1, int shortedEdge2) {
         this.shortedEdge1[id] = shortedEdge1;

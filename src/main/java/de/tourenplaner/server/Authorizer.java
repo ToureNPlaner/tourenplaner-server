@@ -27,6 +27,7 @@ import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.util.CharsetUtil;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.sql.SQLException;
 import java.util.Random;
 import java.util.logging.Logger;
@@ -54,7 +55,7 @@ public class Authorizer extends RequestHandler {
      */
     protected String generateSalt() {
         // TODO optimize salt-generation
-        final Random rand = new Random();
+        final Random rand = new SecureRandom();
         final StringBuilder saltBuilder = new StringBuilder(64);
         for (int i = 0; i < 4; i++) {
             saltBuilder.append(Long.toHexString(rand.nextLong()));
