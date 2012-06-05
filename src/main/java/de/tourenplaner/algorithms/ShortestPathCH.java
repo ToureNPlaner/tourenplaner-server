@@ -201,7 +201,6 @@ public class ShortestPathCH extends GraphAlgorithm {
      * @param markedEdges
      * @param dists
      * @param srcId
-     * @return
      * @throws IllegalAccessException
      */
     protected final void dijkstraStopAtEmptyDistOnly(int[] dists, BitSet markedEdges, int srcId) throws IllegalAccessException {
