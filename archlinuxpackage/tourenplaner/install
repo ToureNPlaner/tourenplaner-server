@@ -1,7 +1,0 @@
-post_install() {
-[[ -d /var/tourenplaner ]] || install -o http -g http -d /var/tourenplaner
-
-echo '==> Please copy your germany.txt to /var/tourenplaner/ and make sure it is readable by the http user.'
-
-}
-
