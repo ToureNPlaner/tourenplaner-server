@@ -76,10 +76,12 @@ public class ComputeServer {
             algInfo.put("name", alg.getAlgName());
             algInfo.put("description", alg.getDescription());
             algInfo.put("urlsuffix", alg.getURLSuffix());
-            if (alg instanceof AlgorithmFactory) {
-                algInfo.put("constraints", alg.getConstraints());
-                algInfo.put("details", alg.getDetails());
-            } // instance of GraphAlgorithmFactory implies also instance of AlgorithmFactory
+
+            // stuff every alg has (should have):
+            algInfo.put("constraints", alg.getConstraints());
+            algInfo.put("details", alg.getDetails());
+
+             // if the alg is a graph algorithm it may additionally have pointconstraints
             if (alg instanceof GraphAlgorithmFactory) {
                 algInfo.put("pointconstraints", ((GraphAlgorithmFactory) alg).getPointConstraints());
             }
