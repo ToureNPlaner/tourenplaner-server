@@ -132,6 +132,6 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         bfsMarkUp(cgraph, points.getPointId(0));
         bfsMarkDown(cgraph, points.getPointId(1));
 
-        req.setResultObject(new SubgraphResult(graph, cgraph));
+        req.setResultObject(new SubgraphResult(graph, cgraph, points.getPointId(0), points.getPointId(1)));
     }
 }
