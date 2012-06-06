@@ -18,32 +18,19 @@ package de.tourenplaner.algorithms;
 
 import de.tourenplaner.graphrep.GraphRep;
 
-import java.util.*;
-
 /**
  * Used to create instances of TravelingSalesmen algorithm
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
-    private final Map<String, Object> details;
-    private final List<Map<String, Object>> constraints;
-    private final List<Map<String, Object>> pointConstraints;
+public class TravelingSalesmenFactory extends SharingAlgorithmFactory {
 
-    public TravelingSalesmenFactory(GraphRep graph){
-      super(graph);
-        constraints = new ArrayList<Map<String, Object>> (0);
-        pointConstraints = new ArrayList<Map<String, Object>>(0);
-        details = new HashMap<String, Object>(3);
+    public TravelingSalesmenFactory(GraphRep graph) {
+        super(graph);
         details.put("hidden", this.isHidden());
         details.put("minpoints", 2);
         details.put("sourceistarget", true);
 
-    }
-
-    @Override
-    public Map<String, Object> getDetails() {
-        return details;
     }
 
     @Override
@@ -54,16 +41,6 @@ public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
     @Override
     public Algorithm createAlgorithm(DijkstraStructs rs) {
         return new TravelingSalesman(graph, rs);
-    }
-
-    @Override
-    public List<Map<String, Object>> getPointConstraints() {
-        return pointConstraints;
-    }
-
-    @Override
-    public List<Map<String, Object>> getConstraints() {
-        return constraints;
     }
 
     @Override

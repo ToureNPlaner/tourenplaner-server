@@ -18,7 +18,7 @@ package de.tourenplaner.algorithms;
 
 import de.tourenplaner.graphrep.GraphRep;
 
-import java.util.*;
+import java.util.HashMap;
 
 /**
  * Used to create instances of ConstraintShortestPath algorithm
@@ -26,9 +26,6 @@ import java.util.*;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class ConstrainedSPFactory extends SharingAlgorithmFactory {
-    private final Map<String, Object> details;
-    private final List<Map<String, Object>> constraints;
-    private final List<Map<String, Object>> pointConstraints;
 
 
     /**
@@ -36,7 +33,6 @@ public class ConstrainedSPFactory extends SharingAlgorithmFactory {
      */
     public ConstrainedSPFactory(GraphRep graph) {
         super(graph);
-        constraints = new ArrayList<Map<String, Object>>();
         constraints.add(new HashMap<String, Object>(4));
         constraints.get(0).put("id", "maxAltitudeDifference");
         constraints.get(0).put("name", "Maximum Altitude Difference");
@@ -44,25 +40,17 @@ public class ConstrainedSPFactory extends SharingAlgorithmFactory {
         constraints.get(0).put("type", "meter");
         constraints.get(0).put("min", 0);
 
-        pointConstraints = new ArrayList<Map<String, Object>>(0);
-
-        details = new HashMap<String, Object>(3);
         details.put("hidden", this.isHidden());
         details.put("minpoints", 2);
         details.put("maxpoints", 2);
         details.put("sourceistarget", false);
-
     }
 
     @Override
-    public String getDescription(){
+    public String getDescription() {
         return "Calculates, if possible, a short route between the two supplied points, that climbs less than the supplied maximum altitude over it's length";
     }
 
-    @Override
-    public Map<String, Object> getDetails() {
-        return details;
-    }
 
     @Override
     public Algorithm createAlgorithm(DijkstraStructs rs) {
@@ -70,10 +58,8 @@ public class ConstrainedSPFactory extends SharingAlgorithmFactory {
     }
 
     /*
-      * (non-Javadoc)
-      *
-      * @see de.tourenplaner.algorithms.AlgorithmFactory#createAlgorithm()
-      */
+     * @see de.tourenplaner.algorithms.AlgorithmFactory#createAlgorithm()
+    */
     @Override
     public Algorithm createAlgorithm() {
         return new ConstrainedSP(graph, new DijkstraStructs(
@@ -93,16 +79,6 @@ public class ConstrainedSPFactory extends SharingAlgorithmFactory {
     @Override
     public int getVersion() {
         return 1;
-    }
-
-    @Override
-    public List<Map<String, Object>> getPointConstraints() {
-        return pointConstraints;
-    }
-
-    @Override
-    public List<Map<String, Object>> getConstraints() {
-        return constraints;
     }
 
     @Override

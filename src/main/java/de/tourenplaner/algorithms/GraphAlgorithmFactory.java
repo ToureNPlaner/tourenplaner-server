@@ -18,6 +18,7 @@ package de.tourenplaner.algorithms;
 
 import de.tourenplaner.graphrep.GraphRep;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,18 +29,22 @@ import java.util.Map;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
-	
-	protected GraphRep graph;
-	
-	
-	public GraphAlgorithmFactory(GraphRep graph){
-		this.graph = graph;
-	}
-	
-	/**
-	 * Gets the List of PointConstraints in a jsonserializable Map format
-	 * 
-	 * @return A list of maps of pointconstraints or null
-	 */
-	public abstract List<Map<String, Object>> getPointConstraints();
+
+    protected GraphRep graph;
+    protected final List<Map<String, Object>> pointConstraints;
+
+
+    public GraphAlgorithmFactory(GraphRep graph) {
+        this.graph = graph;
+        this.pointConstraints = new ArrayList<Map<String, Object>>();
+    }
+
+    /**
+     * Gets the List of PointConstraints in a jsonserializable Map format
+     *
+     * @return A list of maps of pointconstraints or null
+     */
+    public List<Map<String, Object>> getPointConstraints() {
+        return pointConstraints;
+    }
 }

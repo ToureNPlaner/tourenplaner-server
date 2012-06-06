@@ -16,6 +16,8 @@
 
 package de.tourenplaner.algorithms;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -26,49 +28,60 @@ import java.util.Map;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public abstract class AlgorithmFactory {
-	/**
-	 * Creates a new instance of the Algorithm class(s) associated with this
-	 * factory
-	 * 
-	 * @return a new Algorithm instance
-	 */
-	public abstract Algorithm createAlgorithm();
 
-	/**
-	 * Used to get the URLSuffix for the constructed Algorithms e.. "sp" will
-	 * make the Algorithm available under /algsp
-	 * 
-	 * @return
-	 */
-	public abstract String getURLSuffix();
 
-	/**
-	 * Returns the human readable name of the constructed Algorithms e.g.
-	 * "Shortest Path"
-	 * 
-	 * @return
-	 */
-	public abstract String getAlgName();
+    protected final Map<String, Object> details;
+    protected final List<Map<String, Object>> constraints;
 
-	/**
-	 * Returns the version of the constructed Algorithms
-	 * 
-	 * @return
-	 */
-	public abstract int getVersion();
+    public AlgorithmFactory() {
+        details = new HashMap<String, Object>();
+        constraints = new ArrayList<Map<String, Object>>();
+    }
 
-	/**
-	 * Returns if it is an isHidden algorithm
-	 * 
-	 */
-	public abstract boolean isHidden();
+    /**
+     * Creates a new instance of the Algorithm class(s) associated with this
+     * factory
+     *
+     * @return a new Algorithm instance
+     */
+    public abstract Algorithm createAlgorithm();
+
+    /**
+     * Used to get the URLSuffix for the constructed Algorithms e.. "sp" will
+     * make the Algorithm available under /algsp
+     *
+     * @return
+     */
+    public abstract String getURLSuffix();
+
+    /**
+     * Returns the human readable name of the constructed Algorithms e.g.
+     * "Shortest Path"
+     *
+     * @return
+     */
+    public abstract String getAlgName();
+
+    /**
+     * Returns the version of the constructed Algorithms
+     *
+     * @return
+     */
+    public abstract int getVersion();
+
+    /**
+     * Returns if it is an isHidden algorithm
+     */
+    public abstract boolean isHidden();
 
     /**
      * Gets the Constraints not bound to any Point
      *
      * @return A List of Maps with the constraints or null
      */
-    public abstract List<Map<String, Object>> getConstraints();
+    public List<Map<String, Object>> getConstraints() {
+        return constraints;
+    }
 
     /**
      * Gets Details for the the algorithm
@@ -77,7 +90,9 @@ public abstract class AlgorithmFactory {
      *
      * @return A map with the details or null
      */
-    public abstract Map<String, Object> getDetails();
+    public Map<String, Object> getDetails() {
+        return details;
+    }
 
     /**
      * Gets a human readable (english) description of the implemented
