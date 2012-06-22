@@ -21,7 +21,6 @@ import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.server.ErrorMessage;
 import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
-import java.io.ByteArrayOutputStream;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -62,38 +61,32 @@ public class ComputeThread extends Thread {
         Algorithm alg;
 
         while (!Thread.interrupted()) {
-            //TODO: unused variables and returned error messages. wat.
-            long cpuTime;
-            int requestID = -1;
-            ByteArrayOutputStream baOutputStream;
 
             try {
                 work = reqQueue.take();
 
                 // check needed if availability of algorithms changes
-                alg = alm.getAlgByURLSuffix(work.getAlgorithmURLSuffix());
+                alg = alm.getAlgByURLSuffix(work.getRequestData().getAlgorithmURLSuffix());
                 if (alg != null) {
                     try {
 
                         alg.compute(work);
-                        log.finer("Algorithm " + work.getAlgorithmURLSuffix() + " successfully computed.");
+                        log.finer("Algorithm " + work.getRequestData().getAlgorithmURLSuffix() + " successfully computed.");
 
                         // IOException will be handled as EINTERNAL
                         work.getResponder().writeComputeResult(work, HttpResponseStatus.OK);
 
                     } catch (ComputeException e) {
                         log.log(Level.WARNING, "There was a ComputeException", e);
-                        String errorMessage = work.getResponder().writeAndReturnErrorMessage(
-                                ErrorMessage.ECOMPUTE, e.getMessage());
+                        String errorMessage = work.getResponder().writeAndReturnErrorMessage(ErrorMessage.ECOMPUTE, e.getMessage());
                     } catch (Exception e) {
                         log.log(Level.WARNING, "Internal server exception (caused by algorithm or result writing)", e);
                         // Don't give too much info to client as we probably got a programming mistake
-                        String errorMessage = work.getResponder().writeAndReturnErrorMessage(
-                                ErrorMessage.EINTERNAL_UNSPECIFIED);
+                        work.getResponder().writeErrorMessage(ErrorMessage.EINTERNAL_UNSPECIFIED);
                     }
                 } else {
-                    log.warning("Unsupported algorithm " + work.getAlgorithmURLSuffix() + " requested");
-                    String errorMessage = work.getResponder().writeAndReturnErrorMessage(ErrorMessage.EUNKNOWNALG);
+                    log.warning("Unsupported algorithm " + work.getRequestData().getAlgorithmURLSuffix() + " requested");
+                    work.getResponder().writeErrorMessage(ErrorMessage.EUNKNOWNALG);
                 }
 
             } catch (InterruptedException e) {

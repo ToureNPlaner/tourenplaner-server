@@ -60,9 +60,9 @@ public class ShortestPath extends GraphAlgorithm {
 	}
 
     @Override
-    public void compute(ComputeRequest req) throws ComputeException, Exception {
-        assert req != null : "We ended up without a request object in run";
-
+    public void compute(ComputeRequest request) throws ComputeException, Exception {
+        assert request != null : "We ended up without a request object in run";
+        ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         RequestPoints points = req.getPoints();
         // Check if we have enough points to do something useful
         if (points.size() < 2) {
@@ -96,7 +96,7 @@ public class ShortestPath extends GraphAlgorithm {
         res.setMisc(misc);
 
         // Save the result
-        req.setResultObject(res);
+        request.setResultObject(res);
     }
 
     /**

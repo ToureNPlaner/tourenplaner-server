@@ -121,7 +121,8 @@ public class UpDownGraphPacket extends GraphAlgorithm {
 
 
     @Override
-    public void compute(ComputeRequest req) throws ComputeException, Exception {
+    public void compute(ComputeRequest request) throws ComputeException, Exception {
+        ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         RequestPoints points  = req.getPoints();
         if (points.size() != 2)
             throw new ComputeException("Not enough points, need 2");
@@ -132,6 +133,6 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         bfsMarkUp(cgraph, points.getPointId(0));
         bfsMarkDown(cgraph, points.getPointId(1));
 
-        req.setResultObject(new SubgraphResult(graph, cgraph, points.getPointId(0), points.getPointId(1)));
+        request.setResultObject(new SubgraphResult(graph, cgraph, points.getPointId(0), points.getPointId(1)));
     }
 }

@@ -74,8 +74,8 @@ public class TravelingSalesman extends GraphAlgorithm {
     }
 
     @Override
-    public void compute(ComputeRequest req) throws ComputeException, Exception {
-
+    public void compute(ComputeRequest request) throws ComputeException, Exception {
+        ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         // Map points to ids
         RequestPoints points = req.getPoints();
         if (points.size() < 2) {
@@ -123,7 +123,7 @@ public class TravelingSalesman extends GraphAlgorithm {
             res.setMisc(misc);
 
             // Set the result
-            req.setResultObject(res);
+            request.setResultObject(res);
 
         } catch (IllegalAccessException e) {
             throw new ComputeException("Illegal Access: " + e.getMessage());

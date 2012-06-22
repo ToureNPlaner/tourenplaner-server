@@ -33,9 +33,9 @@ public class NNSearch extends GraphAlgorithm {
 	}
 
 	@Override
-	public void compute(ComputeRequest req) throws ComputeException, Exception {
-		assert req != null : "We ended up without a request object in run";
-
+	public void compute(ComputeRequest request) throws ComputeException, Exception {
+		assert request != null : "We ended up without a request object in run";
+        ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         WayResult res = new WayResult(req.getPoints(), req.getConstraints());
 
 		// TODO: send error messages to client
@@ -45,7 +45,7 @@ public class NNSearch extends GraphAlgorithm {
 			throw new ComputeException("Not enough points, need at least 1");
 		}
 		nearestNeighbourLookup(points);
-        req.setResultObject(res);
+        request.setResultObject(res);
 	}
 
 

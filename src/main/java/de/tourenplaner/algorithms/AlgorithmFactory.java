@@ -16,6 +16,12 @@
 
 package de.tourenplaner.algorithms;
 
+import de.tourenplaner.computecore.RequestData;
+import de.tourenplaner.server.Responder;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.jboss.netty.handler.codec.http.HttpRequest;
+
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -86,4 +92,14 @@ public abstract class AlgorithmFactory {
      * @return A description of the algorithm
      */
     public abstract String getDescription();
+
+    /**
+     * This method is used to read RequestData for the Algorithms constructed by the factory
+     * @param mapper
+     * @param responder
+     * @param request
+     * @return
+     * @throws IOException
+     */
+    public abstract RequestData readRequestData(ObjectMapper mapper, Responder responder, HttpRequest request) throws IOException;
 }

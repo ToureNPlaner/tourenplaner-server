@@ -18,8 +18,6 @@ package de.tourenplaner.computecore;
 
 import de.tourenplaner.server.Responder;
 
-import java.util.Map;
-
 /**
  * This class is used to represent a request for computation
  *
@@ -27,30 +25,28 @@ import java.util.Map;
  */
 public class ComputeRequest {
 
-	private final RequestPoints points;
-	private final Map<String, Object> constraints;
-	private final String algName;
 	private final Responder responder;
     private final boolean acceptsSmile;
+    private final RequestData requestData;
     private StreamJsonWriter resultObject;
-
 	/**
-	 * Constructs a new ComputeRequest using the given Responder, Points and
-	 * Constraints.
+	 * Constructs a new ComputeRequest using the given Responder
 	 *
      * @param responder The to this compute request corresponding Responder
-     * @param algName The algorithm name
-     * @param points RequestPoints
-     * @param constraints map with constraints
      * @param acceptsSmile Flag if client accepts Smile
      */
-	public ComputeRequest(Responder responder, String algName, RequestPoints points, Map<String, Object> constraints, boolean acceptsSmile) {
-		this.algName = algName;
-		this.points = points;
-		this.constraints = constraints;
+	public ComputeRequest(Responder responder, RequestData requestData, boolean acceptsSmile) {
 		this.responder = responder;
         this.acceptsSmile = acceptsSmile;
+        this.requestData = requestData;
 	}
+
+    /**
+     * Gets the RequestData object holding the data of this compute Request
+     */
+    public RequestData getRequestData(){
+        return requestData;
+    }
 
 	/**
 	 * Gets the responder object which is used to send the result to the correct
@@ -62,33 +58,6 @@ public class ComputeRequest {
 		return responder;
 	}
 
-	/**
-	 * Gets the URLSuffix for the requested algorithm e.g. "sp" for a shortest
-	 * path algorithm
-	 * 
-	 * @return Returns the URLSuffix
-	 */
-	public String getAlgorithmURLSuffix() {
-		return algName;
-	}
-
-	/**
-	 * Returns the Points associated with this request
-	 * 
-	 * @return RequestPoints
-	 */
-	public RequestPoints getPoints() {
-		return points;
-	}
-
-	/**
-	 * Returns the constraints associated with this request
-	 * 
-	 * @return A Map representing the constraints
-	 */
-	public Map<String, Object> getConstraints() {
-		return constraints;
-	}
 
     /**
      * Sets the object storing the result of this computation

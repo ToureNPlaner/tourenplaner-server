@@ -75,6 +75,14 @@ public class ComputeCore {
 		return reqQueue.offer(rq);
 	}
 
+    /**
+     * Checks whether the ComputeCore is ready to take another request
+     * @return
+     */
+    public boolean isFull(){
+        return reqQueue.remainingCapacity()==0;
+    }
+
 	/**
 	 * Gets the AlgorithmRegistry used by this ComputeCore to create
 	 * AlgorithmManagers for it's ComputeThreads
