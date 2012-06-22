@@ -5,9 +5,11 @@
 case $1 in
 jar)
 	mvn compile assembly:single
+   exit $?
 	;;
 test)
 	mvn test
+   exit $?
 	;;
 *)
 	echo "$1 not supported by this script"
