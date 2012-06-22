@@ -96,7 +96,7 @@ public class WayByNodeIds extends GraphAlgorithm {
     @Override
     public void compute(ComputeRequest request) throws ComputeException, Exception {
         assert request != null;
-        log.warning("WayByNodeIds called");
+        log.finer("WayByNodeIds called");
         NodeIdsRequestData req = (NodeIdsRequestData) request.getRequestData();
         IntArrayDeque deque = ds.borrowDeque();
         try {
