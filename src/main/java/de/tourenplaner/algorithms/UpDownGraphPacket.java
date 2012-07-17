@@ -3,10 +3,11 @@ package de.tourenplaner.algorithms;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntObjectOpenHashMap;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.graphrep.GraphRep;
+
+import java.util.logging.Logger;
 
 /**
  * @author Niklas Schnelle
@@ -15,6 +16,8 @@ import de.tourenplaner.graphrep.GraphRep;
  *
  */
 public class UpDownGraphPacket extends GraphAlgorithm {
+    private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
+
     private final DijkstraStructs ds;
 
     public UpDownGraphPacket(GraphRep graph, DijkstraStructs resourceSharer) {
@@ -31,7 +34,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
      * @param targetId
      * @throws IllegalAccessException
      */
-    protected final void bfsMarkUp(IntObjectOpenHashMap<IntArrayList> cgraph, int targetId) throws IllegalAccessException {
+    protected final void bfsMarkUp(IntArrayList cgraph, int targetId) throws IllegalAccessException {
         int edgeId;
         int currNode;
         int targetNode;
@@ -52,10 +55,8 @@ public class UpDownGraphPacket extends GraphAlgorithm {
                 if (graph.getRankSlope(edgeId) >= 0) {
                     bfsEdges++;
                     // Add the edge
-                    if (cgraph.get(currNode) == null)
-                        cgraph.put(currNode, new IntArrayList());
+                    cgraph.add(edgeId);
 
-                    cgraph.get(currNode).add(edgeId);
                     if (!visited.get(targetNode)) {
                         visited.set(targetNode);
                         // Add target for exploration
@@ -64,7 +65,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
                 }
             }
         }
-        System.out.println("BFS_up space: " + bfsNodes + " nodes and " + bfsEdges + " edges");
+        log.fine("BFS_up space: " + bfsNodes + " nodes and " + bfsEdges + " edges");
         ds.returnVisitedSet();
         ds.returnDeque();
     }
@@ -78,7 +79,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
      * @param targetId
      * @throws IllegalAccessException
      */
-    protected final void bfsMarkDown(IntObjectOpenHashMap<IntArrayList> cgraph, int targetId) throws IllegalAccessException {
+    protected final void bfsMarkDown(IntArrayList cgraph, int targetId) throws IllegalAccessException {
         int edgeId;
         int currNode;
         int sourceNode;
@@ -99,10 +100,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
                 if (graph.getRankSlope(edgeId) <= 0) {
                     bfsEdges++;
                     // Add the edge
-                    if (cgraph.get(sourceNode) == null)
-                        cgraph.put(sourceNode, new IntArrayList());
-
-                    cgraph.get(sourceNode).add(edgeId);
+                    cgraph.add(edgeId);
 
                     if (!visited.get(sourceNode)) {
                         visited.set(sourceNode);
@@ -114,7 +112,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
                 }
             }
         }
-        System.out.println("BFS_down space: " + bfsNodes + " nodes and " + bfsEdges + " edges");
+        log.fine("BFS_down space: " + bfsNodes + " nodes and " + bfsEdges + " edges");
         ds.returnVisitedSet();
         ds.returnDeque();
     }
@@ -128,11 +126,11 @@ public class UpDownGraphPacket extends GraphAlgorithm {
             throw new ComputeException("Not enough points, need 2");
 
         points.setIdsFromGraph(graph);
-
-        IntObjectOpenHashMap<IntArrayList> cgraph = new IntObjectOpenHashMap<IntArrayList>();
+        long start = System.nanoTime();
+        IntArrayList cgraph = new IntArrayList();
         bfsMarkUp(cgraph, points.getPointId(0));
         bfsMarkDown(cgraph, points.getPointId(1));
-
+        log.info("Took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
         request.setResultObject(new SubgraphResult(graph, cgraph, points.getPointId(0), points.getPointId(1)));
     }
 }

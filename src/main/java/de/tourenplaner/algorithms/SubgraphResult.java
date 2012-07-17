@@ -1,9 +1,7 @@
 package de.tourenplaner.algorithms;
 
 import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntObjectOpenHashMap;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import de.tourenplaner.computecore.StreamJsonWriter;
 import de.tourenplaner.graphrep.GraphRep;
 import org.codehaus.jackson.JsonGenerator;
@@ -21,10 +19,10 @@ public class SubgraphResult implements StreamJsonWriter {
 
 
     private final GraphRep graph;
-    private final IntObjectOpenHashMap<IntArrayList> cgraph;
+    private IntArrayList cgraph;
     private final int srcId, trgtId;
 
-    public SubgraphResult(GraphRep graphRep, IntObjectOpenHashMap<IntArrayList> cgraph, int srcId, int trgtId) {
+    public SubgraphResult(GraphRep graphRep, IntArrayList cgraph, int srcId, int trgtId) {
         this.graph = graphRep;
         this.cgraph = cgraph;
         this.srcId = srcId;
@@ -38,16 +36,14 @@ public class SubgraphResult implements StreamJsonWriter {
         gen.writeNumberField("srcId", srcId);
         gen.writeNumberField("trgtId", trgtId);
         gen.writeArrayFieldStart("edges");
-        for (IntObjectCursor node : cgraph){
-            IntArrayList values = (IntArrayList)node.value;
-            for (IntCursor edgeId : values) {
-                gen.writeNumber(node.key); //src
-                gen.writeNumber(graph.getTarget(edgeId.value)); //trgt
-                gen.writeNumber(graph.getDist(edgeId.value)); // dist
-            }
+        for (IntCursor edgeId : cgraph) {
+            gen.writeNumber(graph.getSource(edgeId.value)); //src
+            gen.writeNumber(graph.getTarget(edgeId.value)); //trgt
+            gen.writeNumber(graph.getDist(edgeId.value)); // dist
         }
         gen.writeEndArray();
         gen.writeEndObject();
+        this.cgraph = null;
         gen.flush();
     }
 }
