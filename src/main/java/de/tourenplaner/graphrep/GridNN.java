@@ -26,7 +26,7 @@ import java.util.logging.Logger;
 public class GridNN implements NNSearcher {
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
     private static final long serialVersionUID = 1L;
-    private static final int numberOfColumns = 1000;
+    private static final int numberOfColumns = 400;
     private int numRows;
     private int numCols;
 
@@ -135,10 +135,12 @@ public class GridNN implements NNSearcher {
         final int row = mapLat(lat);
         final int col = mapLon(lon);
         // Need to search the exact cell and all around it
+        // because lat,lon can be out of the range of stored coordinates
+        // make sure we search a cell at all
         final int upper = (row - 1 > 0) ? row - 1 : 0;
-        final int lower = (row + 2 < numRows) ? row + 2 : numRows;
+        final int lower = (row + 2 < numRows) ? upper + 3 : numRows;
         final int left = (col - 1 > 0) ? col - 1 : 0;
-        final int right = (col + 2 < numCols) ? col + 2 : numCols;
+        final int right = (col + 2 < numCols) ? left + 3 : numCols;
 
         long minDist = Long.MAX_VALUE;
         long dist;
@@ -162,7 +164,7 @@ public class GridNN implements NNSearcher {
         }
         // If every list was null fallback
         if (minDist == Long.MAX_VALUE){
-            log.fine("Fell back to dumbNN for "+lat+","+lon);
+            log.warning("Fell back to dumbNN for "+lat+","+lon);
             minNodeId = fallback.getIDForCoordinates(lat, lon);
         }
         return minNodeId;

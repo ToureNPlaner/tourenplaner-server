@@ -88,7 +88,6 @@ public class GraphRep implements Serializable {
     protected final int[] trgt;
     protected final int[] dist;
     protected final int[] euclidianDist;
-    protected final int[] rankSlope;
 
     protected final int[] shortedEdge1;
     protected final int[] shortedEdge2;
@@ -131,8 +130,6 @@ public class GraphRep implements Serializable {
         this.trgt = new int[edgeCount];
         this.dist = new int[edgeCount];
         this.euclidianDist = new int[edgeCount];
-
-        this.rankSlope = new int[edgeCount];
         this.shortedEdge1 = new int[edgeCount];
         this.shortedEdge2 = new int[edgeCount];
 
@@ -199,7 +196,6 @@ public class GraphRep implements Serializable {
 
         this.shortedEdge1[index] = -1;
         this.shortedEdge1[index] = -1;
-        this.rankSlope[index] = rank[target] - rank[source];
     }
 
     /**
@@ -493,16 +489,6 @@ public class GraphRep implements Serializable {
      */
     public final int getSource(int edgeId) {
         return src[edgeId];
-    }
-
-    /**
-     * Gets the rankSlope of the edge identified by it's edgeId
-     *
-     * @param edgeId
-     * @return
-     */
-    public final int getRankSlope(int edgeId) {
-        return rankSlope[edgeId];
     }
 
     /**

@@ -115,19 +115,21 @@ public class ShortestPathCH extends GraphAlgorithm {
         int edgeId;
         int currNode;
         int sourceNode;
+        int targetRank;
         IntArrayDeque deque = ds.borrowDeque();
         BitSet visited = ds.borrowVisitedSet();
         deque.addLast(targetId);
         visited.set(targetId);
         while (!deque.isEmpty()) {
             currNode = deque.removeLast();
+            targetRank = graph.getRank(currNode);
             bfsNodes++;
             Inner:
             for (int i = 0; i < graph.getInEdgeCount(currNode); i++) {
                 edgeId = graph.getInEdgeId(currNode, i);
                 sourceNode = graph.getSource(edgeId);
                 // Check if G_down
-                if (graph.getRankSlope(edgeId) <= 0) {
+                if (targetRank <= graph.getRank(sourceNode)) {
                     bfsEdges++;
                     // Mark the edge
                     markedEdges.set(edgeId);
@@ -158,6 +160,7 @@ public class ShortestPathCH extends GraphAlgorithm {
         int edgeId;
         int currNode;
         int sourceNode;
+        int targetRank;
         BitSet visited = ds.borrowVisitedSet();
         // Set all nodes already in the deque as visited
         for (IntCursor nodeId: deque){
@@ -165,13 +168,14 @@ public class ShortestPathCH extends GraphAlgorithm {
         }
         while (!deque.isEmpty()) {
             currNode = deque.removeLast();
+            targetRank = graph.getRank(currNode);
             bfsNodes++;
             Inner:
             for (int i = 0; i < graph.getInEdgeCount(currNode); i++) {
                 edgeId = graph.getInEdgeId(currNode, i);
                 sourceNode = graph.getSource(edgeId);
                 // Check if G_down
-                if (graph.getRankSlope(edgeId) <= 0) {
+                if (graph.getRank(sourceNode) >= targetRank) {
                     bfsEdges++;
                     // Mark the edge
                     markedEdges.set(edgeId);
@@ -210,10 +214,12 @@ public class ShortestPathCH extends GraphAlgorithm {
         int tempDist;
         int targetNode;
         int nodeId = srcId;
+        int sourceRank;
         DIJKSTRA:
         while (!heap.isEmpty()) {
             nodeId = heap.peekMinId();
             nodeDist = heap.peekMinDist();
+            sourceRank = graph.getRank(nodeId);
             heap.removeMin();
             if (nodeId == destId) {
                 break DIJKSTRA;
@@ -223,9 +229,8 @@ public class ShortestPathCH extends GraphAlgorithm {
             for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 targetNode = graph.getTarget(edgeId);
-
                 // Either marked (by BFS) or G_up edge
-                if (markedEdges.get(edgeId) || graph.getRankSlope(edgeId) >= 0) {
+                if (markedEdges.get(edgeId) || (sourceRank <= graph.getRank(targetNode))) {
 
                     tempDist = dists[nodeId] + graph.getDist(edgeId);
 
@@ -261,10 +266,12 @@ public class ShortestPathCH extends GraphAlgorithm {
         int edgeId;
         int tempDist;
         int targetNode;
+        int sourceRank;
         int nodeId = srcId;
         while (!heap.isEmpty()) {
             nodeId = heap.peekMinId();
             nodeDist = heap.peekMinDist();
+            sourceRank = graph.getRank(nodeId);
             heap.removeMin();
             if (nodeDist > dists[nodeId]) {
                 continue;
@@ -275,7 +282,7 @@ public class ShortestPathCH extends GraphAlgorithm {
                 targetNode = graph.getTarget(edgeId);
 
                 // Either marked (by BFS) or G_up edge
-                if (markedEdges.get(edgeId) || graph.getRankSlope(edgeId) >= 0) {
+                if (markedEdges.get(edgeId) || (sourceRank <= graph.getRank(targetNode))) {
 
                     tempDist = dists[nodeId] + graph.getDist(edgeId);
 

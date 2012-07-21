@@ -187,6 +187,7 @@ public class ComputeServer {
         // GridNN is even faster and uses less RAM
         log.info("Start creating NNSearcher");
         graph.setNNSearcher(new GridNN(graph));//new HashNN(graphRep);
+
         //System.gc();
         log.info("Graph loaded");
 

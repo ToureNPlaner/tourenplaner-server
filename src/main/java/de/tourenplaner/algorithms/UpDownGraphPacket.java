@@ -38,6 +38,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         int edgeId;
         int currNode;
         int targetNode;
+        int sourceRank;
         int bfsNodes = 0, bfsEdges = 0;
 
         IntArrayDeque deque = ds.borrowDeque();
@@ -46,13 +47,14 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         visited.set(targetId);
         while (!deque.isEmpty()) {
             currNode = deque.removeLast();
+            sourceRank = graph.getRank(currNode);
             bfsNodes++;
             Inner:
             for (int i = graph.getOutEdgeCount(currNode) - 1; i >= 0; i--) {
                 edgeId = graph.getOutEdgeId(currNode, i);
                 targetNode = graph.getTarget(edgeId);
                 // Check if G_up
-                if (graph.getRankSlope(edgeId) >= 0) {
+                if (sourceRank <= graph.getRank(targetNode)) {
                     bfsEdges++;
                     // Add the edge
                     cgraph.add(edgeId);
@@ -83,6 +85,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         int edgeId;
         int currNode;
         int sourceNode;
+        int targetRank;
         int bfsNodes = 0, bfsEdges = 0;
 
         IntArrayDeque deque = ds.borrowDeque();
@@ -91,13 +94,14 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         visited.set(targetId);
         while (!deque.isEmpty()) {
             currNode = deque.removeLast();
+            targetRank = graph.getRank(currNode);
             bfsNodes++;
             Inner:
             for (int i = 0; i < graph.getInEdgeCount(currNode); i++) {
                 edgeId = graph.getInEdgeId(currNode, i);
                 sourceNode = graph.getSource(edgeId);
                 // Check if G_down
-                if (graph.getRankSlope(edgeId) <= 0) {
+                if (targetRank <= graph.getRank(sourceNode)) {
                     bfsEdges++;
                     // Add the edge
                     cgraph.add(edgeId);
