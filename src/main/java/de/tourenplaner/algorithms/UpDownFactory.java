@@ -2,6 +2,8 @@ package de.tourenplaner.algorithms;
 
 import de.tourenplaner.graphrep.GraphRep;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -9,9 +11,26 @@ import java.util.Map;
  * @author Niklas Schnelle
  */
 public class UpDownFactory extends  SharingAlgorithmFactory {
+    private final Map<String, Object> details;
+    private final List<Map<String, Object>> constraints;
+    private final List<Map<String, Object>> pointConstraints;
 
     public UpDownFactory(GraphRep graphRep){
         super(graphRep);
+        constraints = new ArrayList<Map<String, Object>>(0);
+        constraints.add(new HashMap<String, Object>(4));
+        constraints.get(0).put("id", "maxSearchLevel");
+        constraints.get(0).put("name", "Maximum Search Level");
+        constraints.get(0).put("description", "The maximum node level to explore");
+        constraints.get(0).put("type", "integer");
+        constraints.get(0).put("min", 0);
+
+
+        pointConstraints = new ArrayList<Map<String, Object>>(0);
+        details = new HashMap<String, Object>(3);
+        details.put("hidden", this.isHidden());
+        details.put("minpoints", 2);
+        details.put("sourceistarget", false);
     }
 
     @Override
@@ -21,7 +40,7 @@ public class UpDownFactory extends  SharingAlgorithmFactory {
 
     @Override
     public List<Map<String, Object>> getPointConstraints() {
-        return null;
+        return pointConstraints;
     }
 
     @Override
@@ -51,12 +70,12 @@ public class UpDownFactory extends  SharingAlgorithmFactory {
 
     @Override
     public List<Map<String, Object>> getConstraints() {
-        return null;
+        return constraints;
     }
 
     @Override
     public Map<String, Object> getDetails() {
-        return null;
+        return details;
     }
 
     @Override
