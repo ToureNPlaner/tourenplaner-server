@@ -7,6 +7,7 @@ import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.graphrep.GraphRep;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -34,11 +35,12 @@ public class UpDownGraphPacket extends GraphAlgorithm {
      * @param targetId
      * @throws IllegalAccessException
      */
-    protected final void bfsMarkUp(IntArrayList cgraph, int targetId) throws IllegalAccessException {
+    protected final void bfsMarkUp(IntArrayList cgraph, int targetId, int maxSearchLevel) throws IllegalAccessException {
         int edgeId;
         int currNode;
         int targetNode;
         int sourceRank;
+        int targetRank;
         int bfsNodes = 0, bfsEdges = 0;
 
         IntArrayDeque deque = ds.borrowDeque();
@@ -53,13 +55,14 @@ public class UpDownGraphPacket extends GraphAlgorithm {
             for (int i = graph.getOutEdgeCount(currNode) - 1; i >= 0; i--) {
                 edgeId = graph.getOutEdgeId(currNode, i);
                 targetNode = graph.getTarget(edgeId);
+                targetRank = graph.getRank(targetNode);
                 // Check if G_up
-                if (sourceRank <= graph.getRank(targetNode)) {
+                if (sourceRank <= targetRank) {
                     bfsEdges++;
                     // Add the edge
                     cgraph.add(edgeId);
 
-                    if (!visited.get(targetNode)) {
+                    if (!visited.get(targetNode) && targetRank <= maxSearchLevel) {
                         visited.set(targetNode);
                         // Add target for exploration
                         deque.addFirst(targetNode);
@@ -81,10 +84,11 @@ public class UpDownGraphPacket extends GraphAlgorithm {
      * @param targetId
      * @throws IllegalAccessException
      */
-    protected final void bfsMarkDown(IntArrayList cgraph, int targetId) throws IllegalAccessException {
+    protected final void bfsMarkDown(IntArrayList cgraph, int targetId, int maxSearchLevel) throws IllegalAccessException {
         int edgeId;
         int currNode;
         int sourceNode;
+        int sourceRank;
         int targetRank;
         int bfsNodes = 0, bfsEdges = 0;
 
@@ -100,13 +104,14 @@ public class UpDownGraphPacket extends GraphAlgorithm {
             for (int i = 0; i < graph.getInEdgeCount(currNode); i++) {
                 edgeId = graph.getInEdgeId(currNode, i);
                 sourceNode = graph.getSource(edgeId);
+                sourceRank = graph.getRank(sourceNode);
                 // Check if G_down
-                if (targetRank <= graph.getRank(sourceNode)) {
+                if (targetRank <= sourceRank) {
                     bfsEdges++;
                     // Add the edge
                     cgraph.add(edgeId);
 
-                    if (!visited.get(sourceNode)) {
+                    if (!visited.get(sourceNode) && sourceRank <= maxSearchLevel) {
                         visited.set(sourceNode);
                         // Add source for exploration
                         deque.addFirst(sourceNode);
@@ -129,11 +134,22 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         if (points.size() != 2)
             throw new ComputeException("Not enough points, need 2");
 
+
+        Map<String, Object> constraints = req.getConstraints();
+        int maxSearchLevel = Integer.MAX_VALUE;
+        if (constraints != null && req.getConstraints().get("maxSearchLevel") != null) {
+            try {
+                maxSearchLevel = ((Number) req.getConstraints().get("maxAltitudeDifference")).intValue();
+            } catch (ClassCastException e) {
+                throw new ComputeException("Couldn't read Maximum Altitude Difference, wrong type: " + e.getMessage());
+            }
+        }
+
         points.setIdsFromGraph(graph);
         long start = System.nanoTime();
         IntArrayList cgraph = new IntArrayList();
-        bfsMarkUp(cgraph, points.getPointId(0));
-        bfsMarkDown(cgraph, points.getPointId(1));
+        bfsMarkUp(cgraph, points.getPointId(0), maxSearchLevel);
+        bfsMarkDown(cgraph, points.getPointId(1), maxSearchLevel);
         log.info("Took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
         request.setResultObject(new SubgraphResult(graph, cgraph, points.getPointId(0), points.getPointId(1)));
     }
