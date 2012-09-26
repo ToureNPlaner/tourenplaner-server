@@ -78,7 +78,6 @@ public class ComputeServer {
             algInfo.put("name", alg.getAlgName());
             algInfo.put("description", alg.getDescription());
             algInfo.put("urlsuffix", alg.getURLSuffix());
-            algInfo.put("hidden", alg.isHidden());
 
             // stuff every alg has (should have):
             algInfo.put("constraints", alg.getConstraints());
