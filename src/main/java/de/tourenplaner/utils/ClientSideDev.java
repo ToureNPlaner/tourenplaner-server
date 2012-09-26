@@ -97,19 +97,22 @@ public class ClientSideDev {
             int edgeId;
             int currNode;
             int sourceNode;
+            int targetRank;
             IntArrayDeque deque = ds.borrowDeque();
             BitSet visited = ds.borrowVisitedSet();
             deque.addLast(targetId);
             visited.set(targetId);
             while (!deque.isEmpty()) {
                 currNode = deque.removeLast();
+                targetRank = graph.getRank(currNode);
+
                 bfsNodes++;
                 Inner:
                 for (int i = 0; i < graph.getInEdgeCount(currNode); i++) {
                     edgeId = graph.getInEdgeId(currNode, i);
                     sourceNode = graph.getSource(edgeId);
                     // Check if G_down
-                    if (graph.getRankSlope(edgeId) <= 0) {
+                    if (graph.getRank(sourceNode) >= targetRank) {
                         bfsEdges++;
                         // Mark the edge
                         markedEdges.add(edgeId);
@@ -141,19 +144,21 @@ public class ClientSideDev {
             int edgeId;
             int currNode;
             int targetNode;
+            int sourceRank;
             IntArrayDeque deque = ds.borrowDeque();
             BitSet visited = ds.borrowVisitedSet();
             deque.addLast(targetId);
             visited.set(targetId);
             while (!deque.isEmpty()) {
                 currNode = deque.removeLast();
+                sourceRank = graph.getRank(currNode);
                 bfsNodes++;
                 Inner:
                 for (int i = graph.getOutEdgeCount(currNode) - 1; i >= 0 ; i--) {
                     edgeId = graph.getOutEdgeId(currNode, i);
                     targetNode = graph.getTarget(edgeId);
                     // Check if G_up
-                    if (graph.getRankSlope(edgeId) >= 0) {
+                    if (sourceRank<= graph.getRank(targetNode)) {
                         bfsEdges++;
                         // Mark the edge
                         markedEdges.add(edgeId);
