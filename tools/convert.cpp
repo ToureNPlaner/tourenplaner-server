@@ -50,24 +50,34 @@ double calcEdgeDistance(Edge* e, Node* nodes){
 
 
 int main(int args, char** argv) {
+    bool isCH;
+    string ranks;
+    string graph;
+    ifstream gin;
+    ifstream rin;
     // assert endianess
     int x = ('b'<<8)+'a';
     char* y = (char*)&x;
     assert(y[0]=='a' && y[1]=='b');
     // assert type sizes
 
-    string graph(args >=2?argv[1]:"graph.dat");
-    string ranks(args >=3?argv[2]:"graph_ids");
+    graph = args >=2?argv[1]:"graph.dat";
+    isCH = args >= 3;
+    
+    if(isCH)
+        ranks = argv[2];
 
-    ifstream gin(graph.c_str(), ios::in | ios::binary);
-    ifstream rin(ranks.c_str(), ios::out | ios::binary);
+    gin.open(graph.c_str(), ios::in | ios::binary);
+    
+    if(isCH)
+        rin.open(ranks.c_str(), ios::in | ios::binary);
     
     if(!gin.good()) {
         cerr << "Could not open file for reading: "<< graph << endl;
         return 1;
     }
     
-    if(!rin.good()) {
+    if(isCH && !rin.good()) {
         cerr << "Could not open file reading: "<< ranks << endl;
         return 1;
     }
@@ -78,14 +88,19 @@ int main(int args, char** argv) {
     // Number of edges from graph file
     gin.read((char*)&ne, sizeof(uint32_t));
     
-    // Number of nodes read from rank file
-    rin.read((char*)&nr, sizeof(uint32_t));
+    if(isCH){    
+    	// Number of nodes read from rank file
+    	rin.read((char*)&nr, sizeof(uint32_t));
     
-    if(nr != n){
-        cerr << "Number of nodes in rank file does not match graph file " << n << "vs"<<nr<<endl; 
-        return 1;
+    	if(nr != n){
+        	cerr << "Number of nodes in rank file does not match graph file " << n << "vs"<<nr<<endl; 
+        	return 1;
+    	}
     }
-    
+
+
+    cout << "Reading " << n << " nodes and " << ne << " edges"<< endl;
+ 
     Node* nodes = new Node[n];
     Edge* edges = new Edge[ne];
     // Read nodes
@@ -93,8 +108,10 @@ int main(int args, char** argv) {
         gin.read((char*)&nodes[i].lon,sizeof(double));
         gin.read((char*)&nodes[i].lat,sizeof(double));
         gin.read((char*)&nodes[i].ele,sizeof(int32_t));
-        // Read the rank of the node from rank file
-        rin.read((char*)&nodes[i].rank, sizeof(uint32_t));
+        if (isCH){
+			// Read the rank of the node from rank file
+        	rin.read((char*)&nodes[i].rank, sizeof(uint32_t));
+		}
     }
     
     // Read edges
@@ -114,8 +131,12 @@ int main(int args, char** argv) {
     for(unsigned int i=0 ; i<n; ++i) {
        cout << ((int32_t) (nodes[i].lat*10000000.0)) << " ";
        cout << ((int32_t) (nodes[i].lon*10000000.0)) << " ";
-       cout << nodes[i].ele << " ";
-       cout << ((nodes[i].rank < (uint32_t)numeric_limits<int32_t>::max())?(int32_t)nodes[i].rank:(int32_t)numeric_limits<int32_t>::max())<< endl;
+       cout << nodes[i].ele;
+	   if(isCH){	
+           cout << " " <<((nodes[i].rank < (uint32_t)numeric_limits<int32_t>::max())?(int32_t)nodes[i].rank:(int32_t)numeric_limits<int32_t>::max())<< endl;
+	   } else{
+	   	   cout << endl;
+       }
     }
  
     
@@ -124,12 +145,17 @@ int main(int args, char** argv) {
             cout << edges[i].sourceId << " " ;
             cout << edges[i].targetId << " " ;
             cout << edges[i].length << " ";
-            cout << (int) calcEdgeDistance(&edges[i], nodes) << " ";
-            cout << ((edges[i].shortcuttedEdge1< (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge1 : -1)<< " ";
-            cout << ((edges[i].shortcuttedEdge2 < (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge2 : -1)<< endl;
+            cout << (int) calcEdgeDistance(&edges[i], nodes);
+            if(isCH){
+                cout << " " << ((edges[i].shortcuttedEdge1< (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge1 : -1)<< " ";
+            	cout << ((edges[i].shortcuttedEdge2 < (uint32_t) numeric_limits<int32_t>::max())? (int32_t)edges[i].shortcuttedEdge2 : -1)<< endl;
+		    } else {
+		    	cout << endl;
+            }
     }
        
     gin.close();
-    rin.close();
+    if(isCH)
+    	rin.close();
 }
 
