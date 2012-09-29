@@ -139,7 +139,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         int maxSearchLevel = Integer.MAX_VALUE;
         if (constraints != null && req.getConstraints().get("maxSearchLevel") != null) {
             try {
-                maxSearchLevel = ((Number) req.getConstraints().get("maxAltitudeDifference")).intValue();
+                maxSearchLevel = ((Number) req.getConstraints().get("maxSearchLevel")).intValue();
             } catch (ClassCastException e) {
                 throw new ComputeException("Couldn't read Maximum Altitude Difference, wrong type: " + e.getMessage());
             }
