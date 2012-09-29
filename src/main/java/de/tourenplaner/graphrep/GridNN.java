@@ -165,7 +165,7 @@ public class GridNN implements NNSearcher {
         // If every list was null fallback
         if (minDist == Long.MAX_VALUE){
             log.warning("Fell back to dumbNN for "+lat+","+lon);
-            minNodeId = fallback.getIDForCoordinates(lat, lon);
+            minNodeId = 0;//fallback.getIDForCoordinates(lat, lon);
         }
         return minNodeId;
 
