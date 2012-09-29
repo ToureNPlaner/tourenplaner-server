@@ -99,7 +99,7 @@ int main(int args, char** argv) {
     }
 
 
-    cout << "Reading " << n << " nodes and " << ne << " edges"<< endl;
+    cerr << "Reading " << n << " nodes and " << ne << " edges"<< endl;
  
     Node* nodes = new Node[n];
     Edge* edges = new Edge[ne];
