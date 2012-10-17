@@ -275,7 +275,7 @@ public class ConstrainedSP extends GraphAlgorithm {
             for (int i = 0; i < graph.getOutEdgeCount(nodeId); i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 // Ignore Shortcuts
-                if (graph.getFirstShortcuttedEdge(edgeId) != -1) {
+                if (graph.getFirstShortcuttedEdge(edgeId) > 0) {
                     continue;
                 }
 

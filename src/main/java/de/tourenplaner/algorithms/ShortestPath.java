@@ -228,7 +228,7 @@ public class ShortestPath extends GraphAlgorithm {
             for (int i = 0; i < edgeCount; i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 // Ignore Shortcuts
-                if (graph.getFirstShortcuttedEdge(edgeId) != -1) {
+                if (graph.getFirstShortcuttedEdge(edgeId) > 0) {
                     continue;
                 }
                 targetNode = graph.getTarget(edgeId);

@@ -336,7 +336,7 @@ public class ShortestPathCH extends GraphAlgorithm {
             // unpacking
             edgeId = deque.removeFirst();
             shortedEdge1 = graph.getFirstShortcuttedEdge(edgeId);
-            if (shortedEdge1 != -1) {
+            if (shortedEdge1 > 0) {
                 // We have a shortcut unpack it
                 shortedEdge2 = graph.getSecondShortcuttedEdge(edgeId);
                 deque.addFirst(shortedEdge2);
