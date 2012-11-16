@@ -8,6 +8,8 @@ import de.tourenplaner.computecore.Way;
 import de.tourenplaner.computecore.WayResult;
 import de.tourenplaner.graphrep.GraphRep;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -28,6 +30,7 @@ public class WayByNodeIds extends GraphAlgorithm {
     private WayResult unpackEdges(IntArrayDeque edges) {
         int edgeId, shortedEdge1, shortedEdge2, currNode;
         int nodeLat, nodeLon, length = 0;
+        int distance = 0;
         RequestPoints points = new RequestPoints();
         WayResult result = new WayResult(points, null);
         Way resultWay = new Way();
@@ -56,6 +59,7 @@ public class WayByNodeIds extends GraphAlgorithm {
                     nodeLon = graph.getNodeLon(currNode);
                     resultWay.addPoint(nodeLat, nodeLon);
                     length += graph.getEuclidianDist(edgeId);
+                    distance += graph.getDist(edgeId);
                 }
             }
             // Add destination node
@@ -64,6 +68,7 @@ public class WayByNodeIds extends GraphAlgorithm {
             resultWay.addPoint(nodeLat, nodeLon);
 
             resultWay.setDistance(length);
+            resultWay.setTravelTime(distance * graph.travelTimeConstant);
         }
         result.getResultWays().add(resultWay);
         return result;
@@ -102,6 +107,10 @@ public class WayByNodeIds extends GraphAlgorithm {
         try {
             findEdges(deque, req);
             WayResult res = unpackEdges(deque);
+            Map<String, Object> misc = new HashMap<String, Object>(1);
+            misc.put("distance", res.getResultWays().get(0).getDistance());
+            misc.put("time", res.getResultWays().get(0).getTravelTime());
+            res.setMisc(misc);
             request.setResultObject(res);
         } finally {
             ds.returnDeque();
