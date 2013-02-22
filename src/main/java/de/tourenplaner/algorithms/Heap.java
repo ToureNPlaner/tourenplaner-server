@@ -19,116 +19,144 @@ package de.tourenplaner.algorithms;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
+import com.carrotsearch.hppc.ArraySizingStrategy;
+
 /**
  * provides heap structures for a minimum heap for ints
  *
- * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
+ * @author Stefan Bühler, Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class Heap {
-    private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
+	private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
 
-	// 1) the heaplength is the number of elements in the
-	// heap, not the real number of ints in the array. For example heaplength =
-	// 3 means that the array containing the heap contains 6*integers. So for
-	// heaplength = 3 the index of the last element is (3-1)/2 and the index for
-	// the dist of the last element is ((3-1)/2)+1
-	// 2) the pos parameter is the real position in the array
-	// 3) a trinary heap is supposed to be a little bit faster
+	/* Ternary heap structure.
+	 *
+	 * Index calculations:
+	 *   - Each heap entry has two array slots
+	 *   - If one heap entry is located at array slots [n,n+1], the children
+	 *     of this entry are at [3*n+2,3*n+3], [3*n+4,3*n+5], [3*n+6,3*n+7]
+	 *     For example: the root entry [0,1] has the children [2,3],[4,5],[6,7],
+	 *                  and [2,3] has the children [8,9],[10,11],[12,13].
+	 *     Also for each entry [n,n+1] n is even.
+	 *   - For a not root entry (n > 0) [n,n+1] the parent is:
+	 *          round_down_to_even((n - 2) / 3)
+	 *     because for each c in {3*n+2,3*n+4,3*n+6} and n even,
+	 *          round_down_to_even((c - 2) / 3) == n
+	 *     round_down_to_even((n - 2) / 3) is ((n - 2) / 3) & ~1 in java.
+	 */
 
+	/** the {@link #resizer} is applied to the actual number of ints in the array, not
+	 * the number of entries in the heap.
+	 */
+	protected final ArraySizingStrategy resizer;
+
+	// each heap entry takes two int slots in the heap array; one identifier, and
+	// the value to sort the heap with (named "dist").
 	private int[] heaparr;
-	private int heaplength;
+	private int heapentries;
 
 	// TODO: determine good value
 	// with this number of elements in the heap there is no growing from
 	// stuttgart-> hamburg
-	private static final int arrayGrowthSum = 4000;
+	public final static int DEFAULT_CAPACITY = 2048;
 
 	/**
-	 * initial size is {@value #arrayGrowthSum}
+	 * initial size is {@value #DEFAULT_CAPACITY}
 	 */
 	public Heap() {
-		heaparr = new int[arrayGrowthSum];
-		heaplength = 0;
+		this(DEFAULT_CAPACITY);
 	}
 
-    /**
-     * initializes a heap with given initialSize
-     *
-     * @param initialSize
-     */
-	public Heap(int initialSize) {
-		heaparr = new int[initialSize];
-		heaplength = 0;
+	/**
+	 * initializes a heap with given initialSize
+	 *
+	 * @param initialSize number of items to reserve space for
+	 */
+	public Heap(int initialCapacity) {
+		this(initialCapacity, new com.carrotsearch.hppc.BoundedProportionalArraySizingStrategy());
 	}
 
-    /**
-     * insert a element to the heap
-     *
-     * @param id
-     * @param dist
-     */
+	/**
+	 * initializes a heap with given initialSize and a custom resizing strategy.
+	 *
+	 * @param initialSize number of items to reserve space for
+	 */
+	public Heap(int initialCapacity, ArraySizingStrategy resizer) {
+		assert resizer != null;
+		this.resizer = resizer;
+		heaparr = new int[resizer.round(2*initialCapacity)];
+		heapentries = 0;
+	}
+
+	/**
+	 * insert a element to the heap
+	 *
+	 * @param id
+	 * @param dist
+	 */
 
 	public final void insert(int id, int dist) {
-		checkHeapArray();
-		heaparr[heaplength * 2] = id;
-		heaparr[(heaplength * 2) + 1] = dist;
-		heaplength += 1;
-		bubbleUp((heaplength - 1) * 2);
+		ensureBufferSpace(2);
+		final int entryNdx = heapentries * 2;
+		heaparr[entryNdx] = id;
+		heaparr[entryNdx + 1] = dist;
+		++heapentries;
+		bubbleUp(entryNdx);
 	}
 
-    /**
-     * check for empty heap
-     *
-     * @return
-     */
+	/**
+	 * check for empty heap
+	 *
+	 * @return
+	 */
 	public final boolean isEmpty() {
-		return heaplength <= 0;
+		return heapentries <= 0;
 	}
 
-    /**
-     * peeks the id of the minimum of the heap
-     *
-     * @return
-     */
+	/**
+	 * peeks the id of the minimum of the heap
+	 *
+	 * @return
+	 */
 	public final int peekMinId() {
+		assert heapentries > 0;
 		return heaparr[0];
 	}
 
 
-    /**
-     * peeks the dist of the minimum of the heap
-     *
-     * @return
-     */
+	/**
+	 * peeks the dist of the minimum of the heap
+	 *
+	 * @return
+	 */
 	public final int peekMinDist() {
+		assert heapentries > 0;
 		return heaparr[1];
 	}
 
-    /**
-     * removes the min element of the heap
-     */
+	/**
+	 * removes the min element of the heap
+	 */
 	public final void removeMin() {
-		heaplength -= 1;
-		heaparr[0] = heaparr[heaplength * 2];
-		heaparr[1] = heaparr[(heaplength * 2) + 1];
+		assert heapentries > 0;
+		--heapentries;
+		heaparr[0] = heaparr[heapentries * 2];
+		heaparr[1] = heaparr[(heapentries * 2) + 1];
 		siftDown(0);
 	}
 
-    /**
-     * implements bubble up to correct miss alignments from the button of the heap
-     *
-     * @param pos
-     */
+	/**
+	 * implements bubble up to correct miss alignments from the button of the heap
+	 *
+	 * @param pos  index in the heap array for the item to bubble up
+	 */
 	private final void bubbleUp(int pos) {
-		int parent;
-		int tempid;
-		int tempdist;
-		while (true) {
-			// TODO: improve
-			parent = (((pos / 2) - 1) / 3) * 2;
-			if ((parent >= 0) && (heaparr[parent + 1] > heaparr[pos + 1])) {
-				tempid = heaparr[parent];
-				tempdist = heaparr[parent + 1];
+		while (pos > 0) {
+			// find parent index for pos
+			final int parent = ((pos - 2) / 3) & ~1;
+			if (heaparr[parent + 1] > heaparr[pos + 1]) {
+				final int tempid = heaparr[parent];
+				final int tempdist = heaparr[parent + 1];
 				heaparr[parent] = heaparr[pos];
 				heaparr[parent + 1] = heaparr[pos + 1];
 				heaparr[pos] = tempid;
@@ -141,43 +169,46 @@ public class Heap {
 		}
 	}
 
-
-    /**
-     * implements sift down to correct miss alignments from the top of the heap.
-     *
-     * @param pos
-     */
+	/**
+	 * implements sift down to correct miss alignments from the top of the heap.
+	 *
+	 * @param pos  index in the heap array for the item to sift down
+	 */
 	private final void siftDown(int pos) {
-		int tempid;
-		int tempdist;
-
-		int child1;
-		int child2;
-		int child3;
-		int minChild;
+		final int heaplen = heapentries * 2;
 		while (true) {
-			// TODO: improve
-			child1 = (((pos / 2) * 3) + 1) * 2;
-			child2 = child1 + 2;
-			child3 = child1 + 4;
+			// find children indices for pos
+			final int child1 = pos * 3 + 2;
+			final int child2 = child1 + 2;
+			final int child3 = child1 + 4;
 
-			minChild = -1;
+			int minChild;
 
-			if (child1 <= ((heaplength * 2) - 2)) {
+			// all except at most two entries we visit in a "sift down" have 3 children
+			if (child3 < heaplen) {
+				// 3 children
 				minChild = child1;
-			}
-			if ((child2 <= ((heaplength * 2) - 2))
-					&& (heaparr[child2 + 1] < heaparr[minChild + 1])) {
-				minChild = child2;
-			}
-			if ((child3 <= ((heaplength * 2) - 2))
-					&& (heaparr[child3 + 1] < heaparr[minChild + 1])) {
-				minChild = child3;
+				if (heaparr[child2 + 1] < heaparr[minChild + 1]) {
+					minChild = child2;
+				}
+				if (heaparr[child3 + 1] < heaparr[minChild + 1]) {
+					minChild = child3;
+				}
+			} else if (child1 < heaplen) {
+				// 1 or 2 children
+				minChild = child1;
+				if ((child2 < heaplen)
+						&& (heaparr[child2 + 1] < heaparr[minChild + 1])) {
+					minChild = child2;
+				}
+			} else {
+				// no children - reached leaf
+				break;
 			}
 
-			if ((minChild != -1) && (heaparr[minChild + 1] < heaparr[pos + 1])) {
-				tempid = heaparr[pos];
-				tempdist = heaparr[pos + 1];
+			if (heaparr[minChild + 1] < heaparr[pos + 1]) {
+				final int tempid = heaparr[pos];
+				final int tempdist = heaparr[pos + 1];
 				heaparr[pos] = heaparr[minChild];
 				heaparr[pos + 1] = heaparr[minChild + 1];
 				heaparr[minChild] = tempid;
@@ -189,21 +220,22 @@ public class Heap {
 		}
 	}
 
-    /**
-     * resets heap
-     */
-    public final void resetHeap() {
-		heaplength = 0;
+	/**
+	 * resets heap
+	 */
+	public final void resetHeap() {
+		heapentries = 0;
 	}
 
-    /**
-     * checks heap array size and increase if needed
-     */
-	private final void checkHeapArray() {
-		if (((heaplength * 2) + 1) >= heaparr.length) {
-			log.finer("Increased Heap size from " + heaparr.length
-					+ " to " + (heaparr.length + arrayGrowthSum));
-			heaparr = Arrays.copyOf(heaparr, heaparr.length + arrayGrowthSum);
+	/**
+	 * Ensures the internal buffer has enough free slots to store expectedAdditions items in the heap.
+	 */
+	public final void ensureBufferSpace(int expectedAdditions) {
+		final int minlen = (heapentries + expectedAdditions) * 2;
+		if (minlen > heaparr.length) {
+			final int newLen = resizer.grow(heaparr.length, heapentries * 2, 2);
+			log.finer("Increased Heap size from " + heaparr.length + " to " +  newLen);
+			heaparr = Arrays.copyOf(heaparr, newLen);
 		}
 	}
 }
