@@ -38,16 +38,14 @@ public class ShortestPathTest {
     private Random random = new Random(1337);
     private int nodeCount = 0;
     private GraphRep graph = null;
-    private ShortestPath shortestPath = null;
-    private ShortestPathCH shortestPathCH = null;
 
     private int testCaseNumber = 0;
-    
-    private void runTestCase(int numPoints, boolean tour) throws ComputeException, IllegalAccessException {
+
+    private void runTestCase(ShortestPath shortestPath, int numPoints, boolean tour) throws ComputeException, IllegalAccessException {
         RequestPoints points = new RequestPoints();
-        for (int i=0; i<numPoints; i++) {
+        for (int i = 0; i < numPoints; i++) {
             int randomId = random.nextInt(nodeCount);
-            points.addPoint(graph.getNodeLat(randomId),graph.getNodeLon(randomId));
+            points.addPoint(graph.getNodeLat(randomId), graph.getNodeLon(randomId));
         }
 
         // TODO if we do not add here constraints hash map, the test fails. Maybe bad behavior of ShortestPath
@@ -59,16 +57,11 @@ public class ShortestPathTest {
         List<Way> wayList = new ArrayList<Way>();
         points.setIdsFromGraph(graph);
 
-        int totalDist;
-        if (shortestPath != null) {
-            totalDist = shortestPath.shortestPath(points, wayList, tour);
-        } else {
-            totalDist = shortestPathCH.shortestPath(points, wayList, tour);
-        }
-        
+        int totalDist = shortestPath.shortestPath(points, wayList, tour);
+
         int expectedTotalDist = 0;
         // pointNumber is the number of the start points within points 
-        for (int pointIndex=0; pointIndex < points.size(); pointIndex++) {
+        for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
 
             int[] dist = new int[nodeCount];
             for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
@@ -89,7 +82,7 @@ public class ShortestPathTest {
             queue.add(sourcePointId);
             while (queue.size() > 0) {
                 int currentNode = queue.remove(0);
-                for (int edge=0; edge < graph.getOutEdgeCount(currentNode); edge++) {
+                for (int edge = 0; edge < graph.getOutEdgeCount(currentNode); edge++) {
                     int tempEdgeId = graph.getOutEdgeId(currentNode, edge);
                     int targetId = graph.getTarget(tempEdgeId);
                     int tempDist = dist[currentNode] + graph.getDist(tempEdgeId);
@@ -101,8 +94,8 @@ public class ShortestPathTest {
             }
             expectedTotalDist = expectedTotalDist + dist[targetPointId];
         }
-        
-        assertEquals("The distance of test case " + testCaseNumber + " seems wrong.", expectedTotalDist,totalDist);
+
+        assertEquals("The distance of test case " + testCaseNumber + " seems wrong.", expectedTotalDist, totalDist);
         System.out.println("Test case " + testCaseNumber + " finished.");
     }
 
@@ -112,37 +105,22 @@ public class ShortestPathTest {
         nodeCount = graph.getNodeCount();
     }
 
-    private void runTestCases() throws ComputeException, IllegalAccessException {
-        runTestCase(2, false);
-        runTestCase(2, true);
-        runTestCase(2, false);
-        runTestCase(2, true);
-        runTestCase(2, false);
-        runTestCase(2, true);
+    private void runTestCases(ShortestPath shortestPath) throws ComputeException, IllegalAccessException {
+        for (int i = 0; i < 7; i++) {
+            runTestCase(shortestPath, i, false);
+            runTestCase(shortestPath, i, true);
+            runTestCase(shortestPath, i, true);
+            runTestCase(shortestPath, i, false);
+        }
 
-        runTestCase(3, false);
-        runTestCase(3, true);
-        runTestCase(3, false);
-        runTestCase(3, true);
-        runTestCase(3, false);
-        runTestCase(3, true);
-
-        runTestCase(4, false);
-        runTestCase(4, true);
-        runTestCase(4, false);
-        runTestCase(4, true);
-        runTestCase(4, false);
-        runTestCase(4, true);
     }
 
     @Test
-    public void testShortestPath() throws Exception {
+    public void testShortestPathNoCH() throws Exception {
         prepareTestRun();
         GraphAlgorithmFactory fac = new ShortestPathFactory(graph);
-        shortestPath = (ShortestPath) fac.createAlgorithm();
-        shortestPathCH = null;
-
-        runTestCases();
+        ShortestPath shortestPath = (ShortestPath) fac.createAlgorithm();
+        runTestCases(shortestPath);
 
     }
 
@@ -150,10 +128,9 @@ public class ShortestPathTest {
     public void testShortestPathCH() throws Exception {
         prepareTestRun();
         GraphAlgorithmFactory fac = new ShortestPathCHFactory(graph);
-        shortestPath = null;
-        shortestPathCH = (ShortestPathCH) fac.createAlgorithm();
+        ShortestPath shortestPathCH = (ShortestPath) fac.createAlgorithm();
 
-        runTestCases();
+        runTestCases(shortestPathCH);
     }
 }
                             
