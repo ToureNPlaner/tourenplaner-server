@@ -19,15 +19,11 @@ package de.tourenplaner.algorithms;
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
-import de.tourenplaner.computecore.WayResult;
 import de.tourenplaner.graphrep.GraphRep;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -35,7 +31,7 @@ import java.util.logging.Logger;
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public class ShortestPathCH extends GraphAlgorithm {
+public class ShortestPathCH extends ShortestPath {
 
     private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
 
@@ -49,57 +45,6 @@ public class ShortestPathCH extends GraphAlgorithm {
     public ShortestPathCH(GraphRep graph, DijkstraStructs resourceSharer) {
         super(graph);
         ds = resourceSharer;
-    }
-
-    // maybe use http://code.google.com/p/simplelatlng/ instead
-    private final double calcDirectDistance(double lat1, double lng1, double lat2, double lng2) {
-        double earthRadius = 6370.97327862;
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLng = Math.toRadians(lng2 - lng1);
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        double dist = earthRadius * c;
-        return dist * 1000;
-    }
-
-    @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
-        assert request != null : "We ended up without a request object in run";
-        ClassicRequestData req = (ClassicRequestData) request.getRequestData();
-        RequestPoints points = req.getPoints();
-        // Check if we have enough points to do something useful
-        if (points.size() < 2) {
-            throw new ComputeException("Not enough points, need at least 2");
-        }
-        WayResult res = new WayResult(req.getPoints(), req.getConstraints());
-        List<Way> resultWays = res.getResultWays();
-        int distance = 0;
-        try {
-            // First let's map the RequestPoints to Ids
-            points.setIdsFromGraph(graph);
-            // Then compute the multi hop shortest path of them
-            distance = shortestPath(points, resultWays, false);
-        } catch (IllegalAccessException e) {
-            // If this happens there likely is a programming error
-            e.printStackTrace();
-        }
-
-        // Calculate total time
-        int numWays = resultWays.size();
-        double totalTime = 0;
-        for (int i = 0; i < numWays; i++) {
-            totalTime += resultWays.get(i).getTravelTime();
-        }
-
-        Map<String, Object> misc = new HashMap<String, Object>(1);
-        misc.put("distance", distance);
-        misc.put("time", totalTime);
-
-
-        res.setMisc(misc);
-
-        // Set result
-        request.setResultObject(res);
     }
 
     /**
@@ -153,7 +98,7 @@ public class ShortestPathCH extends GraphAlgorithm {
      * can break the inner loop early
      *
      * @param markedEdges
-     * @param deque filled with the target nodes
+     * @param deque       filled with the target nodes
      * @throws IllegalAccessException
      */
     public final void bfsMarkAll(BitSet markedEdges, IntArrayDeque deque) throws IllegalAccessException {
@@ -163,7 +108,7 @@ public class ShortestPathCH extends GraphAlgorithm {
         int targetRank;
         BitSet visited = ds.borrowVisitedSet();
         // Set all nodes already in the deque as visited
-        for (IntCursor nodeId: deque){
+        for (IntCursor nodeId : deque) {
             visited.set(nodeId.value);
         }
         while (!deque.isEmpty()) {
@@ -302,7 +247,6 @@ public class ShortestPathCH extends GraphAlgorithm {
      * Backtracks the prevEdges Array and calculates the actual path length
      * returns the length of the found path in meters
      *
-     *
      * @param prevEdges
      * @param resultWay
      * @param srcId
@@ -364,9 +308,9 @@ public class ShortestPathCH extends GraphAlgorithm {
      * Computes the shortest path over points[0] -> points[1] -> points[2]...
      * and stores all points on the path in resultWays
      *
-     * @param points    The points the route should span, the id's must have been set
+     * @param points     The points the route should span, the id's must have been set
      * @param resultWays
-     * @param tour         Specifies whether this is a tour and points[n]->points[0]
+     * @param tour       Specifies whether this is a tour and points[n]->points[0]
      * @return
      * @throws IllegalAccessException
      * @throws Exception
@@ -436,7 +380,6 @@ public class ShortestPathCH extends GraphAlgorithm {
 
             log.info("found sp with dist = " + resultWays.get(pointIndex).getDistance() / 1000.0 + " km (direct distance: " + directDistance / 1000.0 + " dist[destid] = " + dists[destId] + "\n" +
                     "BFS: " + (bfsdonetime - starttime) / 1000000.0 + " ms with " + bfsNodes + " nodes and " + bfsEdges + " edges\n" + "Dijkstra: " + (dijkstratime - bfsdonetime) / 1000000.0 + " ms\n" + "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms");
-
 
 
             // Return/Reset the data structures

@@ -59,7 +59,7 @@ public class ShortestPathFactory extends SharingAlgorithmFactory {
 	 */
 	@Override
 	public Algorithm createAlgorithm(DijkstraStructs rs) {
-		return new ShortestPath(graph, rs);
+		return new ShortestPathNoCH(graph, rs);
 	}
 
 	/*
@@ -69,7 +69,7 @@ public class ShortestPathFactory extends SharingAlgorithmFactory {
 	 */
 	@Override
 	public Algorithm createAlgorithm() {
-		return new ShortestPath(graph, new DijkstraStructs(
+		return new ShortestPathNoCH(graph, new DijkstraStructs(
 				graph.getNodeCount(), graph.getEdgeCount()));
 	}
 
