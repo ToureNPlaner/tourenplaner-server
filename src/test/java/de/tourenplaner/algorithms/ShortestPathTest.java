@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -44,15 +43,13 @@ public class ShortestPathTest {
 
     private int testCaseNumber = 0;
     
-    private void runTestCase(int n, boolean tour) throws ComputeException, IllegalAccessException {
+    private void runTestCase(int numPoints, boolean tour) throws ComputeException, IllegalAccessException {
         RequestPoints points = new RequestPoints();
-        for (int i=0; i<n; i++) {
+        for (int i=0; i<numPoints; i++) {
             int randomId = random.nextInt(nodeCount);
             points.addPoint(graph.getNodeLat(randomId),graph.getNodeLon(randomId));
         }
-        if (tour) {
-            points.addPoint(points.getPointLat(0), points.getPointLon(0));
-        }
+
         // TODO if we do not add here constraints hash map, the test fails. Maybe bad behavior of ShortestPath
         for (RequestPoint point : points.getStore()) {
             point.setConstraints(new HashMap<String, Object>());
@@ -64,36 +61,45 @@ public class ShortestPathTest {
 
         int totalDist;
         if (shortestPath != null) {
-            totalDist = shortestPath.shortestPath(points, wayList, false);
+            totalDist = shortestPath.shortestPath(points, wayList, tour);
         } else {
-            totalDist = shortestPathCH.shortestPath(points, wayList, false);
+            totalDist = shortestPathCH.shortestPath(points, wayList, tour);
         }
         
         int expectedTotalDist = 0;
-        
         // pointNumber is the number of the start points within points 
-        for (int pointNumber=0; pointNumber < points.size()-1; pointNumber++) {
+        for (int pointIndex=0; pointIndex < points.size(); pointIndex++) {
 
             int[] dist = new int[nodeCount];
             for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
                 dist[nodeId] = Integer.MAX_VALUE;
             }
-            dist[points.getPointId(pointNumber)] = 0;
+            int sourcePointId = points.getPointId(pointIndex);
+            int targetPointId;
+            if (pointIndex < points.size() - 1) {
+                targetPointId = points.getPointId(pointIndex + 1);
+            } else if (tour) {
+                targetPointId = points.getPointId(0);
+            } else {
+                break;
+            }
+
+            dist[sourcePointId] = 0;
             List<Integer> queue = new ArrayList<Integer>();
-            queue.add(points.getPointId(pointNumber));
+            queue.add(sourcePointId);
             while (queue.size() > 0) {
                 int currentNode = queue.remove(0);
                 for (int edge=0; edge < graph.getOutEdgeCount(currentNode); edge++) {
                     int tempEdgeId = graph.getOutEdgeId(currentNode, edge);
                     int targetId = graph.getTarget(tempEdgeId);
                     int tempDist = dist[currentNode] + graph.getDist(tempEdgeId);
-                    if (tempDist < dist[targetId] && tempDist <= totalDist) {
+                    if (tempDist < dist[targetId]) {
                         dist[targetId] = tempDist;
                         queue.add(targetId);
                     }
                 }
             }
-            expectedTotalDist = expectedTotalDist + dist[points.getPointId(pointNumber + 1)];
+            expectedTotalDist = expectedTotalDist + dist[targetPointId];
         }
         
         assertEquals("The distance of test case " + testCaseNumber + " seems wrong.", expectedTotalDist,totalDist);
@@ -130,31 +136,24 @@ public class ShortestPathTest {
     }
 
     @Test
-    public void testShortestPath() {
+    public void testShortestPath() throws Exception {
         prepareTestRun();
         GraphAlgorithmFactory fac = new ShortestPathFactory(graph);
         shortestPath = (ShortestPath) fac.createAlgorithm();
         shortestPathCH = null;
 
-        try {
-            runTestCases();
-        } catch (Exception e) {
-            fail("Failed with exception: " + e.getMessage());
-        }
+        runTestCases();
+
     }
 
     @Test
-    public void testShortestPathCH() {
+    public void testShortestPathCH() throws Exception {
         prepareTestRun();
         GraphAlgorithmFactory fac = new ShortestPathCHFactory(graph);
         shortestPath = null;
         shortestPathCH = (ShortestPathCH) fac.createAlgorithm();
 
-        try {
-            runTestCases();
-        } catch (Exception e) {
-            fail("Failed with exception: " + e.getMessage());
-        }
+        runTestCases();
     }
 }
                             
