@@ -101,12 +101,13 @@ public class ShortestPathTest {
 
 
     private void prepareTestRun() {
+        random = new Random(1337);
         graph = (new TestGraphReader()).readTestGraph();
         nodeCount = graph.getNodeCount();
     }
 
     private void runTestCases(ShortestPath shortestPath) throws ComputeException, IllegalAccessException {
-        for (int i = 0; i < 7; i++) {
+        for (int i = 0; i < 10; i++) {
             runTestCase(shortestPath, i, false);
             runTestCase(shortestPath, i, true);
             runTestCase(shortestPath, i, true);
@@ -124,10 +125,20 @@ public class ShortestPathTest {
 
     }
 
+
     @Test
     public void testShortestPathCH() throws Exception {
         prepareTestRun();
         GraphAlgorithmFactory fac = new ShortestPathCHFactory(graph);
+        ShortestPath shortestPathCH = (ShortestPath) fac.createAlgorithm();
+
+        runTestCases(shortestPathCH);
+    }
+
+    @Test
+    public void testShortestPathBDCH() throws Exception {
+        prepareTestRun();
+        GraphAlgorithmFactory fac = new ShortestPathBDCHFactory(graph);
         ShortestPath shortestPathCH = (ShortestPath) fac.createAlgorithm();
 
         runTestCases(shortestPathCH);
