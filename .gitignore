@@ -1,0 +1,6 @@
+.idea/*
+.checkstyle
+.classpath
+.project
+.settings/
+target/
