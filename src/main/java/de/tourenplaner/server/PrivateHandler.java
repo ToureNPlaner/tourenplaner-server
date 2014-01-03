@@ -106,7 +106,7 @@ public class PrivateHandler extends RequestHandler {
         UserDataset authenticatedUser = null;
 
         // if no authorization header keep on with adding not verified user
-        if (request.getHeader("Authorization") != null) {
+        if (request.headers().get("Authorization") != null) {
             authenticatedUser = authorizer.auth(request);
             if (authenticatedUser == null) {
                 // auth(request) sent error response
