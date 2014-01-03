@@ -90,6 +90,8 @@ public class GridNN implements NNSearcher {
         this.latDiff = latMax - latMin;
         this.lonMin = lonMin;
         this.lonDiff = lonMax - lonMin;
+        log.info("Min latitude: "+latMin+" max latitude: "+latMax+
+        "\nmin longitude: "+lonMin+" max longitude: "+lonMax);
 
         // Calculate numRows and numCols to match the geometry of our map
         // only an optimization not needed for correctness

@@ -132,10 +132,11 @@ public class ComputeServer {
         GraphRepWriter gWriter = new GraphRepBinaryWriter();
 
         // now that we have a config (or not) we look if we only need to dump our graph and then exit
+	    // TODO WARNING Properly handle graph formats
         if (cliParser.dumpgraph()) {
             log.info("Dumping Graph...");
             try {
-                graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
+                graph = new GraphRepStandardReader(false).createGraphRep(new FileInputStream(graphFilename));
                 gWriter.writeGraphRep(new FileOutputStream(dumpName(graphFilename)), graph);
             } catch (IOException e) {
                 log.severe("IOError dumping graph to file: " + dumpName(graphFilename) + '\n' + e.getMessage());
@@ -147,14 +148,14 @@ public class ComputeServer {
         //TODO there's an awful lot of duplicate logic and three layers of exception throwing code wtf
         try {
             if (cliParser.loadTextGraph()) {
-                graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
+                graph = new GraphRepStandardReader(false).createGraphRep(new FileInputStream(graphFilename));
             } else {
                 try {
                     graph = new GraphRepBinaryReader().createGraphRep(new FileInputStream(dumpName(graphFilename)));
                 } catch (InvalidClassException e) {
                     log.warning("Dumped Graph version does not match the required version: " + e.getMessage());
                     log.info("Falling back to text reading from file: " + graphFilename + " (path provided by config file)");
-                    graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
+                    graph = new GraphRepStandardReader(false).createGraphRep(new FileInputStream(graphFilename));
                     
 
                     if (graph != null && new File(dumpName(graphFilename)).delete()) {
@@ -168,7 +169,7 @@ public class ComputeServer {
                 } catch (IOException e) {
                     log.log(Level.WARNING, "loading dumped graph failed", e);
                     log.info("Falling back to text reading from file " + graphFilename + " (path provided by config file)");
-                    graph = new GraphRepTextReader().createGraphRep(new FileInputStream(graphFilename));
+                    graph = new GraphRepStandardReader(false).createGraphRep(new FileInputStream(graphFilename));
                     log.info("Graph successfully read. Now writing new dump");
                     gWriter.writeGraphRep(new FileOutputStream(dumpName(graphFilename)), graph);
                 }
