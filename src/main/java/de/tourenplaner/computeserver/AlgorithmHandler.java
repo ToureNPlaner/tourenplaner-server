@@ -29,6 +29,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonProcessingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
+import org.jboss.netty.handler.codec.http.HttpHeaders;
 import org.jboss.netty.handler.codec.http.HttpRequest;
 import org.jboss.netty.util.CharsetUtil;
 
@@ -92,7 +93,8 @@ public class  AlgorithmHandler extends RequestHandler {
                 return;
             }
             // Only now read the request
-            boolean acceptsSmile = (request.getHeader("Accept") != null) && request.getHeader("Accept").contains("application/x-jackson-smile");
+	        HttpHeaders headers = request.headers();
+            boolean acceptsSmile = (headers.get("Accept") != null) && headers.get("Accept").contains("application/x-jackson-smile");
             final RequestData requestData = algFac.readRequestData(mapper, responder, request);
             final ComputeRequest req = new ComputeRequest(responder, requestData ,acceptsSmile);
 
@@ -100,7 +102,7 @@ public class  AlgorithmHandler extends RequestHandler {
             if (req != null) {
                 // Log what is requested
                 request.getContent().resetReaderIndex();
-                String ip = request.getHeader("X-Forwarded-For");
+                String ip = headers.get("X-Forwarded-For");
                 if (ip == null) {
                     ip = ((InetSocketAddress) req.getResponder().getChannel().getRemoteAddress()).getAddress().getHostAddress();
                 }

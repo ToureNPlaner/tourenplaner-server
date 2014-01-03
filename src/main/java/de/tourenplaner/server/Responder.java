@@ -119,7 +119,7 @@ public class Responder {
         // Respond with Unauthorized Access
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
         // Send the client the realm so it knows we want Basic Access Auth.
-        response.setHeader("WWW-Authenticate", "Basic realm=\"ToureNPlaner\"");
+        response.headers().set("WWW-Authenticate", "Basic realm=\"ToureNPlaner\"");
         // Write the response.
         ChannelFuture future = replyChannel.write(response);
         future.addListener(ChannelFutureListener.CLOSE);
@@ -133,12 +133,12 @@ public class Responder {
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
 
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader(CONTENT_TYPE, "text-html; charset=UTF-8");
+        response.headers().set("Access-Control-Allow-Origin", "*");
+        response.headers().set(CONTENT_TYPE, "text-html; charset=UTF-8");
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.setHeader(CONTENT_LENGTH, 0);
+            response.headers().set(CONTENT_LENGTH, 0);
         }
 
         // Write the response.
@@ -173,8 +173,8 @@ public class Responder {
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
 
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
+        response.headers().set("Access-Control-Allow-Origin", "*");
+        response.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");
         outputBuffer.clear();
         OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
 
@@ -195,7 +195,7 @@ public class Responder {
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
+            response.headers().set(CONTENT_LENGTH, response.getContent().readableBytes());
         }
 
         // Write the response.
@@ -226,8 +226,8 @@ public class Responder {
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
 
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
+        response.headers().set("Access-Control-Allow-Origin", "*");
+        response.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");
         outputBuffer.clear();
 
         if (byteArray != null) {
@@ -240,7 +240,7 @@ public class Responder {
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
+            response.headers().set(CONTENT_LENGTH, response.getContent().readableBytes());
         }
 
         // Write the response.
@@ -290,13 +290,13 @@ public class Responder {
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, errorMessage.status);
 
-        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.headers().set("Access-Control-Allow-Origin", "*");
         // Add header so that clients know how they can authenticate
         if(errorMessage.status.equals(HttpResponseStatus.UNAUTHORIZED)){
-            response.setHeader("WWW-Authenticate","Basic realm=\"touenplaner\"");
+            response.headers().set("WWW-Authenticate","Basic realm=\"touenplaner\"");
         }
 
-        response.setHeader(CONTENT_TYPE, "application/json; charset=UTF-8");
+        response.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");
 
         response.setContent(outputBuffer);
         // Write the response.
@@ -377,8 +377,8 @@ public class Responder {
         // Build the response object.
         HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
 
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader(CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile": "application/json; charset=UTF-8");
+        response.headers().set("Access-Control-Allow-Origin", "*");
+        response.headers().set(CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile": "application/json; charset=UTF-8");
 
         outputBuffer.clear();
         OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
@@ -391,7 +391,7 @@ public class Responder {
         
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.setHeader(CONTENT_LENGTH, response.getContent().readableBytes());
+            response.headers().set(CONTENT_LENGTH, response.getContent().readableBytes());
         }
 
         // Write the response.
