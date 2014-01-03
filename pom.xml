@@ -137,13 +137,19 @@
 		<dependency>
 			<groupId>com.carrotsearch</groupId>
 			<artifactId>hppc</artifactId>
-			<version>0.4.1</version>
+			<version>0.5.3</version>
 		</dependency>
 
 		<dependency>
 			<groupId>c3p0</groupId>
 			<artifactId>c3p0</artifactId>
 			<version>0.9.1.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>fmi.graph</groupId>
+			<artifactId>graphio</artifactId>
+			<version>0.6-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 </project>
