@@ -1,6 +1,6 @@
 #!/bin/bash
 
-[[ $# -ne 1 ]] && echo -e "Usage:\n\t$0 [jar|test] [arguments to mvn]" && exit 1
+[[ $# -le 1 ]] && echo -e "Usage:\n\t$0 [jar|test] [arguments to mvn]" && exit 1
 
 case $1 in
   jar)

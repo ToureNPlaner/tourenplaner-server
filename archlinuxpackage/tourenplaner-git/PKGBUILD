@@ -1,13 +1,13 @@
 # Maintainer: Christoph Haag <haagch.christoph@googlemail.com>
 
-pkgname=tourenplaner-git
-pkgver=863.2433ac8
+pkgname=tourenplaner-server-git
+pkgver=864.aa8a067
 pkgrel=1
 pkgdesc="A server for calculating shortest paths, TSP and CSP"
 arch=('any')
 url="http://tourenplaner.github.com/"
 license=('GPL')
-depends=('java-runtime' 'sudo')
+depends=('java-runtime')
 makedepends=('maven')
 backup=('etc/tourenplaner.conf')
 license=('BSD')
@@ -26,22 +26,25 @@ build() {
   _M2_REPO=${srcdir}/.m2
   mkdir -p ${_M2_REPO}
   sh build.sh jar -Dmaven.repo.local=${_M2_REPO}
+}
 
+package() {
+  cd tourenplaner-server
   install -d ${pkgdir}/usr/share/java/tourenplaner/
-  install -m644 ./jar/tourenplaner-server.jar ${pkgdir}/usr/share/java/tourenplaner/tourenplaner-server.jar
+  install -m644 target/tourenplaner-server-*-jar-with-dependencies.jar ${pkgdir}/usr/share/java/tourenplaner/tourenplaner-server.jar
 
   install -d ${pkgdir}/usr/share/tourenplaner/
   install -m644 ./data/database/db_init_script.sql ${pkgdir}/usr/share/tourenplaner/
   install -m744 ./data/database/db_init.sh ${pkgdir}/usr/share/tourenplaner/
 
   install -d ${pkgdir}/usr/bin
-  install -m 755 ./archlinuxpackage/tourenplaner/tourenplaner-server.sh ${pkgdir}/usr/bin/tourenplaner-server
+  install -m 755 ./archlinuxpackage/tourenplaner-git/tourenplaner-server.sh ${pkgdir}/usr/bin/tourenplaner-server
 
   install -d ${pkgdir}/etc
-  install -m 644 ./archlinuxpackage/tourenplaner/tourenplaner.conf ${pkgdir}/etc/tourenplaner.conf
+  install -m 644 ./data/config/tourenplaner.conf ${pkgdir}/etc/tourenplaner.conf
 
-  install -d ${pkgdir}/etc/rc.d
-  install -m 755 ./archlinuxpackage/tourenplaner/tourenplanerd ${pkgdir}/etc/rc.d/tourenplanerd
+  install -d ${pkgdir}/usr/lib/systemd/system
+  install -m 755 ./archlinuxpackage/tourenplaner-git/systemd_tourenplaner.service ${pkgdir}/usr/lib/systemd/system/tourenplaner.service
 
   install -d ${pkgdir}/var/lib/tourenplaner
   install -d ${pkgdir}/var/log/tourenplaner
