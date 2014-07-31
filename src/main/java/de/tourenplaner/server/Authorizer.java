@@ -116,7 +116,7 @@ public class Authorizer extends RequestHandler {
         // Why between heaven and earth does Java have AES Encryption in
         // the standard library but not Base64 though it has it internally
         // several times
-        emailandpw = myReq.getHeader("Authorization");
+        emailandpw = myReq.headers().get("Authorization");
         if (emailandpw == null) {
             log.info("Missing Authorization header");
             return null;

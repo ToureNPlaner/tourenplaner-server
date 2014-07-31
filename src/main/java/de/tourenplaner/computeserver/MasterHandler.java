@@ -128,10 +128,10 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
 
         // We only allow POST and GET methods so only allow request when Method
         // is Post or Get
-        final String methodType = request.getHeader("Access-Control-Request-Method");
+        final String methodType = request.headers().get("Access-Control-Request-Method");
         if ((methodType != null) && (methodType.trim().equals("POST") || methodType.trim().equals("GET"))) {
             response = new DefaultHttpResponse(HTTP_1_1, OK);
-            response.addHeader("Connection", "Keep-Alive");
+            response.headers().add("Connection", "Keep-Alive");
         } else {
             response = new DefaultHttpResponse(HTTP_1_1, FORBIDDEN);
             // We don't want to keep the connection now
@@ -141,13 +141,13 @@ public class MasterHandler extends SimpleChannelUpstreamHandler {
         final ArrayList<String> allowHeaders = new ArrayList<String>(2);
         allowHeaders.add("Content-Type");
         allowHeaders.add("Authorization");
+        HttpHeaders headers = response.headers();
+        headers.set("Access-Control-Allow-Origin", "*");
+	    headers.set("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
+	    headers.set(CONTENT_TYPE, "application/json");
+	    headers.set("Content-Length", "0");
 
-        response.setHeader("Access-Control-Allow-Origin", "*");
-        response.setHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
-        response.setHeader(CONTENT_TYPE, "application/json");
-        response.setHeader("Content-Length", "0");
-
-        response.setHeader("Access-Control-Allow-Headers", allowHeaders);
+	    headers.set("Access-Control-Allow-Headers", allowHeaders);
 
         final ChannelFuture future = channel.write(response);
         if (!keepAlive) {

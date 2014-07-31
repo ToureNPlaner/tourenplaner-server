@@ -1,0 +1,15 @@
+[Unit]
+Description=ToureNPlaner Server
+After=network.target
+
+[Service]
+User=http
+ExecStart=/usr/lib/jvm/java-7-openjdk/bin/java \
+        -Xmx8g \
+        -Xincgc \
+        -jar '/usr/share/java/tourenplaner/tourenplaner-server.jar' \
+        -c /etc/tourenplaner.conf \
+        -f dump
+
+[Install]
+WantedBy=multi-user.target
