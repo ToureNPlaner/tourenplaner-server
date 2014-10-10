@@ -10,6 +10,13 @@
 	<name>tourenplaner-server</name>
 	<url>http://tourenplaner.github.com</url>
 
+	<repositories>  
+		<repository>            
+			<id>dropbox</id>                        
+			<url>https://dl.dropboxusercontent.com/u/30343875/mvntest/</url>                        
+		</repository>           
+	</repositories>     
+
 	<developers>
 		<developer>
 			<id>niklas</id>
@@ -151,5 +158,6 @@
 			<artifactId>graphio</artifactId>
 			<version>0.6-SNAPSHOT</version>
 		</dependency>
+
 	</dependencies>
 </project>
