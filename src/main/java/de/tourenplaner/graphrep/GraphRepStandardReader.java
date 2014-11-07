@@ -42,7 +42,7 @@ public class GraphRepStandardReader implements GraphRepReader{
 	public GraphRep createGraphRep(InputStream in) throws IOException {
 
 		BufferedInputStream inb = new BufferedInputStream(in);
-		Reader r = new Reader();
+		Reader r = new Reader(false, true);
 		Node n;
 		Edge e;
 		int edgeCount, edge;

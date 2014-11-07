@@ -39,11 +39,11 @@ public class ComputeServer {
 
     private static void registerAlgorithms(AlgorithmRegistry reg, GraphRep graph) {
         // reg.registerAlgorithm(new ShortestPathFactory(graph));
-        reg.registerAlgorithm(new ShortestPathBDCHFactory(graph));
-        reg.registerAlgorithm(new ShortestPathCHFactory(graph));
         reg.registerAlgorithm(new TravelingSalesmenFactory(graph));
+        reg.registerAlgorithm(new ShortestPathBDCHFactory(graph));
+        //reg.registerAlgorithm(new ShortestPathCHFactory(graph));
         reg.registerAlgorithm(new NNSearchFactory(graph));
-        reg.registerAlgorithm(new ConstrainedSPFactory(graph));
+        //reg.registerAlgorithm(new ConstrainedSPFactory(graph));
         reg.registerAlgorithm(new UpDownFactory(graph));
         reg.registerAlgorithm(new WayByNodeIdsFactory(graph));
     }
