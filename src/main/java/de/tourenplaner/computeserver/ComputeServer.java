@@ -46,6 +46,7 @@ public class ComputeServer {
         //reg.registerAlgorithm(new ConstrainedSPFactory(graph));
         reg.registerAlgorithm(new UpDownFactory(graph));
         reg.registerAlgorithm(new WayByNodeIdsFactory(graph));
+        reg.registerAlgorithm(new CoreGraphFactory(graph));
     }
 
     private static Logger log = Logger.getLogger("de.tourenplaner");

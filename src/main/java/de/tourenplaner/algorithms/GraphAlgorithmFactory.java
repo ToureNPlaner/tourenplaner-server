@@ -42,9 +42,9 @@ import java.util.Map;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
-    private static final class MapType extends TypeReference<Map<String, Object>> {
+    protected static final class MapType extends TypeReference<Map<String, Object>> {
     }
-    private static final MapType JSONOBJECT = new MapType();
+    protected static final MapType JSONOBJECT = new MapType();
 	
 	protected GraphRep graph;
 	
