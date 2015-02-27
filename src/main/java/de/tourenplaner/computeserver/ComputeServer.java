@@ -23,7 +23,6 @@ import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.computecore.SharingAMFactory;
 import de.tourenplaner.config.ConfigManager;
 import de.tourenplaner.graphrep.*;
-import de.tourenplaner.server.CLIParser;
 
 import java.io.*;
 import java.util.*;
@@ -175,9 +174,7 @@ public class ComputeServer {
                     gWriter.writeGraphRep(new FileOutputStream(dumpName(graphFilename)), graph);
                 }
             }
-        } catch (IOException e) {
-            log.log(Level.SEVERE, "loading text graph failed", e);
-        }
+
 
         if (graph == null) {
             log.severe("Reading graph failed");
@@ -208,5 +205,11 @@ public class ComputeServer {
         Map<String, Object> serverInfo = getServerInfo(reg);
 
         new HttpComputeServer(cm, serverInfo, comCore);
+
+        } catch (IOException e) {
+	        log.log(Level.SEVERE, "loading text graph failed", e);
+        } catch (InterruptedException e) {
+	        log.log(Level.SEVERE, "Main Thread interrupted", e);
+        }
     }
 }

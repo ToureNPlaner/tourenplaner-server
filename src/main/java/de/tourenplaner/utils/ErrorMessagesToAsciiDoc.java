@@ -16,7 +16,7 @@
 
 package de.tourenplaner.utils;
 
-import de.tourenplaner.server.ErrorMessage;
+import de.tourenplaner.computeserver.ErrorMessage;
 
 import java.util.*;
 

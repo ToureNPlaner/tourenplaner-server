@@ -16,11 +16,10 @@
 
 package de.tourenplaner.computeserver;
 
-import de.tourenplaner.server.Responder;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
 import java.util.Map;
@@ -46,7 +45,8 @@ public class InfoHandler {
         this.responder = responder;
     }
 
-    public void handleInfo(final HttpRequest request) throws JsonGenerationException, JsonMappingException, IOException {
+    public void handleInfo(final FullHttpRequest request) throws JsonGenerationException, JsonMappingException, IOException {
         responder.writeJSON(serverInfo, HttpResponseStatus.OK);
+	    request.release();
     }
 }

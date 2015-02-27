@@ -2,16 +2,16 @@ package de.tourenplaner.algorithms;
 
 import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.computecore.RequestData;
+import de.tourenplaner.computeserver.ErrorMessage;
+import de.tourenplaner.computeserver.Responder;
 import de.tourenplaner.graphrep.GraphRep;
-import de.tourenplaner.server.ErrorMessage;
-import de.tourenplaner.server.Responder;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.handler.codec.http.FullHttpRequest;
 import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.JsonParser;
 import org.codehaus.jackson.JsonToken;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.handler.codec.http.HttpRequest;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -88,12 +88,12 @@ public class WayByNodeIdsFactory extends SharingAlgorithmFactory {
     }
 
     @Override
-    public RequestData readRequestData(ObjectMapper mapper, Responder responder, HttpRequest request) throws IOException {
-        final ChannelBuffer content = request.getContent();
+    public RequestData readRequestData(ObjectMapper mapper, Responder responder, FullHttpRequest request) throws IOException {
+        final ByteBuf content = request.content();
         IntArrayList nodeIds = null;
         if (content.readableBytes() > 0) {
             nodeIds = new IntArrayList();
-            final JsonParser jp = mapper.getJsonFactory().createJsonParser(new ChannelBufferInputStream(content));
+            final JsonParser jp = mapper.getJsonFactory().createJsonParser(new ByteBufInputStream(content));
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {

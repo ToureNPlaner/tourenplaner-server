@@ -14,28 +14,25 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.database;
+package de.tourenplaner.computeserver;
+
+import org.codehaus.jackson.map.MapperConfig;
+import org.codehaus.jackson.map.PropertyNamingStrategy;
+import org.codehaus.jackson.map.introspect.AnnotatedField;
+import org.codehaus.jackson.map.introspect.AnnotatedMethod;
 
 /**
- * Class to bundle a json byte array and the corresponding user id.
- *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public class JSONObject {
-
-    private int userID;
-    private byte[] jsonByteArray;
-    
-    public JSONObject(int userID, byte[] jsonByteArray) {
-        this.userID = userID;
-        this.jsonByteArray = jsonByteArray;
+class JSONLowerCaseStrategy extends PropertyNamingStrategy {
+    @Override
+    public String nameForGetterMethod(MapperConfig<?> config, AnnotatedMethod method, String defaultName) {
+        return defaultName.toLowerCase();
     }
 
-    public int getUserID() {
-        return userID;
+    @Override
+    public String nameForField(MapperConfig<?> config, AnnotatedField field, String defaultName) {
+        return defaultName.toLowerCase();
     }
 
-    public byte[] getJsonByteArray() {
-        return jsonByteArray;
-    }
 }

@@ -18,8 +18,8 @@ package de.tourenplaner.computecore;
 
 import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.ComputeException;
-import de.tourenplaner.server.ErrorMessage;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+import de.tourenplaner.computeserver.ErrorMessage;
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Level;

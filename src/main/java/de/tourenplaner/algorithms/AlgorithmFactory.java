@@ -17,10 +17,9 @@
 package de.tourenplaner.algorithms;
 
 import de.tourenplaner.computecore.RequestData;
-import de.tourenplaner.server.Responder;
+import de.tourenplaner.computeserver.Responder;
+import io.netty.handler.codec.http.FullHttpRequest;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -101,5 +100,5 @@ public abstract class AlgorithmFactory {
      * @return
      * @throws IOException
      */
-    public abstract RequestData readRequestData(ObjectMapper mapper, Responder responder, HttpRequest request) throws IOException;
+    public abstract RequestData readRequestData(ObjectMapper mapper, Responder responder, FullHttpRequest request) throws IOException;
 }

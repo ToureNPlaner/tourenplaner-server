@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.server;
+package de.tourenplaner.computeserver;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer

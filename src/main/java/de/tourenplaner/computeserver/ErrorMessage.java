@@ -14,9 +14,10 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.server;
+package de.tourenplaner.computeserver;
 
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
+
+import io.netty.handler.codec.http.HttpResponseStatus;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer

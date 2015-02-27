@@ -14,33 +14,30 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.server;
+package de.tourenplaner.computeserver;
 
 import de.tourenplaner.computecore.ComputeRequest;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders.Names;
+import io.netty.handler.codec.http.HttpResponse;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.JsonGenerator;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig;
 import org.codehaus.jackson.smile.SmileFactory;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferOutputStream;
-import org.jboss.netty.buffer.ChannelBuffers;
-import org.jboss.netty.channel.Channel;
-import org.jboss.netty.channel.ChannelFuture;
-import org.jboss.netty.channel.ChannelFutureListener;
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponse;
-import org.jboss.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.logging.Logger;
 
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_LENGTH;
-import static org.jboss.netty.handler.codec.http.HttpHeaders.Names.CONTENT_TYPE;
-import static org.jboss.netty.handler.codec.http.HttpResponseStatus.UNAUTHORIZED;
-import static org.jboss.netty.handler.codec.http.HttpVersion.HTTP_1_1;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * This class encapsulates the translation from Map<String, Object> to JSON and
@@ -57,7 +54,6 @@ public class Responder {
     private boolean keepAlive;
     private static final ObjectMapper mapper;
     private static final ObjectMapper smileMapper;
-    private ChannelBuffer outputBuffer;
 
     static {
         mapper = new ObjectMapper();
@@ -78,7 +74,6 @@ public class Responder {
     public Responder(Channel replyChan) {
         this.replyChannel = replyChan;
         this.keepAlive = false;
-        this.outputBuffer = null;
     }
 
 
@@ -117,11 +112,11 @@ public class Responder {
     public void writeUnauthorizedClose() {
         log.info("Writing unauthorized close");
         // Respond with Unauthorized Access
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, UNAUTHORIZED);
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
         // Send the client the realm so it knows we want Basic Access Auth.
         response.headers().set("WWW-Authenticate", "Basic realm=\"ToureNPlaner\"");
         // Write the response.
-        ChannelFuture future = replyChannel.write(response);
+        ChannelFuture future = replyChannel.writeAndFlush(response);
         future.addListener(ChannelFutureListener.CLOSE);
     }
 
@@ -131,18 +126,18 @@ public class Responder {
      */
     public void writeStatusResponse(HttpResponseStatus status) {
         // Build the response object.
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+        HttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(CONTENT_TYPE, "text-html; charset=UTF-8");
+        response.headers().set(Names.CONTENT_TYPE, "text-html; charset=UTF-8");
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(CONTENT_LENGTH, 0);
+            response.headers().set(Names.CONTENT_LENGTH, 0);
         }
 
         // Write the response.
-        ChannelFuture future = replyChannel.write(response);
+        ChannelFuture future = replyChannel.writeAndFlush(response);
 
         // Close the non-keep-alive connection after the write operation is
         // done.
@@ -164,19 +159,12 @@ public class Responder {
      */
     public void writeJSON(Object toWrite, HttpResponseStatus status) throws IOException {
 
-        // Allocate buffer if not already done
-        // do this here because we are in a worker thread
-        if (outputBuffer == null) {
-            outputBuffer = ChannelBuffers.dynamicBuffer(4096);
-        }
-
         // Build the response object.
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");
-        outputBuffer.clear();
-        OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+        response.headers().set(Names.CONTENT_TYPE, "application/json; charset=UTF-8");
+        OutputStream resultStream = new ByteBufOutputStream(response.content());
 
         // let's hope that the mapper can actually transform our object to
         // something that makes sense
@@ -191,15 +179,14 @@ public class Responder {
         }
 
         resultStream.flush();
-        response.setContent(outputBuffer);
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(CONTENT_LENGTH, response.getContent().readableBytes());
+            response.headers().set(Names.CONTENT_LENGTH, response.content().readableBytes());
         }
 
         // Write the response.
-        ChannelFuture future = replyChannel.write(response);
+        ChannelFuture future = replyChannel.writeAndFlush(response);
 
         // Close the non-keep-alive connection after the write operation is
         // done.
@@ -217,34 +204,26 @@ public class Responder {
      * @throws IOException Thrown if writing onto the output fails
      */
     public void writeByteArray(byte[] byteArray, HttpResponseStatus status) throws IOException {
-        // Allocate buffer if not already done
-        // do this here because we are in a worker thread
-        if (outputBuffer == null) {
-            outputBuffer = ChannelBuffers.dynamicBuffer(4096);
-        }
 
         // Build the response object.
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");
-        outputBuffer.clear();
+        response.headers().set(Names.CONTENT_TYPE, "application/json; charset=UTF-8");
 
         if (byteArray != null) {
-            OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+            OutputStream resultStream = new ByteBufOutputStream(response.content());
             resultStream.write(byteArray);
             resultStream.flush();
         }
 
-        response.setContent(outputBuffer);
-
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(CONTENT_LENGTH, response.getContent().readableBytes());
+            response.headers().set(Names.CONTENT_LENGTH, response.content().readableBytes());
         }
 
         // Write the response.
-        ChannelFuture future = replyChannel.write(response);
+        ChannelFuture future = replyChannel.writeAndFlush(response);
 
         // Close the non-keep-alive connection after the write operation is
         // done.
@@ -269,15 +248,10 @@ public class Responder {
             throws IOException
     {
         log.info("Writing Error Message: " + errorMessage.message + " --- " + details);
+	    // Build the response object.
+	    FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, errorMessage.status);
 
-        // Allocate buffer if not already done
-        // do this here because we are in a worker thread
-        if (outputBuffer == null) {
-            outputBuffer = ChannelBuffers.dynamicBuffer(4096);
-        }
-
-        outputBuffer.clear();
-        OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+        OutputStream resultStream = new ByteBufOutputStream(response.content());
         JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(resultStream);
         gen.writeStartObject();
         gen.writeStringField("errorid", errorMessage.errorId);
@@ -287,8 +261,7 @@ public class Responder {
         gen.close();
         resultStream.flush();
 
-        // Build the response object.
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, errorMessage.status);
+
 
         response.headers().set("Access-Control-Allow-Origin", "*");
         // Add header so that clients know how they can authenticate
@@ -296,11 +269,10 @@ public class Responder {
             response.headers().set("WWW-Authenticate","Basic realm=\"touenplaner\"");
         }
 
-        response.headers().set(CONTENT_TYPE, "application/json; charset=UTF-8");
+        response.headers().set(Names.CONTENT_TYPE, "application/json; charset=UTF-8");
 
-        response.setContent(outputBuffer);
         // Write the response.
-        ChannelFuture future = replyChannel.write(response);
+        ChannelFuture future = replyChannel.writeAndFlush(response);
 
         // Close the connection after the write operation is
         // done.
@@ -366,36 +338,29 @@ public class Responder {
      * @throws IOException Thrown if writing json onto the output or onto the returned ByteArrayOutputStream fails
      */
     public void writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
-        // Allocate buffer if not already done
-        // do this here because we are in a worker thread
-        if (outputBuffer == null) {
-            outputBuffer = ChannelBuffers.dynamicBuffer(4096);
-        }
 
         ObjectMapper useMapper = (work.isAcceptsSmile()) ? smileMapper: mapper;
         
         // Build the response object.
-        HttpResponse response = new DefaultHttpResponse(HTTP_1_1, status);
+        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile": "application/json; charset=UTF-8");
+        response.headers().set(Names.CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile": "application/json; charset=UTF-8");
 
-        outputBuffer.clear();
-        OutputStream resultStream = new ChannelBufferOutputStream(outputBuffer);
+        OutputStream resultStream = new ByteBufOutputStream(response.content());
 
         work.getResultObject().writeToStream(useMapper, resultStream);
         resultStream.flush();
 
         resultStream.flush();
-        response.setContent(outputBuffer);
         
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(CONTENT_LENGTH, response.getContent().readableBytes());
+            response.headers().set(Names.CONTENT_LENGTH, response.content().readableBytes());
         }
 
         // Write the response.
-        ChannelFuture future = replyChannel.write(response);
+        ChannelFuture future = replyChannel.writeAndFlush(response);
 
         // Close the non-keep-alive connection after the write operation is
         // done.
