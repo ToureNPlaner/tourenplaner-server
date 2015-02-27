@@ -125,6 +125,8 @@ public class  AlgorithmHandler extends RequestHandler {
             }
         } catch (JsonParseException e) {
             responder.writeErrorMessage(ErrorMessage.EBADJSON, e.getMessage());
+        } finally {
+	        request.release();
         }
 
     }

@@ -22,12 +22,13 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import static io.netty.handler.codec.http.HttpVersion.*;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
  * This handler handles HTTP Requests on the normal operation socket including *
@@ -78,6 +79,8 @@ public class MasterHandler  extends ChannelInboundHandlerAdapter {
         final FullHttpRequest request = (FullHttpRequest) msg;
 	    if (HttpHeaders.is100ContinueExpected(request)) {
 		    ctx.write(new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.CONTINUE));
+		    request.release();
+		    return;
 	    }
 
         final Channel channel = ctx.channel();
@@ -92,20 +95,21 @@ public class MasterHandler  extends ChannelInboundHandlerAdapter {
 
         responder.setKeepAlive(HttpHeaders.isKeepAlive(request));
 
-            if ("/info".equals(path)) {
+        if ("/info".equals(path)) {
 
-                infoHandler.handleInfo(request);
+            infoHandler.handleInfo(request);
 
-            } else if (path.startsWith("/alg")) {
+        } else if (path.startsWith("/alg")) {
 
-                final String algName = queryStringDecoder.path().substring(4);
-                algHandler.handleAlg(request, algName);
+            final String algName = queryStringDecoder.path().substring(4);
+            algHandler.handleAlg(request, algName);
 
-            } else {
-                // Unknown request, close connection
-                log.warning("An unknown URL was requested: " + path);
-                responder.writeErrorMessage(ErrorMessage.EUNKNOWNURL, "unknown URL: " + path);
-            }
+        } else {
+            // Unknown request, close connection
+            log.warning("An unknown URL was requested: " + path);
+            responder.writeErrorMessage(ErrorMessage.EUNKNOWNURL, "unknown URL: " + path);
+            request.release();
+        }
     }
 
 
