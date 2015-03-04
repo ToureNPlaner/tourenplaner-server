@@ -197,6 +197,11 @@ public class GraphRep implements Serializable {
     protected final int[] height;
     protected final int[] rank;
 
+    protected final int[] xPos;
+    protected final int[] yPos;
+    private int boundHeight;
+    private int boundWidth;
+
     // edges
     protected final int[] src;
     protected final int[] trgt;
@@ -238,6 +243,9 @@ public class GraphRep implements Serializable {
         this.lon = new int[nodeCount];
         this.height = new int[nodeCount];
 
+        this.xPos = new int[nodeCount];
+        this.yPos = new int[nodeCount];
+
         this.rank = new int[nodeCount];
 
         this.src = new int[edgeCount];
@@ -253,165 +261,58 @@ public class GraphRep implements Serializable {
     }
 
     /**
-     * Set the NNSearcher used by this GraphRep
-     *
-     * @param searcher
-     */
-    public void setNNSearcher(NNSearcher searcher) {
-        this.searcher = searcher;
-    }
-
-    /**
-     * Sets the data fields of the node given by it's id
-     *
-     * @param id
-     * @param lat    in degrees*10^7
-     * @param lon    in degrees*10^7
-     * @param height
-     */
-    public final void setNodeData(int id, int lat, int lon, int height) {
-        this.lat[id] = lat;
-        this.lon[id] = lon;
-        this.height[id] = height;
-        this.rank[id] = Integer.MAX_VALUE;
-    }
-
-    /**
-     * Sets the rank of the node given by it's id
-     *
-     * @param id
-     * @param rank
-     */
-    public final void setNodeRank(int id, int rank) {
-        this.rank[id] = rank;
-    }
-
-    /**
-     * Gets the rank of the node given by it's id
-     *
-     * @param id
-     */
-    public final int getNodeRank(int id) {
-        return this.rank[id];
-    }
-
-    /**
-     * Set the data filed of the edge given by it's id
-     *
-     * @param index
-     * @param source
-     * @param target
-     * @param dist
-     */
-    public final void setEdgeData(int index, int source, int target, int dist, int euclidianDist) {
-        this.src[index] = source;
-        this.trgt[index] = target;
-        this.dist[index] = dist;
-        this.euclidianDist[index] = euclidianDist;
-
-        this.shortedEdge1[index] = -1;
-        this.shortedEdge1[index] = -1;
-    }
-
-    /**
-     * Sets the shortcut fields of the edge given by it's id
-     *
-     * @param id
-     * @param shortedEdge2
-     * @param shortedEdge1
-     */
-    public final void setShortcutData(int id, int shortedEdge1, int shortedEdge2) {
-        this.shortedEdge1[id] = shortedEdge1;
-        this.shortedEdge2[id] = shortedEdge2;
-    }
-
-
-    /**
-     * Sets the offsetOut array to the given array, this method
-     * is only used for low level graph loading so generateOffsets()
-     * can be avoided
-     *
-     * @param newOffsetOut
-     */
-    public final void setOffsetOut(int[] newOffsetOut) {
-        this.offsetOut = newOffsetOut;
-    }
-
-    /**
-     * Gets the offsetOut array used by this GraphRep, this method
-     * is only used for low level graph writing.
-     */
-    protected final int[] getOffsetOut() {
-        return this.offsetOut;
-    }
-
-    /**
-     * Sets the offsetIn array to the given array, this method
-     * is only used for low level graph loading so generateOffsets()
-     * can be avoided
-     *
-     * @param newOffsetIn
-     */
-    protected final void setOffsetIn(int[] newOffsetIn) {
-        this.offsetIn = newOffsetIn;
-    }
-
-    /**
-     * Gets the offsetIn array used by this GraphRep, this method
-     * is only used for low level graph writing.
-     */
-    protected final int[] getOffsetIn() {
-        return this.offsetIn;
-    }
-
-    /**
-     * Sets the mappingInToOut array to the given array, this method
-     * is only used for low level graph loading so generateOffsets()
-     * can be avoided
-     *
-     * @param newMapping
-     */
-    protected final void setMappingInToOut(int[] newMapping) {
-        this.mappingInToOut = newMapping;
-    }
-
-    /**
-     * Gets the mappingInToOut array used by this GraphRep, this method
-     * is only used for low level graph writing.
-     */
-    protected final int[] getMappingInToOut() {
-        return this.mappingInToOut;
-    }
-
-    /**
-     * Checks if the out edges are sorted by ascending rank
-     * just as chconstructor does
-     *
-     * @return
-     */
-    private boolean outEdgesSorted() {
-        boolean sorted = true;
-        for (int i = 0; i < this.src.length - 1; i++) {
-            int srcId1 = this.src[i];
-            int srcId2 = this.src[i + 1];
-            if (srcId1 > srcId2 || (srcId1 == srcId2 && this.rank[this.trgt[i + 1]] < this.rank[this.trgt[i]])) {
-                sorted = false;
-                break;
-            }
-        }
-        return sorted;
-    }
-
-
-    /**
      * Regenerates the offset arrays from the current edge arrays
      */
-    public final void generateOffsets() {
+    public final void setup() {
         checkAndSortNodesByRank();
         checkAndSortOutEdges();
         mapAndSortInEdges();
         generateOutEdgeOffsets();
         generateInEdgeOffsets();
+        computeXYCoords();
+    }
+
+    private int getXYDistance(double x1, double y1, double x2, double y2) {
+        float lon1 = (float) (x1 / 180 * Math.PI);
+        float lon2 = (float) (x2 / 180 * Math.PI);
+        float lat1 = (float) (y1 / 180 * Math.PI);
+        float lat2 = (float) (y2 / 180 * Math.PI);
+        int dist = (int) (1000 * 6378 *Math.acos(Math.sin(lat1)*Math.sin(lat2) + Math.cos(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1)));
+        return dist;
+    }
+
+    public double lon2x(double lat) {
+        return (180.0/Math.PI * Math.log(Math.tan(Math.PI/4+lat*(Math.PI/180.0)*0.5)));
+    }
+
+    private void computeXYCoords() {
+        double minX = Float.MAX_VALUE;
+        double minY = Float.MAX_VALUE;
+        double maxX = Float.MIN_VALUE;
+        double maxY = Float.MIN_VALUE;
+
+        // Find min/max
+        for (int i = 0; i < nodeCount; ++i) {
+            double x = lon2x(this.lon[i] / 10_000_000.0);
+            double y = (this.lat[i] / 10_000_000.0);
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+        }
+
+        // Compute the coordinates
+        boundWidth = getXYDistance(minX, minY, maxX, minY);
+        boundHeight = getXYDistance(minX, minY, minX, maxY);
+        for (int i = 0; i < nodeCount; ++i) {
+            double x = lon2x(this.lon[i] / 10_000_000.0);
+            double y = (this.lat[i] / 10_000_000.0);
+            int xDist = getXYDistance(x, minY, minX, minY);
+            int yDist = getXYDistance(minX, y, minX, minY);
+            this.xPos[i] = xDist;
+            this.yPos[i] = boundHeight - yDist;
+        }
+
     }
 
     private void generateInEdgeOffsets() {
@@ -547,6 +448,26 @@ public class GraphRep implements Serializable {
             log.log(Level.INFO, "out edges sorted: " + sorted);
         }
     }
+
+    /**
+     * Checks if the out edges are sorted by ascending rank
+     * just as chconstructor does
+     *
+     * @return
+     */
+    private boolean outEdgesSorted() {
+        boolean sorted = true;
+        for (int i = 0; i < this.src.length - 1; i++) {
+            int srcId1 = this.src[i];
+            int srcId2 = this.src[i + 1];
+            if (srcId1 > srcId2 || (srcId1 == srcId2 && this.rank[this.trgt[i + 1]] < this.rank[this.trgt[i]])) {
+                sorted = false;
+                break;
+            }
+        }
+        return sorted;
+    }
+
 
     /**
      * Gets the distance in the shortest path format that is multiplied for
@@ -705,6 +626,28 @@ public class GraphRep implements Serializable {
      */
     public final int getRank(int nodeId) {
         return rank[nodeId];
+
+
+    }
+
+    /**
+     * Get the projected x position
+     *
+     * @param nodeId
+     * @return
+     */
+    public final int getXPos(int nodeId) {
+        return xPos[nodeId];
+    }
+
+    /**
+     * Get the projected y position
+     *
+     * @param nodeId
+     * @return
+     */
+    public final int getYPos(int nodeId) {
+        return yPos[nodeId];
     }
 
     /**
@@ -730,5 +673,137 @@ public class GraphRep implements Serializable {
     public final int getTarget(int edgeId) {
         return trgt[edgeId];
     }
+
+    /**
+     * Set the NNSearcher used by this GraphRep
+     *
+     * @param searcher
+     */
+    public void setNNSearcher(NNSearcher searcher) {
+        this.searcher = searcher;
+    }
+
+    /**
+     * Sets the data fields of the node given by it's id
+     *
+     * @param id
+     * @param lat    in degrees*10^7
+     * @param lon    in degrees*10^7
+     * @param height
+     */
+    public final void setNodeData(int id, int lat, int lon, int height) {
+        this.lat[id] = lat;
+        this.lon[id] = lon;
+        this.height[id] = height;
+        this.rank[id] = Integer.MAX_VALUE;
+    }
+
+    /**
+     * Sets the rank of the node given by it's id
+     *
+     * @param id
+     * @param rank
+     */
+    public final void setNodeRank(int id, int rank) {
+        this.rank[id] = rank;
+    }
+
+    /**
+     * Gets the rank of the node given by it's id
+     *
+     * @param id
+     */
+    public final int getNodeRank(int id) {
+        return this.rank[id];
+    }
+
+    /**
+     * Set the data filed of the edge given by it's id
+     *
+     * @param index
+     * @param source
+     * @param target
+     * @param dist
+     */
+    public final void setEdgeData(int index, int source, int target, int dist, int euclidianDist) {
+        this.src[index] = source;
+        this.trgt[index] = target;
+        this.dist[index] = dist;
+        this.euclidianDist[index] = euclidianDist;
+
+        this.shortedEdge1[index] = -1;
+        this.shortedEdge1[index] = -1;
+    }
+
+    /**
+     * Sets the shortcut fields of the edge given by it's id
+     *
+     * @param id
+     * @param shortedEdge2
+     * @param shortedEdge1
+     */
+    public final void setShortcutData(int id, int shortedEdge1, int shortedEdge2) {
+        this.shortedEdge1[id] = shortedEdge1;
+        this.shortedEdge2[id] = shortedEdge2;
+    }
+
+
+    /**
+     * Sets the offsetOut array to the given array, this method
+     * is only used for low level graph loading so setup()
+     * can be avoided
+     *
+     * @param newOffsetOut
+     */
+    public final void setOffsetOut(int[] newOffsetOut) {
+        this.offsetOut = newOffsetOut;
+    }
+
+    /**
+     * Gets the offsetOut array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getOffsetOut() {
+        return this.offsetOut;
+    }
+
+    /**
+     * Sets the offsetIn array to the given array, this method
+     * is only used for low level graph loading so setup()
+     * can be avoided
+     *
+     * @param newOffsetIn
+     */
+    protected final void setOffsetIn(int[] newOffsetIn) {
+        this.offsetIn = newOffsetIn;
+    }
+
+    /**
+     * Gets the offsetIn array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getOffsetIn() {
+        return this.offsetIn;
+    }
+
+    /**
+     * Sets the mappingInToOut array to the given array, this method
+     * is only used for low level graph loading so setup()
+     * can be avoided
+     *
+     * @param newMapping
+     */
+    protected final void setMappingInToOut(int[] newMapping) {
+        this.mappingInToOut = newMapping;
+    }
+
+    /**
+     * Gets the mappingInToOut array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getMappingInToOut() {
+        return this.mappingInToOut;
+    }
+
 
 }

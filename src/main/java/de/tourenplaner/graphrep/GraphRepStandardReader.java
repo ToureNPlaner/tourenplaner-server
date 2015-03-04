@@ -83,9 +83,9 @@ public class GraphRepStandardReader implements GraphRepReader{
 			}
 			r.close();
 
-			log.info("Start generating offsets");
-			graphRep.generateOffsets();
-			log.info("successfully created offset of InEdges");
+			log.info("Setting up graph");
+			graphRep.setup();
+			log.info("graph setup");
 			return graphRep;
 		} catch (GraphException ex) {
 			throw new IOException(ex);

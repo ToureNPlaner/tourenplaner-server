@@ -97,7 +97,7 @@ public class GraphRepTextReader implements GraphRepReader {
         }
         in.close();
         log.info("Start generating offsets");
-        graphRep.generateOffsets();
+        graphRep.setup();
         log.info("successfully created offset of InEdges");
 
         return graphRep;
