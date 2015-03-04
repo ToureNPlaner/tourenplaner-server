@@ -33,11 +33,56 @@ public class GraphRep implements Serializable {
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
 
     /**
+     * This class is used internally to sort the Nodes by rank, which is needed
+     * so that the CORE Nodes have ids [0, 1, 2, .., k]
+     */
+    private static final class NodeSortAdapter extends SortAdapter {
+        private final GraphRep graph;
+        private final int[] order;
+
+        public NodeSortAdapter(GraphRep graph, int[] order) {
+            this.graph = graph;
+            this.order = order;
+        }
+
+        @Override
+        public void swap(int i, int j) {
+            int tmpLat = graph.lat[i];
+            int tmpLon = graph.lon[i];
+            int tmpRank = graph.rank[i];
+            int tmpHeight = graph.height[i];
+            int tmpOrder = order[i];
+
+            graph.lat[i] = graph.lat[j];
+            graph.lon[i] = graph.lon[j];
+            graph.rank[i] = graph.rank[j];
+            graph.height[i] = graph.height[j];
+            order[i] = order[j];
+
+            graph.lat[j] = tmpLat;
+            graph.lon[j] = tmpLon;
+            graph.rank[j] = tmpRank;
+            graph.height[j] = tmpHeight;
+            order[j] = tmpOrder;
+        }
+
+        @Override
+        public boolean less(int i, int j) {
+            return graph.rank[i] > graph.rank[j];
+        }
+
+        @Override
+        public int length() {
+            return graph.lat.length;
+        }
+    }
+
+    /**
      * This class is used internally to sort the in edge arrays
      * it's a heap sort implementation using a ternary heap.
      */
-    private static class MappingSortAdapter extends SortAdapter {
-        private GraphRep graph;
+    private static final class MappingSortAdapter extends SortAdapter {
+        private final GraphRep graph;
 
         public MappingSortAdapter(GraphRep graph) {
             this.graph = graph;
@@ -75,13 +120,15 @@ public class GraphRep implements Serializable {
      * in ascending rank order
      * it's a heap sort implementation using a ternary heap.
      */
-    private static class OutEdgeSortAdapter extends SortAdapter {
-        private GraphRep graph;
-        private int[] order;
+    private static final class OutEdgeSortAdapter extends SortAdapter {
+        private final GraphRep graph;
+        private final int[] order;
+
         /**
          * Sorts the graphs out edges storing their new id in the order array
          * which needs to have edgeNum size and needs to be initialized
          * wit 0,1,2..,edgeNum-1
+         *
          * @param graph
          * @param order
          */
@@ -207,6 +254,7 @@ public class GraphRep implements Serializable {
 
     /**
      * Set the NNSearcher used by this GraphRep
+     *
      * @param searcher
      */
     public void setNNSearcher(NNSearcher searcher) {
@@ -338,14 +386,15 @@ public class GraphRep implements Serializable {
     /**
      * Checks if the out edges are sorted by ascending rank
      * just as chconstructor does
+     *
      * @return
      */
-    private boolean outEdgesSorted(){
+    private boolean outEdgesSorted() {
         boolean sorted = true;
         for (int i = 0; i < this.src.length - 1; i++) {
             int srcId1 = this.src[i];
             int srcId2 = this.src[i + 1];
-            if (srcId1 == srcId2 && this.rank[this.trgt[i + 1]] < this.rank[this.trgt[i]]) {
+            if (srcId1 > srcId2 || (srcId1 == srcId2 && this.rank[this.trgt[i + 1]] < this.rank[this.trgt[i]])) {
                 sorted = false;
                 break;
             }
@@ -353,55 +402,52 @@ public class GraphRep implements Serializable {
         return sorted;
     }
 
+
     /**
      * Regenerates the offset arrays from the current edge arrays
      */
     public final void generateOffsets() {
-        this.mappingInToOut = new int[edgeCount];
-        this.offsetOut = new int[nodeCount + 1];
+        checkAndSortNodesByRank();
+        checkAndSortOutEdges();
+        mapAndSortInEdges();
+        generateOutEdgeOffsets();
+        generateInEdgeOffsets();
+    }
+
+    private void generateInEdgeOffsets() {
+        int currentDest;
+        int prevDest = -1;
         this.offsetIn = new int[nodeCount + 1];
-
-        // Check if out edges are correctly sorted and
-        // resort if not, the ChConstructor should
-        // produce already sorted graphs so we check it first
-        boolean sorted = outEdgesSorted();
-        if (!sorted){
-            // TODO: Find less memory hungry method to map shorted edges to new ids
-            int[] order = new int[edgeCount];
-            int[] newIds = new int[edgeCount];
-            log.log(Level.INFO, "Out edges are not sorted, resort");
-            for (int i = 0; i < edgeCount; i++)
-                order[i] = i;
-            Sorter.sort(new OutEdgeSortAdapter(this, order));
-
-            for (int i = 0; i < edgeCount; i++){
-                newIds[order[i]] = i;
-            }
-
-            // Fixup shorted edges
-            for (int i = 0; i < edgeCount; i++){
-                int oldId1 = this.shortedEdge1[i];
-                int oldId2 = this.shortedEdge2[i];
-                if (oldId1 >= 0){
-                    this.shortedEdge1[i] = newIds[oldId1];
+        for (int i = 0; i < edgeCount; i++) {
+            currentDest = trgt[mappingInToOut[i]];
+            if (currentDest != prevDest) {
+                for (int j = currentDest; j > prevDest; j--) {
+                    offsetIn[j] = i;
                 }
-                if (oldId2 >= 0){
-                    this.shortedEdge2[i] = newIds[oldId2];
-                }
+                prevDest = currentDest;
             }
-            // check if it's true
-            sorted = outEdgesSorted();
-            log.log(Level.INFO, "out edges sorted: "+sorted);
         }
 
+        offsetIn[nodeCount] = edgeCount;
+        // assuming we have at least one edge
+        for (int cnt = nodeCount - 1; offsetIn[cnt] == 0; cnt--) {
+            offsetIn[cnt] = offsetIn[cnt + 1];
+        }
+    }
 
-        // Set mapping to inital values (0,1,2,3..)
+    private void mapAndSortInEdges() {
+        this.mappingInToOut = new int[edgeCount];
+        // Set mapping to initial values (0,1,2,3..)
         for (int i = 0; i < edgeCount; i++) {
             this.mappingInToOut[i] = i;
         }
+        Sorter.sort(new MappingSortAdapter(this));
+    }
 
+    private void generateOutEdgeOffsets() {
         int currentSource;
         int prevSource = -1;
+        this.offsetOut = new int[nodeCount + 1];
         for (int i = 0; i < edgeCount; i++) {
             currentSource = src[i];
             if (currentSource != prevSource) {
@@ -417,25 +463,88 @@ public class GraphRep implements Serializable {
         for (int cnt = nodeCount - 1; offsetOut[cnt] == 0; cnt--) {
             offsetOut[cnt] = offsetOut[cnt + 1];
         }
+    }
 
-        Sorter.sort(new MappingSortAdapter(this));
-
-        int currentDest;
-        int prevDest = -1;
-        for (int i = 0; i < edgeCount; i++) {
-            currentDest = trgt[mappingInToOut[i]];
-            if (currentDest != prevDest) {
-                for (int j = currentDest; j > prevDest; j--) {
-                    offsetIn[j] = i;
-                }
-                prevDest = currentDest;
+    /**
+     * Nodes must be ordered by rank descending, this function checks just that
+     *
+     * @return
+     */
+    private boolean nodesSorted() {
+        boolean sorted = true;
+        for (int i = 0; i < nodeCount-1; ++i) {
+            if (rank[i] < rank[i+1]) {
+                sorted = false;
+                break;
             }
         }
+        return sorted;
+    }
 
-        offsetIn[nodeCount] = edgeCount;
-        // assuming we have at least one edge
-        for (int cnt = nodeCount - 1; offsetIn[cnt] == 0; cnt--) {
-            offsetIn[cnt] = offsetIn[cnt + 1];
+    /**
+     * Sort Nodes by their rank, this is needed so that the CORE has  node ids [0,1,..,k]
+     */
+    private void checkAndSortNodesByRank() {
+        boolean sorted = nodesSorted();
+        if (!sorted) {
+            // TODO: Find less memory hungry method to map shorted edges to new ids
+            int[] order = new int[nodeCount];
+            log.log(Level.INFO, "Nodes are not sorted, resort");
+            for (int i = 0; i < nodeCount; i++) {
+                order[i] = i;
+            }
+            Sorter.sort(new NodeSortAdapter(this, order));
+
+            int[] newIds = new int[nodeCount];
+            for (int i = 0; i < newIds.length; i++) {
+                newIds[order[i]] = i;
+            }
+
+            // Fixup edges
+            for (int i = 0; i < edgeCount; i++) {
+                this.src[i] = newIds[src[i]];
+                this.trgt[i] = newIds[trgt[i]];
+            }
+
+            // check if it's true
+            sorted = nodesSorted();
+            log.log(Level.INFO, "nodes sorted: " + sorted);
+        }
+    }
+
+    private void checkAndSortOutEdges() {
+        // Check if out edges are correctly sorted and
+        // resort if not, the ChConstructor should
+        // produce already sorted graphs so we check it first
+        boolean sorted = outEdgesSorted();
+        if (!sorted) {
+            // TODO: Find less memory hungry method to map shorted edges to new ids
+            int[] order = new int[edgeCount];
+            log.log(Level.INFO, "Out edges are not sorted, resort");
+            for (int i = 0; i < edgeCount; i++) {
+                order[i] = i;
+            }
+            Sorter.sort(new OutEdgeSortAdapter(this, order));
+
+            int[] newIds = new int[edgeCount];
+            for (int i = 0; i < newIds.length; i++) {
+                newIds[order[i]] = i;
+            }
+
+            // Fixup shorted edges
+            for (int i = 0; i < edgeCount; i++) {
+                int oldId1 = this.shortedEdge1[i];
+                int oldId2 = this.shortedEdge2[i];
+                if (oldId1 >= 0) {
+                    this.shortedEdge1[i] = newIds[oldId1];
+                }
+                if (oldId2 >= 0) {
+                    this.shortedEdge2[i] = newIds[oldId2];
+                }
+            }
+            // check if it's true
+            sorted = outEdgesSorted();
+            log.log(Level.INFO, "out edges sorted: " + sorted);
         }
     }
 
@@ -621,5 +730,5 @@ public class GraphRep implements Serializable {
     public final int getTarget(int edgeId) {
         return trgt[edgeId];
     }
-    
+
 }
