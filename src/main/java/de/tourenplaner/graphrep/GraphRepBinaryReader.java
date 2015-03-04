@@ -84,7 +84,7 @@ public class GraphRepBinaryReader implements GraphRepReader {
             height = tempib.get();
             rank = tempib.get();
             graphRep.setNodeData(i, lat, lon, height);
-            graphRep.setNodeRank(i, rank);
+            graphRep.setRank(i, rank);
         }
 
 

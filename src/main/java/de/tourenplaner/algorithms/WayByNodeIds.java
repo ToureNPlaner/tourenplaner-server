@@ -39,8 +39,8 @@ public class WayByNodeIds extends GraphAlgorithm {
             // Add first and last node as points
             int firstNode = graph.getSource(edges.getFirst());
             int lastNode = graph.getTarget(edges.getLast());
-            points.addPoint(graph.getNodeLat(firstNode), graph.getNodeLon(firstNode));
-            points.addPoint(graph.getNodeLat(lastNode), graph.getNodeLon(lastNode));
+            points.addPoint(graph.getLat(firstNode), graph.getLon(firstNode));
+            points.addPoint(graph.getLat(lastNode), graph.getLon(lastNode));
             while (!edges.isEmpty()) {
                 // Get the top edge and check if it's a shortcut that needs
                 // further
@@ -55,16 +55,16 @@ public class WayByNodeIds extends GraphAlgorithm {
                 } else {
                     // No shortcut remember it
                     currNode = graph.getSource(edgeId);
-                    nodeLat = graph.getNodeLat(currNode);
-                    nodeLon = graph.getNodeLon(currNode);
+                    nodeLat = graph.getLat(currNode);
+                    nodeLon = graph.getLon(currNode);
                     resultWay.addPoint(nodeLat, nodeLon);
                     length += graph.getEuclidianDist(edgeId);
                     distance += graph.getDist(edgeId);
                 }
             }
             // Add destination node
-            nodeLat = graph.getNodeLat(lastNode);
-            nodeLon = graph.getNodeLon(lastNode);
+            nodeLat = graph.getLat(lastNode);
+            nodeLon = graph.getLon(lastNode);
             resultWay.addPoint(nodeLat, nodeLon);
 
             resultWay.setDistance(length);

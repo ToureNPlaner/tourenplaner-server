@@ -49,9 +49,9 @@ public class GraphRepBinaryWriter implements GraphRepWriter {
 
         // Write nodes
         for (int i = 0; i < numNodes; i++) {
-            dout.writeInt(graphRep.getNodeLat(i));
-            dout.writeInt(graphRep.getNodeLon(i));
-            dout.writeInt(graphRep.getNodeHeight(i));
+            dout.writeInt(graphRep.getLat(i));
+            dout.writeInt(graphRep.getLon(i));
+            dout.writeInt(graphRep.getHeight(i));
             dout.writeInt(graphRep.getRank(i));
         }
 

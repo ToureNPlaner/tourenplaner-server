@@ -71,7 +71,7 @@ public class GraphRepStandardReader implements GraphRepReader{
 				lat = (int) (n.getLat()*1e7);
 				lon = (int) (n.getLon()*1e7);
 				graphRep.setNodeData(n.getId(), lat, lon, n.getElevation());
-				graphRep.setNodeRank(n.getId(), n.getLevel());
+				graphRep.setRank(n.getId(), n.getLevel());
 			}
 
 			edge = 0;

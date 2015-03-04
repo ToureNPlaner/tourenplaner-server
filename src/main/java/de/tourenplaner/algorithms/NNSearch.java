@@ -61,8 +61,8 @@ public class NNSearch extends GraphAlgorithm {
 		for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
 			nodeID = graph.getIdForCoordinates(points.getPointLat(pointIndex),
 					points.getPointLon(pointIndex));
-			points.setPointLat(pointIndex, graph.getNodeLat(nodeID));
-			points.setPointLon(pointIndex, graph.getNodeLon(nodeID));
+			points.setPointLat(pointIndex, graph.getLat(nodeID));
+			points.setPointLon(pointIndex, graph.getLon(nodeID));
 		}
 	}
 

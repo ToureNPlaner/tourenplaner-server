@@ -40,8 +40,8 @@ public class HashNN implements NNSearcher {
 		dumpNN = new DumbNN(graphRep);
 		hashMap = new LongObjectOpenHashMap<Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
-			long tempLat = graphRep.getNodeLat(i) / 1000;
-			long tempLon = graphRep.getNodeLon(i) / 1000;
+			long tempLat = graphRep.getLat(i) / 1000;
+			long tempLon = graphRep.getLon(i) / 1000;
 
 			long key = (tempLat << 32) | tempLon;
 			IntArrayList tempValues = (IntArrayList) hashMap.get(key);
@@ -146,9 +146,9 @@ public class HashNN implements NNSearcher {
 			 * key = keyLat + j << 32 | keyLon + k; if
 			 * (hashMap.containsKey(key)) { int[] ringArr = (int[])
 			 * hashMap.get(key); for (int nodeID : ringArr) { tempDist =
-			 * (graphRep.getNodeLat(nodeID) - lat) (graphRep.getNodeLat(nodeID)
-			 * - lat) + (graphRep.getNodeLon(nodeID) - lon)
-			 * (graphRep.getNodeLon(nodeID) - lon); if (tempDist < dist) { dist
+			 * (graphRep.getLat(nodeID) - lat) (graphRep.getLat(nodeID)
+			 * - lat) + (graphRep.getLon(nodeID) - lon)
+			 * (graphRep.getLon(nodeID) - lon); if (tempDist < dist) { dist
 			 * = tempDist; pos = nodeID; }
 			 * 
 			 * } found = true; } } }
@@ -169,9 +169,9 @@ public class HashNN implements NNSearcher {
 	}
 
 	private final long sqDistToCoords(int nodeID, int lat, int lon) {
-		return ((long) (graphRep.getNodeLat(nodeID) - lat))
-				* ((long) (graphRep.getNodeLat(nodeID) - lat))
-				+ ((long) (graphRep.getNodeLon(nodeID) - lon))
-				* ((long) (graphRep.getNodeLon(nodeID) - lon));
+		return ((long) (graphRep.getLat(nodeID) - lat))
+				* ((long) (graphRep.getLat(nodeID) - lat))
+				+ ((long) (graphRep.getLon(nodeID) - lon))
+				* ((long) (graphRep.getLon(nodeID) - lon));
 	}
 }

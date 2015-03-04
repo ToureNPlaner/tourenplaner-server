@@ -288,15 +288,15 @@ public class ShortestPathCH extends ShortestPath {
             } else {
                 // No shortcut remember it
                 currNode = graph.getSource(edgeId);
-                nodeLat = graph.getNodeLat(currNode);
-                nodeLon = graph.getNodeLon(currNode);
+                nodeLat = graph.getLat(currNode);
+                nodeLon = graph.getLon(currNode);
                 resultWay.addPoint(nodeLat, nodeLon);
                 length += graph.getEuclidianDist(edgeId);
             }
         }
         // Add destination node
-        nodeLat = graph.getNodeLat(destId);
-        nodeLon = graph.getNodeLon(destId);
+        nodeLat = graph.getLat(destId);
+        nodeLon = graph.getLon(destId);
         resultWay.addPoint(nodeLat, nodeLon);
 
         resultWay.setDistance(length);
@@ -346,7 +346,7 @@ public class ShortestPathCH extends ShortestPath {
             int[] prevEdges = ds.borrowPrevArray();
             BitSet markedEdges = ds.borrowMarkedSet();
 
-            directDistance += calcDirectDistance(graph.getNodeLat(srcId) / 10000000.0, (double) graph.getNodeLon(srcId) / 10000000, (double) graph.getNodeLat(destId) / 10000000, (double) graph.getNodeLon(destId) / 10000000);
+            directDistance += calcDirectDistance(graph.getLat(srcId) / 10000000.0, (double) graph.getLon(srcId) / 10000000, (double) graph.getLat(destId) / 10000000, (double) graph.getLon(destId) / 10000000);
 
             // Do our BFS marking at the destination
             bfsMark(markedEdges, destId);

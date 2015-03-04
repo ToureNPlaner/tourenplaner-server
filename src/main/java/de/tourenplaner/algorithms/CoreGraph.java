@@ -39,12 +39,12 @@ public class CoreGraph extends GraphAlgorithm{
 			int src = graph.getSource(edgeId);
 			// Optimization we only need to look at the target if source is high so pull it into if
 			// int trgt = graph.getTarget(edgeId);
-			if(graph.getNodeRank(src) >= coreLevel && graph.getNodeRank(graph.getTarget(edgeId)) >= coreLevel){
+			if(graph.getRank(src) >= coreLevel && graph.getRank(graph.getTarget(edgeId)) >= coreLevel){
 				boolean outputEdge = true;
 				// Skip shortcuts where the shortcutted node is high their respective skip edges get added already
 				int firstSkipped = graph.getFirstShortcuttedEdge(edgeId);
 				if(firstSkipped >= 0){
-					if(graph.getNodeRank(graph.getTarget(firstSkipped)) >= coreLevel){
+					if(graph.getRank(graph.getTarget(firstSkipped)) >= coreLevel){
 						outputEdge = false;
 					}
 				}

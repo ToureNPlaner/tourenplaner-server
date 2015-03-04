@@ -215,13 +215,13 @@ public class ConstrainedSP extends GraphAlgorithm {
             distance += graph.getEuclidianDist(prevEdge);
             multdistance += graph.getDist(prevEdge);
             routeElements--;
-            resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
-            resultWay.setPointLon(routeElements, graph.getNodeLon(currNode));
+            resultWay.setPointLat(routeElements, graph.getLat(currNode));
+            resultWay.setPointLon(routeElements, graph.getLon(currNode));
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
-        resultWay.setPointLat(0, graph.getNodeLat(currNode));
-        resultWay.setPointLon(0, graph.getNodeLon(currNode));
+        resultWay.setPointLat(0, graph.getLat(currNode));
+        resultWay.setPointLon(0, graph.getLon(currNode));
         resultWay.setTravelTime(multdistance * graph.travelTimeConstant);
         resultWay.setDistance(distance);
         return;
@@ -280,8 +280,8 @@ public class ConstrainedSP extends GraphAlgorithm {
                 }
 
                 targetNode = graph.getTarget(edgeId);
-                srcHeight = graph.getNodeHeight(nodeId);
-                trgtHeight = graph.getNodeHeight(targetNode);
+                srcHeight = graph.getHeight(nodeId);
+                trgtHeight = graph.getHeight(targetNode);
                 tempAltitudeDiff = trgtHeight - srcHeight;
                 // if only positive altitude differences of edges are allowed,
                 // negative edges have only euclidian distance.
@@ -329,8 +329,8 @@ public class ConstrainedSP extends GraphAlgorithm {
         while (routeElements > 0) {
             prevNode = graph.getSource(prevEdges[currNode]);
             routeElements--;
-            currNodeHeight = graph.getNodeHeight(currNode);
-            prevNodeHeight = graph.getNodeHeight(prevNode);
+            currNodeHeight = graph.getHeight(currNode);
+            prevNodeHeight = graph.getHeight(prevNode);
             tempAltitudeDiff = currNodeHeight - prevNodeHeight;
             if (tempAltitudeDiff > 0) {
                 altitudeDiff += tempAltitudeDiff;

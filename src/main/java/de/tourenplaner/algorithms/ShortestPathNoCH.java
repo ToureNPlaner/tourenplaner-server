@@ -82,10 +82,10 @@ public class ShortestPathNoCH extends ShortestPath {
             int[] prevEdges = ds.borrowPrevArray();
 
             directDistance += calcDirectDistance(
-                    graph.getNodeLat(srcId) / 10000000.0,
-                    (double) graph.getNodeLon(srcId) / 10000000,
-                    (double) graph.getNodeLat(trgtId) / 10000000,
-                    (double) graph.getNodeLon(trgtId) / 10000000
+                    graph.getLat(srcId) / 10000000.0,
+                    (double) graph.getLon(srcId) / 10000000,
+                    (double) graph.getLat(trgtId) / 10000000,
+                    (double) graph.getLon(trgtId) / 10000000
             );
 
 
@@ -218,14 +218,14 @@ public class ShortestPathNoCH extends ShortestPath {
             length += graph.getEuclidianDist(prevEdge);
             routeElements--;
 
-            resultWay.setPointLat(routeElements, graph.getNodeLat(currNode));
-            resultWay.setPointLon(routeElements, graph.getNodeLon(currNode));
+            resultWay.setPointLat(routeElements, graph.getLat(currNode));
+            resultWay.setPointLon(routeElements, graph.getLon(currNode));
 
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
-        resultWay.setPointLat(0, graph.getNodeLat(currNode));
-        resultWay.setPointLon(0, graph.getNodeLon(currNode));
+        resultWay.setPointLat(0, graph.getLat(currNode));
+        resultWay.setPointLon(0, graph.getLon(currNode));
         resultWay.setDistance(length);
         return;
     }

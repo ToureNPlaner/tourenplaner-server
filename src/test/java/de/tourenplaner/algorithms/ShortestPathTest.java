@@ -45,7 +45,7 @@ public class ShortestPathTest {
         RequestPoints points = new RequestPoints();
         for (int i = 0; i < numPoints; i++) {
             int randomId = random.nextInt(nodeCount);
-            points.addPoint(graph.getNodeLat(randomId), graph.getNodeLon(randomId));
+            points.addPoint(graph.getLat(randomId), graph.getLon(randomId));
         }
 
         // TODO if we do not add here constraints hash map, the test fails. Maybe bad behavior of ShortestPath

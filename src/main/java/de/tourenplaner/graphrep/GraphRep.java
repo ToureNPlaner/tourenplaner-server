@@ -571,7 +571,7 @@ public class GraphRep implements Serializable {
      * @param nodeId
      * @return float
      */
-    public final int getNodeHeight(int nodeId) {
+    public final int getHeight(int nodeId) {
         return height[nodeId];
     }
 
@@ -581,7 +581,7 @@ public class GraphRep implements Serializable {
      * @param nodeId
      * @return int (degrees*10^7)
      */
-    public final int getNodeLat(int nodeId) {
+    public final int getLat(int nodeId) {
         return lat[nodeId];
     }
 
@@ -591,7 +591,7 @@ public class GraphRep implements Serializable {
      * @param nodeId
      * @return int (degrees*10^7)
      */
-    public final int getNodeLon(int nodeId) {
+    public final int getLon(int nodeId) {
         return lon[nodeId];
     }
 
@@ -617,18 +617,6 @@ public class GraphRep implements Serializable {
         return offsetOut[nodeId] + edgeNum;
     }
 
-    /**
-     * Gets the CH rank in the graph, can be MAX_INT if the node hasn't been
-     * contracted at all CH property is getRank(nodeA)<=getRank(nodeB)
-     *
-     * @param nodeId
-     * @return
-     */
-    public final int getRank(int nodeId) {
-        return rank[nodeId];
-
-
-    }
 
     /**
      * Get the projected x position
@@ -704,17 +692,22 @@ public class GraphRep implements Serializable {
      * @param id
      * @param rank
      */
-    public final void setNodeRank(int id, int rank) {
+    public final void setRank(int id, int rank) {
         this.rank[id] = rank;
     }
 
+
     /**
-     * Gets the rank of the node given by it's id
+     * Gets the CH rank in the graph, can be MAX_INT if the node hasn't been
+     * contracted at all CH property is getRank(nodeA)<=getRank(nodeB)
      *
-     * @param id
+     * @param nodeId
+     * @return
      */
-    public final int getNodeRank(int id) {
-        return this.rank[id];
+    public final int getRank(int nodeId) {
+        return rank[nodeId];
+
+
     }
 
     /**

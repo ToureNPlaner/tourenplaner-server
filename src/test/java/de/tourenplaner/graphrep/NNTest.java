@@ -43,7 +43,7 @@ public abstract class NNTest {
 
 
     protected final long sqDistToCoords(int nodeID, int lat, int lon) {
-        return ((long) (graph.getNodeLat(nodeID) - lat)) * ((long) (graph.getNodeLat(nodeID) - lat)) + ((long) (graph.getNodeLon(nodeID) - lon)) * ((long) (graph.getNodeLon(nodeID) - lon));
+        return ((long) (graph.getLat(nodeID) - lat)) * ((long) (graph.getLat(nodeID) - lat)) + ((long) (graph.getLon(nodeID) - lon)) * ((long) (graph.getLon(nodeID) - lon));
     }
 
 
@@ -69,7 +69,7 @@ public abstract class NNTest {
         int curr;
         // First search for min/max Lat then for min/max Lon
         for (int i = 0; i < nodeCount; i++){
-            curr = graph.getNodeLat(i);
+            curr = graph.getLat(i);
             if(curr < minLat)
                 minLat = curr;
             if(curr > maxLat)
@@ -77,7 +77,7 @@ public abstract class NNTest {
         }
 
         for (int i = 0; i < nodeCount; i++) {
-            curr = graph.getNodeLat(i);
+            curr = graph.getLat(i);
             if (curr < minLon)
                 minLon = curr;
             if (curr > maxLon)
