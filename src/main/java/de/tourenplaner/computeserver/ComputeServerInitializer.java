@@ -55,6 +55,7 @@ public class ComputeServerInitializer extends ChannelInitializer<SocketChannel> 
 				.withAnyOrigin()
 				.allowNullOrigin()
 				.allowedRequestMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS)
+				.allowedRequestHeaders("Content-Type")
 				.preflightResponseHeader(Names.CONTENT_TYPE, "application/json")
 				.build();
 		ChannelPipeline pipeline = ch.pipeline();

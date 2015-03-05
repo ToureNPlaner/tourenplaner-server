@@ -32,6 +32,7 @@ public class GraphRep implements Serializable {
     private static final long serialVersionUID = 15L;
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
 
+
     /**
      * This class is used internally to sort the Nodes by rank, which is needed
      * so that the CORE Nodes have ids [0, 1, 2, .., k]
@@ -199,6 +200,7 @@ public class GraphRep implements Serializable {
 
     protected final int[] xPos;
     protected final int[] yPos;
+    private int maxRank;
     private int boundHeight;
     private int boundWidth;
 
@@ -290,6 +292,7 @@ public class GraphRep implements Serializable {
         double minY = Float.MAX_VALUE;
         double maxX = Float.MIN_VALUE;
         double maxY = Float.MIN_VALUE;
+        int tmpRank = 0;
 
         // Find min/max
         for (int i = 0; i < nodeCount; ++i) {
@@ -299,11 +302,14 @@ public class GraphRep implements Serializable {
             minY = Math.min(minY, y);
             maxX = Math.max(maxX, x);
             maxY = Math.max(maxY, y);
+            maxRank = Math.max(maxRank, tmpRank);
         }
 
         // Compute the coordinates
         boundWidth = getXYDistance(minX, minY, maxX, minY);
         boundHeight = getXYDistance(minX, minY, minX, maxY);
+        log.log(Level.INFO, "Bounding box: "+minX+", "+minY+ " - "+boundWidth+", "+boundHeight);
+
         for (int i = 0; i < nodeCount; ++i) {
             double x = lon2x(this.lon[i] / 10_000_000.0);
             double y = (this.lat[i] / 10_000_000.0);
@@ -468,6 +474,13 @@ public class GraphRep implements Serializable {
         return sorted;
     }
 
+    /**
+     * Get the maximum rank value in the graph
+     * @return
+     */
+    public int getMaxRank() {
+        return maxRank;
+    }
 
     /**
      * Gets the distance in the shortest path format that is multiplied for
