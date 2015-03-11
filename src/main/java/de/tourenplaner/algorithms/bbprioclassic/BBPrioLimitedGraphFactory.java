@@ -16,6 +16,11 @@
 
 package de.tourenplaner.algorithms.bbprioclassic;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.computecore.RequestData;
@@ -27,11 +32,6 @@ import de.tourenplaner.graphrep.PrioDings;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 import java.io.IOException;
 import java.util.List;
@@ -160,7 +160,7 @@ public class BBPrioLimitedGraphFactory extends GraphAlgorithmFactory {
 		final ByteBuf content = request.content();
 		if (content.readableBytes() > 0) {
 
-			final JsonParser jp = mapper.getJsonFactory().createJsonParser(new ByteBufInputStream(content));
+			final JsonParser jp = mapper.getFactory().createParser(new ByteBufInputStream(content));
 			jp.setCodec(mapper);
 
 			if (jp.nextToken() != JsonToken.START_OBJECT) {

@@ -1,7 +1,7 @@
 package de.tourenplaner.computecore;
 
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -65,15 +65,15 @@ public class WayResult implements StreamJsonWriter {
      *
      * @param mapper Jackson ObjectMapper
      * @param stream OutputStream
-     * @throws org.codehaus.jackson.JsonGenerationException
+     * @throws com.fasterxml.jackson.core.JsonGenerationException
      *                             Thrown if generating json fails
-     * @throws org.codehaus.jackson.JsonProcessingException
+     * @throws com.fasterxml.jackson.core.JsonProcessingException
      *                             Thrown if json generation processing fails
      * @throws java.io.IOException Thrown if writing json onto the stream fails
      */
     public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
 
-        JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
+        JsonGenerator gen = mapper.getFactory().createGenerator(stream);
         Map<String, Object> pconsts;
 
         gen.setCodec(mapper);

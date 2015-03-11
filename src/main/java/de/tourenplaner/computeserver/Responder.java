@@ -16,6 +16,11 @@
 
 package de.tourenplaner.computeserver;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import de.tourenplaner.computecore.ComputeRequest;
 import io.netty.buffer.ByteBufOutputStream;
 import io.netty.channel.Channel;
@@ -26,12 +31,6 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders.Names;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.SerializationConfig;
-import org.codehaus.jackson.smile.SmileFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -61,7 +60,8 @@ public class Responder {
         // http://wiki.fasterxml.com/JacksonFeaturePropertyNamingStrategy
         mapper.setPropertyNamingStrategy(new JSONLowerCaseStrategy());
         // Makes jackson use: ISO-8601
-        mapper.configure(SerializationConfig.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
+        // TODO still needed?
+        //mapper.configure(JsonGenerator.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
         
         // The mapper used for smile
         smileMapper = new ObjectMapper(new SmileFactory());
@@ -252,7 +252,7 @@ public class Responder {
 	    FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, errorMessage.status);
 
         OutputStream resultStream = new ByteBufOutputStream(response.content());
-        JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(resultStream);
+        JsonGenerator gen = mapper.getFactory().createGenerator(resultStream);
         gen.writeStartObject();
         gen.writeStringField("errorid", errorMessage.errorId);
         gen.writeStringField("message", errorMessage.message);

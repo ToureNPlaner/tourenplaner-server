@@ -1,5 +1,9 @@
 package de.tourenplaner.algorithms.coregraph;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.DijkstraStructs;
 import de.tourenplaner.algorithms.SharingAlgorithmFactory;
@@ -10,10 +14,6 @@ import de.tourenplaner.graphrep.GraphRep;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -55,7 +55,7 @@ public class CoreGraphFactory extends SharingAlgorithmFactory {
 		final ByteBuf content = request.content();
 		if (content.readableBytes() > 0) {
 
-			final JsonParser jp = mapper.getJsonFactory().createJsonParser(new ByteBufInputStream(content));
+			final JsonParser jp = mapper.getFactory().createParser(new ByteBufInputStream(content));
 			jp.setCodec(mapper);
 
 			if (jp.nextToken() != JsonToken.START_OBJECT) {

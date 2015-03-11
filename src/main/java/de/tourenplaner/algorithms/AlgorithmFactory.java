@@ -16,10 +16,11 @@
 
 package de.tourenplaner.algorithms;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computeserver.Responder;
 import io.netty.handler.codec.http.FullHttpRequest;
-import org.codehaus.jackson.map.ObjectMapper;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;

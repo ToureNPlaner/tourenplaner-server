@@ -16,6 +16,9 @@
 
 package de.tourenplaner.computeserver;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.AlgorithmFactory;
 import de.tourenplaner.computecore.AlgorithmRegistry;
 import de.tourenplaner.computecore.ComputeCore;
@@ -26,10 +29,6 @@ import de.tourenplaner.utils.SHA1;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.util.CharsetUtil;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -66,8 +65,8 @@ public class  AlgorithmHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param algName algorithm name as String
-     * @throws JsonParseException Thrown if parsing json content fails
-     * @throws JsonProcessingException Thrown if json generation processing fails
+     * @throws com.fasterxml.jackson.core.JsonParseException Thrown if parsing json content fails
+     * @throws com.fasterxml.jackson.core.JsonProcessingException Thrown if json generation processing fails
      * @throws IOException Thrown if error message sending or reading json fails
      */
     public void handleAlg(FullHttpRequest request, String algName) throws IOException {

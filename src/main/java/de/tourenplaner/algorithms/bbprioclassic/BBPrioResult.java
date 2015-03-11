@@ -1,9 +1,9 @@
 package de.tourenplaner.algorithms.bbprioclassic;
 
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.computecore.StreamJsonWriter;
 import de.tourenplaner.graphrep.GraphRep;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -37,7 +37,7 @@ public class BBPrioResult implements StreamJsonWriter {
 
 	@Override
 	public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
-		JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
+		JsonGenerator gen = mapper.getFactory().createGenerator(stream);
 		gen.writeStartObject();
 		gen.writeArrayFieldStart("edges");
 		for (Edge e : edges) {
