@@ -1,6 +1,8 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.coregraph;
 
 import com.carrotsearch.hppc.IntArrayList;
+import de.tourenplaner.algorithms.ComputeException;
+import de.tourenplaner.algorithms.GraphAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.GraphRep;
 
@@ -10,7 +12,7 @@ import java.util.logging.Logger;
 /**
  * Algorithm to extract Core Graphs, these are subgraphs that include all nodes and their edges.
  */
-public class CoreGraph extends GraphAlgorithm{
+public class CoreGraph extends GraphAlgorithm {
 	private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
 
 	public CoreGraph(GraphRep graph) {

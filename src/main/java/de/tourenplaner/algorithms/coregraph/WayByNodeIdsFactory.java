@@ -1,6 +1,9 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.coregraph;
 
 import com.carrotsearch.hppc.IntArrayList;
+import de.tourenplaner.algorithms.Algorithm;
+import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.SharingAlgorithmFactory;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;

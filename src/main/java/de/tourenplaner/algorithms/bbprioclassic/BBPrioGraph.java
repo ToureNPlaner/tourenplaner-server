@@ -1,5 +1,6 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.bbprioclassic;
 
+import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.EdgeExtractor;
 import de.tourenplaner.graphrep.GraphRep;

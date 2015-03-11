@@ -1,5 +1,8 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.coregraph;
 
+import de.tourenplaner.algorithms.Algorithm;
+import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.SharingAlgorithmFactory;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;
@@ -21,7 +24,7 @@ import java.util.Map;
 /**
  * GraphAlgorithm factory used to create the Core export Algorithm instances
  */
-public class CoreGraphFactory extends SharingAlgorithmFactory{
+public class CoreGraphFactory extends SharingAlgorithmFactory {
 	private final Map<String, Object> details;
 	private final List<Map<String, Object>> constraints;
 	private final List<Map<String, Object>> pointConstraints;

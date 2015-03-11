@@ -1,4 +1,4 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.bbprioclassic;
 
 /**
  * @author Niklas Schnelle

@@ -7,7 +7,7 @@ package de.tourenplaner.graphrep;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import de.tourenplaner.algorithms.BBPrioResult;
+import de.tourenplaner.algorithms.bbprioclassic.BBPrioResult;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;
@@ -64,10 +64,8 @@ public class EdgeExtractor {
 		* */
  		if (edgeLen <= maxLen) {
 		    // TODO: Does this weird middle stuff break assumptions?
-		    int middle = graph.getSource(skipA);
+		    int middle = graph.getTarget(skipA);
 
-		    if (graph.getSource(skipB) != middle && graph.getTarget(skipB) != middle)
-			    middle = graph.getTarget(skipA);
 			int srcId = graph.getSource(index);
 		    double x1 = graph.getXPos(srcId);
 		    double y1 = graph.getYPos(srcId);
@@ -103,17 +101,14 @@ public class EdgeExtractor {
 			return;
 		}
 
-		int middle = graph.getSource(skipA);
+		int middle = graph.getTarget(skipA);
 
-		if (graph.getSource(skipB) != middle && graph.getTarget(skipB) != middle)
-			middle = graph.getTarget(skipA);
-
-		if (graph.getRank(middle) < P) {
+		/*if (graph.getRank(middle) < P) {
 			visited[index] = true;
 			needClear.add(index);
 			IDs.add(index);
 			return;
-		}
+		}*/
 		unpack(skipA, IDs, P);
 		unpack(skipB, IDs, P);
 	}
@@ -136,24 +131,19 @@ public class EdgeExtractor {
 			int curr_prio = graph.getRank(curr_node);
 			for (int j = graph.getOutEdgeCount(curr_node) - 1; j >= 0; --j) {
 				int edge_index = graph.getOutEdgeId(curr_node, j);
-				if (graph.getRank(graph.getTarget(edge_index)) < curr_prio) {
+				int trg = graph.getTarget(edge_index);
+				int trgt_prio = graph.getRank(trg);
+				if (trgt_prio < curr_prio || trgt_prio < P) { // Out edges are sorted by target prio ascending, we're descending so break instead of continue
 					break;
 				}
 
-				int trg = graph.getTarget(edge_index);
-				if (graph.getRank(trg) < P) {// Out edges are sorted by target prio ascending, we're descending so break instead of continue
-					break;
-				}
 				BBPrioResult.Edge e = new BBPrioResult.Edge();
 				e.edgeId = edge_index;
 
 				int skipA = graph.getFirstShortcuttedEdge(edge_index);
 				int skippedNode = -1;
-				if (skipA != -1) {
-					skippedNode = graph.getSource(skipA);
-					int skipB = graph.getSecondShortcuttedEdge(edge_index);
-					if (graph.getSource(skipB) != skippedNode && graph.getTarget(skipB) != skippedNode)
-						skippedNode = graph.getTarget(skipA);
+				if (skipA >= 0) {
+					skippedNode = graph.getTarget(skipA);
 
 					if (graph.getRank(skippedNode) >= P) {
 						continue;

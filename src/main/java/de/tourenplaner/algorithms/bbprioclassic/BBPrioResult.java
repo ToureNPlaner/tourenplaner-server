@@ -1,4 +1,4 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.bbprioclassic;
 
 import de.tourenplaner.computecore.StreamJsonWriter;
 import de.tourenplaner.graphrep.GraphRep;

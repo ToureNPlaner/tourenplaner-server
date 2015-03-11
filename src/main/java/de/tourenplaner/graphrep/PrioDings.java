@@ -136,7 +136,7 @@ public final class PrioDings {
                         int nd = nodesXstruct[jj];
                         assert (graph.getXPos(nd) >= left);
                         assert (graph.getXPos(nd) <= right);
-                        if ((graph.getXPos(nd) >= lower) && (graph.getYPos(nd) <= upper) && (graph.getRank(nd) >= priority)) {
+                        if ((graph.getYPos(nd) >= lower) && (graph.getYPos(nd) <= upper) && (graph.getRank(nd) >= priority)) {
                             selectedNodeIDs.add(nd);
                         }
 
@@ -307,7 +307,7 @@ public final class PrioDings {
                 int inf = nodeIDOffsetsToStore.get(i);
                 for (int k = offset2Xstruct[inf]; k < offset2Xstruct[inf + 1]; k++) {
                     nodeIDs[nodeCounter] = nodesXstruct[k];
-                    yKeys[nodeCounter] = graph.getXPos(nodeIDs[nodeCounter]);
+                    yKeys[nodeCounter] = graph.getYPos(nodeIDs[nodeCounter]);
                     prios[nodeCounter] = graph.getRank(nodeIDs[nodeCounter]);
                     nodeCounter++;
                 }

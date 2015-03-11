@@ -1,7 +1,10 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.coregraph;
 
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntArrayList;
+import de.tourenplaner.algorithms.ComputeException;
+import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.GraphAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
@@ -74,7 +77,7 @@ public class WayByNodeIds extends GraphAlgorithm {
         return result;
     }
 
-    private void findEdges(IntArrayDeque deque,NodeIdsRequestData req) throws ComputeException{
+    private void findEdges(IntArrayDeque deque,NodeIdsRequestData req) throws ComputeException {
         IntArrayList nodeIds = req.getNodeIds();
         int currNode, nextNode, currEdge, currTarget;
         for(int i=0; i < nodeIds.size()-1; i++){

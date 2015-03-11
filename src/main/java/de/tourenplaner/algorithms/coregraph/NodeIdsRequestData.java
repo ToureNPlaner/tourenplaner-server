@@ -1,4 +1,4 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.coregraph;
 
 import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.computecore.RequestData;

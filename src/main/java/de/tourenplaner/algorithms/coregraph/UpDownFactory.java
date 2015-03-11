@@ -1,5 +1,8 @@
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.coregraph;
 
+import de.tourenplaner.algorithms.Algorithm;
+import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.SharingAlgorithmFactory;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.ArrayList;
@@ -10,7 +13,7 @@ import java.util.Map;
 /**
  * @author Niklas Schnelle
  */
-public class UpDownFactory extends  SharingAlgorithmFactory {
+public class UpDownFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;
     private final List<Map<String, Object>> constraints;
     private final List<Map<String, Object>> pointConstraints;

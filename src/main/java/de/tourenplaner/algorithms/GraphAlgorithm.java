@@ -26,7 +26,7 @@ import de.tourenplaner.graphrep.GraphRep;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public abstract class GraphAlgorithm implements Algorithm {
-	final GraphRep graph;
+	final protected GraphRep graph;
 
 	public GraphAlgorithm(GraphRep graph) {
 		this.graph = graph;
