@@ -298,6 +298,7 @@ public class GraphRep implements Serializable {
         for (int i = 0; i < nodeCount; ++i) {
             double x = lon2x(this.lon[i] / 10_000_000.0);
             double y = (this.lat[i] / 10_000_000.0);
+            tmpRank = this.rank[i];
             minX = Math.min(minX, x);
             minY = Math.min(minY, y);
             maxX = Math.max(maxX, x);

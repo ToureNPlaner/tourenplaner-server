@@ -63,7 +63,6 @@ public class EdgeExtractor {
 		* ratio = Height/Baseline
 		* */
  		if (edgeLen <= maxLen) {
-		    // TODO: Does this weird middle stuff break assumptions?
 		    int middle = graph.getTarget(skipA);
 
 			int srcId = graph.getSource(index);
@@ -121,6 +120,38 @@ public class EdgeExtractor {
 			unpack(index, newIDs, minLen, maxLen, maxRatio);
 	}
 
+
+	private BBPrioResult.Edge extractEdge(int edge_index, ArrayList<Integer> nodeIDs, ArrayList<Integer> extraIDs, double minLen, double maxLen, double maxRatio, int P) {
+		BBPrioResult.Edge e = new BBPrioResult.Edge();
+		e.edgeId = edge_index;
+		ArrayList<Integer> unpackIDs = new ArrayList<Integer>();
+		unpackShortcut(edge_index, unpackIDs, minLen, maxLen, maxRatio, P);
+
+		for (int k = 0; k < unpackIDs.size(); k++) {
+			int newEdge = unpackIDs.get(k);
+			int s = graph.getSource(newEdge);
+			int t = graph.getTarget(newEdge);
+			int mark1 = marker[s];
+			if (mark1 < 0) {
+				marker[s] = nodeIDs.size() + extraIDs.size();
+				extraIDs.add(s);
+			}
+			int mark2 = marker[t];
+			if (mark2 < 0) {
+				marker[t] = nodeIDs.size() + extraIDs.size();
+				extraIDs.add(t);
+			}
+			int type = 0; // TOD we need better type info here;
+			e.unpacked.add(graph.getXPos(s));
+			e.unpacked.add(graph.getYPos(s));
+			e.unpacked.add(graph.getXPos(t));
+			e.unpacked.add(graph.getYPos(t));
+			e.unpacked.add(type);
+		}
+		return e;
+	}
+
+
 	public void getPriorityEdges(ArrayList<Integer> nodeIDs, ArrayList<BBPrioResult.Edge> edges, double minLen, double maxLen, double maxRatio, int P) {
 		for (int i = 0; i < nodeIDs.size(); i++) {
 			marker[nodeIDs.get(i)] = i;
@@ -129,18 +160,16 @@ public class EdgeExtractor {
 		for (int i = 0; i < nodeIDs.size(); i++) {
 			int curr_node = nodeIDs.get(i);
 			int curr_prio = graph.getRank(curr_node);
+
+			// Out Edges
 			for (int j = graph.getOutEdgeCount(curr_node) - 1; j >= 0; --j) {
-				int edge_index = graph.getOutEdgeId(curr_node, j);
-				int trg = graph.getTarget(edge_index);
-				int trgt_prio = graph.getRank(trg);
-				if (trgt_prio < curr_prio || trgt_prio < P) { // Out edges are sorted by target prio ascending, we're descending so break instead of continue
+				int edgeId = graph.getOutEdgeId(curr_node, j);
+				int trg = graph.getTarget(edgeId);
+				int trgtPrio = graph.getRank(trg);
+				if (trgtPrio < curr_prio || trgtPrio < P) { // Out edges are sorted by target prio ascending, we're descending so break instead of continue
 					break;
 				}
-
-				BBPrioResult.Edge e = new BBPrioResult.Edge();
-				e.edgeId = edge_index;
-
-				int skipA = graph.getFirstShortcuttedEdge(edge_index);
+				int skipA = graph.getFirstShortcuttedEdge(edgeId);
 				int skippedNode = -1;
 				if (skipA >= 0) {
 					skippedNode = graph.getTarget(skipA);
@@ -149,43 +178,35 @@ public class EdgeExtractor {
 						continue;
 					}
 
-					ArrayList<Integer> unpackIDs = new ArrayList<Integer>();
-					unpackShortcut(edge_index, unpackIDs, minLen, maxLen, maxRatio, P);
+					edges.add(extractEdge(edgeId, nodeIDs, extraIDs, minLen, maxLen, maxRatio, P));
 
-					for (int k = 0; k < unpackIDs.size(); k++) {
-						int newEdge = unpackIDs.get(k);
-						int s = graph.getSource(newEdge);
-						int t = graph.getTarget(newEdge);
-						int mark1 = marker[s];
-						if (mark1 < 0) {
-							marker[s] = nodeIDs.size() + extraIDs.size();
-							extraIDs.add(s);
-						}
-						int mark2 = marker[t];
-						if (mark2 < 0) {
-							marker[t] = nodeIDs.size() + extraIDs.size();
-							extraIDs.add(t);
-						}
-						int type = 0; // TOD we need better type info here;
-						e.unpacked.add(graph.getXPos(s));
-						e.unpacked.add(graph.getYPos(s));
-						e.unpacked.add(graph.getXPos(t));
-						e.unpacked.add(graph.getYPos(t));
-						e.unpacked.add(type);
-					}
-				} else if (!visited[edge_index]){
-					visited[edge_index] = true;
-					needClear.add(edge_index);
-					int s = graph.getSource(edge_index);
-					int t = graph.getTarget(edge_index);
-					int type = 0; // We need better type info
-					e.unpacked.add(graph.getXPos(s));
-					e.unpacked.add(graph.getYPos(s));
-					e.unpacked.add(graph.getXPos(t));
-					e.unpacked.add(graph.getYPos(t));
-					e.unpacked.add(type);
+				} else if (!visited[edgeId]){
+					edges.add(takeEdge(edgeId));
 				}
-				edges.add(e);
+			}
+
+			// In Edges
+			for (int j = 0 ; j < graph.getInEdgeCount(curr_node); ++j) {
+				int edgeId = graph.getOutEdgeId(curr_node, j);
+				int src = graph.getSource(edgeId);
+				int srcPrio = graph.getRank(src);
+				if (srcPrio < curr_prio || srcPrio < P) { // In edges are sorted by source prio descending, we're ascending so break instead of continue
+					break;
+				}
+				int skipB = graph.getSecondShortcuttedEdge(edgeId);
+				int skippedNode = -1;
+				if (skipB >= 0) {
+					skippedNode = graph.getSource(skipB);
+
+					if (graph.getRank(skippedNode) >= P) {
+						continue;
+					}
+
+					edges.add(extractEdge(edgeId, nodeIDs, extraIDs, minLen, maxLen, maxRatio, P));
+
+				} else if (!visited[edgeId]){
+					edges.add(takeEdge(edgeId));
+				}
 			}
 
 		}
@@ -201,6 +222,22 @@ public class EdgeExtractor {
 			visited[index.value] = false;
 		}
 		needClear.clear();
+	}
+
+	private BBPrioResult.Edge takeEdge(int edge_index) {
+		visited[edge_index] = true;
+		needClear.add(edge_index);
+		int s = graph.getSource(edge_index);
+		int t = graph.getTarget(edge_index);
+		int type = 0; // We need better type info
+		BBPrioResult.Edge e = new BBPrioResult.Edge();
+		e.edgeId = edge_index;
+		e.unpacked.add(graph.getXPos(s));
+		e.unpacked.add(graph.getYPos(s));
+		e.unpacked.add(graph.getXPos(t));
+		e.unpacked.add(graph.getYPos(t));
+		e.unpacked.add(type);
+		return e;
 	}
 
 
