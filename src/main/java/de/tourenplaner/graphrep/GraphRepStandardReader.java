@@ -42,19 +42,17 @@ public class GraphRepStandardReader implements GraphRepReader{
 	public GraphRep createGraphRep(InputStream in) throws IOException {
 
 		BufferedInputStream inb = new BufferedInputStream(in);
-		Reader r = new Reader(false, true);
-		Node n;
-		Edge e;
-		int edgeCount, edge;
-		int nodeCount;
+
 		try {
 			System.currentTimeMillis();
-			MetaData meta;
-			if (binary){
-				meta = r.readBin(inb);
-			} else {
-				meta = r.read(inb);
-			}
+			Reader r = new Reader(inb, binary);
+			MetaData meta = r.readMetaData();
+
+			Node n;
+			Edge e;
+			int edgeCount;
+			int edge;
+			int nodeCount;
 
 
 			nodeCount = r.getNodeCount();
