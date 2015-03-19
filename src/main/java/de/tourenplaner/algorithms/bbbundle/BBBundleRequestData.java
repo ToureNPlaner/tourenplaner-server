@@ -6,20 +6,31 @@ import de.tourenplaner.computecore.RequestData;
 /**
  * Created by niklas on 19.03.15.
  */
-public class BBBundleRequestData extends RequestData {
+public final class BBBundleRequestData extends RequestData {
+    public enum LevelMode {
+        EXACT,
+        AUTO,
+        HINTED
+    }
     protected BoundingBox bbox;
 
+    public int getHintLevel() {
+        return hintLevel;
+    }
 
+    public int getCoreLevel() {return coreLevel;}
 
     public BoundingBox getBbox() {
         return bbox;
     }
 
-    protected int minLevel;
-
-    protected double minLen;
-    protected double maxLen;
-    protected double maxRatio;
+    protected final int hintLevel;
+    protected final int coreLevel;
+    protected final int nodeCount;
+    protected final LevelMode mode;
+    protected final double minLen;
+    protected final double maxLen;
+    protected final double maxRatio;
 
     public double getMinLen(){ return minLen;}
 
@@ -27,20 +38,16 @@ public class BBBundleRequestData extends RequestData {
 
     public double getMaxRatio(){ return maxRatio;}
 
-    public int getMinLevel() {
-        return minLevel;
-    }
-
-    public BBBundleRequestData(String algSuffix) {
-        super(algSuffix);
-    }
-
-    public BBBundleRequestData(String algSuffix, BoundingBox bbox, double minLen, double maxLen, double maxRatio, int minLevel){
+    public BBBundleRequestData(String algSuffix, BoundingBox bbox, LevelMode mode, double minLen, double maxLen, double maxRatio, int nodeCount, int hintLevel, int coreLevel){
         super(algSuffix);
         this.bbox = bbox;
-        this.minLevel = minLevel;
+        this.nodeCount = nodeCount;
         this.minLen = minLen;
         this.maxLen = maxLen;
         this.maxRatio = maxRatio;
+        this.hintLevel = hintLevel;
+        this.coreLevel = coreLevel;
+        this.mode = mode;
     }
+
 }
