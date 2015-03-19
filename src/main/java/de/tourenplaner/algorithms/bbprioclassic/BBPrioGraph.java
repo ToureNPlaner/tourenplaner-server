@@ -4,7 +4,6 @@ import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.PrioAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
-import de.tourenplaner.graphrep.EdgeExtractor;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.graphrep.PrioDings;
 

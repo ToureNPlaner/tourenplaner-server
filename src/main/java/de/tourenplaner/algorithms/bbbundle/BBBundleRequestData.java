@@ -18,14 +18,14 @@ public final class BBBundleRequestData extends RequestData {
         return hintLevel;
     }
 
-    public int getCoreLevel() {return coreLevel;}
+    public int getCoreSize() {return coreSize;}
 
     public BoundingBox getBbox() {
         return bbox;
     }
 
     protected final int hintLevel;
-    protected final int coreLevel;
+    protected final int coreSize;
     protected final int nodeCount;
     protected final LevelMode mode;
     protected final double minLen;
@@ -38,7 +38,7 @@ public final class BBBundleRequestData extends RequestData {
 
     public double getMaxRatio(){ return maxRatio;}
 
-    public BBBundleRequestData(String algSuffix, BoundingBox bbox, LevelMode mode, double minLen, double maxLen, double maxRatio, int nodeCount, int hintLevel, int coreLevel){
+    public BBBundleRequestData(String algSuffix, BoundingBox bbox, LevelMode mode, double minLen, double maxLen, double maxRatio, int nodeCount, int hintLevel, int coreSize){
         super(algSuffix);
         this.bbox = bbox;
         this.nodeCount = nodeCount;
@@ -46,7 +46,7 @@ public final class BBBundleRequestData extends RequestData {
         this.maxLen = maxLen;
         this.maxRatio = maxRatio;
         this.hintLevel = hintLevel;
-        this.coreLevel = coreLevel;
+        this.coreSize = coreSize;
         this.mode = mode;
     }
 

@@ -3,11 +3,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package de.tourenplaner.graphrep;
+package de.tourenplaner.algorithms.bbprioclassic;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import de.tourenplaner.algorithms.bbprioclassic.BBPrioResult;
+import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.ArrayList;
 import java.util.logging.Logger;

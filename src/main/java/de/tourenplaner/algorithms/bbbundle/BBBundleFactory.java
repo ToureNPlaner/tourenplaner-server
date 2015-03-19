@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
-import de.tourenplaner.algorithms.bbprioclassic.BBPrioLimitedGraph;
 import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computecore.RequestPoints;
@@ -193,7 +192,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                         nodeCount = jp.getIntValue();
                     } else if ("level".equals(fieldname)) {
                         hintLevel = jp.getIntValue();
-                    } else if ("coreLevel".equals(fieldname)) {
+                    } else if ("coreSize".equals(fieldname)) {
                         coreLevel = jp.getIntValue();
                     } else if ("mode".equals(fieldname)) {
                         String m = jp.getText();

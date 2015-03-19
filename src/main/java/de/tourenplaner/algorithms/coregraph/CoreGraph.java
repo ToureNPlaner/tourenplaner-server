@@ -26,9 +26,9 @@ public class CoreGraph extends GraphAlgorithm {
 
 		Map<String, Object> constraints = req.getConstraints();
 		int coreLevel = 80;
-		if (constraints != null && req.getConstraints().get("coreLevel") != null) {
+		if (constraints != null && req.getConstraints().get("coreSize") != null) {
 			try {
-				coreLevel = ((Number) req.getConstraints().get("coreLevel")).intValue();
+				coreLevel = ((Number) req.getConstraints().get("coreSize")).intValue();
 			} catch (ClassCastException e) {
 				throw new ComputeException("Couldn't read Maximum Altitude Difference, wrong type: " + e.getMessage());
 			}

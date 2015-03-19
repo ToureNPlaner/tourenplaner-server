@@ -33,7 +33,7 @@ public class CoreGraphFactory extends SharingAlgorithmFactory {
 		super(graphRep);
 		constraints = new ArrayList<Map<String, Object>>(0);
 		constraints.add(new HashMap<String, Object>(4));
-		constraints.get(0).put("id", "coreLevel");
+		constraints.get(0).put("id", "coreSize");
 		constraints.get(0).put("name", "Core Level");
 		constraints.get(0).put("description", "The level the core should start at (lower bound)");
 		constraints.get(0).put("type", "integer");
