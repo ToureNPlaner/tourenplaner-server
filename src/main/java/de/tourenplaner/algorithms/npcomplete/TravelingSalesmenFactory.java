@@ -14,8 +14,11 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.npcomplete;
 
+import de.tourenplaner.algorithms.Algorithm;
+import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.SharingAlgorithmFactory;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.*;
@@ -25,7 +28,7 @@ import java.util.*;
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public class TravelingSalesmenFactory extends SharingAlgorithmFactory{
+public class TravelingSalesmenFactory extends SharingAlgorithmFactory {
     private final Map<String, Object> details;
     private final List<Map<String, Object>> constraints;
     private final List<Map<String, Object>> pointConstraints;

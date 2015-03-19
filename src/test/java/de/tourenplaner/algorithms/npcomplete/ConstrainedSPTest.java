@@ -14,8 +14,9 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.npcomplete;
 
+import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
 import de.tourenplaner.graphrep.GraphRep;

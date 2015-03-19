@@ -4,7 +4,7 @@
  */
 package de.tourenplaner.graphrep;
 
-import java.util.ArrayList;
+import com.carrotsearch.hppc.IntArrayList;
 
 /**
  * PrioSearchTree stores key, value pairs according to an associated priority
@@ -14,7 +14,6 @@ import java.util.ArrayList;
  * @author spark
  */
 public class PrioSearchTree {
-
     
     int[] treeKey;
     int[] treePrio;
@@ -84,7 +83,7 @@ public class PrioSearchTree {
         }
     }
 
-    private void queryPSTleft(int lower, int prio, int pos, ArrayList<Integer> dataKey, ArrayList<Integer> dataPrio, ArrayList<Integer> dataInf) // return everything below the tree at pos which is larger than lower and has priority >=prio
+    private void queryPSTleft(int lower, int prio, int pos, IntArrayList dataKey, IntArrayList dataPrio, IntArrayList dataInf) // return everything below the tree at pos which is larger than lower and has priority >=prio
     // result consists of individual data items 
     {
         if (pos > treeKey.length - 1) {
@@ -122,7 +121,7 @@ public class PrioSearchTree {
         }
     }
 
-    private void queryPSTright(int upper, int prio, int pos, ArrayList<Integer> dataKey, ArrayList<Integer> dataPrio, ArrayList<Integer> dataInf) // return everything below the tree at pos which is smaller than upper and has priority >=prio
+    private void queryPSTright(int upper, int prio, int pos, IntArrayList dataKey, IntArrayList dataPrio, IntArrayList dataInf) // return everything below the tree at pos which is smaller than upper and has priority >=prio
     // result consists of individual data items 
     {
         if (pos > treeKey.length - 1) {
@@ -164,7 +163,7 @@ public class PrioSearchTree {
 	/**
 	 *  Query the subtree rooted at pos for all data with keys between lower and upper and priority >= prio
 	 * */
-    public void queryPST(int lower, int upper, int prio, int pos, ArrayList<Integer> dataKey, ArrayList<Integer> dataPrio, ArrayList<Integer> dataInf) {
+    public void queryPST(int lower, int upper, int prio, int pos, IntArrayList dataKey, IntArrayList dataPrio, IntArrayList dataInf) {
         // starting at subtree rooted at pos, returns everything between lower and upper with priority >=prio
         // result comes as vector of individual data items 
         if (pos > treeKey.length - 1) {
@@ -202,7 +201,7 @@ public class PrioSearchTree {
     }
 
 
-    private void reportSubtreePrio(int pos, int prio, ArrayList<Integer> dataKey, ArrayList<Integer> dataPrio, ArrayList<Integer> dataInf) // appends the actual items in the subtree rooted at pos at the end as long as prio matches
+    private void reportSubtreePrio(int pos, int prio, IntArrayList dataKey, IntArrayList dataPrio, IntArrayList dataInf) // appends the actual items in the subtree rooted at pos at the end as long as prio matches
     {
         assert (pos <= treeKey.length - 1);
 

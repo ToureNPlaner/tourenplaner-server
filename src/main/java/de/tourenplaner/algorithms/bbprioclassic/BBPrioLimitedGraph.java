@@ -1,6 +1,8 @@
 package de.tourenplaner.algorithms.bbprioclassic;
 
+import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.algorithms.ComputeException;
+import de.tourenplaner.algorithms.PrioAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.EdgeExtractor;
 import de.tourenplaner.graphrep.GraphRep;
@@ -34,7 +36,7 @@ public class BBPrioLimitedGraph extends PrioAlgorithm {
 		long start = System.nanoTime();
 		int currNodeCount;
 		int level;
-		ArrayList<Integer> nodes;
+		IntArrayList nodes;
 		if (req.mode == BBPrioLimitedRequestData.LevelMode.AUTO) {
 
 			level = graph.getMaxRank();

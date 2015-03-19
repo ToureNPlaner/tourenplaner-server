@@ -104,7 +104,7 @@ public class BBPrioLimitedGraphFactory extends GraphAlgorithmFactory {
 	 */
 	@Override
 	public boolean isHidden() {
-		return false;
+		return true;
 	}
 
 	/**

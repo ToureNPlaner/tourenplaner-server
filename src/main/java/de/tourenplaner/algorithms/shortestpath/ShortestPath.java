@@ -14,8 +14,11 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.shortestpath;
 
+import de.tourenplaner.algorithms.ClassicRequestData;
+import de.tourenplaner.algorithms.ComputeException;
+import de.tourenplaner.algorithms.GraphAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
@@ -64,7 +67,7 @@ public abstract class ShortestPath extends GraphAlgorithm {
      * @param resultWays
      * @param tour
      * @return
-     * @throws ComputeException
+     * @throws de.tourenplaner.algorithms.ComputeException
      * @throws IllegalAccessException
      */
     public abstract int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException;

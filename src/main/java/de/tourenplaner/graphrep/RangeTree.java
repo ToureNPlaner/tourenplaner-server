@@ -4,7 +4,7 @@
  */
 package de.tourenplaner.graphrep;
 
-import java.util.ArrayList;
+import com.carrotsearch.hppc.IntArrayList;
 
 /**
  * RangeTree stores key, value pairs of ints for fast range access on the key values.
@@ -39,7 +39,7 @@ public final class RangeTree {
 	 * individual items in keyItems and infItems as well as the indices of the heads of all subtrees completely
 	 * contained in the result which are stored in batches.
 	 */
-    private void batchQueryLeft(int lower, int pos, ArrayList<Integer> batches, ArrayList<Integer> keyItems, ArrayList<Integer> infItems)
+    private void batchQueryLeft(int lower, int pos, IntArrayList batches, IntArrayList keyItems, IntArrayList infItems)
     {
         if (pos > treeKey.length - 1) {
             return;
@@ -63,7 +63,7 @@ public final class RangeTree {
 	 * individual items in keyItems and infItems as well as the indices of the heads of all subtrees completely
 	 * contained in the result which are stored in batches.
 	 */
-    private void batchQueryRight(int upper, int pos, ArrayList<Integer> batches, ArrayList<Integer> keyItems, ArrayList<Integer> infItems)
+    private void batchQueryRight(int upper, int pos, IntArrayList batches, IntArrayList keyItems, IntArrayList infItems)
     {
         if (pos > treeKey.length - 1) {
             return;
@@ -87,7 +87,7 @@ public final class RangeTree {
 	 * individual items in keyItems and infItems as well as the indices of the heads of all subtrees completely
 	 * contained in the result which are stored in batches.
 	 */
-	public void batchQuery(int lower, int upper, int pos, ArrayList<Integer> batches, ArrayList<Integer> keyItems, ArrayList<Integer> infItems)
+	public void batchQuery(int lower, int upper, int pos, IntArrayList batches, IntArrayList keyItems, IntArrayList infItems)
 	{
 		// starting at subtree rooted at pos, returns everything between lower and upper
 		// in batches (heads of subtrees) and individual infs
@@ -107,7 +107,7 @@ public final class RangeTree {
 	/**
 	 * Appends all items and their keys stored in the subtree rooted at pos to keyItems and infItems
 	 */
-    public void reportSubtree(int pos, ArrayList<Integer> keyItems, ArrayList<Integer> infItems)
+    public void reportSubtree(int pos, IntArrayList keyItems, IntArrayList infItems)
 	{
 	if (pos > treeKey.length - 1) {
             return;

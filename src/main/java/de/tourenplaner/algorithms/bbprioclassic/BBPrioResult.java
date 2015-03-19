@@ -1,5 +1,6 @@
 package de.tourenplaner.algorithms.bbprioclassic;
 
+import com.carrotsearch.hppc.IntArrayList;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.computecore.StreamJsonWriter;
@@ -17,10 +18,10 @@ public class BBPrioResult implements StreamJsonWriter {
 
 	public static class Edge {
 		public int edgeId;
-		public ArrayList<Integer> unpacked;
+		public IntArrayList unpacked;
 
 		public Edge() {
-			this.unpacked = new ArrayList<Integer>();
+			this.unpacked = new IntArrayList();
 		}
 	}
 
@@ -30,7 +31,7 @@ public class BBPrioResult implements StreamJsonWriter {
 	private ArrayList<Edge> edges;
 	private GraphRep graph;
 
-	public BBPrioResult(GraphRep graph, ArrayList<Integer> nodes, ArrayList<Edge> edges) {
+	public BBPrioResult(GraphRep graph, IntArrayList nodes, ArrayList<Edge> edges) {
 		this.graph = graph;
 		this.edges = edges;
 	}
@@ -46,8 +47,8 @@ public class BBPrioResult implements StreamJsonWriter {
 			gen.writeNumberField("trgt", graph.getTarget(e.edgeId));
 			gen.writeNumberField("cost", graph.getDist(e.edgeId));
 			gen.writeArrayFieldStart("draw");
-			for(int d : e.unpacked){
-				gen.writeNumber(d);
+			for (int i = 0; i < e.unpacked.size(); ++i){
+				gen.writeNumber(e.unpacked.get(i));
 			}
 			gen.writeEndArray();
 			gen.writeEndObject();

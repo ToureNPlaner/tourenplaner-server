@@ -14,11 +14,16 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.npcomplete;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntOpenHashSet;
+import de.tourenplaner.algorithms.ClassicRequestData;
+import de.tourenplaner.algorithms.ComputeException;
+import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.GraphAlgorithm;
+import de.tourenplaner.algorithms.shortestpath.ShortestPathCH;
 import de.tourenplaner.computecore.*;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.utils.StaticMath;

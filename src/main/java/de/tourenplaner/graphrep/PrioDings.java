@@ -4,7 +4,10 @@
  */
 package de.tourenplaner.graphrep;
 
+import com.carrotsearch.hppc.IntArrayList;
+
 import java.awt.*;
+import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 /**
@@ -32,7 +35,7 @@ public final class PrioDings {
     public int getNextNode(int x, int y, int P) {
    
         Rectangle.Double range=new Rectangle.Double();
-        ArrayList<Integer> candNodes=new ArrayList<Integer>();
+        IntArrayList candNodes=new IntArrayList();
  
         range.width = range.height = 32;
         while (candNodes.size()==0)
@@ -64,7 +67,7 @@ public final class PrioDings {
 	/**
 	 *  Get all nodes contained within the given rectangle with priority at least priority
 	 */
-    public ArrayList<Integer> getNodeSelection(Rectangle.Double range, int priority) {
+    public IntArrayList getNodeSelection(Rectangle.Double range, int priority) {
         // returns indices of nodes in NodeArray falling into rectangle and with
         // high enough priority
 
@@ -77,14 +80,14 @@ public final class PrioDings {
         // 5. query all remaining subtree heads -> yields a set of nodes (which need to be checked
         //      for feasiblity, though
         //System.out.println("view " + range);
-        ArrayList<Integer> selectedNodeIDs = new ArrayList<Integer>();
+        IntArrayList selectedNodeIDs = new IntArrayList();
         int left = (int) range.x, right = (int) (range.x + range.width);
         int lower = (int) range.y, upper = (int) (range.y + range.height);
 
 //        System.out.println("PST query with "+left+"-"+right+" and "+lower+"-"+upper+"----- "+priority);
-        ArrayList<Integer> resPST = new ArrayList<Integer>();
-        ArrayList<Integer> resKeys = new ArrayList<Integer>();
-        ArrayList<Integer> resInfs = new ArrayList<Integer>();
+        IntArrayList resPST = new IntArrayList();
+        IntArrayList resKeys = new IntArrayList();
+        IntArrayList resInfs = new IntArrayList();
 
         myXRT.batchQuery(left, right, 0, resPST, resKeys, resInfs);
 
@@ -101,9 +104,9 @@ public final class PrioDings {
         }
 //        System.out.println("Selected " + selectedNodeIDs.size() + " nodes from " + resInfs.size() + " from X-structure");
         for (int i = 0; i < resPST.size(); i++) {
-            ArrayList<Integer> dataKeys = new ArrayList<Integer>();
-            ArrayList<Integer> dataPrios = new ArrayList<Integer>();
-            ArrayList<Integer> dataInfs = new ArrayList<Integer>();
+            IntArrayList dataKeys = new IntArrayList();
+            IntArrayList dataPrios = new IntArrayList();
+            IntArrayList dataInfs = new IntArrayList();
 
             int tmp_cnt = 0;
             if (resPST.get(i) < myPSTs.length) {
@@ -125,8 +128,8 @@ public final class PrioDings {
                 //System.out.println("Added " + tmp_cnt + " from PST " + resPST.get(i));
             } else // otherwise simply scan the subtree
             {
-                ArrayList<Integer> xCoordsToDrop = new ArrayList<Integer>();
-                ArrayList<Integer> nodeIDOffsetsToCheck = new ArrayList<Integer>();
+                IntArrayList xCoordsToDrop = new IntArrayList();
+                IntArrayList nodeIDOffsetsToCheck = new IntArrayList();
                 myXRT.reportSubtree(resPST.get(i), xCoordsToDrop, nodeIDOffsetsToCheck);
 
                 // returned offsets are into
@@ -277,8 +280,8 @@ public final class PrioDings {
 
         for (int j = 0; j < limitPST; j++) {
             // collect nodeIDs to be stored in PST j
-            ArrayList<Integer> xCoordsToStore = new ArrayList<Integer>();
-            ArrayList<Integer> nodeIDOffsetsToStore = new ArrayList<Integer>();
+            IntArrayList xCoordsToStore = new IntArrayList();
+            IntArrayList nodeIDOffsetsToStore = new IntArrayList();
             myXRT.reportSubtree(j, xCoordsToStore, nodeIDOffsetsToStore);
 
             // returned offsets are into 

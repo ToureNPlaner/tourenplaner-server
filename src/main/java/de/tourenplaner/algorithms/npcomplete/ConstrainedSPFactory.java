@@ -14,8 +14,11 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.npcomplete;
 
+import de.tourenplaner.algorithms.Algorithm;
+import de.tourenplaner.algorithms.DijkstraStructs;
+import de.tourenplaner.algorithms.SharingAlgorithmFactory;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.*;

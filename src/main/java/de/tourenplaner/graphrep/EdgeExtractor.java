@@ -39,7 +39,7 @@ public class EdgeExtractor {
 	}
 
 
-	public void unpack(int index, ArrayList<Integer> IDs, double minLen, double maxLen, double maxRatio) {
+	public void unpack(int index, IntArrayList IDs, double minLen, double maxLen, double maxRatio) {
 		if (visited[index])
 			return;
 		double edgeLen = ((double)graph.getEuclidianDist(index));
@@ -87,7 +87,7 @@ public class EdgeExtractor {
 		unpack(skipB, IDs, minLen, maxLen, maxRatio);
 	}
 
-	public void unpack(int index, ArrayList<Integer> IDs, int P) {
+	public void unpack(int index, IntArrayList IDs, int P) {
 		if (visited[index])
 			return;
 		int skipA = graph.getFirstShortcuttedEdge(index);
@@ -112,7 +112,7 @@ public class EdgeExtractor {
 		unpack(skipB, IDs, P);
 	}
 
-	public void unpackShortcut(int index, ArrayList<Integer> newIDs, double minLen, double maxLen, double maxRatio, int P) {
+	public void unpackShortcut(int index, IntArrayList newIDs, double minLen, double maxLen, double maxRatio, int P) {
 		newIDs.clear();
 		if (minLen < 0)
 			unpack(index, newIDs, P);
@@ -121,10 +121,10 @@ public class EdgeExtractor {
 	}
 
 
-	private BBPrioResult.Edge extractEdge(int edge_index, ArrayList<Integer> nodeIDs, ArrayList<Integer> extraIDs, double minLen, double maxLen, double maxRatio, int P) {
+	private BBPrioResult.Edge extractEdge(int edge_index, IntArrayList nodeIDs, IntArrayList extraIDs, double minLen, double maxLen, double maxRatio, int P) {
 		BBPrioResult.Edge e = new BBPrioResult.Edge();
 		e.edgeId = edge_index;
-		ArrayList<Integer> unpackIDs = new ArrayList<Integer>();
+		IntArrayList unpackIDs = new IntArrayList();
 		unpackShortcut(edge_index, unpackIDs, minLen, maxLen, maxRatio, P);
 
 		for (int k = 0; k < unpackIDs.size(); k++) {
@@ -152,11 +152,11 @@ public class EdgeExtractor {
 	}
 
 
-	public void getPriorityEdges(ArrayList<Integer> nodeIDs, ArrayList<BBPrioResult.Edge> edges, double minLen, double maxLen, double maxRatio, int P) {
+	public void getPriorityEdges(IntArrayList nodeIDs, ArrayList<BBPrioResult.Edge> edges, double minLen, double maxLen, double maxRatio, int P) {
 		for (int i = 0; i < nodeIDs.size(); i++) {
 			marker[nodeIDs.get(i)] = i;
 		}
-		ArrayList<Integer> extraIDs = new ArrayList<Integer>();
+		IntArrayList extraIDs = new IntArrayList();
 		for (int i = 0; i < nodeIDs.size(); i++) {
 			int curr_node = nodeIDs.get(i);
 			int curr_prio = graph.getRank(curr_node);

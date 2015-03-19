@@ -14,8 +14,11 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.algorithms;
+package de.tourenplaner.algorithms.shortestpath;
 
+import com.carrotsearch.hppc.IntArrayList;
+import de.tourenplaner.algorithms.ComputeException;
+import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.computecore.RequestPoint;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computecore.Way;
@@ -78,7 +81,7 @@ public class ShortestPathTest {
             }
 
             dist[sourcePointId] = 0;
-            List<Integer> queue = new ArrayList<Integer>();
+            IntArrayList queue = new IntArrayList();
             queue.add(sourcePointId);
             while (queue.size() > 0) {
                 int currentNode = queue.remove(0);

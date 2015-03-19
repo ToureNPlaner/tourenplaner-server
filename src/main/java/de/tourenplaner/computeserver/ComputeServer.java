@@ -21,6 +21,8 @@ import de.tourenplaner.algorithms.bbprioclassic.BBPrioLimitedGraphFactory;
 import de.tourenplaner.algorithms.coregraph.CoreGraphFactory;
 import de.tourenplaner.algorithms.coregraph.UpDownFactory;
 import de.tourenplaner.algorithms.coregraph.WayByNodeIdsFactory;
+import de.tourenplaner.algorithms.npcomplete.TravelingSalesmenFactory;
+import de.tourenplaner.algorithms.shortestpath.ShortestPathBDCHFactory;
 import de.tourenplaner.computecore.AlgorithmManagerFactory;
 import de.tourenplaner.computecore.AlgorithmRegistry;
 import de.tourenplaner.computecore.ComputeCore;

@@ -1,6 +1,8 @@
 package de.tourenplaner.algorithms.bbprioclassic;
 
+import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.algorithms.ComputeException;
+import de.tourenplaner.algorithms.PrioAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.EdgeExtractor;
 import de.tourenplaner.graphrep.GraphRep;
@@ -32,7 +34,7 @@ public class BBPrioGraph extends PrioAlgorithm {
 
 
         long start = System.nanoTime();
-	    ArrayList<Integer> nodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), req.getMinLevel());
+	    IntArrayList nodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), req.getMinLevel());
 	    ArrayList<BBPrioResult.Edge> edges = new ArrayList<BBPrioResult.Edge>();
 	    edx.getPriorityEdges(nodes, edges, req.getMinLen(), req.getMaxLen(), req.getMaxRatio(), req.getMinLevel());
 

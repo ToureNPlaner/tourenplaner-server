@@ -14,10 +14,9 @@
  *    limitations under the License.
  */
 
-package de.tourenplaner.algorithms.bbprioclassic;
+package de.tourenplaner.algorithms;
 
 
-import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.graphrep.PrioDings;
 

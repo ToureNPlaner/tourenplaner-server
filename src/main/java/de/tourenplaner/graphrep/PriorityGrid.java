@@ -4,9 +4,10 @@
  */
 package de.tourenplaner.graphrep;
 
+import com.carrotsearch.hppc.IntArrayList;
+
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
 
 /**
  *
@@ -17,9 +18,9 @@ public final class PriorityGrid {
     private final GraphRep graph;
 
     
-    public ArrayList<Integer> getNodeSelection(Rectangle2D.Double range, int priority) {
+    public IntArrayList getNodeSelection(Rectangle2D.Double range, int priority) {
         System.out.println("view " + range);
-        ArrayList<Integer> selectedNodeIDs = new ArrayList<Integer>();
+        IntArrayList selectedNodeIDs = new IntArrayList();
         for (int i = 0; i < graph.getNodeCount(); i++) {
 //            n.display();
             if (graph.getRank(i) < priority) {
@@ -40,9 +41,9 @@ public final class PriorityGrid {
         return selectedNodeIDs;
     }
     
-    public ArrayList<Integer> getNodeSelection(Rectangle range, int minPriority, int maxPriority) {
+    public IntArrayList getNodeSelection(Rectangle range, int minPriority, int maxPriority) {
         System.out.println("view " + range);
-        ArrayList<Integer> selectedNodeIDs = new ArrayList<Integer>();
+        IntArrayList selectedNodeIDs = new IntArrayList();
         for (int i = 0; i < graph.getNodeCount(); i++) {
 //            n.display();
             if (graph.getRank(i) < minPriority || graph.getRank(i) >= maxPriority) {
