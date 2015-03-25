@@ -14,7 +14,7 @@ import com.carrotsearch.hppc.IntArrayList;
  * @author spark
  */
 public class PrioSearchTree {
-    
+
     int[] treeKey;
     int[] treePrio;
     int[] treeInf;
@@ -115,9 +115,10 @@ public class PrioSearchTree {
             if (2 * pos + 2 < treeKey.length) {
                 reportSubtreePrio(2 * pos + 2, prio, dataKey, dataPrio, dataInf);
             }
-        } else // if (keys[pos]<lower)
-        if (2 * pos + 2 < treeKey.length) {
-            queryPSTleft(lower, prio, 2 * pos + 2, dataKey, dataPrio, dataInf);
+        } else {/* if (keys[pos]<lower) */
+            if (2 * pos + 2 < treeKey.length) {
+                queryPSTleft(lower, prio, 2 * pos + 2, dataKey, dataPrio, dataInf);
+            }
         }
     }
 
@@ -154,15 +155,16 @@ public class PrioSearchTree {
                 queryPSTright(upper, prio, 2 * pos + 2, dataKey, dataPrio, dataInf);
 
             }
-        } else // if (keys[pos]<lower)
-        if (2 * pos + 1 < treeKey.length) {
-            queryPSTright(upper, prio, 2 * pos + 1, dataKey, dataPrio, dataInf);
+        } else {// if (keys[pos] > upper)
+            if (2 * pos + 1 < treeKey.length) {
+                queryPSTright(upper, prio, 2 * pos + 1, dataKey, dataPrio, dataInf);
+            }
         }
     }
 
-	/**
-	 *  Query the subtree rooted at pos for all data with keys between lower and upper and priority >= prio
-	 * */
+    /**
+     * Query the subtree rooted at pos for all data with keys between lower and upper and priority >= prio
+     */
     public void queryPST(int lower, int upper, int prio, int pos, IntArrayList dataKey, IntArrayList dataPrio, IntArrayList dataInf) {
         // starting at subtree rooted at pos, returns everything between lower and upper with priority >=prio
         // result comes as vector of individual data items 
@@ -173,13 +175,12 @@ public class PrioSearchTree {
         if (heapPrio[pos] < prio) {
             return;
         }
-
+        // TODO heapPrio(pos) check rundandant with above
         // check if current prioPoint should be reported
         if ((heapPrio[pos] >= prio) && (heapKey[pos] >= lower) && (heapKey[pos] <= upper)) {
             dataKey.add(heapKey[pos]);
             dataPrio.add(heapPrio[pos]);
             dataInf.add(heapInf[pos]);
-
         }
 
         if (treeKey[pos] < lower) // descend into right subtree
@@ -190,13 +191,13 @@ public class PrioSearchTree {
             queryPST(lower, upper, prio, 2 * pos + 1, dataKey, dataPrio, dataInf);
         } else // we have a split
         {
-            queryPSTleft(lower, prio, 2 * pos + 1, dataKey, dataPrio, dataInf);	// report everything in the left subtree larger then lower
+            queryPSTleft(lower, prio, 2 * pos + 1, dataKey, dataPrio, dataInf);    // report everything in the left subtree larger than lower
             if (treePrio[pos] >= prio) {          // if prio is ok, split item itself should be reported
                 dataKey.add(treeKey[pos]);
                 dataPrio.add(treePrio[pos]);
                 dataInf.add(treeInf[pos]);
             }
-            queryPSTright(upper, prio, 2 * pos + 2, dataKey, dataPrio, dataInf);	// report everything in the right subtree smaller than upper
+            queryPSTright(upper, prio, 2 * pos + 2, dataKey, dataPrio, dataInf);    // report everything in the right subtree smaller than upper
         }
     }
 
@@ -243,15 +244,14 @@ public class PrioSearchTree {
         return subTreeSize[pos];
     }
 
-	/**
-	 * Creates a new PrioritySearchTree containing the given items.
-	 * IMPORTANT:
-	 * - Items are assumed to be sorted by key, priority and value
-	 * - The number of elements is assumed to be even
-	 * - Keys can occur multiple times
-	 */
-    public PrioSearchTree(int[] inpKey, int[] inpPrio, int[] inpInf)
-    {
+    /**
+     * Creates a new PrioritySearchTree containing the given items.
+     * IMPORTANT:
+     * - Items are assumed to be sorted by key, priority and value
+     * - The number of elements is assumed to be even
+     * - Keys can occur multiple times
+     */
+    public PrioSearchTree(int[] inpKey, int[] inpPrio, int[] inpInf) {
         /*
          for(int i=0; i<inpKey.length-1; i++)
          {
@@ -271,7 +271,7 @@ public class PrioSearchTree {
 
 
         initSubTreeSize(0);
-        assert(subTreeSize[0] == inpKey.length);
+        assert (subTreeSize[0] == inpKey.length);
 
         // do the actual construction
         initArray(inpKey, inpPrio, inpInf, 0, 0, inpKey.length - 1);

@@ -7,11 +7,9 @@ package de.tourenplaner.graphrep;
 import com.carrotsearch.hppc.IntArrayList;
 
 import java.awt.*;
-import java.awt.geom.Rectangle2D;
 import java.util.*;
 
 /**
- *
  * @author spark
  */
 public final class PrioDings {
@@ -28,45 +26,42 @@ public final class PrioDings {
     private static final Random generator = new Random();
 
 
-	/**
-	 * Get the nearest node for the given x, y coordinates with
-	 * priority at least P
-	 */
+    /**
+     * Get the nearest node for the given x, y coordinates with
+     * priority at least P
+     */
     public int getNextNode(int x, int y, int P) {
-   
-        Rectangle.Double range=new Rectangle.Double();
-        IntArrayList candNodes=new IntArrayList();
- 
+
+        Rectangle.Double range = new Rectangle.Double();
+        IntArrayList candNodes = new IntArrayList();
+
         range.width = range.height = 32;
-        while (candNodes.size()==0)
-        { 
+        while (candNodes.size() == 0) {
             range.x = x - range.width / 2;
             range.y = y - range.height / 2;
             candNodes = getNodeSelection(range, P);
-            range.width*=2;
-            range.height*=2;
+            range.width *= 2;
+            range.height *= 2;
         }
-        
-        int bestNode=0;
-        double bestDist= Double.MAX_VALUE;
-        for (int i = 0; i < candNodes.size(); i++)
-        {
-            int nodeId=candNodes.get(i);
-            double deltaX=graph.getXPos(nodeId)-x;
-            double deltaY=graph.getYPos(nodeId)-y;
-            double dist=deltaX*deltaX+deltaY*deltaY;
-            if (dist<bestDist)
-            {
-                bestDist=dist;
-                bestNode=nodeId;
+
+        int bestNode = 0;
+        double bestDist = Double.MAX_VALUE;
+        for (int i = 0; i < candNodes.size(); i++) {
+            int nodeId = candNodes.get(i);
+            double deltaX = graph.getXPos(nodeId) - x;
+            double deltaY = graph.getYPos(nodeId) - y;
+            double dist = deltaX * deltaX + deltaY * deltaY;
+            if (dist < bestDist) {
+                bestDist = dist;
+                bestNode = nodeId;
             }
         }
         return bestNode;
     }
 
-	/**
-	 *  Get all nodes contained within the given rectangle with priority at least priority
-	 */
+    /**
+     * Get all nodes contained within the given rectangle with priority at least priority
+     */
     public IntArrayList getNodeSelection(Rectangle.Double range, int priority) {
         // returns indices of nodes in NodeArray falling into rectangle and with
         // high enough priority
@@ -113,15 +108,14 @@ public final class PrioDings {
                 //System.out.println("PSTQuery mit: "+priority+" on PST number "+resPST.get(i));
                 myPSTs[resPST.get(i)].queryPST(lower, upper, priority, 0, dataKeys, dataPrios, dataInfs);
                 for (int j = 0; j < dataInfs.size(); j++) {
-                    int jj=dataInfs.get(j);
+                    int jj = dataInfs.get(j);
                     assert (graph.getYPos(jj) >= lower);
                     assert (graph.getYPos(jj) <= upper);
                     assert (graph.getRank(jj) >= priority);
-                    
-                    
+
+
                     assert (graph.getXPos(jj) >= left);
                     assert (graph.getXPos(jj) <= right);
-
                     selectedNodeIDs.add(jj);
                     tmp_cnt++;
                 }
@@ -140,6 +134,7 @@ public final class PrioDings {
                         assert (graph.getXPos(nd) >= left);
                         assert (graph.getXPos(nd) <= right);
                         if ((graph.getYPos(nd) >= lower) && (graph.getYPos(nd) <= upper) && (graph.getRank(nd) >= priority)) {
+
                             selectedNodeIDs.add(nd);
                         }
 
@@ -191,9 +186,9 @@ public final class PrioDings {
         mySort(storage + 1, end, data1, data2, data3);
     }
 
-	/**
-	 * Creates the priority data structure for the given graph
-	 */
+    /**
+     * Creates the priority data structure for the given graph
+     */
     public PrioDings(GraphRep graph) {
         this.graph = graph;
         // initializes data structures with given nodes
@@ -267,8 +262,8 @@ public final class PrioDings {
         // until 0, 2, 6, 14, 30, ...
         int limitPST = 0;
         int height = 0;
-	    // TODO: Need a comment here for why we divide by 256
-        while (limitPST < rangeTreeKeys.length/256) {
+        // TODO: Need a comment here for why we divide by 256
+        while (limitPST < rangeTreeKeys.length / 256) {
             limitPST = (limitPST + 1) * 2;
             height++;
         }
@@ -301,8 +296,8 @@ public final class PrioDings {
             int[] prios = new int[sizePST];
             int[] nodeIDs = new int[sizePST];
             yKeys[sizePST - 1] = 0;
-            prios[sizePST - 1] = 0;
-            nodeIDs[sizePST - 1] = 0;
+            prios[sizePST - 1] = Integer.MIN_VALUE;
+            nodeIDs[sizePST - 1] = Integer.MAX_VALUE;
 
 
             int nodeCounter = 0;
@@ -315,12 +310,12 @@ public final class PrioDings {
                     nodeCounter++;
                 }
             }
-            System.out.println(nodeCounter + " und " + sizePST);
+            System.out.println(nodeCounter + " and " + sizePST);
             // assert(nodeCounter==sizePST);
             for (int i = 0; i < 5; i++) {
                 System.out.println(yKeys[i] + " " + prios[i] + " " + nodeIDs[i]);
             }
-            
+
             mySort(0, sizePST - 1, yKeys, prios, nodeIDs);
 
             for (int i = 0; i < 5; i++) {
