@@ -175,9 +175,9 @@ public class PrioSearchTree {
         if (heapPrio[pos] < prio) {
             return;
         }
-        // TODO heapPrio(pos) check rundandant with above
+
         // check if current prioPoint should be reported
-        if ((heapPrio[pos] >= prio) && (heapKey[pos] >= lower) && (heapKey[pos] <= upper)) {
+        if (/* (heapPrio[pos] >= prio) &&*/ heapKey[pos] >= lower && heapKey[pos] <= upper) {
             dataKey.add(heapKey[pos]);
             dataPrio.add(heapPrio[pos]);
             dataInf.add(heapInf[pos]);
