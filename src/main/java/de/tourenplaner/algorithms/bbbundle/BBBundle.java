@@ -76,8 +76,8 @@ public class BBBundle  extends PrioAlgorithm {
                     }
 
                     // Down-In edges
-                    for (int downEdgeNum = 0; downEdgeNum < graph.getOutEdgeCount(nodeId); ++downEdgeNum) {
-                        int edgeId = graph.getOutEdgeId(nodeId, downEdgeNum);
+                    for (int downEdgeNum = 0; downEdgeNum < graph.getInEdgeCount(nodeId); ++downEdgeNum) {
+                        int edgeId = graph.getInEdgeId(nodeId, downEdgeNum);
                         int srcId = graph.getSource(edgeId);
                         if (dfsState[srcId] > 0 || srcId < coreSize) {
                             continue;
@@ -186,8 +186,8 @@ public class BBBundle  extends PrioAlgorithm {
             }
 
             // Down-In edges
-            for (int downEdgeNum = 0; downEdgeNum < graph.getOutEdgeCount(nodeId); ++downEdgeNum) {
-                int edgeId = graph.getOutEdgeId(nodeId, downEdgeNum);
+            for (int downEdgeNum = 0; downEdgeNum < graph.getInEdgeCount(nodeId); ++downEdgeNum) {
+                int edgeId = graph.getInEdgeId(nodeId, downEdgeNum);
                 int srcId = graph.getSource(edgeId);
 
                 int srcRank = graph.getRank(srcId);
@@ -243,8 +243,6 @@ public class BBBundle  extends PrioAlgorithm {
         log.info("ExtractBBox took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
         log.info("Level was: "+level);
         log.info("Nodes extracted: "+bboxNodes.size()+" of "+graph.getNodeCount());
-
-
         start = System.nanoTime();
         IntArrayDeque nodes =topoSortNodes(bboxNodes, level, req.getCoreSize());
         log.info("TopSort took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
