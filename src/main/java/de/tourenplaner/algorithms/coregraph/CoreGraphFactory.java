@@ -5,8 +5,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.Algorithm;
-import de.tourenplaner.algorithms.DijkstraStructs;
-import de.tourenplaner.algorithms.SharingAlgorithmFactory;
+import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;
@@ -16,7 +15,6 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,31 +22,18 @@ import java.util.Map;
 /**
  * GraphAlgorithm factory used to create the Core export Algorithm instances
  */
-public class CoreGraphFactory extends SharingAlgorithmFactory {
+public class CoreGraphFactory extends GraphAlgorithmFactory {
 	private final Map<String, Object> details;
-	private final List<Map<String, Object>> constraints;
-	private final List<Map<String, Object>> pointConstraints;
 
 	public CoreGraphFactory(GraphRep graphRep){
 		super(graphRep);
-		constraints = new ArrayList<Map<String, Object>>(0);
-		constraints.add(new HashMap<String, Object>(4));
-		constraints.get(0).put("id", "coreSize");
-		constraints.get(0).put("name", "Core Level");
-		constraints.get(0).put("description", "The level the core should start at (lower bound)");
-		constraints.get(0).put("type", "integer");
-		constraints.get(0).put("min", 30);
-
-
-		pointConstraints = new ArrayList<Map<String, Object>>(0);
 		details = new HashMap<String, Object>(3);
 		details.put("hidden", this.isHidden());
-		details.put("minpoints", 2);
 		details.put("sourceistarget", false);
 	}
 
 	/**
-	 * Reads ClassicRequestData unless overridden
+	 * Reads unless overridden
 	 */
 	public RequestData readRequestData(ObjectMapper mapper, Responder responder, FullHttpRequest request) throws IOException {
 		Map<String, Object> constraints = null;
@@ -105,11 +90,6 @@ public class CoreGraphFactory extends SharingAlgorithmFactory {
 	}
 
 	@Override
-	public Algorithm createAlgorithm(DijkstraStructs rs) {
-		return new CoreGraph(graph);
-	}
-
-	@Override
 	public List<Map<String, Object>> getPointConstraints() {
 		return null;
 	}
@@ -121,12 +101,12 @@ public class CoreGraphFactory extends SharingAlgorithmFactory {
 
 	@Override
 	public String getURLSuffix() {
-		return "core";
+		return "drawcore";
 	}
 
 	@Override
 	public String getAlgName() {
-		return "Core Graph";
+		return "Drawable Core Graph";
 	}
 
 	@Override
@@ -141,7 +121,7 @@ public class CoreGraphFactory extends SharingAlgorithmFactory {
 
 	@Override
 	public List<Map<String, Object>> getConstraints() {
-		return constraints;
+		return null;
 	}
 
 	@Override
@@ -151,6 +131,6 @@ public class CoreGraphFactory extends SharingAlgorithmFactory {
 
 	@Override
 	public String getDescription() {
-		return "The level the core should start at (lower bound)";
+		return "Compute the current graphs core, that is the nodes and edges above level minLevel. Output with drawable edges";
 	}
 }
