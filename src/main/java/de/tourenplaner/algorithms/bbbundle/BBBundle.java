@@ -164,7 +164,7 @@ public class BBBundle  extends PrioAlgorithm {
     }
 
 
-    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleResult.Edge> upEdges, ArrayList<BBBundleResult.Edge> downEdges, int P, double minLen, double maxLen, double maxRatio) {
+    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int P, double minLen, double maxLen, double maxRatio) {
         int edgeCount = 0;
         for (IntCursor ic : nodes) {
             int nodeId = ic.value;
@@ -179,7 +179,7 @@ public class BBBundle  extends PrioAlgorithm {
                 if (trgtRank < P || trgtRank < nodeRank) {
                     break;
                 }
-                BBBundleResult.Edge e = new BBBundleResult.Edge(edgeId, nodeId, trgtId, graph.getDist(edgeId));
+                BBBundleEdge e = new BBBundleEdge(edgeId, nodeId, trgtId, graph.getDist(edgeId));
                 unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 upEdges.add(e);
                 edgeCount++;
@@ -195,7 +195,7 @@ public class BBBundle  extends PrioAlgorithm {
                 if (srcRank < P || srcRank < nodeRank) {
                     break;
                 }
-                BBBundleResult.Edge e = new BBBundleResult.Edge(edgeId, srcId, nodeId, graph.getDist(edgeId));
+                BBBundleEdge e = new BBBundleEdge(edgeId, srcId, nodeId, graph.getDist(edgeId));
                 unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 downEdges.add(e);
                 edgeCount++;
@@ -250,8 +250,8 @@ public class BBBundle  extends PrioAlgorithm {
 
 
         start = System.nanoTime();
-        ArrayList<BBBundleResult.Edge> upEdges = new ArrayList<>();
-        ArrayList<BBBundleResult.Edge> downEdges = new ArrayList<>();
+        ArrayList<BBBundleEdge> upEdges = new ArrayList<>();
+        ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
         extractEdges(nodes, upEdges, downEdges, level, req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
 
         log.info("Extract edges took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
