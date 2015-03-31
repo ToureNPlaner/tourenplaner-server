@@ -164,7 +164,7 @@ public class BBBundle  extends PrioAlgorithm {
     }
 
 
-    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int P, double minLen, double maxLen, double maxRatio) {
+    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int P, int coreSize, double minLen, double maxLen, double maxRatio) {
         int edgeCount = 0;
         for (IntCursor ic : nodes) {
             int nodeId = ic.value;
@@ -176,7 +176,7 @@ public class BBBundle  extends PrioAlgorithm {
                 int trgtRank = graph.getRank(trgtId);
 
                 // Out edges are sorted by target rank ascending, mind we're going down
-                if (trgtRank < P || trgtRank < nodeRank) {
+                if (trgtRank < P || trgtRank < nodeRank || trgtId < coreSize) {
                     break;
                 }
                 BBBundleEdge e = new BBBundleEdge(edgeId, nodeId, trgtId, graph.getDist(edgeId));
@@ -192,7 +192,7 @@ public class BBBundle  extends PrioAlgorithm {
 
                 int srcRank = graph.getRank(srcId);
                 // In edges are sorted by source rank descending
-                if (srcRank < P || srcRank < nodeRank) {
+                if (srcRank < P || srcRank < nodeRank || srcId < coreSize) {
                     break;
                 }
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcId, nodeId, graph.getDist(edgeId));
@@ -244,15 +244,15 @@ public class BBBundle  extends PrioAlgorithm {
         log.info("Level was: "+level);
         log.info("Nodes extracted: "+bboxNodes.size()+" of "+graph.getNodeCount());
         start = System.nanoTime();
-        IntArrayDeque nodes =topoSortNodes(bboxNodes, level, req.getCoreSize());
+        IntArrayDeque nodes = topoSortNodes(bboxNodes, level, req.getCoreSize());
         log.info("TopSort took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
-        log.info("Nodes after TopSort: "+nodes.size());
+        log.info("Nodes after TopSort: (with coreSize = "+req.getCoreSize()+") "+nodes.size());
 
 
         start = System.nanoTime();
         ArrayList<BBBundleEdge> upEdges = new ArrayList<>();
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
-        extractEdges(nodes, upEdges, downEdges, level, req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+        extractEdges(nodes, upEdges, downEdges, level, req.getCoreSize(),req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
 
         log.info("Extract edges took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
         log.info("UpEdges: "+upEdges.size()+ ", downEdges: "+downEdges.size());

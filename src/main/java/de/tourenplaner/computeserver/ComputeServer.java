@@ -22,6 +22,7 @@ import de.tourenplaner.algorithms.bbprioclassic.BBPrioLimitedGraphFactory;
 import de.tourenplaner.algorithms.coregraph.CoreGraphFactory;
 import de.tourenplaner.algorithms.coregraph.UpDownFactory;
 import de.tourenplaner.algorithms.coregraph.WayByNodeIdsFactory;
+import de.tourenplaner.algorithms.drawcore.DrawCoreFactory;
 import de.tourenplaner.algorithms.npcomplete.TravelingSalesmenFactory;
 import de.tourenplaner.algorithms.shortestpath.ShortestPathBDCHFactory;
 import de.tourenplaner.computecore.AlgorithmManagerFactory;
@@ -56,6 +57,7 @@ public class ComputeServer {
 
         reg.registerAlgorithm(new BBPrioLimitedGraphFactory(graph, new PrioDings(graph)));
         reg.registerAlgorithm(new BBBundleFactory(graph, new PrioDings(graph)));
+        reg.registerAlgorithm(new DrawCoreFactory(graph));
     }
 
     private static Logger log = Logger.getLogger("de.tourenplaner");
