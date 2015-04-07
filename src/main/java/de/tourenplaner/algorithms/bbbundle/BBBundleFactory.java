@@ -9,7 +9,6 @@ import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.computecore.RequestData;
-import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;
 import de.tourenplaner.graphrep.GraphRep;
@@ -29,7 +28,6 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
     private static final class MapType extends TypeReference<Map<String, Object>> {
     }
 
-    private static final MapType JSONOBJECT = new MapType();
     protected final PrioDings prioDings;
 
 
@@ -137,8 +135,6 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
      * Reads ClassicRequestData unless overridden
      */
     public RequestData readRequestData(ObjectMapper mapper, Responder responder, FullHttpRequest request) throws IOException {
-        Map<String, Object> constraints = null;
-        final RequestPoints points = new RequestPoints();
         final ByteBuf content = request.content();
         if (content.readableBytes() > 0) {
 

@@ -48,7 +48,6 @@ public class BBPrioGraphFactory extends GraphAlgorithmFactory {
 	private static final class MapType extends TypeReference<Map<String, Object>> {
 	}
 
-	private static final MapType JSONOBJECT = new MapType();
 	protected final PrioDings prioDings;
 
 

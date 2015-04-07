@@ -46,7 +46,6 @@ public class  AlgorithmHandler extends RequestHandler {
     private static final class MapType extends TypeReference<Map<String, Object>> {
     }
 
-    private static final MapType JSONOBJECT = new MapType();
     private static final ObjectMapper mapper = new ObjectMapper();
     private final ComputeCore computer;
     private final AlgorithmRegistry algReg;
