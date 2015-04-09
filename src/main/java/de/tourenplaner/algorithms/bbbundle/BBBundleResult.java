@@ -20,20 +20,30 @@ public final class BBBundleResult implements StreamJsonWriter {
     private final ArrayList<BBBundleEdge> upEdges;
     private final ArrayList<BBBundleEdge> downEdges;
     private final int nodeCount;
+    private final int coreSize;
     private final GraphRep graph;
 
-    public BBBundleResult(GraphRep graph, int nodeCount, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges) {
+    public BBBundleResult(GraphRep graph, int nodeCount, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int coreSize) {
         this.upEdges = upEdges;
         this.downEdges = downEdges;
         this.nodeCount= nodeCount;
         this.graph = graph;
+        this.coreSize = coreSize;
     }
 
     @Override
     public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
         JsonGenerator gen = mapper.getFactory().createGenerator(stream);
         gen.writeStartObject();
+        // Head
+        gen.writeObjectFieldStart("head");
         gen.writeNumberField("nodeCount", nodeCount);
+        gen.writeNumberField("upEdgeCount", upEdges.size());
+        gen.writeNumberField("downEdgeCount", downEdges.size());
+        gen.writeNumberField("coreSize", coreSize);
+        gen.writeEndObject();
+        // Edges
+        gen.writeObjectFieldStart("edges");
         gen.writeArrayFieldStart("upEdges");
         for (BBBundleEdge e : upEdges) {
             gen.writeStartObject();
@@ -63,7 +73,7 @@ public final class BBBundleResult implements StreamJsonWriter {
             gen.writeEndObject();
         }
         gen.writeEndArray();
-
+        gen.writeEndObject();
         gen.writeEndObject();
         gen.flush();
     }
