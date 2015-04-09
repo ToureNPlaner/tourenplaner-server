@@ -182,7 +182,8 @@ public class BBBundle extends PrioAlgorithm {
                 if (trgtRank < P || trgtRank < nodeRank) {
                     break;
                 }
-                int srcIdMapped = (nodeId >= coreSize) ? mappedIds[nodeId] : nodeId;
+
+                int srcIdMapped = mappedIds[nodeId];
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
                 unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
@@ -200,8 +201,9 @@ public class BBBundle extends PrioAlgorithm {
                 if (srcRank < P || srcRank < nodeRank) {
                     break;
                 }
+
                 int srcIdMapped = (srcId >= coreSize) ? mappedIds[srcId] : srcId;
-                int trgtIdMapped = (nodeId >= coreSize) ? mappedIds[nodeId] : nodeId;
+                int trgtIdMapped = mappedIds[nodeId];
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
                 unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 downEdges.add(e);
@@ -263,6 +265,6 @@ public class BBBundle extends PrioAlgorithm {
 
         log.info("Extract edges took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
-        request.setResultObject(new BBBundleResult(graph, nodes.size(), upEdges, downEdges));
+        request.setResultObject(new BBBundleResult(graph, nodes.size(), upEdges, downEdges, req.getCoreSize()));
     }
 }
