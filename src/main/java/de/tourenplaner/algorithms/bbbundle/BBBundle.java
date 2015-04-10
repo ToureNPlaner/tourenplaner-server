@@ -120,9 +120,9 @@ public class BBBundle extends PrioAlgorithm {
     }
 
     public void unpack(int index, IntArrayList unpackIds, double minLen, double maxLen, double maxRatio) {
-        if (drawn.get(index)) {
+        /*if (drawn.get(index)) {
             return;
-        }
+        }*/
         double edgeLen = ((double) graph.getEuclidianDist(index));
 
         int skipA = graph.getFirstShortcuttedEdge(index);
