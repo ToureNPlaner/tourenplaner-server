@@ -27,31 +27,28 @@ import java.util.List;
 import java.util.PriorityQueue;
 import java.util.logging.Logger;
 
-class BDPQElement implements Comparable<BDPQElement> {
-
-    public int key;
-    public int value;
-    public int queue;
-
-    BDPQElement(int a, int b, int c) {
-        key = a;
-        value = b;
-        queue = c;
-    }
-
-    public int compareTo(BDPQElement o) {
-        if (key > o.key) return 1;
-        else if (key == o.key) return 0;
-        else return -1;
-    }
-}
-
 /**
  * Shortest Path Algorithm taking advantage of Contraction Hierarchies
  *
  * @author Stefan Funke, Niklas Schnelle
  */
 public class ShortestPathBDCH extends ShortestPath {
+    private final class BDPQElement implements Comparable<BDPQElement> {
+
+        public int key;
+        public int value;
+        public int queue;
+
+        BDPQElement(int a, int b, int c) {
+            key = a;
+            value = b;
+            queue = c;
+        }
+
+        public int compareTo(BDPQElement o) {
+            return key - o.key;
+        }
+    }
 
     private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
 
