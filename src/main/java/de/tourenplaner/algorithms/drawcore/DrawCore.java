@@ -39,7 +39,7 @@ public class DrawCore extends GraphAlgorithm {
                 // Shortcut and skipped edges in core so we get them and don't need the shortcut itself
                 int skipA = graph.getFirstShortcuttedEdge(edgeId);
                 if(skipA > 0 && graph.getTarget(skipA) < req.nodeCount) {
-                    break;
+                    continue;
                 }
                 BBBundleEdge edge = new BBBundleEdge(edgeId, nodeId, trgtId, graph.getDist(edgeId));
                 // TODO how far do we need to unpack the CORE?
