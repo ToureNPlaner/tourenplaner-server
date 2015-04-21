@@ -41,38 +41,62 @@ public class BBBundle extends PrioAlgorithm {
 
     private IntArrayDeque topoSortNodes(IntArrayList bboxNodes, int P, int coreSize) {
         IntArrayDeque topSorted = new IntArrayDeque(bboxNodes.size());
-        IntStack stack = new IntStack();
-        int currIdMap = coreSize;
+
+
         for (int i = 0; i < bboxNodes.size(); ++i) {
-            int nodeId = bboxNodes.get(i);
-            // We pnly want nodes that aren't in the core because we got them already
-            if (nodeId >= coreSize) {
-                dfsState[nodeId] = DISCOVERED;
-                needClear.add(nodeId);
-                stack.push(nodeId);
+            int bboxNodeId = bboxNodes.get(i);
+            // We only want nodes that aren't in the core because we got them already
+            if (bboxNodeId >= coreSize && dfsState[bboxNodeId] == UNSEEN) {
+                dfs(topSorted, bboxNodeId, coreSize);
             }
         }
+        int currMapId = coreSize;
+        for (IntCursor ic: topSorted) {
+            assert dfsState[ic.value] == COMPLETED;
+            mappedIds[ic.value] = currMapId++;
+        }
+
+        for (IntCursor ic : needClear) {
+            dfsState[ic.value] = UNSEEN;
+        }
+        needClear.clear();
+
+        return topSorted;
+    }
+
+    private void dfs(IntArrayDeque topSorted, int bboxNodeId, int coreSize) {
+        IntStack stack = new IntStack();
+        dfsState[bboxNodeId] = DISCOVERED;
+        needClear.add(bboxNodeId);
+        stack.push(bboxNodeId);
 
         while (!stack.isEmpty()) {
             int nodeId = stack.peek();
-            int nodeRank = graph.getRank(nodeId);
+
             switch (dfsState[nodeId]) {
                 case DISCOVERED: {
                     dfsState[nodeId] = ACTIVE;
+                    int nodeRank = graph.getRank(nodeId);
+                    if(nodeId == 4480) {
+                        log.info("Need to find 1940");
+                    }
                     // Up-Out edges
                     for (int upEdgeNum = graph.getOutEdgeCount(nodeId) - 1; upEdgeNum >= 0; --upEdgeNum) {
                         int edgeId = graph.getOutEdgeId(nodeId, upEdgeNum);
                         int trgtId = graph.getTarget(edgeId);
                         int trgtRank = graph.getRank(trgtId);
-                        if (dfsState[trgtId] > 0 || trgtId < coreSize) {
-                            continue;
-                        }
-
                         // Out edges are sorted by target rank ascending, mind we're going down
-                        if (trgtRank < P || trgtRank < nodeRank) {
+                        if (trgtRank < nodeRank) {
                             break;
                         }
-                        assert dfsState[trgtId] == UNSEEN;
+
+                        assert dfsState[trgtId] != ACTIVE;
+                        if (dfsState[trgtId] == COMPLETED || trgtId < coreSize) {
+                            continue;
+                        }
+                        assert nodeRank <= trgtRank; // up edge
+                        assert nodeId >= trgtId; // up edge + nodes sorted by rank ascending
+
                         dfsState[trgtId] = DISCOVERED;
                         needClear.add(trgtId);
                         stack.push(trgtId);
@@ -82,16 +106,21 @@ public class BBBundle extends PrioAlgorithm {
                     for (int downEdgeNum = 0; downEdgeNum < graph.getInEdgeCount(nodeId); ++downEdgeNum) {
                         int edgeId = graph.getInEdgeId(nodeId, downEdgeNum);
                         int srcId = graph.getSource(edgeId);
-                        if (dfsState[srcId] > 0 || srcId < coreSize) {
-                            continue;
-                        }
-
                         int srcRank = graph.getRank(srcId);
+
                         // In edges are sorted by source rank descending
-                        if (srcRank < P || srcRank < nodeRank) {
+                        if (srcRank < nodeRank) {
                             break;
                         }
-                        assert dfsState[srcId] == UNSEEN;
+
+                        assert dfsState[srcId] != ACTIVE;
+                        if (dfsState[srcId] == COMPLETED || srcId < coreSize) {
+                            continue;
+                        }
+                        assert nodeRank <= srcRank; // down edge
+                        assert nodeId >= srcId; // down edge + nodes sorted by rank ascending
+
+
                         dfsState[srcId] = DISCOVERED;
                         needClear.add(srcId);
                         stack.push(srcId);
@@ -100,23 +129,16 @@ public class BBBundle extends PrioAlgorithm {
                 }
                 case ACTIVE: {
                     dfsState[nodeId] = COMPLETED;
-                    stack.pop();
-                    topSorted.addFirst(nodeId);
-                    mappedIds[nodeId] = currIdMap++;
+                    topSorted.addFirst(stack.pop());
                     break;
                 }
-                default:
-                    log.info("Crazy state dfsState[" + nodeId + "] = " + dfsState[nodeId]);
+                case COMPLETED: // Stale stack entry, ignore
                     stack.pop();
+                    break;
+                default:
+                    throw new RuntimeException("Crazy dfsState "+dfsState[nodeId]);
             }
         }
-
-        for (IntCursor ic : needClear) {
-            dfsState[ic.value] = UNSEEN;
-        }
-        needClear.clear();
-
-        return topSorted;
     }
 
     public void unpack(int index, IntArrayList unpackIds, double minLen, double maxLen, double maxRatio) {
@@ -135,7 +157,7 @@ public class BBBundle extends PrioAlgorithm {
 
         int skipB = graph.getSecondShortcuttedEdge(index);
         /*
-		*              |x1 y1 1|
+        *              |x1 y1 1|
 		* A = abs(1/2* |x2 y2 1|)= 1/2*Baseline*Height
 		*              |x3 y3 1|
 		*   = 1/2*((x1*y2+y1*x3+x2*y3) - (y2*x3 + y1*x2 + x1*y3))
@@ -167,24 +189,29 @@ public class BBBundle extends PrioAlgorithm {
     }
 
 
-    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int P, int coreSize, double minLen, double maxLen, double maxRatio) {
+    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int coreSize, double minLen, double maxLen, double maxRatio) {
         int edgeCount = 0;
         for (IntCursor ic : nodes) {
             int nodeId = ic.value;
             int nodeRank = graph.getRank(nodeId);
-            // UpOut edges
+            // Up-Out edges
             for (int upEdgeNum = graph.getOutEdgeCount(nodeId) - 1; upEdgeNum >= 0; --upEdgeNum) {
                 int edgeId = graph.getOutEdgeId(nodeId, upEdgeNum);
                 int trgtId = graph.getTarget(edgeId);
                 int trgtRank = graph.getRank(trgtId);
 
                 // Out edges are sorted by target rank ascending, mind we're going down
-                if (trgtRank < P || trgtRank < nodeRank) {
+                if (trgtRank < nodeRank) {
                     break;
                 }
 
+                assert nodeRank <= trgtRank; // up edge
+                assert nodeId >= trgtId; // up edge + nodes sorted by rank ascending
+                assert (trgtId < coreSize) || mappedIds[nodeId] < mappedIds[trgtId];
+
                 int srcIdMapped = mappedIds[nodeId];
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
+
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
                 unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 upEdges.add(e);
@@ -198,12 +225,17 @@ public class BBBundle extends PrioAlgorithm {
 
                 int srcRank = graph.getRank(srcId);
                 // In edges are sorted by source rank descending
-                if (srcRank < P || srcRank < nodeRank) {
+                if (srcRank < nodeRank) {
                     break;
                 }
 
+                assert nodeRank <= srcRank; // down edge
+                assert nodeId >= srcId; // down edge + nodes sorted by rank ascending
+                //assert (srcId < coreSize) || mappedIds[nodeId] < mappedIds[srcId]; // topological order, trgt -> src
+
                 int srcIdMapped = (srcId >= coreSize) ? mappedIds[srcId] : srcId;
                 int trgtIdMapped = mappedIds[nodeId];
+
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
                 unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 downEdges.add(e);
@@ -261,7 +293,7 @@ public class BBBundle extends PrioAlgorithm {
         start = System.nanoTime();
         ArrayList<BBBundleEdge> upEdges = new ArrayList<>();
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
-        extractEdges(nodes, upEdges, downEdges, level, req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+        extractEdges(nodes, upEdges, downEdges, req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
 
         log.info("Extract edges took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
