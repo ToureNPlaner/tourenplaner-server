@@ -269,8 +269,7 @@ public class GraphRep implements Serializable {
         checkAndSortNodesByRank();
         checkAndSortOutEdges();
         mapAndSortInEdges();
-        generateOutEdgeOffsets();
-        generateInEdgeOffsets();
+        generateOffsets();
         computeXYCoords();
     }
 
@@ -309,7 +308,7 @@ public class GraphRep implements Serializable {
         // Compute the coordinates
         boundWidth = getXYDistance(minX, minY, maxX, minY);
         boundHeight = getXYDistance(minX, minY, minX, maxY);
-        log.log(Level.INFO, "Bounding box: "+minX+", "+minY+ " - "+boundWidth+", "+boundHeight);
+        log.log(Level.INFO, "Bounding box: " + minX + ", " + minY + " - " + boundWidth + ", " + boundHeight);
 
         for (int i = 0; i < nodeCount; ++i) {
             double x = lon2x(this.lon[i] / 10_000_000.0);
@@ -322,26 +321,7 @@ public class GraphRep implements Serializable {
 
     }
 
-    private void generateInEdgeOffsets() {
-        int currentDest;
-        int prevDest = -1;
-        this.offsetIn = new int[nodeCount + 1];
-        for (int i = 0; i < edgeCount; i++) {
-            currentDest = trgt[mappingInToOut[i]];
-            if (currentDest != prevDest) {
-                for (int j = currentDest; j > prevDest; j--) {
-                    offsetIn[j] = i;
-                }
-                prevDest = currentDest;
-            }
-        }
 
-        offsetIn[nodeCount] = edgeCount;
-        // assuming we have at least one edge
-        for (int cnt = nodeCount - 1; offsetIn[cnt] == 0; cnt--) {
-            offsetIn[cnt] = offsetIn[cnt + 1];
-        }
-    }
 
     private void mapAndSortInEdges() {
         this.mappingInToOut = new int[edgeCount];
@@ -352,25 +332,26 @@ public class GraphRep implements Serializable {
         Sorter.sort(new MappingSortAdapter(this));
     }
 
-    private void generateOutEdgeOffsets() {
-        int currentSource;
-        int prevSource = -1;
+    private void generateOffsets() {
+        this.offsetIn = new int[nodeCount + 1];
         this.offsetOut = new int[nodeCount + 1];
-        for (int i = 0; i < edgeCount; i++) {
-            currentSource = src[i];
-            if (currentSource != prevSource) {
-                for (int j = currentSource; j > prevSource; j--) {
-                    offsetOut[j] = i;
-                }
-                prevSource = currentSource;
-            }
-        }
 
-        offsetOut[nodeCount] = edgeCount;
-        // assuming we have at least one edge
-        for (int cnt = nodeCount - 1; offsetOut[cnt] == 0; cnt--) {
-            offsetOut[cnt] = offsetOut[cnt + 1];
+        for (int i = 0; i < edgeCount; ++i) {
+            offsetOut[src[i]]++;
+            offsetIn[trgt[mappingInToOut[i]]]++;
         }
+        int outSum = 0;
+        int inSum = 0;
+        for (int i = 0; i < nodeCount; ++i) {
+            int oldOutSum = outSum;
+            int oldInSum = inSum;
+            outSum += offsetOut[i];
+            inSum += offsetIn[i];
+            offsetOut[i] = oldOutSum;
+            offsetIn[i] = oldInSum;
+        }
+        offsetOut[nodeCount] = outSum;
+        offsetIn[nodeCount] = inSum;
     }
 
     /**

@@ -77,9 +77,6 @@ public class BBBundle extends PrioAlgorithm {
                 case DISCOVERED: {
                     dfsState[nodeId] = ACTIVE;
                     int nodeRank = graph.getRank(nodeId);
-                    if(nodeId == 4480) {
-                        log.info("Need to find 1940");
-                    }
                     // Up-Out edges
                     for (int upEdgeNum = graph.getOutEdgeCount(nodeId) - 1; upEdgeNum >= 0; --upEdgeNum) {
                         int edgeId = graph.getOutEdgeId(nodeId, upEdgeNum);
