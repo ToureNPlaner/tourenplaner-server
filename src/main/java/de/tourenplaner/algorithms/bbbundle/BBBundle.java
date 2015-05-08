@@ -1,6 +1,5 @@
 package de.tourenplaner.algorithms.bbbundle;
 
-import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntStack;
@@ -28,7 +27,6 @@ public class BBBundle extends PrioAlgorithm {
 
     private final int[] dfsState;
     private final int[] mappedIds;
-    private final BitSet drawn;
     private final IntArrayList needClear;
 
     public BBBundle(GraphRep graph, PrioDings prioDings) {
@@ -36,7 +34,6 @@ public class BBBundle extends PrioAlgorithm {
         dfsState = new int[graph.getNodeCount()];
         mappedIds = new int[graph.getNodeCount()];
         needClear = new IntArrayList();
-        drawn = new BitSet(graph.getEdgeCount());
     }
 
     private IntArrayDeque topoSortNodes(IntArrayList bboxNodes, int P, int coreSize) {
@@ -147,7 +144,6 @@ public class BBBundle extends PrioAlgorithm {
         int skipA = graph.getFirstShortcuttedEdge(index);
 
         if (skipA == -1 || edgeLen <= minLen) {
-            drawn.set(index);
             unpackIds.add(index);
             return;
         }
@@ -175,7 +171,6 @@ public class BBBundle extends PrioAlgorithm {
             double A = Math.abs(0.5 * ((x1 * y2 + y1 * x3 + x2 * y3) - (y2 * x3 + y1 * x2 + x1 * y3)));
             double ratio = 2.0 * A / (edgeLen * edgeLen);
             if (ratio <= maxRatio) {
-                drawn.set(index);
                 unpackIds.add(index);
                 return;
             }
@@ -239,50 +234,57 @@ public class BBBundle extends PrioAlgorithm {
                 edgeCount++;
             }
         }
-        drawn.clear();
         log.info(edgeCount + " edges");
     }
 
-    @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
-        BBBundleRequestData req = (BBBundleRequestData) request.getRequestData();
+    private IntArrayList findBBoxNodes(BBBundleRequestData req) {
         BoundingBox bbox = req.getBbox();
 
         long start = System.nanoTime();
         IntArrayList bboxNodes = new IntArrayList();
         int currNodeCount;
         int level;
-        if (req.mode == BBBundleRequestData.LevelMode.AUTO) {
+        if (req.getMode() == BBBundleRequestData.LevelMode.AUTO) {
+
+            level = graph.getMaxRank();
+            do {
+                level = level - 10;
+                req.setLevel(level);
+                bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
+                currNodeCount = bboxNodes.size();
+            } while (level > 0 && currNodeCount < req.getNodeCount());
+
+        } else if (req.getMode() == BBBundleRequestData.LevelMode.HINTED) {
 
             level = graph.getMaxRank();
             do {
                 level = level - 10;
                 bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
                 currNodeCount = bboxNodes.size();
-            } while (level > 0 && currNodeCount < req.nodeCount);
-
-        } else if (req.mode == BBBundleRequestData.LevelMode.HINTED) {
-
-            level = graph.getMaxRank();
-            do {
-                level = level - 10;
-                bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
-                currNodeCount = bboxNodes.size();
-            } while (level > 0 && currNodeCount < req.nodeCount);
+            } while (level > 0 && currNodeCount < req.getNodeCount());
             log.info("AutoLevel was: " + level);
-            level = (req.getHintLevel() + level) / 2;
+            level = (req.getLevel() + level) / 2;
+            req.setLevel(level);
             bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
 
         } else { // else if (req.mode == BBPrioLimitedRequestData.LevelMode.EXACT){
-            level = req.getHintLevel();
+            level = req.getLevel();
             bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
         }
 
         log.info("ExtractBBox took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
-        log.info("Level was: " + level);
+        log.info("Level was: " + req.getLevel());
         log.info("Nodes extracted: " + bboxNodes.size() + " of " + graph.getNodeCount());
+        return bboxNodes;
+    }
+
+    @Override
+    public void compute(ComputeRequest request) throws ComputeException {
+        BBBundleRequestData req = (BBBundleRequestData) request.getRequestData();
+        IntArrayList bboxNodes = findBBoxNodes(req);
+        long start;
         start = System.nanoTime();
-        IntArrayDeque nodes = topoSortNodes(bboxNodes, level, req.getCoreSize());
+        IntArrayDeque nodes = topoSortNodes(bboxNodes, req.getLevel(), req.getCoreSize());
         log.info("TopSort took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
         log.info("Nodes after TopSort: (with coreSize = " + req.getCoreSize() + ") " + nodes.size());
 
@@ -294,6 +296,6 @@ public class BBBundle extends PrioAlgorithm {
 
         log.info("Extract edges took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
-        request.setResultObject(new BBBundleResult(graph, nodes.size(), upEdges, downEdges, req.getCoreSize()));
+        request.setResultObject(new BBBundleResult(graph, nodes.size(), upEdges, downEdges, req));
     }
 }

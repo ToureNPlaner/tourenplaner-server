@@ -69,9 +69,7 @@ public final class PriorityGrid {
     }
 
     public double getDiff(int x1, int y1, int x2, int y2) {
-        double xDiff = 1.0*(x2-x1)*(x2-x1);
-        double yDiff = 1.0*(y2-y1)*(y2-y1);
-        return Math.sqrt(xDiff + yDiff);
+        return Math.hypot(x2-x1, y2-y1);
     }
     
     int getNextNode(int x, int y, int P) {

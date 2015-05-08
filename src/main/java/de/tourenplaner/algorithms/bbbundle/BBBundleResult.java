@@ -19,16 +19,16 @@ public final class BBBundleResult implements StreamJsonWriter {
     // TODO use IntArrayList
     private final ArrayList<BBBundleEdge> upEdges;
     private final ArrayList<BBBundleEdge> downEdges;
+    private final BBBundleRequestData request;
     private final int nodeCount;
-    private final int coreSize;
     private final GraphRep graph;
 
-    public BBBundleResult(GraphRep graph, int nodeCount, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int coreSize) {
+    public BBBundleResult(GraphRep graph, int nodeCount, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
         this.upEdges = upEdges;
         this.downEdges = downEdges;
         this.nodeCount= nodeCount;
         this.graph = graph;
-        this.coreSize = coreSize;
+        this.request = request;
     }
 
     @Override
@@ -40,7 +40,8 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeNumberField("nodeCount", nodeCount);
         gen.writeNumberField("upEdgeCount", upEdges.size());
         gen.writeNumberField("downEdgeCount", downEdges.size());
-        gen.writeNumberField("coreSize", coreSize);
+        gen.writeNumberField("coreSize", request.getCoreSize());
+        gen.writeNumberField("level", request.getLevel());
         gen.writeEndObject();
         // Edges
         gen.writeObjectFieldStart("edges");
