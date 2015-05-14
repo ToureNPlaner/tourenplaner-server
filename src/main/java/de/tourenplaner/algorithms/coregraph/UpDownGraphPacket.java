@@ -10,6 +10,7 @@ import de.tourenplaner.algorithms.GraphAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.graphrep.GraphRep;
+import de.tourenplaner.utils.Timing;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -154,7 +155,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
         IntArrayList cgraph = new IntArrayList();
         bfsMarkUp(cgraph, points.getPointId(0), maxSearchLevel);
         bfsMarkDown(cgraph, points.getPointId(1), maxSearchLevel);
-        log.info("Took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
+        log.info(Timing.took("bfsMark", start));
         request.setResultObject(new SubgraphResult(graph, cgraph, points.getPointId(0), points.getPointId(1)));
     }
 }

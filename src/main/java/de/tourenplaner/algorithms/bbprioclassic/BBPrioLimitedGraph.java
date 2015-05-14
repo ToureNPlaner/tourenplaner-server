@@ -6,6 +6,7 @@ import de.tourenplaner.algorithms.PrioAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.graphrep.PrioDings;
+import de.tourenplaner.utils.Timing;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -63,14 +64,15 @@ public class BBPrioLimitedGraph extends PrioAlgorithm {
 			nodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
 			currNodeCount = nodes.size();
 		}
+		log.info(Timing.took("NodeSelection", start));
 		log.info("Level was: "+level);
 		log.info("Nodes found: "+currNodeCount);
+		start = System.nanoTime();
 
 		ArrayList<BBPrioResult.Edge> edges = new ArrayList<BBPrioResult.Edge>();
 		edx.getPriorityEdges(nodes, edges, req.getMinLen(), req.getMaxLen(), req.getMaxRatio(), level);
+		log.info(Timing.took("edx.getPriorityEdges", start));
 
-
-		log.info("Took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
 		request.setResultObject(new BBPrioResult(graph, nodes, edges));
 	}
 }

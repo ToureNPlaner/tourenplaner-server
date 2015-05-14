@@ -5,6 +5,7 @@ import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.GraphAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.GraphRep;
+import de.tourenplaner.utils.Timing;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -57,7 +58,7 @@ public class CoreGraph extends GraphAlgorithm {
 
 			}
 		}
-		log.info("Took " + (double)(System.nanoTime() - start) / 1000000.0+" ms");
+		log.info(Timing.took("ExtractingCore", start));
 		request.setResultObject(new SubgraphResult(graph, cgraph, -1, -1));
 	}
 }

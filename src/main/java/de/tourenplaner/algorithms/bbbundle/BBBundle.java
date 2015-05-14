@@ -10,6 +10,7 @@ import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.graphrep.PrioDings;
+import de.tourenplaner.utils.Timing;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -272,7 +273,7 @@ public class BBBundle extends PrioAlgorithm {
             bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
         }
 
-        log.info("ExtractBBox took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
+        log.info(Timing.took("ExtractBBox", start));
         log.info("Level was: " + req.getLevel());
         log.info("Nodes extracted: " + bboxNodes.size() + " of " + graph.getNodeCount());
         return bboxNodes;
@@ -285,7 +286,7 @@ public class BBBundle extends PrioAlgorithm {
         long start;
         start = System.nanoTime();
         IntArrayDeque nodes = topoSortNodes(bboxNodes, req.getLevel(), req.getCoreSize());
-        log.info("TopSort took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
+        log.info(Timing.took("TopSort", start));
         log.info("Nodes after TopSort: (with coreSize = " + req.getCoreSize() + ") " + nodes.size());
 
 
@@ -294,7 +295,7 @@ public class BBBundle extends PrioAlgorithm {
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
         extractEdges(nodes, upEdges, downEdges, req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
 
-        log.info("Extract edges took " + (double) (System.nanoTime() - start) / 1000000.0 + " ms");
+        log.info(Timing.took("Extracting edges", start));
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
         request.setResultObject(new BBBundleResult(graph, nodes.size(), upEdges, downEdges, req));
     }
