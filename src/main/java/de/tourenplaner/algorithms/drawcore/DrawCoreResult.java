@@ -60,6 +60,7 @@ public class DrawCoreResult implements StreamJsonWriter {
         gen.writeNumber(graph.getYPos(s));
         gen.writeNumber(graph.getXPos(t));
         gen.writeNumber(graph.getYPos(t));
-        gen.writeNumber(type);
+        float speed = (float) graph.getEuclidianDist(edgeId) / (float) graph.getDist(edgeId);
+        gen.writeNumber(speed);
     }
 }

@@ -84,11 +84,11 @@ public final class BBBundleResult implements StreamJsonWriter {
         int s = graph.getSource(edgeId);
         int t = graph.getTarget(edgeId);
         // TODO we need to save the real type
-        int type = 0;
         gen.writeNumber(graph.getXPos(s));
         gen.writeNumber(graph.getYPos(s));
         gen.writeNumber(graph.getXPos(t));
         gen.writeNumber(graph.getYPos(t));
-        gen.writeNumber(type);
+        float speed = (float) graph.getEuclidianDist(edgeId) / (float) graph.getDist(edgeId);
+        gen.writeNumber(speed);
     }
 }
