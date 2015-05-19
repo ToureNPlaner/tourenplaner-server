@@ -81,7 +81,7 @@ public class BBBundle extends PrioAlgorithm {
                         int trgtId = graph.getTarget(edgeId);
                         int trgtRank = graph.getRank(trgtId);
                         // Out edges are sorted by target rank ascending, mind we're going down
-                        if (trgtRank <= nodeRank) {
+                        if (trgtRank < nodeRank) {
                             break;
                         }
 
@@ -104,7 +104,7 @@ public class BBBundle extends PrioAlgorithm {
                         int srcRank = graph.getRank(srcId);
 
                         // In edges are sorted by source rank descending
-                        if (srcRank <= nodeRank) {
+                        if (srcRank < nodeRank) {
                             break;
                         }
 
@@ -194,7 +194,7 @@ public class BBBundle extends PrioAlgorithm {
                 int trgtRank = graph.getRank(trgtId);
 
                 // Out edges are sorted by target rank ascending, mind we're going down
-                if (trgtRank <= nodeRank) {
+                if (trgtRank < nodeRank) {
                     break;
                 }
 
@@ -218,7 +218,7 @@ public class BBBundle extends PrioAlgorithm {
 
                 int srcRank = graph.getRank(srcId);
                 // In edges are sorted by source rank descending
-                if (srcRank <= nodeRank) {
+                if (srcRank < nodeRank) {
                     break;
                 }
 
