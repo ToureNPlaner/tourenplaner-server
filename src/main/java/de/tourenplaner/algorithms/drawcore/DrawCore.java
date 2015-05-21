@@ -25,28 +25,28 @@ public class DrawCore extends GraphAlgorithm {
 
         ArrayList<BBBundleEdge> edges =  new ArrayList<>();
         // Nodes are sorted by rank descending, so the highest nodeCount nodes are 0,..,nodeCount-1
-        for (int nodeId = 0; nodeId < req.nodeCount -1; ++nodeId) {
+        for (int nodeId = 0; nodeId < req.getNodeCount() -1; ++nodeId) {
             // Out edges are sorted by target rank ascending, go them backwards so we can
             // break as soon as targets get too low
             for (int outEdgeNum = graph.getOutEdgeCount(nodeId) - 1; outEdgeNum >= 0; --outEdgeNum) {
                 int edgeId = graph.getOutEdgeId(nodeId, outEdgeNum);
                 int trgtId = graph.getTarget(edgeId);
                 // Too low
-                if(trgtId >= req.nodeCount) {
+                if(trgtId >= req.getNodeCount()) {
                     break;
                 }
 
                 // Shortcut and skipped edges in core so we get them and don't need the shortcut itself
                 int skipA = graph.getFirstShortcuttedEdge(edgeId);
-                if(skipA > 0 && graph.getTarget(skipA) < req.nodeCount) {
+                if(skipA > 0 && graph.getTarget(skipA) < req.getNodeCount()) {
                     continue;
                 }
                 BBBundleEdge edge = new BBBundleEdge(edgeId, nodeId, trgtId, graph.getDist(edgeId));
                 // TODO how far do we need to unpack the CORE?
-                edge.unpacked.add(edgeId);
+                BBBundleEdge.unpack(graph, edgeId, edge.unpacked, req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
                 edges.add(edge);
             }
         }
-        request.setResultObject(new DrawCoreResult(graph, edges, req.nodeCount));
+        request.setResultObject(new DrawCoreResult(graph, edges, req.getNodeCount()));
     }
 }

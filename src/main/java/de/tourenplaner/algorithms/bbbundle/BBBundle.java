@@ -136,51 +136,6 @@ public class BBBundle extends PrioAlgorithm {
         }
     }
 
-    public void unpack(int index, IntArrayList unpackIds, double minLen, double maxLen, double maxRatio) {
-        /*if (drawn.get(index)) {
-            return;
-        }*/
-        double edgeLen = ((double) graph.getEuclidianDist(index));
-
-        int skipA = graph.getFirstShortcuttedEdge(index);
-
-        if (skipA == -1 || edgeLen <= minLen) {
-            unpackIds.add(index);
-            return;
-        }
-
-        int skipB = graph.getSecondShortcuttedEdge(index);
-        /*
-		*              |x1 y1 1|
-		* A = abs(1/2* |x2 y2 1|)= 1/2*Baseline*Height
-		*              |x3 y3 1|
-		*   = 1/2*((x1*y2+y1*x3+x2*y3) - (y2*x3 + y1*x2 + x1*y3))
-		* Height = 2*A/Baseline
-		* ratio = Height/Baseline
-		* */
-        if (edgeLen <= maxLen) {
-            int middle = graph.getTarget(skipA);
-
-            int srcId = graph.getSource(index);
-            double x1 = graph.getXPos(srcId);
-            double y1 = graph.getYPos(srcId);
-            double x2 = graph.getXPos(middle);
-            double y2 = graph.getYPos(middle);
-            int trgtId = graph.getTarget(index);
-            double x3 = graph.getXPos(trgtId);
-            double y3 = graph.getYPos(trgtId);
-            double A = Math.abs(0.5 * ((x1 * y2 + y1 * x3 + x2 * y3) - (y2 * x3 + y1 * x2 + x1 * y3)));
-            double ratio = 2.0 * A / (edgeLen * edgeLen);
-            if (ratio <= maxRatio) {
-                unpackIds.add(index);
-                return;
-            }
-        }
-
-        unpack(skipA, unpackIds, minLen, maxLen, maxRatio);
-        unpack(skipB, unpackIds, minLen, maxLen, maxRatio);
-    }
-
 
     private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int coreSize, double minLen, double maxLen, double maxRatio) {
         int edgeCount = 0;
@@ -206,7 +161,7 @@ public class BBBundle extends PrioAlgorithm {
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
+                BBBundleEdge.unpack(graph, edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 upEdges.add(e);
                 edgeCount++;
             }
@@ -230,7 +185,7 @@ public class BBBundle extends PrioAlgorithm {
                 int trgtIdMapped = mappedIds[nodeId];
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpack(edgeId, e.unpacked, minLen, maxLen, maxRatio);
+                BBBundleEdge.unpack(graph, edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 downEdges.add(e);
                 edgeCount++;
             }

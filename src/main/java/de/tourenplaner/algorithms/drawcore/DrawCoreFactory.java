@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
+import de.tourenplaner.algorithms.bbbundle.BBBundleRequestData;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;
@@ -37,6 +38,11 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
     public RequestData readRequestData(ObjectMapper mapper, Responder responder, FullHttpRequest request) throws IOException {
         int nodeCount = 400;
         final ByteBuf content = request.content();
+        BBBundleRequestData.LevelMode mode = BBBundleRequestData.LevelMode.EXACT;
+        double minLen = 20.0;
+        double maxLen = 400.0;
+        double maxRatio = 0.01;
+
         if (content.readableBytes() > 0) {
 
             final JsonParser jp = mapper.getFactory().createParser(new ByteBufInputStream(content));
@@ -49,6 +55,8 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
             String fieldname;
             JsonToken token;
             boolean finished = false;
+
+
             while (!finished) {
                 //move to next field or END_OBJECT/EOF
                 token = jp.nextToken();
@@ -62,6 +70,19 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
                             throw new JsonParseException("nodeCount is not an int", jp.getCurrentLocation());
                         }
                         nodeCount = jp.getIntValue();
+                    } else if ("mode".equals(fieldname)) {
+                        String m = jp.getText();
+                        if (m.equalsIgnoreCase("hinted")){
+                            mode = BBBundleRequestData.LevelMode.HINTED;
+                        } else if (m.equalsIgnoreCase("exact")) {
+                            mode = BBBundleRequestData.LevelMode.EXACT;
+                        }
+                    } else if ("minLen".equals(fieldname)) {
+                        minLen = jp.getDoubleValue();
+                    }else if ("maxLen".equals(fieldname)) {
+                        maxLen = jp.getDoubleValue();
+                    }else if ("maxRatio".equals(fieldname)) {
+                        maxRatio = jp.getDoubleValue();
                     } else {
                         // ignore for now TODO: user version string etc.
                         if ((token == JsonToken.START_ARRAY) || (token == JsonToken.START_OBJECT)) {
@@ -84,7 +105,7 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
             responder.writeErrorMessage(ErrorMessage.EBADJSON_NOCONTENT);
             return null;
         }
-        return new DrawCoreRequestData(this.getURLSuffix(), nodeCount);
+        return new DrawCoreRequestData(this.getURLSuffix(), nodeCount, mode, minLen, maxLen, maxRatio);
     }
 
     @Override
