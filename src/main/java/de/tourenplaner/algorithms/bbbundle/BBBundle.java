@@ -137,7 +137,7 @@ public class BBBundle extends PrioAlgorithm {
     }
 
 
-    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int coreSize, double minLen, double maxLen, double maxRatio) {
+    private void extractEdges(BoundingBox bbox, IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int coreSize, double minLen, double maxLen, double maxRatio) {
         int edgeCount = 0;
         for (IntCursor ic : nodes) {
             int nodeId = ic.value;
@@ -161,7 +161,7 @@ public class BBBundle extends PrioAlgorithm {
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                BBBundleEdge.unpack(graph, edgeId, e.unpacked, minLen, maxLen, maxRatio);
+                BBBundleEdge.unpack(graph, bbox, edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 upEdges.add(e);
                 edgeCount++;
             }
@@ -185,7 +185,7 @@ public class BBBundle extends PrioAlgorithm {
                 int trgtIdMapped = mappedIds[nodeId];
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                BBBundleEdge.unpack(graph, edgeId, e.unpacked, minLen, maxLen, maxRatio);
+                BBBundleEdge.unpack(graph, bbox, edgeId, e.unpacked, minLen, maxLen, maxRatio);
                 downEdges.add(e);
                 edgeCount++;
             }
@@ -248,7 +248,7 @@ public class BBBundle extends PrioAlgorithm {
         start = System.nanoTime();
         ArrayList<BBBundleEdge> upEdges = new ArrayList<>();
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
-        extractEdges(nodes, upEdges, downEdges, req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+        extractEdges(req.getBbox(), nodes, upEdges, downEdges, req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
 
         log.info(Timing.took("Extracting edges", start));
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());

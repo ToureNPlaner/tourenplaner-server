@@ -16,6 +16,7 @@
 
 package de.tourenplaner.graphrep;
 
+import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.utils.SortAdapter;
 import de.tourenplaner.utils.Sorter;
 
@@ -201,8 +202,7 @@ public class GraphRep implements Serializable {
     protected final int[] xPos;
     protected final int[] yPos;
     private int maxRank;
-    private int boundHeight;
-    private int boundWidth;
+    private BoundingBox bbox;
 
     // edges
     protected final int[] src;
@@ -274,10 +274,10 @@ public class GraphRep implements Serializable {
     }
 
     private int getXYDistance(double x1, double y1, double x2, double y2) {
-        float lon1 = (float) (x1 / 180 * Math.PI);
-        float lon2 = (float) (x2 / 180 * Math.PI);
-        float lat1 = (float) (y1 / 180 * Math.PI);
-        float lat2 = (float) (y2 / 180 * Math.PI);
+        double lon1 =  (x1 / 180 * Math.PI);
+        double lon2 = (x2 / 180 * Math.PI);
+        double lat1 = (y1 / 180 * Math.PI);
+        double lat2 = (y2 / 180 * Math.PI);
         int dist = (int) (1000 * 6378 *Math.acos(Math.sin(lat1)*Math.sin(lat2) + Math.cos(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1)));
         return dist;
     }
@@ -287,16 +287,16 @@ public class GraphRep implements Serializable {
     }
 
     private void computeXYCoords() {
-        double minX = Float.MAX_VALUE;
-        double minY = Float.MAX_VALUE;
-        double maxX = Float.MIN_VALUE;
-        double maxY = Float.MIN_VALUE;
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double maxX = Double.MIN_VALUE;
+        double maxY = Double.MIN_VALUE;
         int tmpRank = 0;
 
         // Find min/max
         for (int i = 0; i < nodeCount; ++i) {
-            double x = lon2x(this.lon[i] / 10_000_000.0);
-            double y = (this.lat[i] / 10_000_000.0);
+            int x = (int) lon2x(this.lon[i] / 10_000_000.0);
+            int y = (int) (this.lat[i] / 10_000_000.0);
             tmpRank = this.rank[i];
             minX = Math.min(minX, x);
             minY = Math.min(minY, y);
@@ -306,21 +306,31 @@ public class GraphRep implements Serializable {
         }
 
         // Compute the coordinates
-        boundWidth = getXYDistance(minX, minY, maxX, minY);
-        boundHeight = getXYDistance(minX, minY, minX, maxY);
-        log.log(Level.INFO, "Bounding box: " + minX + ", " + minY + " - " + boundWidth + ", " + boundHeight);
+        int boundWidth = getXYDistance(minX, minY, maxX, minY);
+        int boundHeight = getXYDistance(minX, minY, minX, maxY);
+
+
+        int minXfinal = Integer.MAX_VALUE;
+        int minYfinal = Integer.MAX_VALUE;
+        int maxXfinal = Integer.MIN_VALUE;
+        int maxYfinal = Integer.MIN_VALUE;
 
         for (int i = 0; i < nodeCount; ++i) {
             double x = lon2x(this.lon[i] / 10_000_000.0);
             double y = (this.lat[i] / 10_000_000.0);
-            int xDist = getXYDistance(x, minY, minX, minY);
-            int yDist = getXYDistance(minX, y, minX, minY);
-            this.xPos[i] = xDist;
-            this.yPos[i] = boundHeight - yDist;
+            int xPos = getXYDistance(x, minY, minX, minY);
+            int yPos = boundHeight - getXYDistance(minX, y, minX, minY);
+            minXfinal = Math.min(minXfinal, xPos);
+            minYfinal = Math.min(minYfinal, yPos);
+            maxXfinal = Math.max(maxXfinal, xPos);
+            maxYfinal = Math.max(maxYfinal, yPos);
+            this.xPos[i] = xPos;
+            this.yPos[i] = yPos;
         }
+        this.bbox = new BoundingBox(minXfinal, minYfinal, maxXfinal-minXfinal, maxYfinal-minYfinal);
+        log.log(Level.INFO, "Bounding box: " + bbox.x + ", " + bbox.y + " - " + bbox.width + ", " + bbox.height);
 
     }
-
 
 
     private void mapAndSortInEdges() {
@@ -612,6 +622,11 @@ public class GraphRep implements Serializable {
         return offsetOut[nodeId] + edgeNum;
     }
 
+    /**
+     * Get the smallest BoundingBox containing the entire graph
+     * @return
+     */
+    public BoundingBox getBbox() {return bbox;}
 
     /**
      * Get the projected x position

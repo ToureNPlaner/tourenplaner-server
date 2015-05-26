@@ -1,6 +1,7 @@
 package de.tourenplaner.algorithms.bbbundle;
 
 import com.carrotsearch.hppc.IntArrayList;
+import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.graphrep.GraphRep;
 
 /**
@@ -21,11 +22,11 @@ public class BBBundleEdge {
         this.unpacked = new IntArrayList();
     }
 
-    public static void unpack(GraphRep graph, int index, IntArrayList unpackIds, double minLen, double maxLen, double maxRatio) {
+    public static void unpack(GraphRep graph, BoundingBox bbox, int index, IntArrayList unpackIds, double minLen, double maxLen, double maxRatio) {
         /*if (drawn.get(index)) {
             return;
         }*/
-        double edgeLen = ((double) graph.getEuclidianDist(index));
+        int edgeLen = graph.getEuclidianDist(index);
 
         int skipA = graph.getFirstShortcuttedEdge(index);
 
@@ -35,6 +36,18 @@ public class BBBundleEdge {
         }
 
         int skipB = graph.getSecondShortcuttedEdge(index);
+
+        int srcId = graph.getSource(index);
+        double x1 = graph.getXPos(srcId);
+        double y1 = graph.getYPos(srcId);
+        int trgtId = graph.getTarget(index);
+        double x3 = graph.getXPos(trgtId);
+        double y3 = graph.getYPos(trgtId);
+        if(!bbox.contains((int) x1, (int) y1) && !bbox.contains((int)x3, (int)y3)){
+            unpackIds.add(index);
+            return;
+        }
+
         /*
 		*              |x1 y1 1|
 		* A = abs(1/2* |x2 y2 1|)= 1/2*Baseline*Height
@@ -45,15 +58,8 @@ public class BBBundleEdge {
 		* */
         if (edgeLen <= maxLen) {
             int middle = graph.getTarget(skipA);
-
-            int srcId = graph.getSource(index);
-            double x1 = graph.getXPos(srcId);
-            double y1 = graph.getYPos(srcId);
             double x2 = graph.getXPos(middle);
             double y2 = graph.getYPos(middle);
-            int trgtId = graph.getTarget(index);
-            double x3 = graph.getXPos(trgtId);
-            double y3 = graph.getYPos(trgtId);
             double A = Math.abs(0.5 * ((x1 * y2 + y1 * x3 + x2 * y3) - (y2 * x3 + y1 * x2 + x1 * y3)));
             double ratio = 2.0 * A / (edgeLen * edgeLen);
             if (ratio <= maxRatio) {
@@ -62,7 +68,7 @@ public class BBBundleEdge {
             }
         }
 
-        unpack(graph, skipA, unpackIds, minLen, maxLen, maxRatio);
-        unpack(graph, skipB, unpackIds, minLen, maxLen, maxRatio);
+        unpack(graph, bbox, skipA, unpackIds, minLen, maxLen, maxRatio);
+        unpack(graph, bbox, skipB, unpackIds, minLen, maxLen, maxRatio);
     }
 }
