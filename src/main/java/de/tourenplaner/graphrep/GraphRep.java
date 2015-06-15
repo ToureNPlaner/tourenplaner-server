@@ -201,6 +201,10 @@ public class GraphRep implements Serializable {
 
     protected final int[] xPos;
     protected final int[] yPos;
+
+    protected int[] offsetOut;
+    protected int[] offsetIn;
+
     private int maxRank;
     private BoundingBox bbox;
 
@@ -213,8 +217,7 @@ public class GraphRep implements Serializable {
     protected final int[] shortedEdge1;
     protected final int[] shortedEdge2;
 
-    protected int[] offsetOut;
-    protected int[] offsetIn;
+
 
     /**
      * The constant used to compute time traveled on an edge from it's

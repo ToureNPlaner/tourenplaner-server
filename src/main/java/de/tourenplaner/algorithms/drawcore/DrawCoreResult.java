@@ -1,5 +1,6 @@
 package de.tourenplaner.algorithms.drawcore;
 
+import com.carrotsearch.hppc.IntArrayList;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.bbbundle.BBBundleEdge;
@@ -18,11 +19,13 @@ public class DrawCoreResult implements StreamJsonWriter {
     private final ArrayList<BBBundleEdge> edges;
     private final int coreSize;
     private final GraphRep graph;
+    private final IntArrayList edgesToDraw;
 
-    public DrawCoreResult(GraphRep graph, ArrayList<BBBundleEdge> edges, int coreSize) {
+    public DrawCoreResult(GraphRep graph, ArrayList<BBBundleEdge> edges, IntArrayList edgesToDraw, int coreSize) {
         this.graph = graph;
         this.edges = edges;
         this.coreSize = coreSize;
+        this.edgesToDraw = edgesToDraw;
     }
 
     @Override
@@ -31,6 +34,13 @@ public class DrawCoreResult implements StreamJsonWriter {
         gen.writeStartObject();
         gen.writeNumberField("nodeCount", coreSize);
         gen.writeNumberField("edgeCount", edges.size());
+        // Drawing Data
+        gen.writeArrayFieldStart("draw");
+        for (int i = 0; i < edgesToDraw.size(); ++i) {
+            writeDrawEdge(gen, edgesToDraw.get(i));
+        }
+        gen.writeEndArray();
+        // Edges
         gen.writeArrayFieldStart("edges");
         for (BBBundleEdge e : edges) {
             gen.writeStartObject();
@@ -40,7 +50,7 @@ public class DrawCoreResult implements StreamJsonWriter {
             gen.writeNumberField("edgeId", e.edgeId);
             gen.writeArrayFieldStart("path");
             for (int i = 0; i < e.unpacked.size(); ++i){
-                writeDrawEdge(gen, e, i);
+                gen.writeNumber(e.unpacked.get(i));
             }
             gen.writeEndArray();
             gen.writeEndObject();
@@ -50,8 +60,7 @@ public class DrawCoreResult implements StreamJsonWriter {
         gen.flush();
     }
 
-    public final void writeDrawEdge(JsonGenerator gen, BBBundleEdge e, int i) throws IOException {
-        int edgeId = e.unpacked.get(i);
+    public final void writeDrawEdge(JsonGenerator gen, int edgeId) throws IOException {
         int s = graph.getSource(edgeId);
         int t = graph.getTarget(edgeId);
         // TODO we need to save the real type
@@ -61,6 +70,6 @@ public class DrawCoreResult implements StreamJsonWriter {
         gen.writeNumber(graph.getXPos(t));
         gen.writeNumber(graph.getYPos(t));
         float speed = (float) graph.getEuclidianDist(edgeId) / (float) graph.getDist(edgeId);
-        gen.writeNumber(speed);
+        gen.writeNumber((int)(speed*100));
     }
 }

@@ -132,7 +132,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
     }
 
     /**
-     * Reads ClassicRequestData unless overridden
+     * Reads ClassicRequestData unless overwritten
      */
     public RequestData readRequestData(ObjectMapper mapper, Responder responder, FullHttpRequest request) throws IOException {
         final ByteBuf content = request.content();

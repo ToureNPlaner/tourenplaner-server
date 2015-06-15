@@ -1,5 +1,6 @@
 package de.tourenplaner.algorithms.bbbundle;
 
+import com.carrotsearch.hppc.IntArrayList;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.computecore.StreamJsonWriter;
@@ -16,18 +17,19 @@ import java.util.ArrayList;
 public final class BBBundleResult implements StreamJsonWriter {
 
     //private final GraphRep graph;
-    // TODO use IntArrayList
+    private final IntArrayList edgesToDraw;
     private final ArrayList<BBBundleEdge> upEdges;
     private final ArrayList<BBBundleEdge> downEdges;
     private final BBBundleRequestData request;
     private final int nodeCount;
     private final GraphRep graph;
 
-    public BBBundleResult(GraphRep graph, int nodeCount, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
+    public BBBundleResult(GraphRep graph, int nodeCount, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
+        this.graph = graph;
+        this.nodeCount= nodeCount;
+        this.edgesToDraw = edgesToDraw;
         this.upEdges = upEdges;
         this.downEdges = downEdges;
-        this.nodeCount= nodeCount;
-        this.graph = graph;
         this.request = request;
     }
 
@@ -43,6 +45,12 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeNumberField("coreSize", request.getCoreSize());
         gen.writeNumberField("level", request.getLevel());
         gen.writeEndObject();
+        // Drawing Data
+        gen.writeArrayFieldStart("draw");
+        for (int i = 0; i < edgesToDraw.size(); ++i) {
+            writeDrawEdge(gen, edgesToDraw.get(i));
+        }
+        gen.writeEndArray();
         // Edges
         gen.writeObjectFieldStart("edges");
         gen.writeArrayFieldStart("upEdges");
@@ -51,9 +59,9 @@ public final class BBBundleResult implements StreamJsonWriter {
             gen.writeNumberField("src", e.srcId);
             gen.writeNumberField("trgt", e.trgtId);
             gen.writeNumberField("cost", e.cost);
-            gen.writeArrayFieldStart("draw");
+            gen.writeArrayFieldStart("path");
             for (int i = 0; i < e.unpacked.size(); ++i){
-                writeDrawEdge(gen, e, i);
+                gen.writeNumber(e.unpacked.get(i));
             }
             gen.writeEndArray();
             gen.writeEndObject();
@@ -66,9 +74,9 @@ public final class BBBundleResult implements StreamJsonWriter {
             gen.writeNumberField("src", e.srcId);
             gen.writeNumberField("trgt", e.trgtId);
             gen.writeNumberField("cost", e.cost);
-            gen.writeArrayFieldStart("draw");
+            gen.writeArrayFieldStart("path");
             for (int i = 0; i < e.unpacked.size(); ++i){
-                writeDrawEdge(gen, e, i);
+                gen.writeNumber(e.unpacked.get(i));
             }
             gen.writeEndArray();
             gen.writeEndObject();
@@ -79,8 +87,7 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.flush();
     }
 
-    public final void writeDrawEdge(JsonGenerator gen, BBBundleEdge e, int i) throws IOException {
-        int edgeId = e.unpacked.get(i);
+    public final void writeDrawEdge(JsonGenerator gen, int edgeId) throws IOException {
         int s = graph.getSource(edgeId);
         int t = graph.getTarget(edgeId);
         // TODO we need to save the real type
@@ -89,6 +96,6 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeNumber(graph.getXPos(t));
         gen.writeNumber(graph.getYPos(t));
         float speed = (float) graph.getEuclidianDist(edgeId) / (float) graph.getDist(edgeId);
-        gen.writeNumber(speed);
+        gen.writeNumber((int)(speed*100));
     }
 }
