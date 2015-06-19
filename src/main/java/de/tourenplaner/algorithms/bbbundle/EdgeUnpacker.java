@@ -31,7 +31,9 @@ public class EdgeUnpacker {
 
         if (skipA == -1 || edgeLen <= minLen) {
             edgesToDraw.add(edgeId);
-            unpackedIndices.add((edgesToDraw.size() - 1));
+            int unpackedIndex = (edgesToDraw.size() - 1);
+            unpackedMap[edgeId] = unpackedIndex;
+            unpackedIndices.add(unpackedIndex);
             return;
         }
 
@@ -44,10 +46,6 @@ public class EdgeUnpacker {
         double x3 = graph.getXPos(trgtId);
         double y3 = graph.getYPos(trgtId);
         if(!bbox.contains((int) x1, (int) y1) && !bbox.contains((int)x3, (int)y3)){
-            edgesToDraw.add(edgeId);
-            int unpackedIndex = (edgesToDraw.size() - 1);
-            unpackedMap[edgeId] = unpackedIndex;
-            unpackedIndices.add(unpackedIndex);
             return;
         }
 
