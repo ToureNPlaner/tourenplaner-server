@@ -21,6 +21,17 @@ public class EdgeUnpacker {
     }
 
     public void unpack(BoundingBox bbox, int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
+        unpackRecursive(bbox, edgeId, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+        // We need at least one unpacking to get coordinates for the nodes
+        if (unpackedIndices.size() < 1) {
+            edgesToDraw.add(edgeId);
+            int unpackedIndex = (edgesToDraw.size() - 1);
+            unpackedMap[edgeId] = unpackedIndex;
+            unpackedIndices.add(unpackedIndex);
+        }
+    }
+
+    private void unpackRecursive(BoundingBox bbox, int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
         if (unpackedMap[edgeId] >= 0 ){
             unpackedIndices.add(unpackedMap[edgeId]);
             return;
@@ -72,8 +83,8 @@ public class EdgeUnpacker {
             }
         }
 
-        unpack(bbox, skipA, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
-        unpack(bbox, skipB, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+        unpackRecursive(bbox, skipA, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+        unpackRecursive(bbox, skipB, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
     }
 
     public void reset() {
