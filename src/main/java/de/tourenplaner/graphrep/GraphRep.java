@@ -21,6 +21,7 @@ import de.tourenplaner.utils.SortAdapter;
 import de.tourenplaner.utils.Sorter;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -217,6 +218,9 @@ public class GraphRep implements Serializable {
     protected final int[] shortedEdge1;
     protected final int[] shortedEdge2;
 
+    // For each edge edgeId saves the edge going in the opposite direction with the same length if it exists
+    protected int[] reverseMap;
+
 
 
     /**
@@ -274,6 +278,7 @@ public class GraphRep implements Serializable {
         mapAndSortInEdges();
         generateOffsets();
         computeXYCoords();
+        computeReverseMap();
     }
 
     private int getXYDistance(double x1, double y1, double x2, double y2) {
@@ -335,7 +340,32 @@ public class GraphRep implements Serializable {
 
     }
 
+    /**
+     * Compute the reverse map
+     */
+    private void computeReverseMap() {
+        reverseMap = new int[edgeCount];
+        Arrays.fill(reverseMap, -1);
+        for (int edgeId = 0; edgeId < edgeCount; ++edgeId) {
+            if(reverseMap[edgeId] >= 0) {
+                continue;
+            }
+            int trgt = this.getTarget(edgeId);
+            int src = this.getSource(edgeId);
+            for (int edgeNum  = 0; edgeNum < this.getOutEdgeCount(trgt); edgeNum++){
+                int otherEdgeId = this.getOutEdgeId(trgt, edgeNum);
+                if(src == this.getTarget(otherEdgeId) && this.getDist(edgeId) == this.getDist(otherEdgeId)) {
+                    reverseMap[edgeId] = otherEdgeId;
+                    reverseMap[otherEdgeId] = edgeId;
+                    break;
+                }
+            }
+        }
+    }
 
+    /**
+     * Generate mapping for InEdges by sorting
+     */
     private void mapAndSortInEdges() {
         this.mappingInToOut = new int[edgeCount];
         // Set mapping to initial values (0,1,2,3..)
@@ -345,6 +375,9 @@ public class GraphRep implements Serializable {
         Sorter.sort(new MappingSortAdapter(this));
     }
 
+    /**
+     * Compute offset arrays
+     */
     private void generateOffsets() {
         this.offsetIn = new int[nodeCount + 1];
         this.offsetOut = new int[nodeCount + 1];
@@ -413,7 +446,9 @@ public class GraphRep implements Serializable {
             log.log(Level.INFO, "nodes sorted: " + sorted);
         }
     }
-
+    /*
+    * Check if out edges are sorted correctly and sort them if they aren't
+     */
     private void checkAndSortOutEdges() {
         // Check if out edges are correctly sorted and
         // resort if not, the ChConstructor should
@@ -488,6 +523,17 @@ public class GraphRep implements Serializable {
      */
     public final int getDist(int edgeId) {
         return dist[edgeId];
+    }
+
+
+    /**
+     * Gets the reverse edge if it exists or -1 if it doesn't. A reverse edge
+     * is an edge going from this edges source to this edges target and has the same length
+     * @param edgeId
+     * @return
+     */
+    public int getReverseEdgeId(int edgeId) {
+        return reverseMap[edgeId];
     }
 
     /**

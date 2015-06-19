@@ -20,14 +20,22 @@ public class EdgeUnpacker {
         this.unpackedMap = new int[graph.getEdgeCount()];
     }
 
+    private void addEdge(int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw) {
+        edgesToDraw.add(edgeId);
+        int unpackedIndex = (edgesToDraw.size() - 1);
+        unpackedMap[edgeId] = unpackedIndex;
+        int reverseEdgeId = graph.getReverseEdgeId(edgeId);
+        if(reverseEdgeId > 0) {
+            unpackedMap[reverseEdgeId] = unpackedIndex;
+        }
+        unpackedIndices.add(unpackedIndex);
+    }
+
     public void unpack(BoundingBox bbox, int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
         unpackRecursive(bbox, edgeId, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
         // We need at least one unpacking to get coordinates for the nodes
         if (unpackedIndices.size() < 1) {
-            edgesToDraw.add(edgeId);
-            int unpackedIndex = (edgesToDraw.size() - 1);
-            unpackedMap[edgeId] = unpackedIndex;
-            unpackedIndices.add(unpackedIndex);
+            addEdge(edgeId, unpackedIndices, edgesToDraw);
         }
     }
 
@@ -41,10 +49,7 @@ public class EdgeUnpacker {
         int skipA = graph.getFirstShortcuttedEdge(edgeId);
 
         if (skipA == -1 || edgeLen <= minLen) {
-            edgesToDraw.add(edgeId);
-            int unpackedIndex = (edgesToDraw.size() - 1);
-            unpackedMap[edgeId] = unpackedIndex;
-            unpackedIndices.add(unpackedIndex);
+            addEdge(edgeId, unpackedIndices, edgesToDraw);
             return;
         }
 
@@ -75,10 +80,7 @@ public class EdgeUnpacker {
             double A = Math.abs(0.5 * ((x1 * y2 + y1 * x3 + x2 * y3) - (y2 * x3 + y1 * x2 + x1 * y3)));
             double ratio = 2.0 * A / (edgeLen * edgeLen);
             if (ratio <= maxRatio) {
-                edgesToDraw.add(edgeId);
-                int unpackedIndex = (edgesToDraw.size() - 1);
-                unpackedMap[edgeId] = unpackedIndex;
-                unpackedIndices.add(unpackedIndex);
+                addEdge(edgeId, unpackedIndices, edgesToDraw);
                 return;
             }
         }
