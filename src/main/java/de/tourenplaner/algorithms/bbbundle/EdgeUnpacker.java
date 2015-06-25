@@ -11,7 +11,7 @@ import java.util.Arrays;
  * <p>
  * Created by niklas on 15.06.15.
  */
-public class EdgeUnpacker {
+public final class EdgeUnpacker {
     private final GraphRep graph;
     private final int[] unpackedMap;
 
@@ -20,20 +20,33 @@ public class EdgeUnpacker {
         this.unpackedMap = new int[graph.getEdgeCount()];
     }
 
-    private void addEdge(int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw) {
+    private final void addEdge(int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw) {
         edgesToDraw.add(edgeId);
         int unpackedIndex = (edgesToDraw.size() - 1);
         unpackedMap[edgeId] = unpackedIndex;
         int reverseEdgeId = graph.getReverseEdgeId(edgeId);
-        if (reverseEdgeId > 0) {
+        if (reverseEdgeId >= 0) {
             unpackedMap[reverseEdgeId] = unpackedIndex;
         }
         unpackedIndices.add(unpackedIndex);
     }
 
-    public void unpack(BoundingBox bbox, int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
-        if (unpackedMap[edgeId] >= 0) {
-            unpackedIndices.add(unpackedMap[edgeId]);
+    public final void unpack(BoundingBox bbox, int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
+        int srcId = graph.getSource(edgeId);
+        int trgtId = graph.getTarget(edgeId);
+        int x1 = graph.getXPos(srcId);
+        int y1 = graph.getYPos(srcId);
+        int x3 = graph.getXPos(trgtId);
+        int y3 = graph.getYPos(trgtId);
+        if(bbox.contains(x1, y1) || bbox.contains(x3, y3)) {
+            unpackRecursive(bbox, edgeId, x1, y1, trgtId, x3, y3, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+        }
+    }
+
+    private final void unpackRecursive(BoundingBox bbox, int edgeId, int x1, int y1, int x3, int y3, int trgtId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
+        int mappedEdgeId = unpackedMap[edgeId];
+        if (mappedEdgeId >= 0) {
+            unpackedIndices.add(mappedEdgeId);
             return;
         }
         int edgeLen = graph.getEuclidianDist(edgeId);
@@ -45,16 +58,6 @@ public class EdgeUnpacker {
             return;
         }
 
-        int srcId = graph.getSource(edgeId);
-        int x1 = graph.getXPos(srcId);
-        int y1 = graph.getYPos(srcId);
-        int trgtId = graph.getTarget(edgeId);
-        int x3 = graph.getXPos(trgtId);
-        int y3 = graph.getYPos(trgtId);
-        if (!bbox.contains(x1, y1) && !bbox.contains(x3, y3)) {
-            return;
-        }
-
         /*
         *              |x1 y1 1|
         * A = abs(1/2* |x2 y2 1|)= 1/2*Baseline*Height
@@ -63,13 +66,14 @@ public class EdgeUnpacker {
         * Height = 2*A/Baseline
         * ratio = Height/Baseline
         * */
+        int middle = graph.getTarget(skipA);
+        int x2 = graph.getXPos(middle);
+        int y2 = graph.getYPos(middle);
+
         if (edgeLen <= maxLen) {
-            int middle = graph.getTarget(skipA);
-            double x2d = graph.getXPos(middle);
-            double y2d = graph.getYPos(middle);
             double A = Math.abs(0.5 * (
-                    ((double) x1 * y2d + (double) y1 * (double) x3 + x2d * (double) y3)
-                    - (y2d * (double) x3 + (double) y1 * x2d + (double) x1 * (double) y3)
+                    ((double) x1 * (double) y2 + (double) y1 * (double) x3 + (double) x2 * (double) y3)
+                    - ((double)y2 * (double) x3 + (double) y1 * (double)x2 + (double) x1 * (double) y3)
             ));
             double ratio = 2.0 * A / (edgeLen * edgeLen);
 
@@ -78,13 +82,17 @@ public class EdgeUnpacker {
                 return;
             }
         }
-
-        unpack(bbox, skipA, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
-        int skipB = graph.getSecondShortcuttedEdge(edgeId);
-        unpack(bbox, skipB, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+        boolean middleContained = bbox.contains(x2, y2);
+        if(bbox.contains(x1, y1) || middleContained) {
+            unpackRecursive(bbox, skipA,  x1, y1, middle, x2, y2, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+        }
+        if(middleContained || bbox.contains(x3, y3)) {
+            int skipB = graph.getSecondShortcuttedEdge(edgeId);
+            unpackRecursive(bbox, skipB, x2, y2, trgtId, x3, y3, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+        }
     }
 
-    public void reset() {
+    public final void reset() {
         Arrays.fill(unpackedMap, -1);
     }
 }
