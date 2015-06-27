@@ -20,41 +20,41 @@ public final class EdgeUnpacker {
         this.unpackedMap = new int[graph.getEdgeCount()];
     }
 
-    private final void addEdge(int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw) {
-        edgesToDraw.add(edgeId);
+    private final void addEdge(BBBundleEdge edge, int segmentEdgeId, IntArrayList edgesToDraw) {
+        edgesToDraw.add(segmentEdgeId);
         int unpackedIndex = (edgesToDraw.size() - 1);
-        unpackedMap[edgeId] = unpackedIndex;
-        int reverseEdgeId = graph.getReverseEdgeId(edgeId);
+        unpackedMap[segmentEdgeId] = unpackedIndex;
+        int reverseEdgeId = graph.getReverseEdgeId(segmentEdgeId);
         if (reverseEdgeId >= 0) {
             unpackedMap[reverseEdgeId] = unpackedIndex;
         }
-        unpackedIndices.add(unpackedIndex);
+        edge.unpacked.add(unpackedIndex);
     }
 
-    public final void unpack(BoundingBox bbox, int edgeId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
-        int srcId = graph.getSource(edgeId);
-        int trgtId = graph.getTarget(edgeId);
+    public final void unpack(BBBundleEdge edge, BoundingBox bbox, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
+        int srcId = graph.getSource(edge.edgeId);
+        int trgtId = graph.getTarget(edge.edgeId);
         int x1 = graph.getXPos(srcId);
         int y1 = graph.getYPos(srcId);
         int x3 = graph.getXPos(trgtId);
         int y3 = graph.getYPos(trgtId);
         if(bbox.contains(x1, y1) || bbox.contains(x3, y3)) {
-            unpackRecursive(bbox, edgeId, x1, y1, trgtId, x3, y3, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+            unpackRecursive(edge, edge.edgeId, bbox, x1, y1, trgtId, x3, y3, edgesToDraw, minLen, maxLen, maxRatio);
         }
     }
 
-    private final void unpackRecursive(BoundingBox bbox, int edgeId, int x1, int y1, int x3, int y3, int trgtId, IntArrayList unpackedIndices, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
-        int mappedEdgeId = unpackedMap[edgeId];
+    private final void unpackRecursive(BBBundleEdge edge, int segmentEdgeId, BoundingBox bbox, int x1, int y1, int x3, int y3, int trgtId, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
+        int mappedEdgeId = unpackedMap[segmentEdgeId];
         if (mappedEdgeId >= 0) {
-            unpackedIndices.add(mappedEdgeId);
+            edge.unpacked.add(mappedEdgeId);
             return;
         }
-        int edgeLen = graph.getEuclidianDist(edgeId);
+        int edgeLen = graph.getEuclidianDist(segmentEdgeId);
 
-        int skipA = graph.getFirstShortcuttedEdge(edgeId);
+        int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
 
         if (skipA == -1 || edgeLen <= minLen) {
-            addEdge(edgeId, unpackedIndices, edgesToDraw);
+            addEdge(edge, segmentEdgeId, edgesToDraw);
             return;
         }
 
@@ -78,17 +78,17 @@ public final class EdgeUnpacker {
             double ratio = 2.0 * A / (edgeLen * edgeLen);
 
             if (ratio <= maxRatio) {
-                addEdge(edgeId, unpackedIndices, edgesToDraw);
+                addEdge(edge, segmentEdgeId, edgesToDraw);
                 return;
             }
         }
         boolean middleContained = bbox.contains(x2, y2);
         if(bbox.contains(x1, y1) || middleContained) {
-            unpackRecursive(bbox, skipA,  x1, y1, middle, x2, y2, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+            unpackRecursive(edge, skipA, bbox,  x1, y1, middle, x2, y2, edgesToDraw, minLen, maxLen, maxRatio);
         }
         if(middleContained || bbox.contains(x3, y3)) {
-            int skipB = graph.getSecondShortcuttedEdge(edgeId);
-            unpackRecursive(bbox, skipB, x2, y2, trgtId, x3, y3, unpackedIndices, edgesToDraw, minLen, maxLen, maxRatio);
+            int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
+            unpackRecursive(edge, skipB, bbox, x2, y2, trgtId, x3, y3, edgesToDraw, minLen, maxLen, maxRatio);
         }
     }
 
