@@ -31,7 +31,7 @@ public final class EdgeUnpacker {
         edge.unpacked.add(unpackedIndex);
     }
 
-    public final void unpack(BBBundleEdge edge, BoundingBox bbox, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
+    public final void unpack(BBBundleEdge edge, IntArrayList edgesToDraw, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
         int srcId = graph.getSource(edge.edgeId);
         int trgtId = graph.getTarget(edge.edgeId);
         int x1 = graph.getXPos(srcId);
@@ -39,11 +39,11 @@ public final class EdgeUnpacker {
         int x3 = graph.getXPos(trgtId);
         int y3 = graph.getYPos(trgtId);
         if(bbox.contains(x1, y1) || bbox.contains(x3, y3)) {
-            unpackRecursive(edge, edge.edgeId, bbox, x1, y1, trgtId, x3, y3, edgesToDraw, minLen, maxLen, maxRatio);
+            unpackRecursive(edge, edge.edgeId, x1, y1, trgtId, x3, y3, edgesToDraw, bbox,  minLen, maxLen, maxRatio);
         }
     }
 
-    private final void unpackRecursive(BBBundleEdge edge, int segmentEdgeId, BoundingBox bbox, int x1, int y1, int x3, int y3, int trgtId, IntArrayList edgesToDraw, double minLen, double maxLen, double maxRatio) {
+    private final void unpackRecursive(BBBundleEdge edge, int segmentEdgeId, int x1, int y1, int x3, int y3, int trgtId, IntArrayList edgesToDraw, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
         int mappedEdgeId = unpackedMap[segmentEdgeId];
         if (mappedEdgeId >= 0) {
             edge.unpacked.add(mappedEdgeId);
@@ -84,11 +84,11 @@ public final class EdgeUnpacker {
         }
         boolean middleContained = bbox.contains(x2, y2);
         if(bbox.contains(x1, y1) || middleContained) {
-            unpackRecursive(edge, skipA, bbox,  x1, y1, middle, x2, y2, edgesToDraw, minLen, maxLen, maxRatio);
+            unpackRecursive(edge, skipA, x1, y1, middle, x2, y2, edgesToDraw, bbox, minLen, maxLen, maxRatio);
         }
         if(middleContained || bbox.contains(x3, y3)) {
             int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
-            unpackRecursive(edge, skipB, bbox, x2, y2, trgtId, x3, y3, edgesToDraw, minLen, maxLen, maxRatio);
+            unpackRecursive(edge, skipB, x2, y2, trgtId, x3, y3, edgesToDraw, bbox, minLen, maxLen, maxRatio);
         }
     }
 

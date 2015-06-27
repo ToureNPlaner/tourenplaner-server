@@ -50,7 +50,7 @@ public class DrawCore extends GraphAlgorithm {
                 }
                 BBBundleEdge edge = new BBBundleEdge(edgeId, nodeId, trgtId, graph.getDist(edgeId));
                 // TODO how far do we need to unpack the CORE?
-                unpacker.unpack(edge, graph.getBbox(), edgesToDraw, req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+                unpacker.unpack(edge, edgesToDraw, graph.getBbox(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
                 edges.add(edge);
             }
         }
