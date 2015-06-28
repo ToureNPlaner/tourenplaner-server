@@ -141,11 +141,12 @@ public class BBBundle extends PrioAlgorithm {
     }
 
 
-    private IntArrayList extractEdges(BoundingBox bbox, IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, int coreSize, double minLen, double maxLen, double maxRatio) {
+    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges,
+                              IntArrayList verticesToDraw, IntArrayList edgesToDraw,
+                              BoundingBox bbox, int coreSize, double minLen, double maxLen, double maxRatio) {
         int edgeCount = 0;
         // Reset to -1
         unpacker.reset();
-        IntArrayList edgesToDraw = new IntArrayList();
         for (IntCursor ic : nodes) {
             int nodeId = ic.value;
             int nodeRank = graph.getRank(nodeId);
@@ -168,7 +169,7 @@ public class BBBundle extends PrioAlgorithm {
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(e, edgesToDraw, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
                 upEdges.add(e);
                 edgeCount++;
             }
@@ -192,13 +193,12 @@ public class BBBundle extends PrioAlgorithm {
                 int trgtIdMapped = mappedIds[nodeId];
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(e, edgesToDraw, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
                 downEdges.add(e);
                 edgeCount++;
             }
         }
         log.info(edgeCount + " edges");
-        return edgesToDraw;
     }
 
     private IntArrayList findBBoxNodes(BBBundleRequestData req) {
@@ -256,10 +256,12 @@ public class BBBundle extends PrioAlgorithm {
         start = System.nanoTime();
         ArrayList<BBBundleEdge> upEdges = new ArrayList<>();
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
-        IntArrayList edgesToDraw = extractEdges(req.getBbox(), nodes, upEdges, downEdges, req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+        IntArrayList verticesToDraw = new IntArrayList();
+        IntArrayList edgesToDraw = new IntArrayList();
+        extractEdges(nodes, upEdges, downEdges, verticesToDraw, edgesToDraw, req.getBbox(), req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
 
         log.info(Timing.took("Extracting edges", start));
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
-        request.setResultObject(new BBBundleResult(graph, nodes.size(), edgesToDraw, upEdges, downEdges, req));
+        request.setResultObject(new BBBundleResult(graph, nodes.size(), verticesToDraw, edgesToDraw, upEdges, downEdges, req));
     }
 }

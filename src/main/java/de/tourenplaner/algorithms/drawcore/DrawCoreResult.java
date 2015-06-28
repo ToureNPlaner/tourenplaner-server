@@ -20,11 +20,13 @@ public class DrawCoreResult implements StreamJsonWriter {
     private final int coreSize;
     private final GraphRep graph;
     private final IntArrayList edgesToDraw;
+    private final IntArrayList verticesToDraw;
 
-    public DrawCoreResult(GraphRep graph, ArrayList<BBBundleEdge> edges, IntArrayList edgesToDraw, int coreSize) {
+    public DrawCoreResult(GraphRep graph, ArrayList<BBBundleEdge> edges, IntArrayList verticesToDraw, IntArrayList edgesToDraw, int coreSize) {
         this.graph = graph;
         this.edges = edges;
         this.coreSize = coreSize;
+        this.verticesToDraw = verticesToDraw;
         this.edgesToDraw = edgesToDraw;
     }
 
@@ -35,11 +37,19 @@ public class DrawCoreResult implements StreamJsonWriter {
         gen.writeNumberField("nodeCount", coreSize);
         gen.writeNumberField("edgeCount", edges.size());
         // Drawing Data
-        gen.writeArrayFieldStart("draw");
-        for (int i = 0; i < edgesToDraw.size(); ++i) {
-            writeDrawEdge(gen, edgesToDraw.get(i));
+        // Drawing Data
+        gen.writeObjectFieldStart("draw");
+        gen.writeArrayFieldStart("vertices");
+        for (int i = 0; i < verticesToDraw.size(); ++i) {
+            writeDrawVertex(gen, verticesToDraw.get(i));
         }
         gen.writeEndArray();
+        gen.writeArrayFieldStart("edges");
+        for (int i = 0; i < edgesToDraw.size(); ++i) {
+            gen.writeNumber(edgesToDraw.get(i));
+        }
+        gen.writeEndArray();
+        gen.writeEndObject();
         // Edges
         gen.writeArrayFieldStart("edges");
         for (BBBundleEdge e : edges) {
@@ -60,16 +70,8 @@ public class DrawCoreResult implements StreamJsonWriter {
         gen.flush();
     }
 
-    public final void writeDrawEdge(JsonGenerator gen, int edgeId) throws IOException {
-        int s = graph.getSource(edgeId);
-        int t = graph.getTarget(edgeId);
-        // TODO we need to save the real type
-        int type = 0;
-        gen.writeNumber(graph.getXPos(s));
-        gen.writeNumber(graph.getYPos(s));
-        gen.writeNumber(graph.getXPos(t));
-        gen.writeNumber(graph.getYPos(t));
-        float speed = (float) graph.getEuclidianDist(edgeId) / (float) graph.getDist(edgeId);
-        gen.writeNumber((int)(speed*100));
+    public final void writeDrawVertex(JsonGenerator gen, int nodeId) throws IOException {
+        gen.writeNumber(graph.getXPos(nodeId));
+        gen.writeNumber(graph.getYPos(nodeId));
     }
 }

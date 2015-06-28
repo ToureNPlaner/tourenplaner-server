@@ -30,6 +30,7 @@ public class DrawCore extends GraphAlgorithm {
 
         ArrayList<BBBundleEdge> edges =  new ArrayList<>();
         IntArrayList edgesToDraw = new IntArrayList();
+        IntArrayList verticesToDraw = new IntArrayList();
         unpacker.reset();
         // Nodes are sorted by rank descending, so the highest nodeCount nodes are 0,..,nodeCount-1
         for (int nodeId = 0; nodeId < req.getNodeCount() -1; ++nodeId) {
@@ -50,10 +51,10 @@ public class DrawCore extends GraphAlgorithm {
                 }
                 BBBundleEdge edge = new BBBundleEdge(edgeId, nodeId, trgtId, graph.getDist(edgeId));
                 // TODO how far do we need to unpack the CORE?
-                unpacker.unpack(edge, edgesToDraw, graph.getBbox(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+                unpacker.unpack(edge, verticesToDraw, edgesToDraw, graph.getBbox(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
                 edges.add(edge);
             }
         }
-        request.setResultObject(new DrawCoreResult(graph, edges, edgesToDraw,req.getNodeCount()));
+        request.setResultObject(new DrawCoreResult(graph, edges, verticesToDraw, edgesToDraw,req.getNodeCount()));
     }
 }

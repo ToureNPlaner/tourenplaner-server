@@ -18,15 +18,17 @@ public final class BBBundleResult implements StreamJsonWriter {
 
     //private final GraphRep graph;
     private final IntArrayList edgesToDraw;
+    private final IntArrayList verticesToDraw;
     private final ArrayList<BBBundleEdge> upEdges;
     private final ArrayList<BBBundleEdge> downEdges;
     private final BBBundleRequestData request;
     private final int nodeCount;
     private final GraphRep graph;
 
-    public BBBundleResult(GraphRep graph, int nodeCount, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
+    public BBBundleResult(GraphRep graph, int nodeCount, IntArrayList verticesToDraw, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
         this.graph = graph;
         this.nodeCount= nodeCount;
+        this.verticesToDraw = verticesToDraw;
         this.edgesToDraw = edgesToDraw;
         this.upEdges = upEdges;
         this.downEdges = downEdges;
@@ -46,11 +48,18 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeNumberField("level", request.getLevel());
         gen.writeEndObject();
         // Drawing Data
-        gen.writeArrayFieldStart("draw");
-        for (int i = 0; i < edgesToDraw.size(); ++i) {
-            writeDrawEdge(gen, edgesToDraw.get(i));
+        gen.writeObjectFieldStart("draw");
+        gen.writeArrayFieldStart("vertices");
+        for (int i = 0; i < verticesToDraw.size(); ++i) {
+            writeDrawVertex(gen, verticesToDraw.get(i));
         }
         gen.writeEndArray();
+        gen.writeArrayFieldStart("edges");
+        for (int i = 0; i < edgesToDraw.size(); ++i) {
+            gen.writeNumber(edgesToDraw.get(i));
+        }
+        gen.writeEndArray();
+        gen.writeEndObject();
         // Edges
         gen.writeObjectFieldStart("edges");
         gen.writeArrayFieldStart("upEdges");
@@ -87,15 +96,8 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.flush();
     }
 
-    public final void writeDrawEdge(JsonGenerator gen, int edgeId) throws IOException {
-        int s = graph.getSource(edgeId);
-        int t = graph.getTarget(edgeId);
-        // TODO we need to save the real type
-        gen.writeNumber(graph.getXPos(s));
-        gen.writeNumber(graph.getYPos(s));
-        gen.writeNumber(graph.getXPos(t));
-        gen.writeNumber(graph.getYPos(t));
-        float speed = (float) graph.getEuclidianDist(edgeId) / (float) graph.getDist(edgeId);
-        gen.writeNumber((int)(speed*100));
+    public final void writeDrawVertex(JsonGenerator gen, int nodeId) throws IOException {
+        gen.writeNumber(graph.getXPos(nodeId));
+        gen.writeNumber(graph.getYPos(nodeId));
     }
 }
