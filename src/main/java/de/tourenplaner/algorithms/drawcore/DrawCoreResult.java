@@ -53,17 +53,14 @@ public class DrawCoreResult implements StreamJsonWriter {
         // Edges
         gen.writeArrayFieldStart("edges");
         for (BBBundleEdge e : edges) {
-            gen.writeStartObject();
-            gen.writeNumberField("src", e.srcId);
-            gen.writeNumberField("trgt", e.trgtId);
-            gen.writeNumberField("cost", e.cost);
-            gen.writeNumberField("edgeId", e.edgeId);
-            gen.writeArrayFieldStart("path");
+            gen.writeNumber(e.srcId);
+            gen.writeNumber(e.trgtId);
+            gen.writeNumber(e.cost);
+            gen.writeStartArray();
             for (int i = 0; i < e.unpacked.size(); ++i){
                 gen.writeNumber(e.unpacked.get(i));
             }
             gen.writeEndArray();
-            gen.writeEndObject();
         }
         gen.writeEndArray();
         gen.writeEndObject();

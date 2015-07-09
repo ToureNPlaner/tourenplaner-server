@@ -64,31 +64,27 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeObjectFieldStart("edges");
         gen.writeArrayFieldStart("upEdges");
         for (BBBundleEdge e : upEdges) {
-            gen.writeStartObject();
-            gen.writeNumberField("src", e.srcId);
-            gen.writeNumberField("trgt", e.trgtId);
-            gen.writeNumberField("cost", e.cost);
-            gen.writeArrayFieldStart("path");
+            gen.writeNumber(e.srcId);
+            gen.writeNumber(e.trgtId);
+            gen.writeNumber(e.cost);
+            gen.writeStartArray();
             for (int i = 0; i < e.unpacked.size(); ++i){
                 gen.writeNumber(e.unpacked.get(i));
             }
             gen.writeEndArray();
-            gen.writeEndObject();
         }
         gen.writeEndArray();
 
         gen.writeArrayFieldStart("downEdges");
         for (BBBundleEdge e : downEdges) {
-            gen.writeStartObject();
-            gen.writeNumberField("src", e.srcId);
-            gen.writeNumberField("trgt", e.trgtId);
-            gen.writeNumberField("cost", e.cost);
-            gen.writeArrayFieldStart("path");
+            gen.writeNumber(e.srcId);
+            gen.writeNumber(e.trgtId);
+            gen.writeNumber(e.cost);
+            gen.writeStartArray();
             for (int i = 0; i < e.unpacked.size(); ++i){
                 gen.writeNumber(e.unpacked.get(i));
             }
             gen.writeEndArray();
-            gen.writeEndObject();
         }
         gen.writeEndArray();
         gen.writeEndObject();
