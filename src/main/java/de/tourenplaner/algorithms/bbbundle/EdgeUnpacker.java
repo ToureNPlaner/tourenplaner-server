@@ -16,10 +16,17 @@ public final class EdgeUnpacker {
     private final int[] edgeMap;
     private final int[] nodeMap;
 
+    private final IntArrayList nodeClear;
+    private final IntArrayList edgeClear;
+
     public EdgeUnpacker(GraphRep graph) {
         this.graph = graph;
         this.edgeMap = new int[graph.getEdgeCount()];
         this.nodeMap = new int[graph.getNodeCount()];
+        this.nodeClear = new IntArrayList();
+        this.edgeClear = new IntArrayList();
+        Arrays.fill(nodeMap, -1);
+        Arrays.fill(edgeMap, -1);
     }
 
     private final void addEdge(BBBundleEdge edge, int segmentEdgeId, int srcId, int trgtId, IntArrayList verticesToDraw, IntArrayList drawEdges) {
@@ -28,21 +35,25 @@ public final class EdgeUnpacker {
             verticesToDraw.add(srcId);
             mappedSrc = verticesToDraw.size() - 1;
             nodeMap[srcId] = mappedSrc;
+            nodeClear.add(srcId);
         }
         int mappedTrgt = nodeMap[trgtId];
         if (mappedTrgt < 0){
             verticesToDraw.add(trgtId);
             mappedTrgt = verticesToDraw.size() - 1;
             nodeMap[trgtId] = mappedTrgt;
+            nodeClear.add(trgtId);
         }
         // TODO proper edge types
         float speed = (float) graph.getEuclidianDist(segmentEdgeId) / (float) graph.getDist(segmentEdgeId);
         drawEdges.add(mappedSrc, mappedTrgt, (int)(speed*100));
         int unpackedIndex = (drawEdges.size()/3 - 1);
         edgeMap[segmentEdgeId] = unpackedIndex;
+        edgeClear.add(segmentEdgeId);
         int reverseEdgeId = graph.getReverseEdgeId(segmentEdgeId);
         if (reverseEdgeId >= 0) {
             edgeMap[reverseEdgeId] = unpackedIndex;
+            edgeClear.add(reverseEdgeId);
         }
         edge.unpacked.add(unpackedIndex);
     }
@@ -109,7 +120,14 @@ public final class EdgeUnpacker {
     }
 
     public final void reset() {
-        Arrays.fill(edgeMap, -1);
-        Arrays.fill(nodeMap, -1);
+        for(int i = 0; i < edgeClear.size(); ++i){
+            edgeMap[edgeClear.get(i)] = -1;
+        }
+
+        for(int i = 0; i < nodeClear.size(); ++i){
+            nodeMap[nodeClear.get(i)] = -1;
+        }
+        nodeClear.clear();
+        edgeClear.clear();
     }
 }
