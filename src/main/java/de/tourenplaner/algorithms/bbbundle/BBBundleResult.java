@@ -1,6 +1,8 @@
 package de.tourenplaner.algorithms.bbbundle;
 
+import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntArrayList;
+import com.carrotsearch.hppc.cursors.IntCursor;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.computecore.StreamJsonWriter;
@@ -19,15 +21,15 @@ public final class BBBundleResult implements StreamJsonWriter {
     //private final GraphRep graph;
     private final IntArrayList edgesToDraw;
     private final IntArrayList verticesToDraw;
+    private final IntArrayDeque nodes;
     private final ArrayList<BBBundleEdge> upEdges;
     private final ArrayList<BBBundleEdge> downEdges;
     private final BBBundleRequestData request;
-    private final int nodeCount;
     private final GraphRep graph;
 
-    public BBBundleResult(GraphRep graph, int nodeCount, IntArrayList verticesToDraw, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
+    public BBBundleResult(GraphRep graph, IntArrayDeque nodes, IntArrayList verticesToDraw, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
         this.graph = graph;
-        this.nodeCount= nodeCount;
+        this.nodes = nodes;
         this.verticesToDraw = verticesToDraw;
         this.edgesToDraw = edgesToDraw;
         this.upEdges = upEdges;
@@ -41,7 +43,7 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeStartObject();
         // Head
         gen.writeObjectFieldStart("head");
-        gen.writeNumberField("nodeCount", nodeCount);
+        gen.writeNumberField("nodeCount", nodes.size());
         gen.writeNumberField("upEdgeCount", upEdges.size());
         gen.writeNumberField("downEdgeCount", downEdges.size());
         gen.writeNumberField("coreSize", request.getCoreSize());
@@ -57,12 +59,19 @@ public final class BBBundleResult implements StreamJsonWriter {
             writeDrawVertex(gen, verticesToDraw.get(i));
         }
         gen.writeEndArray();
+
         gen.writeArrayFieldStart("edges");
         for (int i = 0; i < edgesToDraw.size(); ++i) {
             gen.writeNumber(edgesToDraw.get(i));
         }
         gen.writeEndArray();
         gen.writeEndObject();
+        // Original node ids
+        gen.writeArrayFieldStart("oNodeIds");
+        for (IntCursor ic : nodes) {
+            gen.writeNumber(ic.value);
+        }
+        gen.writeEndArray();
         // Edges
         gen.writeObjectFieldStart("edges");
         gen.writeArrayFieldStart("upEdges");

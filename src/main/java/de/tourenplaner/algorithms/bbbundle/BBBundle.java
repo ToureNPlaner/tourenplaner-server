@@ -252,7 +252,6 @@ public class BBBundle extends PrioAlgorithm {
         log.info(Timing.took("TopSort", start));
         log.info("Nodes after TopSort: (with coreSize = " + req.getCoreSize() + ") " + nodes.size());
 
-
         start = System.nanoTime();
         ArrayList<BBBundleEdge> upEdges = new ArrayList<>();
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
@@ -262,6 +261,6 @@ public class BBBundle extends PrioAlgorithm {
 
         log.info(Timing.took("Extracting edges", start));
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
-        request.setResultObject(new BBBundleResult(graph, nodes.size(), verticesToDraw, edgesToDraw, upEdges, downEdges, req));
+        request.setResultObject(new BBBundleResult(graph, nodes, verticesToDraw, edgesToDraw, upEdges, downEdges, req));
     }
 }
