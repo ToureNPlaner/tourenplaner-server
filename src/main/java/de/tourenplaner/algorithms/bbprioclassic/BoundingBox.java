@@ -16,7 +16,7 @@ public class BoundingBox {
 	public boolean contains(int px, int py) {
 		long right = x+width;
 		long top = y+height;
-		return (px >= x && px < right) && (py >= y && py < top);
+		return (px >= x && px <= right) && (py >= y && py <= top);
 	}
 
 	public BoundingBox(int x, int y, int width, int height) {

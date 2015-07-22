@@ -46,6 +46,9 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeNumberField("downEdgeCount", downEdges.size());
         gen.writeNumberField("coreSize", request.getCoreSize());
         gen.writeNumberField("level", request.getLevel());
+        gen.writeNumberField("minLen", request.getMinLen());
+        gen.writeNumberField("maxLen", request.getMaxLen());
+        gen.writeNumberField("maxRatio", request.getMaxRatio());
         gen.writeEndObject();
         // Drawing Data
         gen.writeObjectFieldStart("draw");

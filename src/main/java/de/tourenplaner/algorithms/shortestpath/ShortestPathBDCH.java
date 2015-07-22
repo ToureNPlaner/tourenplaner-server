@@ -62,6 +62,7 @@ public class ShortestPathBDCH extends ShortestPath {
     int[] touchedNodes;
     int nofTouchedNodes;
     int nofTouchedEdges;
+    int nofStalledNodes;
 
     // TODO: Find better place
     int bestId;
@@ -84,6 +85,7 @@ public class ShortestPathBDCH extends ShortestPath {
         }
         myQueue = new PriorityQueue<BDPQElement>();
         nofTouchedNodes = 0;
+        nofStalledNodes = 0;
         ds = resourceSharer;
     }
 
@@ -145,6 +147,7 @@ public class ShortestPathBDCH extends ShortestPath {
         int bestDist = Integer.MAX_VALUE;
 
         nofTouchedEdges = 0;
+        nofStalledNodes = 0;
         while ((!myQueue.isEmpty())) {
             //System.err.print(".");
             BDPQElement cur = myQueue.remove();
@@ -171,6 +174,7 @@ public class ShortestPathBDCH extends ShortestPath {
                         int tmp_node = graph.getSource(tmp_edge);
                         if (distFwd[cur_node] - tmp_wgt > distFwd[tmp_node]) {
                             stalled = true;
+                            nofStalledNodes++;
                             break;
                         }
                         if (graph.getRank(tmp_node) < graph.getRank(cur_node)) break; // sorted by source rank descending
@@ -206,6 +210,7 @@ public class ShortestPathBDCH extends ShortestPath {
                         int tmp_node = graph.getTarget(tmp_edge);
                         if (distBwd[cur_node] - tmp_wgt > distBwd[tmp_node]) {
                             stalled = true;
+                            nofStalledNodes++;
                             break;
                         }
                         if (graph.getRank(cur_node) > graph.getRank(tmp_node)) break; //sorted by target rank ascending
@@ -362,7 +367,7 @@ public class ShortestPathBDCH extends ShortestPath {
             long backtracktime = System.nanoTime();
             log.info("found sp with dist = " + resultWays.get(pointIndex).getDistance() / 1000.0 + " km (direct distance: " + directDistance / 1000.0  + "\n"+
                     "Dijkstra: " + (dijkstratime - starttime) / 1000000.0 + " ms\n" + "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms\n" +
-                    "Touched Nodes/Edges "+nofTouchedNodes+"/"+nofTouchedEdges);
+                    "Touched Nodes/Edges "+nofTouchedNodes+"/"+nofTouchedEdges+" Number of Stalled nodes: "+nofStalledNodes);
 
             // Save the distance to the last point at the target
             // wrap around at tour

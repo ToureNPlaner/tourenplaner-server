@@ -187,7 +187,7 @@ public class BBBundle extends PrioAlgorithm {
 
                 assert nodeRank <= srcRank; // down edge
                 assert nodeId >= srcId; // down edge + nodes sorted by rank ascending
-                //assert (srcId < coreSize) || mappedIds[nodeId] < mappedIds[srcId]; // topological order, trgt -> src
+                assert (srcId < coreSize) || mappedIds[nodeId] < mappedIds[srcId]; // topological order, trgt -> src
 
                 int srcIdMapped = (srcId >= coreSize) ? mappedIds[srcId] : srcId;
                 int trgtIdMapped = mappedIds[nodeId];
