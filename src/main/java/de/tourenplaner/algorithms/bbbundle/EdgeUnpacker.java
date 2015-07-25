@@ -65,9 +65,8 @@ public final class EdgeUnpacker {
         int y1 = graph.getYPos(srcId);
         int x3 = graph.getXPos(trgtId);
         int y3 = graph.getYPos(trgtId);
-        if(bbox.contains(x1, y1) || bbox.contains(x3, y3)) {
-            unpackRecursive(edge, edge.edgeId, srcId, x1, y1, trgtId, x3, y3, verticesToDraw,  drawEdges, bbox,  minLen, maxLen, maxRatio);
-        }
+        unpackRecursive(edge, edge.edgeId, srcId, x1, y1, trgtId, x3, y3, verticesToDraw,  drawEdges, bbox,  minLen, maxLen, maxRatio);
+
     }
 
     private final void unpackRecursive(BBBundleEdge edge, int segmentEdgeId, int srcId, int x1, int y1, int trgtId, int x3, int y3, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
@@ -80,7 +79,7 @@ public final class EdgeUnpacker {
 
         int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
 
-        if (skipA == -1 || edgeLen <= minLen) {
+        if (skipA == -1 || edgeLen <= minLen || (!bbox.contains(x1, y1) && !bbox.contains(x3, y3))) {
             addEdge(edge, segmentEdgeId, srcId, trgtId, verticesToDraw, drawEdges);
             return;
         }
@@ -109,14 +108,9 @@ public final class EdgeUnpacker {
                 return;
             }
         }
-        boolean middleContained = bbox.contains(x2, y2);
-        if(bbox.contains(x1, y1) || middleContained) {
-            unpackRecursive(edge, skipA, srcId, x1, y1, middle, x2, y2, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
-        }
-        if(middleContained || bbox.contains(x3, y3)) {
-            int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
-            unpackRecursive(edge, skipB, middle, x2, y2, trgtId, x3, y3, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
-        }
+        int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
+        unpackRecursive(edge, skipA, srcId, x1, y1, middle, x2, y2, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
+        unpackRecursive(edge, skipB, middle, x2, y2, trgtId, x3, y3, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
     }
 
     public final void reset() {
