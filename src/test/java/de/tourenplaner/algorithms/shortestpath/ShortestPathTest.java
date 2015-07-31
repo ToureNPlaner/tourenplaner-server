@@ -16,7 +16,6 @@
 
 package de.tourenplaner.algorithms.shortestpath;
 
-import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.computecore.RequestPoint;
@@ -31,7 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
+import static junit.framework.Assert.assertEquals;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
@@ -62,11 +61,14 @@ public class ShortestPathTest {
 
         int totalDist = shortestPath.shortestPath(points, wayList, tour);
 
+
+        int expectedTotalEuclidianDist = 0;
         int expectedTotalDist = 0;
         // pointNumber is the number of the start points within points 
         for (int pointIndex = 0; pointIndex < points.size(); pointIndex++) {
 
             int[] dist = new int[nodeCount];
+            int[] preds = new int[nodeCount];
             for (int nodeId = 0; nodeId < nodeCount; nodeId++) {
                 dist[nodeId] = Integer.MAX_VALUE;
             }
@@ -79,27 +81,41 @@ public class ShortestPathTest {
             } else {
                 break;
             }
-
             dist[sourcePointId] = 0;
-            IntArrayList queue = new IntArrayList();
-            queue.add(sourcePointId);
-            while (queue.size() > 0) {
-                int currentNode = queue.remove(0);
-                for (int edge = 0; edge < graph.getOutEdgeCount(currentNode); edge++) {
-                    int tempEdgeId = graph.getOutEdgeId(currentNode, edge);
-                    int targetId = graph.getTarget(tempEdgeId);
-                    int tempDist = dist[currentNode] + graph.getDist(tempEdgeId);
+            preds[sourcePointId] = 0;
+
+            for(int currentNode = 0; currentNode < graph.getNodeCount(); ++currentNode){
+                for (int edge = 0; edge < graph.getEdgeCount(); edge++) {
+                    int targetId = graph.getTarget(edge);
+                    int sourceId =  graph.getSource(edge);
+                    // Ignore shortcuts and adding to "infinity"
+                    if(graph.getFirstShortcuttedEdge(edge) >= 0 || dist[sourceId] == Integer.MAX_VALUE){
+                        continue;
+                    }
+
+                    int tempDist = dist[sourceId] + graph.getDist(edge);
                     if (tempDist < dist[targetId]) {
+                        preds[targetId] = edge;
                         dist[targetId] = tempDist;
-                        queue.add(targetId);
                     }
                 }
             }
-            expectedTotalDist = expectedTotalDist + dist[targetPointId];
+            int euclidianDist = 0;
+            int currNode = targetPointId;
+            while (currNode != sourcePointId) {
+                int currEdge = preds[currNode];
+                euclidianDist += graph.getEuclidianDist(currEdge);
+                currNode = graph.getSource(currEdge);
+            }
+            System.err.println("Imtermediate edist: "+euclidianDist+ " dist: "+dist[targetPointId]);
+
+            expectedTotalEuclidianDist += euclidianDist;
+            expectedTotalDist += dist[targetPointId];
         }
 
-        assertEquals("The distance of test case " + testCaseNumber + " seems wrong.", expectedTotalDist, totalDist);
-        System.out.println("Test case " + testCaseNumber + " finished.");
+
+        assertEquals("The distance of test case " + testCaseNumber + " seems wrong. ", expectedTotalEuclidianDist, totalDist);
+        System.err.println("Test case " + testCaseNumber + " finished.");
     }
 
 
