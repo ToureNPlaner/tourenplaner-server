@@ -165,7 +165,7 @@ public class ShortestPathNoCH extends ShortestPath {
             for (int i = 0; i < edgeCount; i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 // Ignore Shortcuts
-                if (graph.getFirstShortcuttedEdge(edgeId) > 0) {
+                if (graph.getFirstShortcuttedEdge(edgeId) >= 0) {
                     continue;
                 }
                 targetNode = graph.getTarget(edgeId);
