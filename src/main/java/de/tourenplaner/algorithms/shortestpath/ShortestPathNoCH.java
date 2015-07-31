@@ -56,11 +56,11 @@ public class ShortestPathNoCH extends ShortestPath {
     public int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException {
 
         int srcId;
-        int trgtId = 0;
+        int trgtId;
 
         int totalDistance = 0;
-        int distance = 0;
-        double time = 0;
+        int distance;
+        double time;
 
         // in meters
         double directDistance = 0.0;
@@ -104,10 +104,11 @@ public class ShortestPathNoCH extends ShortestPath {
                 throw new ComputeException("No Path found");
             }
             // Backtrack to get the actual path
-            backtrack(prevEdges, resultWays.get(pointIndex), srcId, trgtId);
-            resultWays.get(pointIndex).setTravelTime(dists[trgtId] * graph.travelTimeConstant);
-            distance = resultWays.get(pointIndex).getDistance();
-            time = resultWays.get(pointIndex).getTravelTime();
+            Way resultWay = resultWays.get(pointIndex);
+            backtrack(prevEdges, resultWay, srcId, trgtId);
+            resultWay.setTravelTime(dists[trgtId] * graph.travelTimeConstant);
+            distance = resultWay.getDistance();
+            time = resultWay.getTravelTime();
             long backtracktime = System.nanoTime();
 
             // Save the distance to the last point at the target
@@ -117,8 +118,8 @@ public class ShortestPathNoCH extends ShortestPath {
 
             totalDistance += distance;
 
-            log.info("found sp with dist = " + distance / 1000.0 + " km (direct distance: " + directDistance / 1000.0 +
-                    " dist[destid] = " + dists[trgtId] + '\n' +
+            log.info("found sp with dist = " + distance / 1000.0 + " km (in meters: " + distance + " direct distance: " + directDistance / 1000.0 +
+                    " dist[trgtId] = " + dists[trgtId] + '\n' +
                     (dijkstratime - starttime) / 1000000.0 + " ms\n" +
                     "Backtracking: " + (backtracktime - dijkstratime) / 1000000.0 + " ms");
 
@@ -168,7 +169,7 @@ public class ShortestPathNoCH extends ShortestPath {
             for (int i = 0; i < edgeCount; i++) {
                 edgeId = graph.getOutEdgeId(nodeId, i);
                 // Ignore Shortcuts
-                if (graph.getFirstShortcuttedEdge(edgeId) > 0) {
+                if (graph.getFirstShortcuttedEdge(edgeId) >= 0) {
                     continue;
                 }
                 targetNode = graph.getTarget(edgeId);
@@ -199,15 +200,16 @@ public class ShortestPathNoCH extends ShortestPath {
      * @throws IllegalAccessException
      */
     public final void backtrack(int[] prevEdges, Way resultWay, int srcId, int trgtId) {
-        // Find out how much space to allocate
-        int currNode = trgtId;
+        // Find out how much space to allocate, 1 for source that we always add
         int routeElements = 1;
 
         int length = 0;
-
+        int currNode = trgtId;
         while (currNode != srcId) {
             routeElements++;
-            currNode = graph.getSource(prevEdges[currNode]);
+            int prevEdge = prevEdges[currNode];
+            length += graph.getEuclidianDist(prevEdge);
+            currNode = graph.getSource(prevEdge);
         }
 
         // Add them without values we set the values in the next step
@@ -215,15 +217,10 @@ public class ShortestPathNoCH extends ShortestPath {
 
         // backtracking here
         currNode = trgtId;
-        int prevEdge;
         while (routeElements > 1) {
-            prevEdge = prevEdges[currNode];
-            length += graph.getEuclidianDist(prevEdge);
             routeElements--;
-
             resultWay.setPointLat(routeElements, graph.getLat(currNode));
             resultWay.setPointLon(routeElements, graph.getLon(currNode));
-
             currNode = graph.getSource(prevEdges[currNode]);
         }
         // add source node to the result.
