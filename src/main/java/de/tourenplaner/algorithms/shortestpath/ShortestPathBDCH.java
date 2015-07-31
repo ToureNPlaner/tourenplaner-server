@@ -283,7 +283,7 @@ public class ShortestPathBDCH extends ShortestPath {
             // unpacking
             edgeId = deque.removeFirst();
             shortedEdge1 = graph.getFirstShortcuttedEdge(edgeId);
-            if (shortedEdge1 > 0) {
+            if (shortedEdge1 >= 0) {
                 // We have a shortcut unpack it
                 shortedEdge2 = graph.getSecondShortcuttedEdge(edgeId);
                 deque.addFirst(shortedEdge2);
