@@ -34,7 +34,6 @@ public class GraphRep implements Serializable {
     private static final long serialVersionUID = 15L;
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
 
-
     /**
      * This class is used internally to sort the Nodes by rank, which is needed
      * so that the CORE Nodes have ids [0, 1, 2, .., k]
@@ -185,6 +184,7 @@ public class GraphRep implements Serializable {
     }
 
     protected NNSearcher searcher;
+    private BoundingBoxPriorityTree bboxxytree;
 
     private final int nodeCount;
     private final int edgeCount;
@@ -269,6 +269,12 @@ public class GraphRep implements Serializable {
         this.searcher = new DumbNN(this);
     }
 
+    public BoundingBoxPriorityTree getXYBoundingBoxPriorityTree() {
+        return bboxxytree;
+    }
+
+
+
     /**
      * Regenerates the offset arrays from the current edge arrays
      */
@@ -279,6 +285,7 @@ public class GraphRep implements Serializable {
         generateOffsets();
         computeXYCoords();
         computeReverseMap();
+        this.bboxxytree = new BoundingBoxPriorityTree(xPos, yPos, rank);
     }
 
     private int getXYDistance(double x1, double y1, double x2, double y2) {

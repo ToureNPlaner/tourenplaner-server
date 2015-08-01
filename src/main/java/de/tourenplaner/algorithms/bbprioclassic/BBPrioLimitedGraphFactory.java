@@ -28,7 +28,7 @@ import de.tourenplaner.computecore.RequestPoints;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;
 import de.tourenplaner.graphrep.GraphRep;
-import de.tourenplaner.graphrep.PrioDings;
+import de.tourenplaner.graphrep.BoundingBoxPriorityTree;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -48,10 +48,10 @@ public class BBPrioLimitedGraphFactory extends GraphAlgorithmFactory {
 	}
 
 	private static final MapType JSONOBJECT = new MapType();
-	protected final PrioDings prioDings;
+	protected final BoundingBoxPriorityTree prioDings;
 
 
-	public BBPrioLimitedGraphFactory(GraphRep graph, PrioDings prioDings) {
+	public BBPrioLimitedGraphFactory(GraphRep graph, BoundingBoxPriorityTree prioDings) {
 		super(graph);
 		this.prioDings = prioDings;
 	}

@@ -8,11 +8,10 @@ import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.PrioAlgorithm;
 import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.computecore.ComputeRequest;
+import de.tourenplaner.graphrep.BoundingBoxPriorityTree;
 import de.tourenplaner.graphrep.GraphRep;
-import de.tourenplaner.graphrep.PrioDings;
 import de.tourenplaner.utils.Timing;
 
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -33,7 +32,7 @@ public class BBBundle extends PrioAlgorithm {
 
     private final IntArrayList needClear;
 
-    public BBBundle(GraphRep graph, PrioDings prioDings) {
+    public BBBundle(GraphRep graph, BoundingBoxPriorityTree prioDings) {
         super(graph, prioDings);
         dfsState = new int[graph.getNodeCount()];
         mappedIds = new int[graph.getNodeCount()];
@@ -214,7 +213,7 @@ public class BBBundle extends PrioAlgorithm {
             do {
                 level = level - 10;
                 req.setLevel(level);
-                bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
+                bboxNodes = prioDings.getNodeSelection(bbox, level);
                 currNodeCount = bboxNodes.size();
             } while (level > 0 && currNodeCount < req.getNodeCount());
 
@@ -223,17 +222,17 @@ public class BBBundle extends PrioAlgorithm {
             level = graph.getMaxRank();
             do {
                 level = level - 10;
-                bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
+                bboxNodes = prioDings.getNodeSelection(bbox, level);
                 currNodeCount = bboxNodes.size();
             } while (level > 0 && currNodeCount < req.getNodeCount());
             log.info("AutoLevel was: " + level);
             level = (req.getLevel() + level) / 2;
             req.setLevel(level);
-            bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
+            bboxNodes = prioDings.getNodeSelection(bbox, level);
 
         } else { // else if (req.mode == BBPrioLimitedRequestData.LevelMode.EXACT){
             level = req.getLevel();
-            bboxNodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), level);
+            bboxNodes = prioDings.getNodeSelection(bbox, level);
         }
 
         log.info(Timing.took("ExtractBBox", start));

@@ -56,9 +56,9 @@ public class ComputeServer {
         reg.registerAlgorithm(new UpDownFactory(graph));
         reg.registerAlgorithm(new WayByNodeIdsFactory(graph));
         reg.registerAlgorithm(new CoreGraphFactory(graph));
-
-        reg.registerAlgorithm(new BBPrioLimitedGraphFactory(graph, new PrioDings(graph)));
-        reg.registerAlgorithm(new BBBundleFactory(graph, new PrioDings(graph)));
+        BoundingBoxPriorityTree xyTree = graph.getXYBoundingBoxPriorityTree();
+        reg.registerAlgorithm(new BBPrioLimitedGraphFactory(graph, xyTree));
+        reg.registerAlgorithm(new BBBundleFactory(graph, xyTree));
         reg.registerAlgorithm(new DrawCoreFactory(graph));
     }
 

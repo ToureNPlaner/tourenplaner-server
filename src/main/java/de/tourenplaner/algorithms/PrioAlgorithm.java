@@ -18,7 +18,7 @@ package de.tourenplaner.algorithms;
 
 
 import de.tourenplaner.graphrep.GraphRep;
-import de.tourenplaner.graphrep.PrioDings;
+import de.tourenplaner.graphrep.BoundingBoxPriorityTree;
 
 /**
  * This abstract class is the basis for Algorithms using a Graphrepresentation
@@ -29,9 +29,9 @@ import de.tourenplaner.graphrep.PrioDings;
  */
 public abstract class PrioAlgorithm implements Algorithm {
 	final protected GraphRep graph;
-	final protected PrioDings prioDings;
+	final protected BoundingBoxPriorityTree prioDings;
 
-	public PrioAlgorithm(GraphRep graph, PrioDings prioDings) {
+	public PrioAlgorithm(GraphRep graph, BoundingBoxPriorityTree prioDings) {
 		this.graph = graph;
 		this.prioDings = prioDings;
 	}

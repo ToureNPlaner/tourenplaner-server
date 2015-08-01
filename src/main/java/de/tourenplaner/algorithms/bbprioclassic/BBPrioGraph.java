@@ -4,11 +4,10 @@ import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.PrioAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
+import de.tourenplaner.graphrep.BoundingBoxPriorityTree;
 import de.tourenplaner.graphrep.GraphRep;
-import de.tourenplaner.graphrep.PrioDings;
 import de.tourenplaner.utils.Timing;
 
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -19,7 +18,7 @@ public class BBPrioGraph extends PrioAlgorithm {
     private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
     private EdgeExtractor edx;
 
-    public BBPrioGraph(GraphRep graph, PrioDings prioDings) {
+    public BBPrioGraph(GraphRep graph, BoundingBoxPriorityTree prioDings) {
         super(graph, prioDings);
         edx = new EdgeExtractor(graph);
     }
@@ -32,7 +31,7 @@ public class BBPrioGraph extends PrioAlgorithm {
 
 
         long start = System.nanoTime();
-        IntArrayList nodes = prioDings.getNodeSelection(new Rectangle2D.Double(bbox.x, bbox.y, bbox.width, bbox.height), req.getMinLevel());
+        IntArrayList nodes = prioDings.getNodeSelection(bbox, req.getMinLevel());
         log.info(Timing.took("nodeSelection", start));
 
         start = System.nanoTime();
