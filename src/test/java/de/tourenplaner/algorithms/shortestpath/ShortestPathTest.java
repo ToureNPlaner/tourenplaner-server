@@ -16,6 +16,7 @@
 
 package de.tourenplaner.algorithms.shortestpath;
 
+import com.carrotsearch.hppc.IntArrayList;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.computecore.RequestPoint;
@@ -83,11 +84,13 @@ public class ShortestPathTest {
             }
             dist[sourcePointId] = 0;
             preds[sourcePointId] = 0;
-
-            for(int currentNode = 0; currentNode < graph.getNodeCount(); ++currentNode){
-                for (int edge = 0; edge < graph.getEdgeCount(); edge++) {
+            IntArrayList queue = new IntArrayList();
+            queue.add(sourcePointId);
+            while(!queue.isEmpty()){
+                int sourceId = queue.remove(0);
+                for (int edgeNum = 0; edgeNum < graph.getOutEdgeCount(sourceId); edgeNum++) {
+                    int edge = graph.getOutEdgeId(sourceId, edgeNum);
                     int targetId = graph.getTarget(edge);
-                    int sourceId =  graph.getSource(edge);
                     // Ignore shortcuts and adding to "infinity"
                     if(graph.getFirstShortcuttedEdge(edge) >= 0 || dist[sourceId] == Integer.MAX_VALUE){
                         continue;
@@ -97,6 +100,7 @@ public class ShortestPathTest {
                     if (tempDist < dist[targetId]) {
                         preds[targetId] = edge;
                         dist[targetId] = tempDist;
+                        queue.add(targetId);
                     }
                 }
             }
