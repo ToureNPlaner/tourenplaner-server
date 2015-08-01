@@ -7,7 +7,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.Algorithm;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
-import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;

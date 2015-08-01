@@ -16,7 +16,7 @@
 
 package de.tourenplaner.graphrep;
 
-import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
+import de.tourenplaner.algorithms.bbbundle.BoundingBox;
 import de.tourenplaner.utils.SortAdapter;
 import de.tourenplaner.utils.Sorter;
 

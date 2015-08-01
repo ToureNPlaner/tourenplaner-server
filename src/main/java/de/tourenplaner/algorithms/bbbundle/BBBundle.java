@@ -6,7 +6,6 @@ import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.PrioAlgorithm;
-import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.BoundingBoxPriorityTree;
 import de.tourenplaner.graphrep.GraphRep;

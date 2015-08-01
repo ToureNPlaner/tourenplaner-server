@@ -1,7 +1,6 @@
 package de.tourenplaner.algorithms.bbbundle;
 
 import com.carrotsearch.hppc.IntArrayList;
-import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.Arrays;

@@ -20,7 +20,6 @@ import de.tourenplaner.algorithms.AlgorithmFactory;
 import de.tourenplaner.algorithms.GraphAlgorithmFactory;
 import de.tourenplaner.algorithms.NNSearchFactory;
 import de.tourenplaner.algorithms.bbbundle.BBBundleFactory;
-import de.tourenplaner.algorithms.bbprioclassic.BBPrioLimitedGraphFactory;
 import de.tourenplaner.algorithms.coregraph.CoreGraphFactory;
 import de.tourenplaner.algorithms.coregraph.UpDownFactory;
 import de.tourenplaner.algorithms.coregraph.WayByNodeIdsFactory;
@@ -57,7 +56,6 @@ public class ComputeServer {
         reg.registerAlgorithm(new WayByNodeIdsFactory(graph));
         reg.registerAlgorithm(new CoreGraphFactory(graph));
         BoundingBoxPriorityTree xyTree = graph.getXYBoundingBoxPriorityTree();
-        reg.registerAlgorithm(new BBPrioLimitedGraphFactory(graph, xyTree));
         reg.registerAlgorithm(new BBBundleFactory(graph, xyTree));
         reg.registerAlgorithm(new DrawCoreFactory(graph));
     }

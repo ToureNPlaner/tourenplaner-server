@@ -8,7 +8,7 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntOpenHashSet;
 import com.carrotsearch.hppc.IntSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
-import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
+import de.tourenplaner.algorithms.bbbundle.BoundingBox;
 
 import java.util.Iterator;
 import java.util.Random;

@@ -1,6 +1,5 @@
 package de.tourenplaner.algorithms.bbbundle;
 
-import de.tourenplaner.algorithms.bbprioclassic.BoundingBox;
 import de.tourenplaner.computecore.RequestData;
 
 /**
