@@ -2,10 +2,10 @@ package de.tourenplaner.algorithms.bbbundle;
 
 /**
  * @author Niklas Schnelle
+ * BoundingBox class used for both projected x,y coordinates and lat, lon geo coordinates
  *
- * This class acts as the RequestData object for Algorithms
- * using the classic protocoll
- */
+ *
+ * */
 public class BoundingBox {
 	// x, y is upper left corner (subject to change)
 	public int x;

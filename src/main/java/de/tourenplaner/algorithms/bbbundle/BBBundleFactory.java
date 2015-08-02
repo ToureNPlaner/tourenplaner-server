@@ -11,7 +11,7 @@ import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computeserver.ErrorMessage;
 import de.tourenplaner.computeserver.Responder;
 import de.tourenplaner.graphrep.GraphRep;
-import de.tourenplaner.graphrep.BoundingBoxPriorityTree;
+import de.tourenplaner.graphrep.BBoxPriorityTree;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -27,10 +27,10 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
     private static final class MapType extends TypeReference<Map<String, Object>> {
     }
 
-    protected final BoundingBoxPriorityTree prioDings;
+    protected final BBoxPriorityTree prioDings;
 
 
-    public BBBundleFactory(GraphRep graph, BoundingBoxPriorityTree prioDings) {
+    public BBBundleFactory(GraphRep graph, BBoxPriorityTree prioDings) {
         super(graph);
         this.prioDings = prioDings;
     }

@@ -55,7 +55,7 @@ public class ComputeServer {
         reg.registerAlgorithm(new UpDownFactory(graph));
         reg.registerAlgorithm(new WayByNodeIdsFactory(graph));
         reg.registerAlgorithm(new CoreGraphFactory(graph));
-        BoundingBoxPriorityTree xyTree = graph.getXYBoundingBoxPriorityTree();
+        BBoxPriorityTree xyTree = graph.getXYBBoxPriorityTree();
         reg.registerAlgorithm(new BBBundleFactory(graph, xyTree));
         reg.registerAlgorithm(new DrawCoreFactory(graph));
     }
@@ -193,12 +193,15 @@ public class ComputeServer {
                 System.exit(1);
             }
 
+            // The GraphRep uses a BoundingBoxPriorityTree for NNSearch
+            // now which should be fast enough but we can change the searcher if
+            // we want to.
             // choose the NNSearcher here
             // DumbNN uses linear search and is slow.
             // HashNN should be faster but needs more RAM
             // GridNN is even faster and uses less RAM
-            log.info("Start creating NNSearcher");
-            graph.setNNSearcher(new GridNN(graph));//new HashNN(graphRep);
+            //log.info("Start creating NNSearcher");
+            //graph.setNNSearcher(new GridNN(graph));//new HashNN(graphRep);
 
             //System.gc();
 

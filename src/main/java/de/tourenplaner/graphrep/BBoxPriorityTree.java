@@ -17,7 +17,7 @@ import java.util.TreeMap;
 /**
  * @author spark
  */
-public final class BoundingBoxPriorityTree {
+public final class BBoxPriorityTree implements NNSearcher {
 
     private final int[] xKeys;
     private final int[] yKeys;
@@ -38,7 +38,7 @@ public final class BoundingBoxPriorityTree {
      * these arrays are stored directly and must not be changed after constructing
      * the BoundingBoxPriorityTree or it will misreport
      */
-    public BoundingBoxPriorityTree(int[] xKeysIn, int[] yKeysIn, int[] prioKeysIn) {
+    public BBoxPriorityTree(int[] xKeysIn, int[] yKeysIn, int[] prioKeysIn) {
         assert (yKeysIn.length == yKeysIn.length) && (yKeysIn.length == xKeysIn.length) && (yKeysIn.length == prioKeysIn.length);
         xKeys = xKeysIn;
         yKeys = yKeysIn;
@@ -182,12 +182,27 @@ public final class BoundingBoxPriorityTree {
 
     }
 
+    /**
+     * Finds the closest nodes for the given coordinates
+     * NOTE this only really fullfills the NNSearcher
+     * interface when the BoundingBoxPriorityTree
+     * was built over the lat, lon geocoordinates
+     *
+     * @param lat
+     * @param lon
+     * @return
+     */
+    @Override
+    public int getIDForCoordinates(int lat, int lon) {
+        // TODO fix behaviour at merdians/poles
+        return getNearestId(lat, lon, 0);
+    }
 
     /**
-     * Get the nearest node for the given x, y coordinates with
+     * Get the nearest id for the given x, y coordinates with
      * priority at least P
      */
-    public int getNextValue(int x, int y, int P) {
+    public int getNearestId(int x, int y, int P) {
 
         BoundingBox bbox = new BoundingBox();
         IntArrayList candValues = new IntArrayList();
@@ -342,6 +357,4 @@ public final class BoundingBoxPriorityTree {
         mySort(start, storage - 1, data1, data2, data3);
         mySort(storage + 1, end, data1, data2, data3);
     }
-
-
 }

@@ -16,17 +16,15 @@
 
 package de.tourenplaner.graphrep;
 
-import java.io.Serializable;
+import org.junit.Test;
 
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public interface NNSearcher extends Serializable {
-	/**
-	 * Finds the closest nodes for the given coordinates
-	 * @param lat
-	 * @param lon
-	 * @return
-	 */
-	int getIDForCoordinates(int lat, int lon);
+public class BoundingBoxPriorityTreeNNTest extends NNTest{
+    @Test
+    public void testGetIdForCoordinates(){
+        NNSearcher searcher = graph.getLatLonBBoxSearchTree();
+        testNNSearcher(searcher);
+    }
 }

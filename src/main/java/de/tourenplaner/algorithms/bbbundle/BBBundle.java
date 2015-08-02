@@ -7,7 +7,7 @@ import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.PrioAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
-import de.tourenplaner.graphrep.BoundingBoxPriorityTree;
+import de.tourenplaner.graphrep.BBoxPriorityTree;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.utils.Timing;
 
@@ -31,7 +31,7 @@ public class BBBundle extends PrioAlgorithm {
 
     private final IntArrayList needClear;
 
-    public BBBundle(GraphRep graph, BoundingBoxPriorityTree prioDings) {
+    public BBBundle(GraphRep graph, BBoxPriorityTree prioDings) {
         super(graph, prioDings);
         dfsState = new int[graph.getNodeCount()];
         mappedIds = new int[graph.getNodeCount()];
