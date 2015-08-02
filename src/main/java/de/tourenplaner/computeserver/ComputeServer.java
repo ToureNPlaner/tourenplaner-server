@@ -55,8 +55,7 @@ public class ComputeServer {
         reg.registerAlgorithm(new UpDownFactory(graph));
         reg.registerAlgorithm(new WayByNodeIdsFactory(graph));
         reg.registerAlgorithm(new CoreGraphFactory(graph));
-        BBoxPriorityTree xyTree = graph.getXYBBoxPriorityTree();
-        reg.registerAlgorithm(new BBBundleFactory(graph, xyTree));
+        reg.registerAlgorithm(new BBBundleFactory(graph));
         reg.registerAlgorithm(new DrawCoreFactory(graph));
     }
 

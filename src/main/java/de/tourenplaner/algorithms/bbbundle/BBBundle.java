@@ -5,7 +5,7 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntStack;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.algorithms.ComputeException;
-import de.tourenplaner.algorithms.PrioAlgorithm;
+import de.tourenplaner.algorithms.GraphAlgorithm;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.graphrep.BBoxPriorityTree;
 import de.tourenplaner.graphrep.GraphRep;
@@ -17,7 +17,7 @@ import java.util.logging.Logger;
 /**
  * Created by niklas on 19.03.15.
  */
-public class BBBundle extends PrioAlgorithm {
+public class BBBundle extends GraphAlgorithm {
     private static Logger log = Logger.getLogger("de.tourenplaner.algorithms");
     private static final int UNSEEN = 0;
     private static final int DISCOVERED = 1;
@@ -31,8 +31,8 @@ public class BBBundle extends PrioAlgorithm {
 
     private final IntArrayList needClear;
 
-    public BBBundle(GraphRep graph, BBoxPriorityTree prioDings) {
-        super(graph, prioDings);
+    public BBBundle(GraphRep graph) {
+        super(graph);
         dfsState = new int[graph.getNodeCount()];
         mappedIds = new int[graph.getNodeCount()];
         needClear = new IntArrayList();
@@ -206,13 +206,14 @@ public class BBBundle extends PrioAlgorithm {
         IntArrayList bboxNodes = new IntArrayList();
         int currNodeCount;
         int level;
+        BBoxPriorityTree bboxPrioTree = graph.getXYBBoxPriorityTree();
         if (req.getMode() == BBBundleRequestData.LevelMode.AUTO) {
 
             level = graph.getMaxRank();
             do {
                 level = level - 10;
                 req.setLevel(level);
-                bboxNodes = prioDings.getNodeSelection(bbox, level);
+                bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
                 currNodeCount = bboxNodes.size();
             } while (level > 0 && currNodeCount < req.getNodeCount());
 
@@ -221,17 +222,17 @@ public class BBBundle extends PrioAlgorithm {
             level = graph.getMaxRank();
             do {
                 level = level - 10;
-                bboxNodes = prioDings.getNodeSelection(bbox, level);
+                bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
                 currNodeCount = bboxNodes.size();
             } while (level > 0 && currNodeCount < req.getNodeCount());
             log.info("AutoLevel was: " + level);
             level = (req.getLevel() + level) / 2;
             req.setLevel(level);
-            bboxNodes = prioDings.getNodeSelection(bbox, level);
+            bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
 
         } else { // else if (req.mode == BBPrioLimitedRequestData.LevelMode.EXACT){
             level = req.getLevel();
-            bboxNodes = prioDings.getNodeSelection(bbox, level);
+            bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
         }
 
         log.info(Timing.took("ExtractBBox", start));
