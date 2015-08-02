@@ -139,7 +139,7 @@ public class BBBundle extends GraphAlgorithm {
     }
 
 
-    private void extractEdges(IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges,
+    private void extractEdges(boolean latLonMode, IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges,
                               IntArrayList verticesToDraw, IntArrayList edgesToDraw,
                               BoundingBox bbox, int coreSize, double minLen, double maxLen, double maxRatio) {
         int edgeCount = 0;
@@ -167,7 +167,7 @@ public class BBBundle extends GraphAlgorithm {
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
                 upEdges.add(e);
                 edgeCount++;
             }
@@ -191,7 +191,7 @@ public class BBBundle extends GraphAlgorithm {
                 int trgtIdMapped = mappedIds[nodeId];
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
                 downEdges.add(e);
                 edgeCount++;
             }
@@ -199,14 +199,14 @@ public class BBBundle extends GraphAlgorithm {
         log.info(edgeCount + " edges");
     }
 
-    private IntArrayList findBBoxNodes(BBBundleRequestData req) {
+    private IntArrayList findBBoxNodes(boolean latLonMode, BBBundleRequestData req) {
         BoundingBox bbox = req.getBbox();
 
         long start = System.nanoTime();
         IntArrayList bboxNodes = new IntArrayList();
         int currNodeCount;
         int level;
-        BBoxPriorityTree bboxPrioTree = graph.getXYBBoxPriorityTree();
+        BBoxPriorityTree bboxPrioTree = (latLonMode)? graph.getLatLonBBoxSearchTree() : graph.getXYBBoxPriorityTree();
         if (req.getMode() == BBBundleRequestData.LevelMode.AUTO) {
 
             level = graph.getMaxRank();
@@ -244,7 +244,7 @@ public class BBBundle extends GraphAlgorithm {
     @Override
     public void compute(ComputeRequest request) throws ComputeException {
         BBBundleRequestData req = (BBBundleRequestData) request.getRequestData();
-        IntArrayList bboxNodes = findBBoxNodes(req);
+        IntArrayList bboxNodes = findBBoxNodes(req.isLatLonMode(), req);
         long start;
         start = System.nanoTime();
         IntArrayDeque nodes = topoSortNodes(bboxNodes, req.getLevel(), req.getCoreSize());
@@ -256,10 +256,10 @@ public class BBBundle extends GraphAlgorithm {
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
         IntArrayList verticesToDraw = new IntArrayList();
         IntArrayList edgesToDraw = new IntArrayList();
-        extractEdges(nodes, upEdges, downEdges, verticesToDraw, edgesToDraw, req.getBbox(), req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+        extractEdges(req.isLatLonMode(), nodes, upEdges, downEdges, verticesToDraw, edgesToDraw, req.getBbox(), req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
 
         log.info(Timing.took("Extracting edges", start));
         log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
-        request.setResultObject(new BBBundleResult(graph, nodes, verticesToDraw, edgesToDraw, upEdges, downEdges, req));
+        request.setResultObject(new BBBundleResult(graph, req.isLatLonMode(), nodes, verticesToDraw, edgesToDraw, upEdges, downEdges, req));
     }
 }

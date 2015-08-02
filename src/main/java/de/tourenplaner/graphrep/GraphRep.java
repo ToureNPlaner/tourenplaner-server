@@ -286,7 +286,7 @@ public class GraphRep implements Serializable {
      *
      * @return
      */
-    public NNSearcher getLatLonBBoxSearchTree() {
+    public BBoxPriorityTree getLatLonBBoxSearchTree() {
         return bboxLatLonTree;
     }
 

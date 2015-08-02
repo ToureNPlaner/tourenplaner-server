@@ -21,8 +21,10 @@ public class DrawCoreResult implements StreamJsonWriter {
     private final GraphRep graph;
     private final IntArrayList edgesToDraw;
     private final IntArrayList verticesToDraw;
+    private final boolean latLonMode;
 
-    public DrawCoreResult(GraphRep graph, ArrayList<BBBundleEdge> edges, IntArrayList verticesToDraw, IntArrayList edgesToDraw, int coreSize) {
+    public DrawCoreResult(GraphRep graph, boolean latLonMode, ArrayList<BBBundleEdge> edges, IntArrayList verticesToDraw, IntArrayList edgesToDraw, int coreSize) {
+        this.latLonMode = latLonMode;
         this.graph = graph;
         this.edges = edges;
         this.coreSize = coreSize;
@@ -40,8 +42,18 @@ public class DrawCoreResult implements StreamJsonWriter {
         // Drawing Data
         gen.writeObjectFieldStart("draw");
         gen.writeArrayFieldStart("vertices");
-        for (int i = 0; i < verticesToDraw.size(); ++i) {
-            writeDrawVertex(gen, verticesToDraw.get(i));
+        if(latLonMode){
+            for (int i = 0; i < verticesToDraw.size(); ++i) {
+                int nodeId = verticesToDraw.get(i);
+                gen.writeNumber(graph.getLat(nodeId));
+                gen.writeNumber(graph.getLon(nodeId));
+            }
+        } else {
+            for (int i = 0; i < verticesToDraw.size(); ++i) {
+                int nodeId = verticesToDraw.get(i);
+                gen.writeNumber(graph.getXPos(nodeId));
+                gen.writeNumber(graph.getYPos(nodeId));
+            }
         }
         gen.writeEndArray();
         gen.writeArrayFieldStart("edges");
@@ -65,10 +77,5 @@ public class DrawCoreResult implements StreamJsonWriter {
         gen.writeEndArray();
         gen.writeEndObject();
         gen.flush();
-    }
-
-    public final void writeDrawVertex(JsonGenerator gen, int nodeId) throws IOException {
-        gen.writeNumber(graph.getXPos(nodeId));
-        gen.writeNumber(graph.getYPos(nodeId));
     }
 }

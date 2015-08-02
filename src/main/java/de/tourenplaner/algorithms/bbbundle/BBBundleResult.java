@@ -26,9 +26,11 @@ public final class BBBundleResult implements StreamJsonWriter {
     private final ArrayList<BBBundleEdge> downEdges;
     private final BBBundleRequestData request;
     private final GraphRep graph;
+    private final boolean latLonMode;
 
-    public BBBundleResult(GraphRep graph, IntArrayDeque nodes, IntArrayList verticesToDraw, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
+    public BBBundleResult(GraphRep graph, boolean latLonMode, IntArrayDeque nodes, IntArrayList verticesToDraw, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
         this.graph = graph;
+        this.latLonMode = latLonMode;
         this.nodes = nodes;
         this.verticesToDraw = verticesToDraw;
         this.edgesToDraw = edgesToDraw;
@@ -61,8 +63,18 @@ public final class BBBundleResult implements StreamJsonWriter {
         // Drawing Data
         gen.writeObjectFieldStart("draw");
         gen.writeArrayFieldStart("vertices");
-        for (int i = 0; i < verticesToDraw.size(); ++i) {
-            writeDrawVertex(gen, verticesToDraw.get(i));
+        if(latLonMode) {
+            for (int i = 0; i < verticesToDraw.size(); ++i) {
+                int nodeId = verticesToDraw.get(i);
+                gen.writeNumber(graph.getXPos(nodeId));
+                gen.writeNumber(graph.getYPos(nodeId));
+            }
+        } else {
+            for (int i = 0; i < verticesToDraw.size(); ++i) {
+                int nodeId = verticesToDraw.get(i);
+                gen.writeNumber(graph.getLat(nodeId));
+                gen.writeNumber(graph.getLon(nodeId));
+            }
         }
         gen.writeEndArray();
 
@@ -108,10 +120,5 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeEndObject();
         gen.writeEndObject();
         gen.flush();
-    }
-
-    public final void writeDrawVertex(JsonGenerator gen, int nodeId) throws IOException {
-        gen.writeNumber(graph.getXPos(nodeId));
-        gen.writeNumber(graph.getYPos(nodeId));
     }
 }

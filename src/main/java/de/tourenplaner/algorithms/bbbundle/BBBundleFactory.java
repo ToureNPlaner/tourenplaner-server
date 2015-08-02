@@ -146,6 +146,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
             double minLen = 0.0;
             double maxLen = 0.0;
             double maxRatio = 0.0;
+            boolean latlon = false;
             int hintLevel = 0;
             int nodeCount = 0;
             int coreSize = 0;
@@ -195,10 +196,12 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                         }
                     } else if ("minLen".equals(fieldname)) {
                         minLen = jp.getDoubleValue();
-                    }else if ("maxLen".equals(fieldname)) {
+                    } else if ("maxLen".equals(fieldname)) {
                         maxLen = jp.getDoubleValue();
-                    }else if ("maxRatio".equals(fieldname)) {
+                    } else if ("maxRatio".equals(fieldname)) {
                         maxRatio = jp.getDoubleValue();
+                    } else if ("coords".equals(fieldname)){
+                        latlon = jp.getText().equals("latlon");
                     } else {
                         // ignore for now TODO: user version string etc.
                         if ((token == JsonToken.START_ARRAY) || (token == JsonToken.START_OBJECT)) {
@@ -216,7 +219,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                 }
             }
 
-            return new BBBundleRequestData(this.getURLSuffix(), bbox, mode, minLen, maxLen, maxRatio, nodeCount, hintLevel, coreSize);
+            return new BBBundleRequestData(this.getURLSuffix(), latlon, bbox, mode, minLen, maxLen, maxRatio, nodeCount, hintLevel, coreSize);
         } else {
             responder.writeErrorMessage(ErrorMessage.EBADJSON_NOCONTENT);
             return null;

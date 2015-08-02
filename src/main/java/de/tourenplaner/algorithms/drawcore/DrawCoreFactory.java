@@ -42,6 +42,7 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
         double minLen = 20.0;
         double maxLen = 400.0;
         double maxRatio = 0.01;
+        boolean latLonMode = false;
 
         if (content.readableBytes() > 0) {
 
@@ -83,6 +84,8 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
                         maxLen = jp.getDoubleValue();
                     }else if ("maxRatio".equals(fieldname)) {
                         maxRatio = jp.getDoubleValue();
+                    }else if ("coords".equals(fieldname)) {
+                        latLonMode = jp.getText().equals("latlon");
                     } else {
                         // ignore for now TODO: user version string etc.
                         if ((token == JsonToken.START_ARRAY) || (token == JsonToken.START_OBJECT)) {
@@ -105,7 +108,7 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
             responder.writeErrorMessage(ErrorMessage.EBADJSON_NOCONTENT);
             return null;
         }
-        return new DrawCoreRequestData(this.getURLSuffix(), nodeCount, mode, minLen, maxLen, maxRatio);
+        return new DrawCoreRequestData(this.getURLSuffix(), latLonMode, nodeCount, mode, minLen, maxLen, maxRatio);
     }
 
     @Override

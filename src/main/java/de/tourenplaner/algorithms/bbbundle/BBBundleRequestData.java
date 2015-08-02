@@ -29,6 +29,8 @@ public final class BBBundleRequestData extends RequestData {
 
     public LevelMode getMode() {return mode;}
 
+    public boolean isLatLonMode() {return  latlon;}
+
     public BoundingBox getBbox() {
         return bbox;
     }
@@ -40,6 +42,7 @@ public final class BBBundleRequestData extends RequestData {
     private final double minLen;
     private final double maxLen;
     private final double maxRatio;
+    private final boolean latlon;
 
     public double getMinLen(){ return minLen;}
 
@@ -47,8 +50,9 @@ public final class BBBundleRequestData extends RequestData {
 
     public double getMaxRatio(){ return maxRatio;}
 
-    public BBBundleRequestData(String algSuffix, BoundingBox bbox, LevelMode mode, double minLen, double maxLen, double maxRatio, int nodeCount, int level, int coreSize){
+    public BBBundleRequestData(String algSuffix, boolean latlon, BoundingBox bbox, LevelMode mode, double minLen, double maxLen, double maxRatio, int nodeCount, int level, int coreSize){
         super(algSuffix);
+        this.latlon = latlon;
         this.bbox = bbox;
         this.nodeCount = nodeCount;
         this.minLen = minLen;
