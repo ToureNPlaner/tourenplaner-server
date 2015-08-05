@@ -1,8 +1,6 @@
 package de.tourenplaner.algorithms.bbbundle;
 
-import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.cursors.IntCursor;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.computecore.StreamJsonWriter;
@@ -21,14 +19,14 @@ public final class BBBundleResult implements StreamJsonWriter {
     //private final GraphRep graph;
     private final IntArrayList edgesToDraw;
     private final IntArrayList verticesToDraw;
-    private final IntArrayDeque nodes;
+    private final int[] nodes;
     private final ArrayList<BBBundleEdge> upEdges;
     private final ArrayList<BBBundleEdge> downEdges;
     private final BBBundleRequestData request;
     private final GraphRep graph;
     private final boolean latLonMode;
 
-    public BBBundleResult(GraphRep graph, boolean latLonMode, IntArrayDeque nodes, IntArrayList verticesToDraw, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
+    public BBBundleResult(GraphRep graph, boolean latLonMode, int[] nodes, IntArrayList verticesToDraw, IntArrayList edgesToDraw, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges, BBBundleRequestData request) {
         this.graph = graph;
         this.latLonMode = latLonMode;
         this.nodes = nodes;
@@ -45,7 +43,7 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeStartObject();
         // Head
         gen.writeObjectFieldStart("head");
-        gen.writeNumberField("nodeCount", nodes.size());
+        gen.writeNumberField("nodeCount", nodes.length);
         gen.writeNumberField("upEdgeCount", upEdges.size());
         gen.writeNumberField("downEdgeCount", downEdges.size());
         gen.writeNumberField("coreSize", request.getCoreSize());
@@ -66,14 +64,14 @@ public final class BBBundleResult implements StreamJsonWriter {
         if(latLonMode) {
             for (int i = 0; i < verticesToDraw.size(); ++i) {
                 int nodeId = verticesToDraw.get(i);
-                gen.writeNumber(graph.getXPos(nodeId));
-                gen.writeNumber(graph.getYPos(nodeId));
+                gen.writeNumber(graph.getLat(nodeId));
+                gen.writeNumber(graph.getLon(nodeId));
             }
         } else {
             for (int i = 0; i < verticesToDraw.size(); ++i) {
                 int nodeId = verticesToDraw.get(i);
-                gen.writeNumber(graph.getLat(nodeId));
-                gen.writeNumber(graph.getLon(nodeId));
+                gen.writeNumber(graph.getXPos(nodeId));
+                gen.writeNumber(graph.getYPos(nodeId));
             }
         }
         gen.writeEndArray();
@@ -86,8 +84,8 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeEndObject();
         // Original node ids
         gen.writeArrayFieldStart("oNodeIds");
-        for (IntCursor ic : nodes) {
-            gen.writeNumber(ic.value);
+        for (int v : nodes) {
+            gen.writeNumber(v);
         }
         gen.writeEndArray();
         // Edges
