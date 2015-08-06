@@ -12,6 +12,7 @@ import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.utils.Timing;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Logger;
 
 /**
@@ -49,11 +50,6 @@ public class BBBundle extends GraphAlgorithm {
             if (bboxNodeId >= coreSize && dfsState[bboxNodeId] == UNSEEN) {
                 dfs(topSorted, bboxNodeId, coreSize);
             }
-        }
-        int currMapId = coreSize;
-        for (IntCursor ic: topSorted) {
-            assert dfsState[ic.value] == COMPLETED;
-            mappedIds[ic.value] = currMapId++;
         }
 
         for (IntCursor ic : needClear) {
@@ -139,14 +135,20 @@ public class BBBundle extends GraphAlgorithm {
     }
 
 
-    private void extractEdges(boolean latLonMode, IntArrayDeque nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges,
+    private void extractEdges(boolean latLonMode, int[] nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges,
                               IntArrayList verticesToDraw, IntArrayList edgesToDraw,
                               BoundingBox bbox, int coreSize, double minLen, double maxLen, double maxRatio) {
+
+        // Map nodeIds into range
+        int currMapId = coreSize;
+        for (int nodeId: nodes) {
+            mappedIds[nodeId] = currMapId++;
+        }
+
         int edgeCount = 0;
         // Reset to -1
         unpacker.reset();
-        for (IntCursor ic : nodes) {
-            int nodeId = ic.value;
+        for (int nodeId : nodes) {
             int nodeRank = graph.getRank(nodeId);
             // Up-Out edges
             for (int upEdgeNum = graph.getOutEdgeCount(nodeId) - 1; upEdgeNum >= 0; --upEdgeNum) {
@@ -241,15 +243,36 @@ public class BBBundle extends GraphAlgorithm {
         return bboxNodes;
     }
 
+    /**
+     * Reverse an int[] as the Arrays package doesn't provide this and Arrays.sort(int[]) has no descending mode
+     * @param arr
+     */
+    private final void reverse(int[] arr){
+        int bottom = 0;
+        int top = arr.length-1;
+        while(bottom < top) {
+            int tmp = arr[bottom];
+            arr[bottom] = arr[top];
+            arr[top] = tmp;
+            top--;
+            bottom++;
+        }
+    }
+
     @Override
     public void compute(ComputeRequest request) throws ComputeException {
         BBBundleRequestData req = (BBBundleRequestData) request.getRequestData();
         IntArrayList bboxNodes = findBBoxNodes(req.isLatLonMode(), req);
+        log.info(+bboxNodes.size()+" bboxNodes");
         long start;
         start = System.nanoTime();
-        IntArrayDeque nodes = topoSortNodes(bboxNodes, req.getLevel(), req.getCoreSize());
+        IntArrayDeque nodesDeque = topoSortNodes(bboxNodes, req.getLevel(), req.getCoreSize());
+        log.info(nodesDeque.size() + " topSortNodes");
+        int[] nodes =  nodesDeque.toArray();
+        Arrays.sort(nodes);
+        reverse(nodes);
         log.info(Timing.took("TopSort", start));
-        log.info("Nodes after TopSort: (with coreSize = " + req.getCoreSize() + ") " + nodes.size());
+        log.info("Nodes after TopSort: (with coreSize = " + req.getCoreSize() + ") " + nodes.length);
 
         start = System.nanoTime();
         ArrayList<BBBundleEdge> upEdges = new ArrayList<>();

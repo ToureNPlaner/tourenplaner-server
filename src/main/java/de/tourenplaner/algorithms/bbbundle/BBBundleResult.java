@@ -84,8 +84,8 @@ public final class BBBundleResult implements StreamJsonWriter {
         gen.writeEndObject();
         // Original node ids
         gen.writeArrayFieldStart("oNodeIds");
-        for (int v : nodes) {
-            gen.writeNumber(v);
+        for (int nodeId : nodes) {
+            gen.writeNumber(nodeId);
         }
         gen.writeEndArray();
         // Edges
