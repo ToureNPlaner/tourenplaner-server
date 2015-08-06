@@ -96,8 +96,8 @@ public final class BBBundleResult implements StreamJsonWriter {
             gen.writeNumber(e.trgtId);
             gen.writeNumber(e.cost);
             gen.writeStartArray();
-            for (int i = 0; i < e.unpacked.size(); ++i){
-                gen.writeNumber(e.unpacked.get(i));
+            for (int i = 0; i < e.path.size(); ++i){
+                gen.writeNumber(e.path.get(i));
             }
             gen.writeEndArray();
         }
@@ -109,8 +109,8 @@ public final class BBBundleResult implements StreamJsonWriter {
             gen.writeNumber(e.trgtId);
             gen.writeNumber(e.cost);
             gen.writeStartArray();
-            for (int i = 0; i < e.unpacked.size(); ++i){
-                gen.writeNumber(e.unpacked.get(i));
+            for (int i = 0; i < e.path.size(); ++i){
+                gen.writeNumber(e.path.get(i));
             }
             gen.writeEndArray();
         }

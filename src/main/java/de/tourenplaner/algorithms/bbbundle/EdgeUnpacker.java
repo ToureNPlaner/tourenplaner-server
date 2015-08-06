@@ -54,7 +54,7 @@ public final class EdgeUnpacker {
             edgeMap[reverseEdgeId] = unpackedIndex;
             edgeClear.add(reverseEdgeId);
         }
-        edge.unpacked.add(unpackedIndex);
+        edge.path.add(unpackedIndex);
     }
 
     public final void unpack(boolean latLonMode, BBBundleEdge edge, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
@@ -80,7 +80,7 @@ public final class EdgeUnpacker {
     private final void unpackRecursiveLatLon(BBBundleEdge edge, int segmentEdgeId, int srcId, int lat1, int lon1, int trgtId, int lat3, int lon3, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
         int mappedEdgeId = edgeMap[segmentEdgeId];
         if (mappedEdgeId >= 0) {
-            edge.unpacked.add(mappedEdgeId);
+            edge.path.add(mappedEdgeId);
             return;
         }
         int edgeLen = graph.getEuclidianDist(segmentEdgeId);
@@ -124,7 +124,7 @@ public final class EdgeUnpacker {
     private final void unpackRecursiveXY(BBBundleEdge edge, int segmentEdgeId, int srcId, int x1, int y1, int trgtId, int x3, int y3, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
         int mappedEdgeId = edgeMap[segmentEdgeId];
         if (mappedEdgeId >= 0) {
-            edge.unpacked.add(mappedEdgeId);
+            edge.path.add(mappedEdgeId);
             return;
         }
         int edgeLen = graph.getEuclidianDist(segmentEdgeId);

@@ -10,13 +10,13 @@ public class BBBundleEdge {
     public final int srcId;
     public final int trgtId;
     public final int cost;
-    public final IntArrayList unpacked;
+    public final IntArrayList path;
 
     public BBBundleEdge(int edgeId, int srcId, int trgtId, int cost) {
         this.edgeId = edgeId;
         this.srcId = srcId;
         this.trgtId = trgtId;
         this.cost = cost;
-        this.unpacked = new IntArrayList();
+        this.path = new IntArrayList();
     }
 }
