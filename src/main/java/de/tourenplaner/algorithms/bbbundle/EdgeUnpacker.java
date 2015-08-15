@@ -87,7 +87,7 @@ public final class EdgeUnpacker {
 
         int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
 
-        if (skipA == -1 || edgeLen <= minLen || (!bbox.contains(lat1, lon1) && !bbox.contains(lat3, lon3))) {
+        if (skipA == -1 || edgeLen <= minLen || (bbox != null && !bbox.contains(lat1, lon1) && !bbox.contains(lat3, lon3))) {
             addEdge(edge, segmentEdgeId, srcId, trgtId, verticesToDraw, drawEdges);
             return;
         }
@@ -131,7 +131,7 @@ public final class EdgeUnpacker {
 
         int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
 
-        if (skipA == -1 || edgeLen <= minLen || (!bbox.contains(x1, y1) && !bbox.contains(x3, y3))) {
+        if (skipA == -1 || edgeLen <= minLen || (bbox != null &&  !bbox.contains(x1, y1) && !bbox.contains(x3, y3))) {
             addEdge(edge, segmentEdgeId, srcId, trgtId, verticesToDraw, drawEdges);
             return;
         }
