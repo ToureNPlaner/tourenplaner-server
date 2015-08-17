@@ -78,6 +78,11 @@ public final class EdgeUnpacker {
     }
 
     private final void unpackRecursiveLatLon(BBBundleEdge edge, int segmentEdgeId, int srcId, int lat1, int lon1, int trgtId, int lat3, int lon3, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
+        // TODO figure out how to keep these for paths
+        if(bbox != null &&  !bbox.contains(lat1, lon1) && !bbox.contains(lat3, lon3)){
+            return;
+        }
+
         int mappedEdgeId = edgeMap[segmentEdgeId];
         if (mappedEdgeId >= 0) {
             edge.path.add(mappedEdgeId);
@@ -104,10 +109,10 @@ public final class EdgeUnpacker {
         int lat2 = graph.getLat(middle);
         int lon2 = graph.getLon(middle);
 
-        /*if (edgeLen <= maxLen) {
+        if (edgeLen <= maxLen) {
             double A = Math.abs(0.5 * (
-                    ((double) lat1 * (double) lon2 + (double) lon1 * (double) lat3 + (double) lat2 * (double) lon3)
-                            - ((double)lon2 * (double) lat3 + (double) lon1 * (double)lat2 + (double) lat1 * (double) lon3)
+                    ((double) lon1 * (double) lat2 + (double) lat1 * (double) lon3 + (double) lon2 * (double) lat3)
+                            - ((double)lat2 * (double) lon3 + (double) lat1 * (double)lon2 + (double) lon1 * (double) lat3)
             ));
             double ratio = 2.0 * A / (edgeLen * edgeLen);
 
@@ -115,7 +120,7 @@ public final class EdgeUnpacker {
                 addEdge(edge, segmentEdgeId, srcId, trgtId, verticesToDraw, drawEdges);
                 return;
             }
-        }*/
+        }
         int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
         unpackRecursiveLatLon(edge, skipA, srcId, lat1, lon1, middle, lat2, lon2, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
         unpackRecursiveLatLon(edge, skipB, middle, lat2, lon2, trgtId, lat3, lon3, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
