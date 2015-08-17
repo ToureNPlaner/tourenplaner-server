@@ -57,8 +57,10 @@ public class DrawCoreResult implements StreamJsonWriter {
         }
         gen.writeEndArray();
         gen.writeArrayFieldStart("edges");
-        for (int i = 0; i < edgesToDraw.size(); ++i) {
-            gen.writeNumber(edgesToDraw.get(i));
+        for (int i = 0; i < edgesToDraw.size();) {
+            gen.writeNumber(edgesToDraw.get(i++)); // srcVId
+            gen.writeNumber(edgesToDraw.get(i++)); // trgtVId
+            gen.writeNumber(edgesToDraw.get(i++)); // type
         }
         gen.writeEndArray();
         gen.writeEndObject();
