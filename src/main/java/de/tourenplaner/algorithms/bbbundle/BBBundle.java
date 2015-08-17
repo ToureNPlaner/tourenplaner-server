@@ -205,7 +205,7 @@ public class BBBundle extends GraphAlgorithm {
         BoundingBox bbox = req.getBbox();
 
         long start = System.nanoTime();
-        IntArrayList bboxNodes = new IntArrayList();
+        IntArrayList bboxNodes;
         int currNodeCount;
         int level;
         BBoxPriorityTree bboxPrioTree = (latLonMode)? graph.getLatLonBBoxSearchTree() : graph.getXYBBoxPriorityTree();

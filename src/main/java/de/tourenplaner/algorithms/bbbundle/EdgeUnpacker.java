@@ -44,8 +44,8 @@ public final class EdgeUnpacker {
             nodeClear.add(trgtId);
         }
         // TODO proper edge types
-        float speed = (float) graph.getEuclidianDist(segmentEdgeId) / (float) graph.getDist(segmentEdgeId);
-        drawEdges.add(mappedSrc, mappedTrgt, (int)(speed*100));
+        int speed = (int) ((float) (graph.getEuclidianDist(segmentEdgeId)*13) / (float) graph.getDist(segmentEdgeId));
+        drawEdges.add(mappedSrc, mappedTrgt, speed);
         int unpackedIndex = (drawEdges.size()/3 - 1);
         edgeMap[segmentEdgeId] = unpackedIndex;
         edgeClear.add(segmentEdgeId);
@@ -87,7 +87,7 @@ public final class EdgeUnpacker {
 
         int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
 
-        if (skipA == -1 || edgeLen <= minLen || (bbox != null && !bbox.contains(lat1, lon1) && !bbox.contains(lat3, lon3))) {
+        if (skipA == -1 || edgeLen <= minLen) {
             addEdge(edge, segmentEdgeId, srcId, trgtId, verticesToDraw, drawEdges);
             return;
         }
@@ -104,7 +104,7 @@ public final class EdgeUnpacker {
         int lat2 = graph.getLat(middle);
         int lon2 = graph.getLon(middle);
 
-        if (edgeLen <= maxLen) {
+        /*if (edgeLen <= maxLen) {
             double A = Math.abs(0.5 * (
                     ((double) lat1 * (double) lon2 + (double) lon1 * (double) lat3 + (double) lat2 * (double) lon3)
                             - ((double)lon2 * (double) lat3 + (double) lon1 * (double)lat2 + (double) lat1 * (double) lon3)
@@ -115,7 +115,7 @@ public final class EdgeUnpacker {
                 addEdge(edge, segmentEdgeId, srcId, trgtId, verticesToDraw, drawEdges);
                 return;
             }
-        }
+        }*/
         int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
         unpackRecursiveLatLon(edge, skipA, srcId, lat1, lon1, middle, lat2, lon2, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
         unpackRecursiveLatLon(edge, skipB, middle, lat2, lon2, trgtId, lat3, lon3, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
