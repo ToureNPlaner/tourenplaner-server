@@ -148,7 +148,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
             double maxRatio = 0.0;
             boolean latlon = false;
             int hintLevel = 0;
-            int nodeCount = 0;
+            int nodeCountHint = 0;
             int coreSize = 0;
             BBBundleRequestData.LevelMode mode = BBBundleRequestData.LevelMode.AUTO;
             int lat = 0, lon = 0;
@@ -180,8 +180,8 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                                 bbox.height = jp.getIntValue();
                             }
                         }
-                    } else if ("nodeCount".equals(fieldname)) {
-                        nodeCount = jp.getIntValue();
+                    } else if ("nodeCountHint".equals(fieldname)) {
+                        nodeCountHint = jp.getIntValue();
                     } else if ("level".equals(fieldname)) {
                         hintLevel = jp.getIntValue();
                     } else if ("coreSize".equals(fieldname)) {
@@ -219,7 +219,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                 }
             }
 
-            return new BBBundleRequestData(this.getURLSuffix(), latlon, bbox, mode, minLen, maxLen, maxRatio, nodeCount, hintLevel, coreSize);
+            return new BBBundleRequestData(this.getURLSuffix(), latlon, bbox, mode, minLen, maxLen, maxRatio, nodeCountHint, hintLevel, coreSize);
         } else {
             responder.writeErrorMessage(ErrorMessage.EBADJSON_NOCONTENT);
             return null;

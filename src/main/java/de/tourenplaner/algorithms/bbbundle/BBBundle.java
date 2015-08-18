@@ -217,7 +217,7 @@ public class BBBundle extends GraphAlgorithm {
                 req.setLevel(level);
                 bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
                 currNodeCount = bboxNodes.size();
-            } while (level > 0 && currNodeCount < req.getNodeCount());
+            } while (level > 0 && currNodeCount < req.getNodeCountHint());
 
         } else if (req.getMode() == BBBundleRequestData.LevelMode.HINTED) {
 
@@ -226,7 +226,7 @@ public class BBBundle extends GraphAlgorithm {
                 level = level - 10;
                 bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
                 currNodeCount = bboxNodes.size();
-            } while (level > 0 && currNodeCount < req.getNodeCount());
+            } while (level > 0 && currNodeCount < req.getNodeCountHint());
             log.info("AutoLevel was: " + level);
             level = (req.getLevel() + level) / 2;
             req.setLevel(level);
