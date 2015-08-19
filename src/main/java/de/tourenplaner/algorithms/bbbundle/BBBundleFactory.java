@@ -182,7 +182,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                         }
                     } else if ("nodeCountHint".equals(fieldname)) {
                         nodeCountHint = jp.getIntValue();
-                    } else if ("level".equals(fieldname)) {
+                    } else if ("minPrio".equals(fieldname)) {
                         hintLevel = jp.getIntValue();
                     } else if ("coreSize".equals(fieldname)) {
                         // in number of nodes
