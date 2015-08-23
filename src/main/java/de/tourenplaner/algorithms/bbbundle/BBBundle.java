@@ -261,28 +261,32 @@ public class BBBundle extends GraphAlgorithm {
 
     @Override
     public void compute(ComputeRequest request) throws ComputeException {
+        long computeStart = System.nanoTime();
         BBBundleRequestData req = (BBBundleRequestData) request.getRequestData();
         IntArrayList bboxNodes = findBBoxNodes(req.isLatLonMode(), req);
-        log.info(+bboxNodes.size()+" bboxNodes");
-        long start;
-        start = System.nanoTime();
+        long afterFindBBoxNodes = System.nanoTime();
+        log.fine(+bboxNodes.size() + " bboxNodes");
         IntArrayDeque nodesDeque = topoSortNodes(bboxNodes, req.getLevel(), req.getCoreSize());
-        log.info(nodesDeque.size() + " topSortNodes");
+        log.fine(nodesDeque.size() + " topSortNodes");
         int[] nodes =  nodesDeque.toArray();
         Arrays.sort(nodes);
         reverse(nodes);
-        log.info(Timing.took("TopSort", start));
-        log.info("Nodes after TopSort: (with coreSize = " + req.getCoreSize() + ") " + nodes.length);
+        long afterTopSort = System.nanoTime();
 
-        start = System.nanoTime();
+        log.fine("Nodes after TopSort: (with coreSize = " + req.getCoreSize() + ") " + nodes.length);
         ArrayList<BBBundleEdge> upEdges = new ArrayList<>();
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
         IntArrayList verticesToDraw = new IntArrayList();
         IntArrayList edgesToDraw = new IntArrayList();
         extractEdges(req.isLatLonMode(), nodes, upEdges, downEdges, verticesToDraw, edgesToDraw, req.getBbox(), req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+        long afterExtractEdges = System.nanoTime();
 
-        log.info(Timing.took("Extracting edges", start));
-        log.info("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
+        log.fine("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
+        log.info("TIMING[Find BBox Nodes, Topological Sort, Extract Edges, Overall]: "+
+                Timing.asStringNoUnit(afterFindBBoxNodes - computeStart)+
+                ", "+Timing.asStringNoUnit(afterTopSort - afterFindBBoxNodes)+
+                ", "+Timing.asStringNoUnit(afterExtractEdges - afterTopSort) +
+                ", " + Timing.asStringNoUnit(afterExtractEdges - computeStart));
         request.setResultObject(new BBBundleResult(graph, req.isLatLonMode(), nodes, verticesToDraw, edgesToDraw, upEdges, downEdges, req));
     }
 }

@@ -6,8 +6,20 @@ package de.tourenplaner.utils;
  * Created by niklas on 14.05.15.
  */
 public class Timing {
-    public static String took(String what, long start) {
+
+    private static final double NANOSECONDS_PER_MILLISECOND = 1000000.0;
+
+    public static final String took(String what, long start) {
         long now = System.nanoTime();
-        return "TIMING: "+what+" took "+(double) (now - start) / 1000000.0 + " ms ";
+        return "TIMING: "+what+" took "+asString(now - start);
     }
+
+    public static final String asString(long timespan){
+        return asStringNoUnit(timespan) + " ms";
+    }
+
+    public static final String asStringNoUnit(long timespan){
+        return Double.toString(timespan/NANOSECONDS_PER_MILLISECOND);
+    }
+
 }

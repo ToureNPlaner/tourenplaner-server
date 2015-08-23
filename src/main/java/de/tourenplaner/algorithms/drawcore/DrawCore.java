@@ -33,7 +33,7 @@ public class DrawCore extends GraphAlgorithm {
         IntArrayList verticesToDraw = new IntArrayList();
         unpacker.reset();
         // Nodes are sorted by rank descending, so the highest nodeCount nodes are 0,..,nodeCount-1
-        for (int nodeId = 0; nodeId < req.getNodeCount() -1; ++nodeId) {
+        for (int nodeId = 0; nodeId < req.getNodeCount(); ++nodeId) {
             // Out edges are sorted by target rank ascending, go them backwards so we can
             // break as soon as targets get too low
             for (int outEdgeNum = graph.getOutEdgeCount(nodeId) - 1; outEdgeNum >= 0; --outEdgeNum) {
