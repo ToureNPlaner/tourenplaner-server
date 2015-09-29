@@ -3,8 +3,8 @@ package de.tourenplaner.utils;
 import com.carrotsearch.hppc.IntArrayList;
 import com.carrotsearch.hppc.IntObjectOpenHashMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
-import org.codehaus.jackson.JsonGenerator;
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -69,7 +69,7 @@ public class ClientSideGraphRep {
 
 
     public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
-        JsonGenerator gen = mapper.getJsonFactory().createJsonGenerator(stream);
+        JsonGenerator gen = mapper.getFactory().createGenerator(stream);
         gen.writeStartObject();
         gen.writeObjectFieldStart("graph");
         IntArrayList list;

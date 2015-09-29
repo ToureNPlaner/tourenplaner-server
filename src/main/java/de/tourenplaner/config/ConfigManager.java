@@ -16,11 +16,9 @@
 
 package de.tourenplaner.config;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,8 +78,8 @@ public class ConfigManager {
 	 *
      * @param inputStream an input stream the config file can be read from
 	 * @throws IOException 
-	 * @throws JsonMappingException 
-	 * @throws JsonParseException 
+	 * @throws com.fasterxml.jackson.databind.JsonMappingException
+	 * @throws com.fasterxml.jackson.core.JsonParseException
      * @throws Exception Thrown if mapping of config file fails, for example
      *      because the file was not found or the file has a bad syntax
 	 */

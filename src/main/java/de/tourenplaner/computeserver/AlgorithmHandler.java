@@ -16,22 +16,19 @@
 
 package de.tourenplaner.computeserver;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.AlgorithmFactory;
 import de.tourenplaner.computecore.AlgorithmRegistry;
 import de.tourenplaner.computecore.ComputeCore;
 import de.tourenplaner.computecore.ComputeRequest;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.config.ConfigManager;
-import de.tourenplaner.server.ErrorMessage;
-import de.tourenplaner.server.RequestHandler;
 import de.tourenplaner.utils.SHA1;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.jboss.netty.handler.codec.http.HttpHeaders;
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.util.CharsetUtil;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -49,7 +46,6 @@ public class  AlgorithmHandler extends RequestHandler {
     private static final class MapType extends TypeReference<Map<String, Object>> {
     }
 
-    private static final MapType JSONOBJECT = new MapType();
     private static final ObjectMapper mapper = new ObjectMapper();
     private final ComputeCore computer;
     private final AlgorithmRegistry algReg;
@@ -68,11 +64,11 @@ public class  AlgorithmHandler extends RequestHandler {
      *
      * @param request HttpRequest
      * @param algName algorithm name as String
-     * @throws JsonParseException Thrown if parsing json content fails
-     * @throws JsonProcessingException Thrown if json generation processing fails
+     * @throws com.fasterxml.jackson.core.JsonParseException Thrown if parsing json content fails
+     * @throws com.fasterxml.jackson.core.JsonProcessingException Thrown if json generation processing fails
      * @throws IOException Thrown if error message sending or reading json fails
      */
-    public void handleAlg(HttpRequest request, String algName) throws IOException {
+    public void handleAlg(FullHttpRequest request, String algName) throws IOException {
 
         try {
             // denial early so we don't parse if Queue is full
@@ -101,10 +97,10 @@ public class  AlgorithmHandler extends RequestHandler {
 
             if (req != null) {
                 // Log what is requested
-                request.getContent().resetReaderIndex();
+                request.content().resetReaderIndex();
                 String ip = headers.get("X-Forwarded-For");
                 if (ip == null) {
-                    ip = ((InetSocketAddress) req.getResponder().getChannel().getRemoteAddress()).getAddress().getHostAddress();
+                    ip = ((InetSocketAddress) req.getResponder().getChannel().remoteAddress()).getAddress().getHostAddress();
                 }
 
                 if (Level.parse(ConfigManager.getInstance().getEntryString("loglevel", "info").toUpperCase())
@@ -114,7 +110,7 @@ public class  AlgorithmHandler extends RequestHandler {
                     //TODO: (persistent?) random salt to make ip not bruteforceable
                     String anonident = SHA1.SHA1(ip + day + "somesalt");
                     log.fine("\"" + algName + "\" for Client " + anonident + "  " +
-                             request.getContent().toString(CharsetUtil.UTF_8));
+                             request.content().toString(CharsetUtil.UTF_8));
                 }
 
                 final boolean success = computer.submit(req);
@@ -127,6 +123,8 @@ public class  AlgorithmHandler extends RequestHandler {
             }
         } catch (JsonParseException e) {
             responder.writeErrorMessage(ErrorMessage.EBADJSON, e.getMessage());
+        } finally {
+	        request.release();
         }
 
     }

@@ -68,7 +68,7 @@ public class GraphRepTextReader implements GraphRepReader {
             graphRep.setNodeData(i, lat, lon, height);
 
             if (splittedLine.length == 4) {
-                graphRep.setNodeRank(i, Integer.parseInt(splittedLine[3]));
+                graphRep.setRank(i, Integer.parseInt(splittedLine[3]));
             }
 
         }
@@ -97,7 +97,7 @@ public class GraphRepTextReader implements GraphRepReader {
         }
         in.close();
         log.info("Start generating offsets");
-        graphRep.generateOffsets();
+        graphRep.setup();
         log.info("successfully created offset of InEdges");
 
         return graphRep;

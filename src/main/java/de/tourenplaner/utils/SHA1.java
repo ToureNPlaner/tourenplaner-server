@@ -16,7 +16,7 @@
 
 package de.tourenplaner.utils;
 
-import org.jboss.netty.util.CharsetUtil;
+import io.netty.util.CharsetUtil;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;

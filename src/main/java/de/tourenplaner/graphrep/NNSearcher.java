@@ -22,9 +22,11 @@ import java.io.Serializable;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public interface NNSearcher extends Serializable {
-
-	// it's best to use the protected lon[] and lat[] arrays in GraphRep for
-	// accessing all nodes
-
+	/**
+	 * Finds the closest nodes for the given coordinates
+	 * @param lat
+	 * @param lon
+	 * @return
+	 */
 	int getIDForCoordinates(int lat, int lon);
 }

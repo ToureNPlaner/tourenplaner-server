@@ -16,10 +16,12 @@
 
 package de.tourenplaner.graphrep;
 
+import de.tourenplaner.algorithms.bbbundle.BoundingBox;
 import de.tourenplaner.utils.SortAdapter;
 import de.tourenplaner.utils.Sorter;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,12 +34,59 @@ public class GraphRep implements Serializable {
     private static final long serialVersionUID = 15L;
     private static Logger log = Logger.getLogger("de.tourenplaner.graphrep");
 
+
+
+    /**
+     * This class is used internally to sort the Nodes by rank, which is needed
+     * so that the CORE Nodes have ids [0, 1, 2, .., k]
+     */
+    private static final class NodeSortAdapter extends SortAdapter {
+        private final GraphRep graph;
+        private final int[] order;
+
+        public NodeSortAdapter(GraphRep graph, int[] order) {
+            this.graph = graph;
+            this.order = order;
+        }
+
+        @Override
+        public void swap(int i, int j) {
+            int tmpLat = graph.lat[i];
+            int tmpLon = graph.lon[i];
+            int tmpRank = graph.rank[i];
+            int tmpHeight = graph.height[i];
+            int tmpOrder = order[i];
+
+            graph.lat[i] = graph.lat[j];
+            graph.lon[i] = graph.lon[j];
+            graph.rank[i] = graph.rank[j];
+            graph.height[i] = graph.height[j];
+            order[i] = order[j];
+
+            graph.lat[j] = tmpLat;
+            graph.lon[j] = tmpLon;
+            graph.rank[j] = tmpRank;
+            graph.height[j] = tmpHeight;
+            order[j] = tmpOrder;
+        }
+
+        @Override
+        public boolean less(int i, int j) {
+            return graph.rank[i] > graph.rank[j];
+        }
+
+        @Override
+        public int length() {
+            return graph.lat.length;
+        }
+    }
+
     /**
      * This class is used internally to sort the in edge arrays
      * it's a heap sort implementation using a ternary heap.
      */
-    private static class MappingSortAdapter extends SortAdapter {
-        private GraphRep graph;
+    private static final class MappingSortAdapter extends SortAdapter {
+        private final GraphRep graph;
 
         public MappingSortAdapter(GraphRep graph) {
             this.graph = graph;
@@ -75,13 +124,15 @@ public class GraphRep implements Serializable {
      * in ascending rank order
      * it's a heap sort implementation using a ternary heap.
      */
-    private static class OutEdgeSortAdapter extends SortAdapter {
-        private GraphRep graph;
-        private int[] order;
+    private static final class OutEdgeSortAdapter extends SortAdapter {
+        private final GraphRep graph;
+        private final int[] order;
+
         /**
          * Sorts the graphs out edges storing their new id in the order array
          * which needs to have edgeNum size and needs to be initialized
          * wit 0,1,2..,edgeNum-1
+         *
          * @param graph
          * @param order
          */
@@ -135,6 +186,8 @@ public class GraphRep implements Serializable {
     }
 
     protected NNSearcher searcher;
+    private BBoxPriorityTree bboxXYTree;
+    private BBoxPriorityTree bboxLatLonTree;
 
     private final int nodeCount;
     private final int edgeCount;
@@ -150,6 +203,15 @@ public class GraphRep implements Serializable {
     protected final int[] height;
     protected final int[] rank;
 
+    protected final int[] xPos;
+    protected final int[] yPos;
+
+    protected int[] offsetOut;
+    protected int[] offsetIn;
+
+    private int maxRank;
+    private BoundingBox bbox;
+
     // edges
     protected final int[] src;
     protected final int[] trgt;
@@ -159,8 +221,10 @@ public class GraphRep implements Serializable {
     protected final int[] shortedEdge1;
     protected final int[] shortedEdge2;
 
-    protected int[] offsetOut;
-    protected int[] offsetIn;
+    // For each edge edgeId saves the edge going in the opposite direction with the same length if it exists
+    protected int[] reverseMap;
+
+
 
     /**
      * The constant used to compute time traveled on an edge from it's
@@ -191,6 +255,9 @@ public class GraphRep implements Serializable {
         this.lon = new int[nodeCount];
         this.height = new int[nodeCount];
 
+        this.xPos = new int[nodeCount];
+        this.yPos = new int[nodeCount];
+
         this.rank = new int[nodeCount];
 
         this.src = new int[edgeCount];
@@ -206,146 +273,169 @@ public class GraphRep implements Serializable {
     }
 
     /**
-     * Set the NNSearcher used by this GraphRep
-     * @param searcher
-     */
-    public void setNNSearcher(NNSearcher searcher) {
-        this.searcher = searcher;
-    }
-
-    /**
-     * Sets the data fields of the node given by it's id
+     * Get the internal BoundingBoxPriorityTree constructed over the XY coordinates
      *
-     * @param id
-     * @param lat    in degrees*10^7
-     * @param lon    in degrees*10^7
-     * @param height
-     */
-    public final void setNodeData(int id, int lat, int lon, int height) {
-        this.lat[id] = lat;
-        this.lon[id] = lon;
-        this.height[id] = height;
-        this.rank[id] = Integer.MAX_VALUE;
-    }
-
-    /**
-     * Sets the rank of the node given by it's id
-     *
-     * @param id
-     * @param rank
-     */
-    public final void setNodeRank(int id, int rank) {
-        this.rank[id] = rank;
-    }
-
-    /**
-     * Gets the rank of the node given by it's id
-     *
-     * @param id
-     */
-    public final int getNodeRank(int id) {
-        return this.rank[id];
-    }
-
-    /**
-     * Set the data filed of the edge given by it's id
-     *
-     * @param index
-     * @param source
-     * @param target
-     * @param dist
-     */
-    public final void setEdgeData(int index, int source, int target, int dist, int euclidianDist) {
-        this.src[index] = source;
-        this.trgt[index] = target;
-        this.dist[index] = dist;
-        this.euclidianDist[index] = euclidianDist;
-
-        this.shortedEdge1[index] = -1;
-        this.shortedEdge1[index] = -1;
-    }
-
-    /**
-     * Sets the shortcut fields of the edge given by it's id
-     *
-     * @param id
-     * @param shortedEdge2
-     * @param shortedEdge1
-     */
-    public final void setShortcutData(int id, int shortedEdge1, int shortedEdge2) {
-        this.shortedEdge1[id] = shortedEdge1;
-        this.shortedEdge2[id] = shortedEdge2;
-    }
-
-
-    /**
-     * Sets the offsetOut array to the given array, this method
-     * is only used for low level graph loading so generateOffsets()
-     * can be avoided
-     *
-     * @param newOffsetOut
-     */
-    public final void setOffsetOut(int[] newOffsetOut) {
-        this.offsetOut = newOffsetOut;
-    }
-
-    /**
-     * Gets the offsetOut array used by this GraphRep, this method
-     * is only used for low level graph writing.
-     */
-    protected final int[] getOffsetOut() {
-        return this.offsetOut;
-    }
-
-    /**
-     * Sets the offsetIn array to the given array, this method
-     * is only used for low level graph loading so generateOffsets()
-     * can be avoided
-     *
-     * @param newOffsetIn
-     */
-    protected final void setOffsetIn(int[] newOffsetIn) {
-        this.offsetIn = newOffsetIn;
-    }
-
-    /**
-     * Gets the offsetIn array used by this GraphRep, this method
-     * is only used for low level graph writing.
-     */
-    protected final int[] getOffsetIn() {
-        return this.offsetIn;
-    }
-
-    /**
-     * Sets the mappingInToOut array to the given array, this method
-     * is only used for low level graph loading so generateOffsets()
-     * can be avoided
-     *
-     * @param newMapping
-     */
-    protected final void setMappingInToOut(int[] newMapping) {
-        this.mappingInToOut = newMapping;
-    }
-
-    /**
-     * Gets the mappingInToOut array used by this GraphRep, this method
-     * is only used for low level graph writing.
-     */
-    protected final int[] getMappingInToOut() {
-        return this.mappingInToOut;
-    }
-
-    /**
-     * Checks if the out edges are sorted by ascending rank
-     * just as chconstructor does
      * @return
      */
-    private boolean outEdgesSorted(){
+    public BBoxPriorityTree getXYBBoxPriorityTree() {
+        return bboxXYTree;
+    }
+
+    /**
+     * Get the internal BoundingBoxPriorityTree constructed over the lat, lon geo coordinates
+     *
+     * @return
+     */
+    public BBoxPriorityTree getLatLonBBoxSearchTree() {
+        return bboxLatLonTree;
+    }
+
+
+
+    /**
+     * Regenerates the offset arrays from the current edge arrays
+     */
+    public final void setup() {
+        checkAndSortNodesByRank();
+        checkAndSortOutEdges();
+        mapAndSortInEdges();
+        generateOffsets();
+        computeXYCoords();
+        computeReverseMap();
+        this.bboxXYTree = new BBoxPriorityTree(xPos, yPos, rank);
+        // TODO need to fix behavior at merdian/poles
+        this.bboxLatLonTree = new BBoxPriorityTree(lat, lon, rank);
+        this.searcher = this.bboxLatLonTree;
+    }
+
+    private int getXYDistance(double x1, double y1, double x2, double y2) {
+        double lon1 =  (x1 / 180 * Math.PI);
+        double lon2 = (x2 / 180 * Math.PI);
+        double lat1 = (y1 / 180 * Math.PI);
+        double lat2 = (y2 / 180 * Math.PI);
+        int dist = (int) (1000 * 6378 *Math.acos(Math.sin(lat1)*Math.sin(lat2) + Math.cos(lat1)*Math.cos(lat2)*Math.cos(lon2-lon1)));
+        return dist;
+    }
+
+    public double lon2x(double lat) {
+        return (180.0/Math.PI * Math.log(Math.tan(Math.PI/4+lat*(Math.PI/180.0)*0.5)));
+    }
+
+    private void computeXYCoords() {
+        double minX = Double.MAX_VALUE;
+        double minY = Double.MAX_VALUE;
+        double maxX = Double.MIN_VALUE;
+        double maxY = Double.MIN_VALUE;
+        int tmpRank = 0;
+
+        // Find min/max
+        for (int i = 0; i < nodeCount; ++i) {
+            int x = (int) lon2x(this.lon[i] / 10_000_000.0);
+            int y = (int) (this.lat[i] / 10_000_000.0);
+            tmpRank = this.rank[i];
+            minX = Math.min(minX, x);
+            minY = Math.min(minY, y);
+            maxX = Math.max(maxX, x);
+            maxY = Math.max(maxY, y);
+            maxRank = Math.max(maxRank, tmpRank);
+        }
+
+        // Compute the coordinates
+        int boundWidth = getXYDistance(minX, minY, maxX, minY);
+        int boundHeight = getXYDistance(minX, minY, minX, maxY);
+
+
+        int minXfinal = Integer.MAX_VALUE;
+        int minYfinal = Integer.MAX_VALUE;
+        int maxXfinal = Integer.MIN_VALUE;
+        int maxYfinal = Integer.MIN_VALUE;
+
+        for (int i = 0; i < nodeCount; ++i) {
+            double x = lon2x(this.lon[i] / 10_000_000.0);
+            double y = (this.lat[i] / 10_000_000.0);
+            int xPos = getXYDistance(x, minY, minX, minY);
+            int yPos = boundHeight - getXYDistance(minX, y, minX, minY);
+            minXfinal = Math.min(minXfinal, xPos);
+            minYfinal = Math.min(minYfinal, yPos);
+            maxXfinal = Math.max(maxXfinal, xPos);
+            maxYfinal = Math.max(maxYfinal, yPos);
+            this.xPos[i] = xPos;
+            this.yPos[i] = yPos;
+        }
+        this.bbox = new BoundingBox(minXfinal, minYfinal, maxXfinal-minXfinal, maxYfinal-minYfinal);
+        log.log(Level.INFO, "Bounding box: " + bbox.x + ", " + bbox.y + " - " + bbox.width + ", " + bbox.height);
+
+    }
+
+    /**
+     * Compute the reverse map
+     */
+    private void computeReverseMap() {
+        reverseMap = new int[edgeCount];
+        Arrays.fill(reverseMap, -1);
+        for (int edgeId = 0; edgeId < edgeCount; ++edgeId) {
+            if(reverseMap[edgeId] >= 0) {
+                continue;
+            }
+            int trgt = this.getTarget(edgeId);
+            int src = this.getSource(edgeId);
+            for (int edgeNum  = 0; edgeNum < this.getOutEdgeCount(trgt); edgeNum++){
+                int otherEdgeId = this.getOutEdgeId(trgt, edgeNum);
+                if(src == this.getTarget(otherEdgeId) && this.getDist(edgeId) == this.getDist(otherEdgeId)) {
+                    reverseMap[edgeId] = otherEdgeId;
+                    reverseMap[otherEdgeId] = edgeId;
+                    break;
+                }
+            }
+        }
+    }
+
+    /**
+     * Generate mapping for InEdges by sorting
+     */
+    private void mapAndSortInEdges() {
+        this.mappingInToOut = new int[edgeCount];
+        // Set mapping to initial values (0,1,2,3..)
+        for (int i = 0; i < edgeCount; i++) {
+            this.mappingInToOut[i] = i;
+        }
+        Sorter.sort(new MappingSortAdapter(this));
+    }
+
+    /**
+     * Compute offset arrays
+     */
+    private void generateOffsets() {
+        this.offsetIn = new int[nodeCount + 1];
+        this.offsetOut = new int[nodeCount + 1];
+
+        for (int i = 0; i < edgeCount; ++i) {
+            offsetOut[src[i]]++;
+            offsetIn[trgt[mappingInToOut[i]]]++;
+        }
+        int outSum = 0;
+        int inSum = 0;
+        for (int i = 0; i < nodeCount; ++i) {
+            int oldOutSum = outSum;
+            int oldInSum = inSum;
+            outSum += offsetOut[i];
+            inSum += offsetIn[i];
+            offsetOut[i] = oldOutSum;
+            offsetIn[i] = oldInSum;
+        }
+        offsetOut[nodeCount] = outSum;
+        offsetIn[nodeCount] = inSum;
+    }
+
+    /**
+     * Nodes must be ordered by rank descending, this function checks just that
+     *
+     * @return
+     */
+    private boolean nodesSorted() {
         boolean sorted = true;
-        for (int i = 0; i < this.src.length - 1; i++) {
-            int srcId1 = this.src[i];
-            int srcId2 = this.src[i + 1];
-            if (srcId1 == srcId2 && this.rank[this.trgt[i + 1]] < this.rank[this.trgt[i]]) {
+        for (int i = 0; i < nodeCount-1; ++i) {
+            if (rank[i] < rank[i+1]) {
                 sorted = false;
                 break;
             }
@@ -354,89 +444,99 @@ public class GraphRep implements Serializable {
     }
 
     /**
-     * Regenerates the offset arrays from the current edge arrays
+     * Sort Nodes by their rank, this is needed so that the CORE has  node ids [0,1,..,k]
      */
-    public final void generateOffsets() {
-        this.mappingInToOut = new int[edgeCount];
-        this.offsetOut = new int[nodeCount + 1];
-        this.offsetIn = new int[nodeCount + 1];
+    private void checkAndSortNodesByRank() {
+        boolean sorted = nodesSorted();
+        if (!sorted) {
+            // TODO: Find less memory hungry method to map shorted edges to new ids
+            int[] order = new int[nodeCount];
+            log.log(Level.INFO, "Nodes are not sorted, resort");
+            for (int i = 0; i < nodeCount; i++) {
+                order[i] = i;
+            }
+            Sorter.sort(new NodeSortAdapter(this, order));
 
+            int[] newIds = new int[nodeCount];
+            for (int i = 0; i < newIds.length; i++) {
+                newIds[order[i]] = i;
+            }
+
+            // Fixup edges
+            for (int i = 0; i < edgeCount; i++) {
+                this.src[i] = newIds[src[i]];
+                this.trgt[i] = newIds[trgt[i]];
+            }
+
+            // check if it's true
+            sorted = nodesSorted();
+            log.log(Level.INFO, "nodes sorted: " + sorted);
+        }
+    }
+    /*
+    * Check if out edges are sorted correctly and sort them if they aren't
+     */
+    private void checkAndSortOutEdges() {
         // Check if out edges are correctly sorted and
         // resort if not, the ChConstructor should
         // produce already sorted graphs so we check it first
         boolean sorted = outEdgesSorted();
-        if (!sorted){
+        if (!sorted) {
             // TODO: Find less memory hungry method to map shorted edges to new ids
             int[] order = new int[edgeCount];
-            int[] newIds = new int[edgeCount];
             log.log(Level.INFO, "Out edges are not sorted, resort");
-            for (int i = 0; i < edgeCount; i++)
+            for (int i = 0; i < edgeCount; i++) {
                 order[i] = i;
+            }
             Sorter.sort(new OutEdgeSortAdapter(this, order));
 
-            for (int i = 0; i < edgeCount; i++){
+            int[] newIds = new int[edgeCount];
+            for (int i = 0; i < newIds.length; i++) {
                 newIds[order[i]] = i;
             }
 
             // Fixup shorted edges
-            for (int i = 0; i < edgeCount; i++){
+            for (int i = 0; i < edgeCount; i++) {
                 int oldId1 = this.shortedEdge1[i];
                 int oldId2 = this.shortedEdge2[i];
-                if (oldId1 >= 0){
+                if (oldId1 >= 0) {
                     this.shortedEdge1[i] = newIds[oldId1];
                 }
-                if (oldId2 >= 0){
+                if (oldId2 >= 0) {
                     this.shortedEdge2[i] = newIds[oldId2];
                 }
             }
             // check if it's true
             sorted = outEdgesSorted();
-            log.log(Level.INFO, "out edges sorted: "+sorted);
+            log.log(Level.INFO, "out edges sorted: " + sorted);
         }
+    }
 
-
-        // Set mapping to inital values (0,1,2,3..)
-        for (int i = 0; i < edgeCount; i++) {
-            this.mappingInToOut[i] = i;
-        }
-
-        int currentSource;
-        int prevSource = -1;
-        for (int i = 0; i < edgeCount; i++) {
-            currentSource = src[i];
-            if (currentSource != prevSource) {
-                for (int j = currentSource; j > prevSource; j--) {
-                    offsetOut[j] = i;
-                }
-                prevSource = currentSource;
+    /**
+     * Checks if the out edges are sorted by ascending rank
+     * just as chconstructor does
+     *
+     * @return
+     */
+    private boolean outEdgesSorted() {
+        boolean sorted = true;
+        for (int i = 0; i < this.src.length - 1; i++) {
+            int srcId1 = this.src[i];
+            int srcId2 = this.src[i + 1];
+            if (srcId1 > srcId2 || (srcId1 == srcId2 && this.rank[this.trgt[i + 1]] < this.rank[this.trgt[i]])) {
+                sorted = false;
+                break;
             }
         }
+        return sorted;
+    }
 
-        offsetOut[nodeCount] = edgeCount;
-        // assuming we have at least one edge
-        for (int cnt = nodeCount - 1; offsetOut[cnt] == 0; cnt--) {
-            offsetOut[cnt] = offsetOut[cnt + 1];
-        }
-
-        Sorter.sort(new MappingSortAdapter(this));
-
-        int currentDest;
-        int prevDest = -1;
-        for (int i = 0; i < edgeCount; i++) {
-            currentDest = trgt[mappingInToOut[i]];
-            if (currentDest != prevDest) {
-                for (int j = currentDest; j > prevDest; j--) {
-                    offsetIn[j] = i;
-                }
-                prevDest = currentDest;
-            }
-        }
-
-        offsetIn[nodeCount] = edgeCount;
-        // assuming we have at least one edge
-        for (int cnt = nodeCount - 1; offsetIn[cnt] == 0; cnt--) {
-            offsetIn[cnt] = offsetIn[cnt + 1];
-        }
+    /**
+     * Get the maximum rank value in the graph
+     * @return
+     */
+    public int getMaxRank() {
+        return maxRank;
     }
 
     /**
@@ -450,6 +550,17 @@ public class GraphRep implements Serializable {
      */
     public final int getDist(int edgeId) {
         return dist[edgeId];
+    }
+
+
+    /**
+     * Gets the reverse edge if it exists or -1 if it doesn't. A reverse edge
+     * is an edge going from this edges source to this edges target and has the same length
+     * @param edgeId
+     * @return
+     */
+    public int getReverseEdgeId(int edgeId) {
+        return reverseMap[edgeId];
     }
 
     /**
@@ -541,7 +652,7 @@ public class GraphRep implements Serializable {
      * @param nodeId
      * @return float
      */
-    public final int getNodeHeight(int nodeId) {
+    public final int getHeight(int nodeId) {
         return height[nodeId];
     }
 
@@ -551,7 +662,7 @@ public class GraphRep implements Serializable {
      * @param nodeId
      * @return int (degrees*10^7)
      */
-    public final int getNodeLat(int nodeId) {
+    public final int getLat(int nodeId) {
         return lat[nodeId];
     }
 
@@ -561,7 +672,7 @@ public class GraphRep implements Serializable {
      * @param nodeId
      * @return int (degrees*10^7)
      */
-    public final int getNodeLon(int nodeId) {
+    public final int getLon(int nodeId) {
         return lon[nodeId];
     }
 
@@ -588,14 +699,29 @@ public class GraphRep implements Serializable {
     }
 
     /**
-     * Gets the CH rank in the graph, can be MAX_INT if the node hasn't been
-     * contracted at all CH property is getRank(nodeA)<=getRank(nodeB)
+     * Get the smallest BoundingBox containing the entire graph
+     * @return
+     */
+    public BoundingBox getBbox() {return bbox;}
+
+    /**
+     * Get the projected x position
      *
      * @param nodeId
      * @return
      */
-    public final int getRank(int nodeId) {
-        return rank[nodeId];
+    public final int getXPos(int nodeId) {
+        return xPos[nodeId];
+    }
+
+    /**
+     * Get the projected y position
+     *
+     * @param nodeId
+     * @return
+     */
+    public final int getYPos(int nodeId) {
+        return yPos[nodeId];
     }
 
     /**
@@ -621,5 +747,142 @@ public class GraphRep implements Serializable {
     public final int getTarget(int edgeId) {
         return trgt[edgeId];
     }
-    
+
+    /**
+     * Set the NNSearcher used by this GraphRep
+     *
+     * @param searcher
+     */
+    public void setNNSearcher(NNSearcher searcher) {
+        this.searcher = searcher;
+    }
+
+    /**
+     * Sets the data fields of the node given by it's id
+     *
+     * @param id
+     * @param lat    in degrees*10^7
+     * @param lon    in degrees*10^7
+     * @param height
+     */
+    public final void setNodeData(int id, int lat, int lon, int height) {
+        this.lat[id] = lat;
+        this.lon[id] = lon;
+        this.height[id] = height;
+        this.rank[id] = Integer.MAX_VALUE;
+    }
+
+    /**
+     * Sets the rank of the node given by it's id
+     *
+     * @param id
+     * @param rank
+     */
+    public final void setRank(int id, int rank) {
+        this.rank[id] = rank;
+    }
+
+
+    /**
+     * Gets the CH rank in the graph, can be MAX_INT if the node hasn't been
+     * contracted at all CH property is getRank(nodeA)<=getRank(nodeB)
+     *
+     * @param nodeId
+     * @return
+     */
+    public final int getRank(int nodeId) {
+        return rank[nodeId];
+
+
+    }
+
+    /**
+     * Set the data filed of the edge given by it's id
+     *
+     * @param index
+     * @param source
+     * @param target
+     * @param dist
+     */
+    public final void setEdgeData(int index, int source, int target, int dist, int euclidianDist) {
+        this.src[index] = source;
+        this.trgt[index] = target;
+        this.dist[index] = dist;
+        this.euclidianDist[index] = euclidianDist;
+
+        this.shortedEdge1[index] = -1;
+        this.shortedEdge1[index] = -1;
+    }
+
+    /**
+     * Sets the shortcut fields of the edge given by it's id
+     *
+     * @param id
+     * @param shortedEdge2
+     * @param shortedEdge1
+     */
+    public final void setShortcutData(int id, int shortedEdge1, int shortedEdge2) {
+        this.shortedEdge1[id] = shortedEdge1;
+        this.shortedEdge2[id] = shortedEdge2;
+    }
+
+
+    /**
+     * Sets the offsetOut array to the given array, this method
+     * is only used for low level graph loading so setup()
+     * can be avoided
+     *
+     * @param newOffsetOut
+     */
+    public final void setOffsetOut(int[] newOffsetOut) {
+        this.offsetOut = newOffsetOut;
+    }
+
+    /**
+     * Gets the offsetOut array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getOffsetOut() {
+        return this.offsetOut;
+    }
+
+    /**
+     * Sets the offsetIn array to the given array, this method
+     * is only used for low level graph loading so setup()
+     * can be avoided
+     *
+     * @param newOffsetIn
+     */
+    protected final void setOffsetIn(int[] newOffsetIn) {
+        this.offsetIn = newOffsetIn;
+    }
+
+    /**
+     * Gets the offsetIn array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getOffsetIn() {
+        return this.offsetIn;
+    }
+
+    /**
+     * Sets the mappingInToOut array to the given array, this method
+     * is only used for low level graph loading so setup()
+     * can be avoided
+     *
+     * @param newMapping
+     */
+    protected final void setMappingInToOut(int[] newMapping) {
+        this.mappingInToOut = newMapping;
+    }
+
+    /**
+     * Gets the mappingInToOut array used by this GraphRep, this method
+     * is only used for low level graph writing.
+     */
+    protected final int[] getMappingInToOut() {
+        return this.mappingInToOut;
+    }
+
+
 }

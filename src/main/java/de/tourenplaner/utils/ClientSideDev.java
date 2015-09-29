@@ -5,13 +5,13 @@ import com.carrotsearch.hppc.IntArrayDeque;
 import com.carrotsearch.hppc.IntIntOpenHashMap;
 import com.carrotsearch.hppc.IntOpenHashSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.smile.SmileFactory;
 import de.tourenplaner.algorithms.DijkstraStructs;
 import de.tourenplaner.algorithms.Heap;
 import de.tourenplaner.graphrep.GraphRep;
 import de.tourenplaner.graphrep.GraphRepBinaryReader;
 import de.tourenplaner.graphrep.GridNN;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.smile.SmileFactory;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;

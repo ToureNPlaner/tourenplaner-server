@@ -31,10 +31,10 @@ public class DumbNN implements NNSearcher {
 	}
 
 	private final long sqDistToCoords(int nodeID, int lat, int lon) {
-		return ((long) (graphRep.getNodeLat(nodeID) - lat))
-				* ((long) (graphRep.getNodeLat(nodeID) - lat))
-				+ ((long) (graphRep.getNodeLon(nodeID) - lon))
-				* ((long) (graphRep.getNodeLon(nodeID) - lon));
+		return ((long) (graphRep.getLat(nodeID) - lat))
+				* ((long) (graphRep.getLat(nodeID) - lat))
+				+ ((long) (graphRep.getLon(nodeID) - lon))
+				* ((long) (graphRep.getLon(nodeID) - lon));
 	}
 
 	@Override

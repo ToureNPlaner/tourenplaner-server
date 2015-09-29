@@ -16,7 +16,7 @@
 
 package de.tourenplaner.computecore;
 
-import de.tourenplaner.server.Responder;
+import de.tourenplaner.computeserver.Responder;
 
 /**
  * This class is used to represent a request for computation

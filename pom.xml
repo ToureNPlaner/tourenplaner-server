@@ -10,6 +10,13 @@
 	<name>tourenplaner-server</name>
 	<url>http://tourenplaner.github.com</url>
 
+	<repositories>  
+		<repository>            
+			<id>dropbox</id>                        
+			<url>https://dl.dropboxusercontent.com/u/30343875/mvntest/</url>                        
+		</repository>           
+	</repositories>     
+
 	<developers>
 		<developer>
 			<id>niklas</id>
@@ -55,6 +62,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <jackson.version>2.5.1</jackson.version>
 	</properties>
 
 	<build>
@@ -68,10 +76,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
+				<version>3.2</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>1.7</source>
+					<target>1.7</target>
 					<compilerArgument>-Xlint:all</compilerArgument>
 					<showWarnings>true</showWarnings>
 					<showDeprecation>true</showDeprecation>
@@ -103,29 +111,28 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-smile</artifactId>
-			<version>1.9.9</version>
-		</dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-smile</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
 
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-core-lgpl</artifactId>
-			<version>1.9.9</version>
-		</dependency>
+     <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-core</artifactId>
+      <version>${jackson.version}</version>
+     </dependency>
 
-		<dependency>
-			<groupId>org.codehaus.jackson</groupId>
-			<artifactId>jackson-mapper-lgpl</artifactId>
-			<version>1.9.9</version>
-		</dependency>
+      <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>${jackson.version}</version>
+      </dependency>
 
 		<dependency>
 			<groupId>io.netty</groupId>
-			<artifactId>netty</artifactId>
-			<version>3.9.0.Final</version>
-			<scope>compile</scope>
+			<artifactId>netty-all</artifactId>
+			<version>4.0.25.Final</version>
 		</dependency>
 
 		<dependency>
@@ -137,7 +144,7 @@
 		<dependency>
 			<groupId>com.carrotsearch</groupId>
 			<artifactId>hppc</artifactId>
-			<version>0.5.3</version>
+			<version>0.6.0</version>
 		</dependency>
 
 		<dependency>
@@ -145,5 +152,12 @@
 			<artifactId>c3p0</artifactId>
 			<version>0.9.1.2</version>
 		</dependency>
+
+		<dependency>
+			<groupId>fmi.graph</groupId>
+			<artifactId>graphio</artifactId>
+			<version>0.8-SNAPSHOT</version>
+		</dependency>
+
 	</dependencies>
 </project>

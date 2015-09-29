@@ -16,19 +16,19 @@
 
 package de.tourenplaner.algorithms;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.computecore.RequestData;
 import de.tourenplaner.computecore.RequestPoints;
+import de.tourenplaner.computeserver.ErrorMessage;
+import de.tourenplaner.computeserver.Responder;
 import de.tourenplaner.graphrep.GraphRep;
-import de.tourenplaner.server.ErrorMessage;
-import de.tourenplaner.server.Responder;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonToken;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.jboss.netty.buffer.ChannelBuffer;
-import org.jboss.netty.buffer.ChannelBufferInputStream;
-import org.jboss.netty.handler.codec.http.HttpRequest;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufInputStream;
+import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -42,9 +42,9 @@ import java.util.Map;
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
-    private static final class MapType extends TypeReference<Map<String, Object>> {
+    protected static final class MapType extends TypeReference<Map<String, Object>> {
     }
-    private static final MapType JSONOBJECT = new MapType();
+    protected static final MapType JSONOBJECT = new MapType();
 	
 	protected GraphRep graph;
 	
@@ -63,13 +63,13 @@ public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
     /**
      * Reads ClassicRequestData unless overridden
      */
-    public RequestData readRequestData(ObjectMapper mapper, Responder responder, HttpRequest request) throws IOException {
+    public RequestData readRequestData(ObjectMapper mapper, Responder responder, FullHttpRequest request) throws IOException {
         Map<String, Object> constraints = null;
         final RequestPoints points = new RequestPoints();
-        final ChannelBuffer content = request.getContent();
+        final ByteBuf content = request.content();
         if (content.readableBytes() > 0) {
 
-            final JsonParser jp = mapper.getJsonFactory().createJsonParser(new ChannelBufferInputStream(content));
+            final JsonParser jp = mapper.getFactory().createParser(new ByteBufInputStream(content));
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {

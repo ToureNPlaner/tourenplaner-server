@@ -19,7 +19,7 @@ package de.tourenplaner.computecore;
 import de.tourenplaner.algorithms.AlgorithmFactory;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.logging.Logger;
 
 /**
@@ -33,14 +33,14 @@ import java.util.logging.Logger;
 public class AlgorithmRegistry {
     private static Logger log = Logger.getLogger("de.tourenplaner.computecore");
 
-	private final HashMap<String, AlgorithmFactory> registry;
+	private final TreeMap<String, AlgorithmFactory> registry;
 
 	/**
 	 * Constructs a new empty AlgorithmRegistry
 	 * 
 	 */
 	public AlgorithmRegistry() {
-		registry = new HashMap<String, AlgorithmFactory>();
+		registry = new TreeMap<String, AlgorithmFactory>();
 	}
 
 	/**

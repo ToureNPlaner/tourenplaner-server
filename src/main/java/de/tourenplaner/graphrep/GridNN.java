@@ -70,7 +70,7 @@ public class GridNN implements NNSearcher {
         // Go lat's and lon's one after the other to access more
         // sequentially
         for (int i = 0; i < numNodes; i++) {
-            curr = graphRep.getNodeLat(i);
+            curr = graphRep.getLat(i);
             if (curr < latMin) {
                 latMin = curr;
             } else if (curr > latMax) {
@@ -78,7 +78,7 @@ public class GridNN implements NNSearcher {
             }
         }
         for (int i = 0; i < numNodes; i++) {
-            curr = graphRep.getNodeLon(i);
+            curr = graphRep.getLon(i);
             if (curr < lonMin) {
                 lonMin = curr;
             } else if (curr > lonMax) {
@@ -90,6 +90,8 @@ public class GridNN implements NNSearcher {
         this.latDiff = latMax - latMin;
         this.lonMin = lonMin;
         this.lonDiff = lonMax - lonMin;
+        log.info("Min latitude: "+latMin+" max latitude: "+latMax+
+        "\nmin longitude: "+lonMin+" max longitude: "+lonMax);
 
         // Calculate numRows and numCols to match the geometry of our map
         // only an optimization not needed for correctness
@@ -104,8 +106,8 @@ public class GridNN implements NNSearcher {
         int lat, lon, index;
         IntArrayList list;
         for (int i = 0; i < numNodes; i++) {
-            lat = graphRep.getNodeLat(i);
-            lon = graphRep.getNodeLon(i);
+            lat = graphRep.getLat(i);
+            lon = graphRep.getLon(i);
             index = coordsToIndex(lat, lon);
             list = grid[index];
 
@@ -172,7 +174,7 @@ public class GridNN implements NNSearcher {
     }
 
     private final long sqDistToCoords(int nodeID, int lat, int lon) {
-        return ((long) (graphRep.getNodeLat(nodeID) - lat)) * ((long) (graphRep.getNodeLat(nodeID) - lat)) + ((long) (graphRep.getNodeLon(nodeID) - lon)) * ((long) (graphRep.getNodeLon(nodeID) - lon));
+        return ((long) (graphRep.getLat(nodeID) - lat)) * ((long) (graphRep.getLat(nodeID) - lat)) + ((long) (graphRep.getLon(nodeID) - lon)) * ((long) (graphRep.getLon(nodeID) - lon));
     }
 
 }
