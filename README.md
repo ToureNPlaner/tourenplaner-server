@@ -12,6 +12,9 @@ The following command builds a runnable .jar file in ./target/
 
 First edit tourenplaner.conf to point to the right graph file and note the
 httpport because that needs to be added to the URL for the clients.
+Alternatively just use the default file by downloading the Saarland graph:
+
+`wget -O - http://niklas.frickel.club/uni/saarland_ch_mine.txt.bz2 | bunzip2 -c - > ch_graph.txt`
 
 Finally run:
 
