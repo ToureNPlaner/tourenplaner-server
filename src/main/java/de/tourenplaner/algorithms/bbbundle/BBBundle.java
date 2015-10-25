@@ -136,7 +136,7 @@ public class BBBundle extends GraphAlgorithm {
 
 
     private void extractEdges(boolean latLonMode, int[] nodes, ArrayList<BBBundleEdge> upEdges, ArrayList<BBBundleEdge> downEdges,
-                              IntArrayList verticesToDraw, IntArrayList edgesToDraw,
+                              IntArrayList verticesToDraw, IntArrayList edgesToDraw, int P,
                               BoundingBox bbox, int coreSize, double minLen, double maxLen, double maxRatio) {
 
         // Map nodeIds into range
@@ -169,7 +169,7 @@ public class BBBundle extends GraphAlgorithm {
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, P, coreSize, bbox, minLen, maxLen, maxRatio);
                 upEdges.add(e);
                 edgeCount++;
             }
@@ -193,7 +193,7 @@ public class BBBundle extends GraphAlgorithm {
                 int trgtIdMapped = mappedIds[nodeId];
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, P, coreSize, bbox, minLen, maxLen, maxRatio);
                 downEdges.add(e);
                 edgeCount++;
             }
@@ -278,7 +278,7 @@ public class BBBundle extends GraphAlgorithm {
         ArrayList<BBBundleEdge> downEdges = new ArrayList<>();
         IntArrayList verticesToDraw = new IntArrayList();
         IntArrayList edgesToDraw = new IntArrayList();
-        extractEdges(req.isLatLonMode(), nodes, upEdges, downEdges, verticesToDraw, edgesToDraw, req.getBbox(), req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
+        extractEdges(req.isLatLonMode(), nodes, upEdges, downEdges, verticesToDraw, edgesToDraw, req.getLevel(), req.getBbox(), req.getCoreSize(), req.getMinLen(), req.getMaxLen(), req.getMaxRatio());
         long afterExtractEdges = System.nanoTime();
 
         log.fine("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
