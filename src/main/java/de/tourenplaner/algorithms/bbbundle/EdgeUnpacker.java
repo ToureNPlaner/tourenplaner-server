@@ -66,7 +66,7 @@ public final class EdgeUnpacker {
             edgeClear.add(reverseEdgeId);
         }
 
-        int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
+        /*int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
         if(skipA >= 0) {
             int skipId = graph.getTarget(skipA);
             // For the core we already skip shortcuts above coreSize
@@ -75,7 +75,7 @@ public final class EdgeUnpacker {
                 int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
                 propagateToChildren(skipB, unpackedIndex, P);
             }
-        }
+        }*/
     }
 
     public final void unpack(boolean latLonMode, BBBundleEdge edge, IntArrayList verticesToDraw, IntArrayList drawEdges, int P, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
