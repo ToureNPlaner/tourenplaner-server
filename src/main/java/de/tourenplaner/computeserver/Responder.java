@@ -351,8 +351,6 @@ public class Responder {
 
         work.getResultObject().writeToStream(useMapper, resultStream);
         resultStream.flush();
-
-        resultStream.flush();
         
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
