@@ -18,6 +18,9 @@ public final class EdgeUnpacker {
     private final IntArrayList nodeClear;
     private final IntArrayList edgeClear;
 
+    // Debug Data
+    public int edgeAboveCount;
+
     public EdgeUnpacker(GraphRep graph) {
         this.graph = graph;
         this.edgeMap = new int[graph.getEdgeCount()];
@@ -26,6 +29,7 @@ public final class EdgeUnpacker {
         this.edgeClear = new IntArrayList();
         Arrays.fill(nodeMap, -1);
         Arrays.fill(edgeMap, -1);
+        edgeAboveCount = 0;
     }
 
     private void addEdge(BBBundleEdge edge, int segmentEdgeId, int srcId, int trgtId, int P, IntArrayList verticesToDraw, IntArrayList drawEdges) {
@@ -51,10 +55,10 @@ public final class EdgeUnpacker {
         // If we are dealing with a shortcut that shortcuts a node above P
         // we need to remember that we kept the parent for all it's children down to P
         // this prevents drawing them as well
-        propagateToChildren(segmentEdgeId, unpackedIndex, P);
+        setEdgeMapEntries(segmentEdgeId, unpackedIndex, P);
     }
 
-    private void propagateToChildren(int segmentEdgeId, int unpackedIndex, int P) {
+    private void setEdgeMapEntries(int segmentEdgeId, int unpackedIndex, int P) {
         if(edgeMap[segmentEdgeId] >= 0){
             return;
         }
@@ -66,16 +70,17 @@ public final class EdgeUnpacker {
             edgeClear.add(reverseEdgeId);
         }
 
-        /*int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
+        int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
         if(skipA >= 0) {
             int skipId = graph.getTarget(skipA);
             // For the core we already skip shortcuts above coreSize
-            if (graph.getRank(skipId) >= P) {
-                propagateToChildren(skipA, unpackedIndex, P);
+            if (P >= 0 && graph.getRank(skipId) >= P) {
+                edgeAboveCount++;
+                /*setEdgeMapEntries(skipA, unpackedIndex, P);
                 int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
-                propagateToChildren(skipB, unpackedIndex, P);
+                setEdgeMapEntries(skipB, unpackedIndex, P);*/
             }
-        }*/
+        }
     }
 
     public final void unpack(boolean latLonMode, BBBundleEdge edge, IntArrayList verticesToDraw, IntArrayList drawEdges, int P, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
@@ -207,5 +212,6 @@ public final class EdgeUnpacker {
         }
         nodeClear.clear();
         edgeClear.clear();
+        edgeAboveCount = 0;
     }
 }

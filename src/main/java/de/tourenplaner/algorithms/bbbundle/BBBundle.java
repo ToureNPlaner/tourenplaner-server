@@ -282,8 +282,10 @@ public class BBBundle extends GraphAlgorithm {
         long afterExtractEdges = System.nanoTime();
 
         log.fine("UpEdges: " + upEdges.size() + ", downEdges: " + downEdges.size());
-        log.info("TIMING[Find BBox Nodes, Topological Sort, Extract Edges, Overall]: "+
-                Timing.asStringNoUnit(afterFindBBoxNodes - computeStart)+
+        log.info("TIMING[Edges, Edges Above, Find BBox Nodes, Topological Sort, Extract Edges, Overall]: "+
+                (upEdges.size()+downEdges.size())+
+                ", "+unpacker.edgeAboveCount+
+                ", "+Timing.asStringNoUnit(afterFindBBoxNodes - computeStart)+
                 ", "+Timing.asStringNoUnit(afterTopSort - afterFindBBoxNodes)+
                 ", "+Timing.asStringNoUnit(afterExtractEdges - afterTopSort) +
                 ", " + Timing.asStringNoUnit(afterExtractEdges - computeStart));
