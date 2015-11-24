@@ -32,17 +32,20 @@ public final class BBoxPriorityTree implements NNSearcher {
     private final PrioSearchTree[] myPSTs;
     private static final Random generator = new Random();
 
+    private final boolean latLonMode;
+
     /**
      * Creates the priority data structure for the given input data where
      * xKeysIn[i], yKeysIn[i], priKeysIn[i] belong to object i. Note that
      * these arrays are stored directly and must not be changed after constructing
      * the BoundingBoxPriorityTree or it will misreport
      */
-    public BBoxPriorityTree(int[] xKeysIn, int[] yKeysIn, int[] prioKeysIn) {
+    public BBoxPriorityTree(int[] xKeysIn, int[] yKeysIn, int[] prioKeysIn, boolean latLonMode) {
         assert (yKeysIn.length == yKeysIn.length) && (yKeysIn.length == xKeysIn.length) && (yKeysIn.length == prioKeysIn.length);
         xKeys = xKeysIn;
         yKeys = yKeysIn;
         prioKeys = prioKeysIn;
+        this.latLonMode = latLonMode;
         // initializes data structures with given nodes
         // IDEA:
         // 0. a. retrieve all x-coordinates from nodes; create sorted list of unique x-coords
@@ -194,8 +197,7 @@ public final class BBoxPriorityTree implements NNSearcher {
      */
     @Override
     public int getIDForCoordinates(int lat, int lon) {
-        // TODO fix behaviour at merdians/poles
-        return getNearestId(lat, lon, 0);
+        return getNearestId(lon, lat, 0);
     }
 
     /**
@@ -203,15 +205,13 @@ public final class BBoxPriorityTree implements NNSearcher {
      * priority at least P
      */
     public int getNearestId(int x, int y, int P) {
-
         BoundingBox bbox = new BoundingBox();
         IntArrayList candValues = new IntArrayList();
-
         bbox.width = bbox.height = 32;
         while (candValues.size() == 0) {
             bbox.x = x - bbox.width / 2;
             bbox.y = y - bbox.height / 2;
-            candValues = getNodeSelection(bbox, P);
+            candValues = queryBbox(bbox, P);
             bbox.width *= 2;
             bbox.height *= 2;
         }
@@ -232,9 +232,37 @@ public final class BBoxPriorityTree implements NNSearcher {
     }
 
     /**
-     * Get all nodes contained within the given rectangle with priority at least priority
+     * Get all nodes contained within the given BBox with priority at least priority.
+     * If latLonMode is set, this accounts for the wrap around at -180/180°
      */
-    public IntArrayList getNodeSelection(BoundingBox bbox, int priority) {
+    public IntArrayList queryBbox(BoundingBox bbox, int priority) {
+        int left, right, bottom, top;
+        IntArrayList res = new IntArrayList();
+        if(latLonMode) {
+            final int multiplier = 10000000;
+            left = bbox.x;
+            right = bbox.x + bbox.width;
+            bottom = bbox.y;
+            top = bbox.y + bbox.height;
+
+            if (right > 180 * multiplier) {
+                // We need to query the part of the rectangle right of the 180° meridian separately
+                int tempLeft = -180 * multiplier;
+                int tempRight = -180 * multiplier + (right % (180 * multiplier));
+                res.addAll(query(tempLeft, tempRight, bottom, top, priority));
+            }
+        } else {
+            left = bbox.x;
+            right = bbox.x + bbox.width;
+            bottom = bbox.y;
+            top = bbox.y + bbox.height;
+        }
+
+        res.addAll(query(left, right, bottom, top, priority));
+        return res;
+    }
+
+    public IntArrayList query(int left, int right, int bottom, int top, int priority) {
         // returns indices of nodes in NodeArray falling into rectangle and with
         // high enough priority
 
@@ -248,23 +276,20 @@ public final class BBoxPriorityTree implements NNSearcher {
         //      for feasiblity, though
         //System.out.println("view " + bbox);
         IntArrayList selectedNodeIDs = new IntArrayList();
-        int left = (int) bbox.x, right = (int) (bbox.x + bbox.width);
-        int lower = (int) bbox.y, upper = (int) (bbox.y + bbox.height);
-
-//        System.out.println("PST query with "+left+"-"+right+" and "+lower+"-"+upper+"----- "+priority);
+//        System.out.println("PST query with "+left+"-"+right+" and "+bottom+"-"+top+"----- "+priority);
         IntArrayList resPST = new IntArrayList();
         IntArrayList resKeys = new IntArrayList();
         IntArrayList resInfs = new IntArrayList();
 
         myXRT.batchQuery(left, right, 0, resPST, resKeys, resInfs);
 
-        // first 
+        // first
         for (int i = 0; i < resInfs.size(); i++) {
             for (int j = offset2Xstruct[resInfs.get(i)]; j < offset2Xstruct[resInfs.get(i) + 1]; j++) {
                 int nd = nodesXstruct[j];
                 assert (xKeys[nd] >= left);
                 assert (xKeys[nd] <= right);
-                if ((yKeys[nd] >= lower) && (yKeys[nd] <= upper) && (prioKeys[nd] >= priority)) {
+                if ((yKeys[nd] >= bottom) && (yKeys[nd] <= top) && (prioKeys[nd] >= priority)) {
                     selectedNodeIDs.add(nd);
                 }
             }
@@ -278,11 +303,11 @@ public final class BBoxPriorityTree implements NNSearcher {
             int tmp_cnt = 0;
             if (resPST.get(i) < myPSTs.length) {
                 //System.out.println("PSTQuery mit: "+priority+" on PST number "+resPST.get(i));
-                myPSTs[resPST.get(i)].queryPST(lower, upper, priority, 0, dataKeys, dataPrios, dataInfs);
+                myPSTs[resPST.get(i)].queryPST(bottom, top, priority, 0, dataKeys, dataPrios, dataInfs);
                 for (int j = 0; j < dataInfs.size(); j++) {
                     int jj = dataInfs.get(j);
-                    assert (yKeys[jj] >= lower);
-                    assert (yKeys[jj] <= upper);
+                    assert (yKeys[jj] >= bottom);
+                    assert (yKeys[jj] <= top);
                     assert (prioKeys[jj] >= priority);
 
 
@@ -305,7 +330,7 @@ public final class BBoxPriorityTree implements NNSearcher {
                         int nd = nodesXstruct[jj];
                         assert (xKeys[nd] >= left);
                         assert (xKeys[nd] <= right);
-                        if ((yKeys[nd] >= lower) && (yKeys[nd] <= upper) && (prioKeys[nd] >= priority)) {
+                        if ((yKeys[nd] >= bottom) && (yKeys[nd] <= top) && (prioKeys[nd] >= priority)) {
 
                             selectedNodeIDs.add(nd);
                         }

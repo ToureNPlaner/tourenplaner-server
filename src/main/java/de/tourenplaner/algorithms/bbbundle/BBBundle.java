@@ -215,7 +215,7 @@ public class BBBundle extends GraphAlgorithm {
             do {
                 level = level - 10;
                 req.setLevel(level);
-                bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
+                bboxNodes = bboxPrioTree.queryBbox(bbox, level);
                 currNodeCount = bboxNodes.size();
             } while (level > 0 && currNodeCount < req.getNodeCountHint());
 
@@ -224,17 +224,17 @@ public class BBBundle extends GraphAlgorithm {
             level = graph.getMaxRank();
             do {
                 level = level - 10;
-                bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
+                bboxNodes = bboxPrioTree.queryBbox(bbox, level);
                 currNodeCount = bboxNodes.size();
             } while (level > 0 && currNodeCount < req.getNodeCountHint());
             log.info("AutoLevel was: " + level);
             level = (req.getLevel() + level) / 2;
             req.setLevel(level);
-            bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
+            bboxNodes = bboxPrioTree.queryBbox(bbox, level);
 
         } else { // else if (req.mode == BBPrioLimitedRequestData.LevelMode.EXACT){
             level = req.getLevel();
-            bboxNodes = bboxPrioTree.getNodeSelection(bbox, level);
+            bboxNodes = bboxPrioTree.queryBbox(bbox, level);
         }
 
         log.info(Timing.took("ExtractBBox", start));

@@ -302,9 +302,9 @@ public class GraphRep implements Serializable {
         generateOffsets();
         computeXYCoords();
         computeReverseMap();
-        this.bboxXYTree = new BBoxPriorityTree(xPos, yPos, rank);
+        this.bboxXYTree = new BBoxPriorityTree(xPos, yPos, rank, false);
         // TODO need to fix behavior at merdian/poles
-        this.bboxLatLonTree = new BBoxPriorityTree(lat, lon, rank);
+        this.bboxLatLonTree = new BBoxPriorityTree(lon, lat, rank, true);
         this.searcher = this.bboxLatLonTree;
     }
 
