@@ -101,11 +101,11 @@ public final class EdgeUnpacker {
 
         // TODO figure out how to keep these for paths
         if(bbox != null &&  !bbox.contains(lat1, lon1) && !bbox.contains(lat3, lon3)){
-            return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
+            return addEdge(segmentEdgeId, srcId, trgtId, -2, -2, verticesToDraw, drawEdges);
         }
 
         if (edgeLen <= minLen) {
-            return addEdge(segmentEdgeId, srcId, trgtId, -2, -2, verticesToDraw, drawEdges);
+            return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
         }
 
 
