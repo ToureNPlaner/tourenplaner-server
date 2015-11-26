@@ -61,6 +61,8 @@ public class DrawCoreResult implements StreamJsonWriter {
             gen.writeNumber(edgesToDraw.get(i++)); // srcVId
             gen.writeNumber(edgesToDraw.get(i++)); // trgtVId
             gen.writeNumber(edgesToDraw.get(i++)); // type
+            gen.writeNumber(edgesToDraw.get(i++)); // drawScA
+            gen.writeNumber(edgesToDraw.get(i++)); // drawScB
         }
         gen.writeEndArray();
         gen.writeEndObject();
@@ -70,11 +72,7 @@ public class DrawCoreResult implements StreamJsonWriter {
             gen.writeNumber(e.srcId);
             gen.writeNumber(e.trgtId);
             gen.writeNumber(e.cost);
-            gen.writeStartArray();
-            for (int i = 0; i < e.path.size(); ++i){
-                gen.writeNumber(e.path.get(i));
-            }
-            gen.writeEndArray();
+            gen.writeNumber(e.drawEdgeIndex);
         }
         gen.writeEndArray();
         gen.writeEndObject();

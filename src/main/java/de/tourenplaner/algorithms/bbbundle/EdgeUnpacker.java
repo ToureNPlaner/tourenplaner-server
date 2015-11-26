@@ -32,7 +32,7 @@ public final class EdgeUnpacker {
         edgeAboveCount = 0;
     }
 
-    private void addEdge(BBBundleEdge edge, int segmentEdgeId, int srcId, int trgtId, int P, IntArrayList verticesToDraw, IntArrayList drawEdges) {
+    private int addEdge(int segmentEdgeId, int srcId, int trgtId, int drawScA, int drawScB, IntArrayList verticesToDraw, IntArrayList drawEdges) {
         int mappedSrc = nodeMap[srcId];
         if (mappedSrc < 0){
             verticesToDraw.add(srcId);
@@ -49,16 +49,13 @@ public final class EdgeUnpacker {
         }
         // TODO proper edge types
         int speed = (int) ((float) (graph.getEuclidianDist(segmentEdgeId)*13) / (float) graph.getDist(segmentEdgeId));
-        drawEdges.add(mappedSrc, mappedTrgt, speed);
-        int unpackedIndex = (drawEdges.size()/3 - 1);
-        edge.path.add(unpackedIndex);
-        // If we are dealing with a shortcut that shortcuts a node above P
-        // we need to remember that we kept the parent for all it's children down to P
-        // this prevents drawing them as well
-        setEdgeMapEntries(segmentEdgeId, unpackedIndex, P);
+        drawEdges.add(mappedSrc, mappedTrgt, speed, drawScA, drawScB);
+        int unpackedIndex = (drawEdges.size()/5 - 1);
+        setEdgeMapEntries(segmentEdgeId, unpackedIndex);
+        return unpackedIndex;
     }
 
-    private void setEdgeMapEntries(int segmentEdgeId, int unpackedIndex, int P) {
+    private void setEdgeMapEntries(int segmentEdgeId, int unpackedIndex) {
         if(edgeMap[segmentEdgeId] >= 0){
             return;
         }
@@ -69,36 +66,23 @@ public final class EdgeUnpacker {
             edgeMap[reverseEdgeId] = unpackedIndex;
             edgeClear.add(reverseEdgeId);
         }
-
-        int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
-        if(skipA >= 0) {
-            int skipId = graph.getTarget(skipA);
-            // For the core we already skip shortcuts above coreSize
-            if (P >= 0 && graph.getRank(skipId) >= P) {
-                edgeAboveCount++;
-                /*setEdgeMapEntries(skipA, unpackedIndex, P);
-                int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
-                setEdgeMapEntries(skipB, unpackedIndex, P);*/
-            }
-        }
     }
 
-    public final void unpack(boolean latLonMode, BBBundleEdge edge, IntArrayList verticesToDraw, IntArrayList drawEdges, int P, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
+    public final void unpack(boolean latLonMode, BBBundleEdge edge, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
         if(latLonMode){
-            unpackRecursiveLatLon(edge, edge.edgeId, verticesToDraw, drawEdges, P, bbox, minLen, maxLen, maxRatio);
+            edge.drawEdgeIndex = unpackRecursiveLatLon(edge.edgeId, verticesToDraw, drawEdges,bbox, minLen, maxLen, maxRatio);
 
         } else {
-            unpackRecursiveXY(edge, edge.edgeId, verticesToDraw, drawEdges, P,  bbox, minLen, maxLen, maxRatio);
+            edge.drawEdgeIndex = unpackRecursiveXY(edge.edgeId, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
         }
 
     }
 
-    private final void unpackRecursiveLatLon(BBBundleEdge edge, int segmentEdgeId, IntArrayList verticesToDraw, IntArrayList drawEdges, int P,  BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
+    private int unpackRecursiveLatLon(int segmentEdgeId, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
 
         int mappedEdgeId = edgeMap[segmentEdgeId];
         if (mappedEdgeId >= 0) {
-            edge.path.add(mappedEdgeId);
-            return;
+            return mappedEdgeId;
         }
         int edgeLen = graph.getEuclidianDist(segmentEdgeId);
 
@@ -106,8 +90,7 @@ public final class EdgeUnpacker {
         int trgtId = graph.getTarget(segmentEdgeId);
         int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
         if (skipA == -1){
-            addEdge(edge, segmentEdgeId, srcId, trgtId, P, verticesToDraw, drawEdges);
-            return;
+            return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
         }
         int skipId = graph.getTarget(skipA);
         int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
@@ -118,12 +101,11 @@ public final class EdgeUnpacker {
 
         // TODO figure out how to keep these for paths
         if(bbox != null &&  !bbox.contains(lat1, lon1) && !bbox.contains(lat3, lon3)){
-            return;
+            return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
         }
 
         if (edgeLen <= minLen) {
-            addEdge(edge, segmentEdgeId, srcId, trgtId, P, verticesToDraw, drawEdges);
-            return;
+            return addEdge(segmentEdgeId, srcId, trgtId, -2, -2, verticesToDraw, drawEdges);
         }
 
 
@@ -132,22 +114,21 @@ public final class EdgeUnpacker {
             int lon2 = graph.getLon(skipId);
             double ratio = edgeBendingRatio(edgeLen, lon1, lat1, lon3, lat3, lon2, lat2);
             if (ratio <= maxRatio) {
-                addEdge(edge, segmentEdgeId, srcId, trgtId, P, verticesToDraw, drawEdges);
-                return;
+                return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
             }
         }
 
-        unpackRecursiveLatLon(edge, skipA, verticesToDraw, drawEdges, P, bbox, minLen, maxLen, maxRatio);
-        unpackRecursiveLatLon(edge, skipB, verticesToDraw, drawEdges, P, bbox, minLen, maxLen, maxRatio);
+        int drawScA = unpackRecursiveLatLon(skipA, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
+        int drawScB = unpackRecursiveLatLon(skipB, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
+        return addEdge(segmentEdgeId, srcId, trgtId, drawScA, drawScB, verticesToDraw, drawEdges);
     }
 
 
 
-    private void unpackRecursiveXY(BBBundleEdge edge, int segmentEdgeId, IntArrayList verticesToDraw, IntArrayList drawEdges, int P,  BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
+    private int unpackRecursiveXY(int segmentEdgeId, IntArrayList verticesToDraw, IntArrayList drawEdges, BoundingBox bbox, double minLen, double maxLen, double maxRatio) {
         int mappedEdgeId = edgeMap[segmentEdgeId];
         if (mappedEdgeId >= 0) {
-            edge.path.add(mappedEdgeId);
-            return;
+            return mappedEdgeId;
         }
         int edgeLen = graph.getEuclidianDist(segmentEdgeId);
 
@@ -156,8 +137,7 @@ public final class EdgeUnpacker {
         int trgtId = graph.getTarget(segmentEdgeId);
         int skipA = graph.getFirstShortcuttedEdge(segmentEdgeId);
         if (skipA == -1){
-            addEdge(edge, segmentEdgeId, srcId, trgtId, P, verticesToDraw, drawEdges);
-            return;
+            return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
         }
 
         int skipId = graph.getTarget(skipA);
@@ -166,8 +146,7 @@ public final class EdgeUnpacker {
         int x3 = graph.getXPos(trgtId);
         int y3 = graph.getYPos(trgtId);
         if (edgeLen <= minLen || (bbox != null && !bbox.contains(x1, y1) && !bbox.contains(x3, y3))) {
-            addEdge(edge, segmentEdgeId, srcId, trgtId, P, verticesToDraw, drawEdges);
-            return;
+            return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
         }
 
 
@@ -176,14 +155,14 @@ public final class EdgeUnpacker {
             int y2 = graph.getYPos(skipId);
             double ratio = edgeBendingRatio(edgeLen, x1, y1, x3, y3, x2, y2);
             if (ratio <= maxRatio) {
-                addEdge(edge, segmentEdgeId, srcId, trgtId, P, verticesToDraw, drawEdges);
-                return;
+                return addEdge(segmentEdgeId, srcId, trgtId, -1, -1, verticesToDraw, drawEdges);
             }
         }
 
         int skipB = graph.getSecondShortcuttedEdge(segmentEdgeId);
-        unpackRecursiveXY(edge, skipA, verticesToDraw, drawEdges, P, bbox, minLen, maxLen, maxRatio);
-        unpackRecursiveXY(edge, skipB, verticesToDraw, drawEdges, P, bbox, minLen, maxLen, maxRatio);
+        int drawScA = unpackRecursiveXY(skipA, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
+        int drawScB = unpackRecursiveXY(skipB, verticesToDraw, drawEdges, bbox, minLen, maxLen, maxRatio);
+        return addEdge(segmentEdgeId, srcId, trgtId, drawScA, drawScB, verticesToDraw, drawEdges);
     }
 
     private static double edgeBendingRatio(int edgeLen, double x1, double y1, double x3, double y3, double x2, double y2) {

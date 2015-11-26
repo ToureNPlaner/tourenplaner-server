@@ -169,7 +169,7 @@ public class BBBundle extends GraphAlgorithm {
                 int trgtIdMapped = (trgtId >= coreSize) ? mappedIds[trgtId] : trgtId;
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, P, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
                 upEdges.add(e);
                 edgeCount++;
             }
@@ -193,7 +193,7 @@ public class BBBundle extends GraphAlgorithm {
                 int trgtIdMapped = mappedIds[nodeId];
 
                 BBBundleEdge e = new BBBundleEdge(edgeId, srcIdMapped, trgtIdMapped, graph.getDist(edgeId));
-                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, P, bbox, minLen, maxLen, maxRatio);
+                unpacker.unpack(latLonMode, e, verticesToDraw, edgesToDraw, bbox, minLen, maxLen, maxRatio);
                 downEdges.add(e);
                 edgeCount++;
             }
