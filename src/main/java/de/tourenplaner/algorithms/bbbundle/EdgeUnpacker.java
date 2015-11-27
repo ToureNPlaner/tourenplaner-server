@@ -100,7 +100,7 @@ public final class EdgeUnpacker {
         int lon3 = graph.getLon(trgtId);
 
         // TODO figure out how to keep these for paths
-        if(bbox != null &&  !bbox.contains(lat1, lon1) && !bbox.contains(lat3, lon3)){
+        if((bbox != null &&  !bbox.contains(lon1, lat1) && !bbox.contains(lon3, lat3))){
             return addEdge(segmentEdgeId, srcId, trgtId, -2, -2, verticesToDraw, drawEdges);
         }
 
