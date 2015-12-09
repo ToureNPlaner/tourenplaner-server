@@ -26,18 +26,15 @@ import de.tourenplaner.computeserver.Responder;
 public class ComputeRequest {
 
 	private final Responder responder;
-    private final boolean acceptsSmile;
     private final RequestData requestData;
-    private StreamJsonWriter resultObject;
+    private FormattedStreamWriter resultObject;
 	/**
 	 * Constructs a new ComputeRequest using the given Responder
 	 *
      * @param responder The to this compute request corresponding Responder
-     * @param acceptsSmile Flag if client accepts Smile
      */
-	public ComputeRequest(Responder responder, RequestData requestData, boolean acceptsSmile) {
+	public ComputeRequest(Responder responder, RequestData requestData) {
 		this.responder = responder;
-        this.acceptsSmile = acceptsSmile;
         this.requestData = requestData;
 	}
 
@@ -64,7 +61,7 @@ public class ComputeRequest {
      *
      * @param ro the object which will hold the result
      */
-    public void setResultObject(StreamJsonWriter ro){
+    public void setResultObject(FormattedStreamWriter ro){
         this.resultObject = ro;
     }
 
@@ -73,18 +70,8 @@ public class ComputeRequest {
      * ComputeRequest
      * @return the StreamJsonWriter that will write the result
      */
-    public StreamJsonWriter getResultObject() {
+    public FormattedStreamWriter getResultObject() {
         return this.resultObject;
     }
-
-    /**
-     * Returns if request comes from a client accepting "application/x-jackson-smile"
-     *
-     * @return Returns if client is accepting smile
-     */
-    public boolean isAcceptsSmile() {
-        return acceptsSmile;
-    }
-
 
 }

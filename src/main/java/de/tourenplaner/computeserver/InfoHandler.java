@@ -16,8 +16,6 @@
 
 package de.tourenplaner.computeserver;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
@@ -45,8 +43,9 @@ public class InfoHandler {
         this.responder = responder;
     }
 
-    public void handleInfo(final FullHttpRequest request) throws JsonGenerationException, JsonMappingException, IOException {
-        responder.writeJSON(serverInfo, HttpResponseStatus.OK);
+    public void handleInfo(final FullHttpRequest request) throws IOException {
+        responder.setFormat(Responder.ResultFormat.fromHeaders(request.headers()));
+        responder.writeObject(serverInfo, HttpResponseStatus.OK);
 	    request.release();
     }
 }

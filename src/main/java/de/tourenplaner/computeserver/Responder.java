@@ -16,6 +16,7 @@
 
 package de.tourenplaner.computeserver;
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonMappingException;
@@ -28,8 +29,8 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
+import io.netty.handler.codec.http.HttpHeaders;
 import io.netty.handler.codec.http.HttpHeaders.Names;
-import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
@@ -39,33 +40,48 @@ import java.util.logging.Logger;
 import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 
 /**
- * This class encapsulates the translation from Map<String, Object> to JSON and
- * then to the wire. As well as providing utility methods for sending answers to
- * clients
+ * This class deals with writing ComputeResults as well as error messages to the wire
  *
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
 public class Responder {
+    public enum ResultFormat {
+        JSON("application/json; charset=UTF-8", new ObjectMapper(new JsonFactory()).setPropertyNamingStrategy(new JSONLowerCaseStrategy())),
+        SMILE("application/x-jackson-smile", new ObjectMapper(new SmileFactory()).setPropertyNamingStrategy(new JSONLowerCaseStrategy()));
+
+        private final String contentType;
+        private final ObjectMapper mapper;
+
+        ResultFormat(String contentType, ObjectMapper mapper){
+            this.contentType = contentType;
+            this.mapper = mapper;
+        }
+
+        public final ObjectMapper getMapper() {
+            return mapper;
+        }
+
+        public final String getContentType() {
+            return contentType;
+        }
+
+        public static ResultFormat fromHeaders(HttpHeaders headers){
+            String accept = headers.get("Accept");
+            if(accept != null && accept.contains(SMILE.contentType)){
+                return SMILE;
+            }
+
+            return JSON;
+        }
+
+    }
 
     private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
     private final Channel replyChannel;
+    private ResultFormat format;
     private boolean keepAlive;
-    private static final ObjectMapper mapper;
-    private static final ObjectMapper smileMapper;
 
-    static {
-        mapper = new ObjectMapper();
-        // make all property names in sent json lowercase
-        // http://wiki.fasterxml.com/JacksonFeaturePropertyNamingStrategy
-        mapper.setPropertyNamingStrategy(new JSONLowerCaseStrategy());
-        // Makes jackson use: ISO-8601
-        // TODO still needed?
-        //mapper.configure(JsonGenerator.Feature.WRITE_DATES_AS_TIMESTAMPS, false);
-        
-        // The mapper used for smile
-        smileMapper = new ObjectMapper(new SmileFactory());
-    }
     /**
      * Constructs a new Responder from the given Channel
      *
@@ -73,19 +89,10 @@ public class Responder {
      */
     public Responder(Channel replyChan) {
         this.replyChannel = replyChan;
+        this.format = null;
         this.keepAlive = false;
     }
 
-
-    // TODO should we keep this unused method here?
-    /**
-     * Gets the KeepAlive flag
-     *
-     * @return Returns the KeepAlive flag
-     */
-    public boolean getKeepAlive() {
-        return keepAlive;
-    }
 
     /**
      * Sets the KeepAlive flag
@@ -97,6 +104,14 @@ public class Responder {
     }
 
     /**
+     * Set the format to be used for responses
+     * @param format
+     */
+    public void setFormat(ResultFormat format) {
+        this.format = format;
+    }
+
+    /**
      * Gets the Channel associated with this Responder
      *
      * @return Returns the reply channel
@@ -105,46 +120,6 @@ public class Responder {
         return replyChannel;
     }
 
-    // TODO should we keep this unused method here?
-    /**
-     * Writes a HTTP Unauthorized answer to the wire and closes the connection
-     */
-    public void writeUnauthorizedClose() {
-        log.info("Writing unauthorized close");
-        // Respond with Unauthorized Access
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.UNAUTHORIZED);
-        // Send the client the realm so it knows we want Basic Access Auth.
-        response.headers().set("WWW-Authenticate", "Basic realm=\"ToureNPlaner\"");
-        // Write the response.
-        ChannelFuture future = replyChannel.writeAndFlush(response);
-        future.addListener(ChannelFutureListener.CLOSE);
-    }
-
-    /**
-     * Writes a HTTP status answer to the wire and closes the connection if it is not a keep-alive connection
-     * @param status HttpResponseStatus
-     */
-    public void writeStatusResponse(HttpResponseStatus status) {
-        // Build the response object.
-        HttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
-
-        response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(Names.CONTENT_TYPE, "text-html; charset=UTF-8");
-
-        if (keepAlive) {
-            // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(Names.CONTENT_LENGTH, 0);
-        }
-
-        // Write the response.
-        ChannelFuture future = replyChannel.writeAndFlush(response);
-
-        // Close the non-keep-alive connection after the write operation is
-        // done.
-        if (!keepAlive) {
-            future.addListener(ChannelFutureListener.CLOSE);
-        }
-    }
 
 
     /**
@@ -157,24 +132,24 @@ public class Responder {
      * @throws JsonGenerationException Thrown if generating json fails
      * @throws IOException Thrown if writing json onto the output fails
      */
-    public void writeJSON(Object toWrite, HttpResponseStatus status) throws IOException {
+    public void writeObject(Object toWrite, HttpResponseStatus status) throws IOException {
 
         // Build the response object.
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(Names.CONTENT_TYPE, "application/json; charset=UTF-8");
+        response.headers().set(Names.CONTENT_TYPE, format.getContentType());
         OutputStream resultStream = new ByteBufOutputStream(response.content());
 
         // let's hope that the mapper can actually transform our object to
         // something that makes sense
         try {
-            mapper.writeValue(resultStream, toWrite);
+            format.getMapper().writeValue(resultStream, toWrite);
         } catch (JsonGenerationException e) {
-            log.severe("Couldn't generate json from object: " + e.getMessage() + "; " + toWrite.toString());
+            log.severe("Couldn't generate format from object: " + e.getMessage() + "; " + toWrite.toString());
             throw e;
         } catch (JsonMappingException e) {
-            log.severe("Couldn't map object to json: " + e.getMessage() + "; " + toWrite.toString());
+            log.severe("Couldn't map object to format: " + e.getMessage() + "; " + toWrite.toString());
             throw e;
         }
 
@@ -194,45 +169,6 @@ public class Responder {
             future.addListener(ChannelFutureListener.CLOSE);
         }
     }
-
-    /**
-     * Writes a given byte array onto the wire. The given byte array should be a json object,
-     * because this method will write &quot;application/json&quot; as content type into the
-     * response header. If the byte array is null this method will sent an empty response content.
-     * @param byteArray A json object as byte array
-     * @param status HttpResponseStatus
-     * @throws IOException Thrown if writing onto the output fails
-     */
-    public void writeByteArray(byte[] byteArray, HttpResponseStatus status) throws IOException {
-
-        // Build the response object.
-        FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
-
-        response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(Names.CONTENT_TYPE, "application/json; charset=UTF-8");
-
-        if (byteArray != null) {
-            OutputStream resultStream = new ByteBufOutputStream(response.content());
-            resultStream.write(byteArray);
-            resultStream.flush();
-        }
-
-        if (keepAlive) {
-            // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(Names.CONTENT_LENGTH, response.content().readableBytes());
-        }
-
-        // Write the response.
-        ChannelFuture future = replyChannel.writeAndFlush(response);
-
-        // Close the non-keep-alive connection after the write operation is
-        // done.
-        if (!keepAlive) {
-            future.addListener(ChannelFutureListener.CLOSE);
-        }
-    }
-
-
 
     /**
      * Sends an error to the client, the connection will be closed afterwards<br /><br />
@@ -252,9 +188,9 @@ public class Responder {
 	    FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, errorMessage.status);
 
         OutputStream resultStream = new ByteBufOutputStream(response.content());
-        JsonGenerator gen = mapper.getFactory().createGenerator(resultStream);
+        JsonGenerator gen = format.getMapper().getFactory().createGenerator(resultStream);
         gen.writeStartObject();
-        gen.writeStringField("errorid", errorMessage.errorId);
+        gen.writeStringField("errorId", errorMessage.errorId);
         gen.writeStringField("message", errorMessage.message);
         gen.writeStringField("details", details);
         gen.writeEndObject();
@@ -264,12 +200,8 @@ public class Responder {
 
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        // Add header so that clients know how they can authenticate
-        if(errorMessage.status.equals(HttpResponseStatus.UNAUTHORIZED)){
-            response.headers().set("WWW-Authenticate","Basic realm=\"touenplaner\"");
-        }
 
-        response.headers().set(Names.CONTENT_TYPE, "application/json; charset=UTF-8");
+        response.headers().set(Names.CONTENT_TYPE, format.getContentType());
 
         // Write the response.
         ChannelFuture future = replyChannel.writeAndFlush(response);
@@ -309,7 +241,7 @@ public class Responder {
      */
     public String writeAndReturnErrorMessage(ErrorMessage errorMessage, String details) throws IOException {
         this.writeErrorMessage(errorMessage, details);
-        return  "{\"errorid\":\"" + errorMessage.errorId +
+        return  "{\"errorId\":\"" + errorMessage.errorId +
                 "\",\"message\":\"" + errorMessage.message +
                 "\",\"details\":\"" + details + "\"}";
     }
@@ -338,18 +270,15 @@ public class Responder {
      * @throws IOException Thrown if writing json onto the output or onto the returned ByteArrayOutputStream fails
      */
     public void writeComputeResult(ComputeRequest work, HttpResponseStatus status) throws IOException {
-
-        ObjectMapper useMapper = (work.isAcceptsSmile()) ? smileMapper: mapper;
-        
         // Build the response object.
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(Names.CONTENT_TYPE, (work.isAcceptsSmile()) ? "application/x-jackson-smile": "application/json; charset=UTF-8");
+        response.headers().set(Names.CONTENT_TYPE, format.getContentType());
 
         OutputStream resultStream = new ByteBufOutputStream(response.content());
 
-        work.getResultObject().writeToStream(useMapper, resultStream);
+        work.getResultObject().writeToStream(format, resultStream);
         resultStream.flush();
         
         if (keepAlive) {

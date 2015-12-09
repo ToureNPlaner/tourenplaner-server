@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-public class  AlgorithmHandler extends RequestHandler {
+public class AlgorithmHandler extends RequestHandler {
 
     private static Logger log = Logger.getLogger("de.tourenplaner.server");
 
@@ -58,19 +58,20 @@ public class  AlgorithmHandler extends RequestHandler {
     }
 
 
-
     /**
      * Handles an algorithm request.
      *
      * @param request HttpRequest
      * @param algName algorithm name as String
-     * @throws com.fasterxml.jackson.core.JsonParseException Thrown if parsing json content fails
+     * @throws com.fasterxml.jackson.core.JsonParseException      Thrown if parsing json content fails
      * @throws com.fasterxml.jackson.core.JsonProcessingException Thrown if json generation processing fails
-     * @throws IOException Thrown if error message sending or reading json fails
+     * @throws IOException                                        Thrown if error message sending or reading json fails
      */
     public void handleAlg(FullHttpRequest request, String algName) throws IOException {
 
         try {
+            HttpHeaders headers = request.headers();
+            responder.setFormat(Responder.ResultFormat.fromHeaders(headers));
             // denial early so we don't parse if Queue is full
             // we need to check later too because it can get full while parsing
             // but this leads an overloaded server focus on computing
@@ -89,10 +90,8 @@ public class  AlgorithmHandler extends RequestHandler {
                 return;
             }
             // Only now read the request
-	        HttpHeaders headers = request.headers();
-            boolean acceptsSmile = (headers.get("Accept") != null) && headers.get("Accept").contains("application/x-jackson-smile");
             final RequestData requestData = algFac.readRequestData(mapper, responder, request);
-            final ComputeRequest req = new ComputeRequest(responder, requestData ,acceptsSmile);
+            final ComputeRequest req = new ComputeRequest(responder, requestData);
 
 
             if (req != null) {
@@ -104,13 +103,13 @@ public class  AlgorithmHandler extends RequestHandler {
                 }
 
                 if (Level.parse(ConfigManager.getInstance().getEntryString("loglevel", "info").toUpperCase())
-                         .intValue() <= Level.FINE.intValue()) {
+                        .intValue() <= Level.FINE.intValue()) {
                     // time in milliseconds / 1000 = unix time / 86400 = one day
                     long day = (System.currentTimeMillis() / 86400000L);
                     //TODO: (persistent?) random salt to make ip not bruteforceable
                     String anonident = SHA1.SHA1(ip + day + "somesalt");
                     log.fine("\"" + algName + "\" for Client " + anonident + "  " +
-                             request.content().toString(CharsetUtil.UTF_8));
+                            request.content().toString(CharsetUtil.UTF_8));
                 }
 
                 final boolean success = computer.submit(req);
@@ -124,7 +123,7 @@ public class  AlgorithmHandler extends RequestHandler {
         } catch (JsonParseException e) {
             responder.writeErrorMessage(ErrorMessage.EBADJSON, e.getMessage());
         } finally {
-	        request.release();
+            request.release();
         }
 
     }

@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.introspect.AnnotatedMethod;
 /**
  * @author Christoph Haag, Sascha Meusel, Niklas Schnelle, Peter Vollmer
  */
-class JSONLowerCaseStrategy extends PropertyNamingStrategy {
+public class JSONLowerCaseStrategy extends PropertyNamingStrategy {
     @Override
     public String nameForGetterMethod(MapperConfig<?> config, AnnotatedMethod method, String defaultName) {
         return defaultName.toLowerCase();

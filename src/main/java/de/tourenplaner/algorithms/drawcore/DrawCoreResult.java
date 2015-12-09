@@ -4,7 +4,9 @@ import com.carrotsearch.hppc.IntArrayList;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.tourenplaner.algorithms.bbbundle.BBBundleEdge;
-import de.tourenplaner.computecore.StreamJsonWriter;
+import de.tourenplaner.computecore.ComputeRequest;
+import de.tourenplaner.computecore.FormattedStreamWriter;
+import de.tourenplaner.computeserver.Responder;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.io.IOException;
@@ -14,7 +16,7 @@ import java.util.ArrayList;
 /**
  * Created by niklas on 30.03.15.
  */
-public class DrawCoreResult implements StreamJsonWriter {
+public class DrawCoreResult implements FormattedStreamWriter {
 
     private final ArrayList<BBBundleEdge> edges;
     private final int coreSize;
@@ -33,8 +35,8 @@ public class DrawCoreResult implements StreamJsonWriter {
     }
 
     @Override
-    public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
-        JsonGenerator gen = mapper.getFactory().createGenerator(stream);
+    public void writeToStream(Responder.ResultFormat format, OutputStream stream) throws IOException {
+        JsonGenerator gen = format.getMapper().getFactory().createGenerator(stream);
         gen.writeStartObject();
         gen.writeNumberField("nodeCount", coreSize);
         gen.writeNumberField("edgeCount", edges.size());

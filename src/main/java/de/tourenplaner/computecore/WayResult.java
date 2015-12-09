@@ -1,7 +1,7 @@
 package de.tourenplaner.computecore;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import de.tourenplaner.computeserver.Responder;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -13,7 +13,7 @@ import java.util.Map;
  * This class is used to hold classic ToureNPlaner results
  * in a more abstract way.
  */
-public class WayResult implements StreamJsonWriter {
+public class WayResult implements FormattedStreamWriter {
 
 
     private Map<String, Object> misc;
@@ -63,7 +63,7 @@ public class WayResult implements StreamJsonWriter {
      * Writes a json representation of the result to the given
      * stream
      *
-     * @param mapper Jackson ObjectMapper
+     * @param format ResultFormat to use for the response
      * @param stream OutputStream
      * @throws com.fasterxml.jackson.core.JsonGenerationException
      *                             Thrown if generating json fails
@@ -71,12 +71,10 @@ public class WayResult implements StreamJsonWriter {
      *                             Thrown if json generation processing fails
      * @throws java.io.IOException Thrown if writing json onto the stream fails
      */
-    public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
+    public void writeToStream(Responder.ResultFormat format, OutputStream stream) throws IOException {
 
-        JsonGenerator gen = mapper.getFactory().createGenerator(stream);
+        JsonGenerator gen = format.getMapper().getFactory().createGenerator(stream);
         Map<String, Object> pconsts;
-
-        gen.setCodec(mapper);
         gen.writeStartObject();
         gen.writeObjectField("constraints", this.constraints);
 

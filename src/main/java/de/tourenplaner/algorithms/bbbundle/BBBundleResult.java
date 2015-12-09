@@ -2,8 +2,8 @@ package de.tourenplaner.algorithms.bbbundle;
 
 import com.carrotsearch.hppc.IntArrayList;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import de.tourenplaner.computecore.StreamJsonWriter;
+import de.tourenplaner.computecore.FormattedStreamWriter;
+import de.tourenplaner.computeserver.Responder;
 import de.tourenplaner.graphrep.GraphRep;
 
 import java.io.IOException;
@@ -14,7 +14,7 @@ import java.util.ArrayList;
  * This class is used to store and send back
  * subgraphs for client side computation
  */
-public final class BBBundleResult implements StreamJsonWriter {
+public final class BBBundleResult implements FormattedStreamWriter {
 
     //private final GraphRep graph;
     private final IntArrayList edgesToDraw;
@@ -38,8 +38,8 @@ public final class BBBundleResult implements StreamJsonWriter {
     }
 
     @Override
-    public void writeToStream(ObjectMapper mapper, OutputStream stream) throws IOException {
-        JsonGenerator gen = mapper.getFactory().createGenerator(stream);
+    public void writeToStream(Responder.ResultFormat format, OutputStream stream) throws IOException {
+        JsonGenerator gen = format.getMapper().getFactory().createGenerator(stream);
         gen.writeStartObject();
         // Head
         gen.writeObjectFieldStart("head");
