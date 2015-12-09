@@ -34,6 +34,6 @@ public interface Algorithm {
      * @throws Exception Exceptions which occurred because of server problems
      *      or faulty algorithm code
 	 */
-    void compute(ComputeRequest req) throws ComputeException, Exception;
+    void compute(ComputeRequest req) throws ComputeException;
 
 }

@@ -79,7 +79,7 @@ public class TravelingSalesman extends GraphAlgorithm {
     }
 
     @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
+    public void compute(ComputeRequest request) throws ComputeException {
         ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         // Map points to ids
         RequestPoints points = req.getPoints();

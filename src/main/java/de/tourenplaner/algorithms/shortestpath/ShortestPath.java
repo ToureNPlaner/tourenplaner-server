@@ -73,7 +73,7 @@ public abstract class ShortestPath extends GraphAlgorithm {
     public abstract int shortestPath(RequestPoints points, List<Way> resultWays, boolean tour) throws ComputeException, IllegalAccessException;
 
     @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
+    public void compute(ComputeRequest request) throws ComputeException {
         assert request != null : "We ended up without a request object in run";
         ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         RequestPoints points = req.getPoints();

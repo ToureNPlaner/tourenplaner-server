@@ -25,7 +25,6 @@ import de.tourenplaner.graphrep.GraphRep;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -58,7 +57,7 @@ public class ConstrainedSP extends GraphAlgorithm {
 
     private Map<String, Object> misc;
     @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
+    public void compute(ComputeRequest request) throws ComputeException {
         misc.clear();
         ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         assert req != null : "We ended up without a request object in run";
@@ -111,13 +110,11 @@ public class ConstrainedSP extends GraphAlgorithm {
         int destlat, destlon;
         int srcId, trgtId;
 
-        try {
-            heap = ds.borrowHeap();
-            dists = ds.borrowDistArray();
-            prevEdges = ds.borrowPrevArray();
-        } catch (IllegalAccessException e) {
-            log.log(Level.SEVERE,"Illegal Access", e);
-        }
+
+        heap = ds.borrowHeap();
+        dists = ds.borrowDistArray();
+        prevEdges = ds.borrowPrevArray();
+
 
         double threshold = 1.0 / (double) ((long)graph.getNodeCount() * (long)graph.getNodeCount() * (long)maxAltitudeDifference * (long) maxAltitudeDifference);
 

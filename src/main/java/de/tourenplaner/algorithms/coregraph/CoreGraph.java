@@ -21,7 +21,7 @@ public class CoreGraph extends GraphAlgorithm {
 	}
 
 	@Override
-	public void compute(ComputeRequest request) throws ComputeException, Exception {
+	public void compute(ComputeRequest request) throws ComputeException {
 		CoreGraphRequest req = (CoreGraphRequest) request.getRequestData();
 
 

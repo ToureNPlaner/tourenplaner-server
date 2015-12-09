@@ -102,7 +102,7 @@ public class WayByNodeIds extends GraphAlgorithm {
     }
 
     @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
+    public void compute(ComputeRequest request) throws ComputeException {
         assert request != null;
         log.finer("WayByNodeIds called");
         NodeIdsRequestData req = (NodeIdsRequestData) request.getRequestData();

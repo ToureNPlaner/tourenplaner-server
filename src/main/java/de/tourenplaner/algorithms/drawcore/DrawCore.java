@@ -25,7 +25,7 @@ public class DrawCore extends GraphAlgorithm {
     }
 
     @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
+    public void compute(ComputeRequest request) throws ComputeException {
         DrawCoreRequestData req = (DrawCoreRequestData) request.getRequestData();
 
         ArrayList<BBBundleEdge> edges =  new ArrayList<>();

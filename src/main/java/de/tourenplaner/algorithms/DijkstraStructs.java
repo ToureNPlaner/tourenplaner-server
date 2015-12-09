@@ -20,6 +20,7 @@ import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
 
 import java.util.Arrays;
+import java.util.ConcurrentModificationException;
 
 /**
  * This class is used to share data structures used by several Dijkstra
@@ -82,9 +83,9 @@ public class DijkstraStructs {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public int[] borrowDistArray() throws IllegalAccessException {
+	public int[] borrowDistArray() {
 		if (distsBorrowed)
-			throw new IllegalAccessException("Dist Array borrowed again");
+			throw new ConcurrentModificationException("Dist Array borrowed again");
 		distsBorrowed = true;
 		return dists;
 	}
@@ -111,9 +112,9 @@ public class DijkstraStructs {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public Heap borrowHeap() throws IllegalAccessException {
+	public Heap borrowHeap() {
 		if (heapBorrowed)
-			throw new IllegalAccessException("Heap borrowed again");
+			throw new ConcurrentModificationException("Heap borrowed again");
 		heapBorrowed = true;
 		return heap;
 	}
@@ -136,9 +137,9 @@ public class DijkstraStructs {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public int[] borrowPrevArray() throws IllegalAccessException {
+	public int[] borrowPrevArray() {
 		if (prevsBorrowed)
-			throw new IllegalAccessException("PrevArray borrowed again");
+			throw new ConcurrentModificationException("PrevArray borrowed again");
 		prevsBorrowed = true;
 		return prevEdges;
 	}
@@ -159,9 +160,9 @@ public class DijkstraStructs {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public BitSet borrowMarkedSet() throws IllegalAccessException {
+	public BitSet borrowMarkedSet() {
 		if (markedBorrowed)
-			throw new IllegalAccessException("MarkedSet borrowed again");
+			throw new ConcurrentModificationException("MarkedSet borrowed again");
 		markedBorrowed = true;
 		return marked;
 	}
@@ -184,9 +185,9 @@ public class DijkstraStructs {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public BitSet borrowVisitedSet() throws IllegalAccessException {
+	public BitSet borrowVisitedSet() {
 		if (visitedBorrowed)
-			throw new IllegalAccessException("VisitedSet borrowed again");
+			throw new ConcurrentModificationException("VisitedSet borrowed again");
 		visitedBorrowed = true;
 		return visited;
 	}
@@ -208,9 +209,9 @@ public class DijkstraStructs {
 	 * @return
 	 * @throws IllegalAccessException
 	 */
-	public IntArrayDeque borrowDeque() throws IllegalAccessException {
+	public IntArrayDeque borrowDeque() {
 		if (dequeBorrowed)
-			throw new IllegalAccessException("Deque borrowed again");
+			throw new ConcurrentModificationException("Deque borrowed again");
 		dequeBorrowed = true;
 		return deque;
 	}

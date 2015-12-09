@@ -40,7 +40,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
      * @param targetId
      * @throws IllegalAccessException
      */
-    protected final void bfsMarkUp(IntArrayList cgraph, int targetId, int maxSearchLevel) throws IllegalAccessException {
+    protected final void bfsMarkUp(IntArrayList cgraph, int targetId, int maxSearchLevel)  {
         int edgeId;
         int currNode;
         int targetNode;
@@ -89,7 +89,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
      * @param targetId
      * @throws IllegalAccessException
      */
-    protected final void bfsMarkDown(IntArrayList cgraph, int targetId, int maxSearchLevel) throws IllegalAccessException {
+    protected final void bfsMarkDown(IntArrayList cgraph, int targetId, int maxSearchLevel)  {
         int edgeId;
         int currNode;
         int sourceNode;
@@ -133,7 +133,7 @@ public class UpDownGraphPacket extends GraphAlgorithm {
 
 
     @Override
-    public void compute(ComputeRequest request) throws ComputeException, Exception {
+    public void compute(ComputeRequest request) throws ComputeException {
         ClassicRequestData req = (ClassicRequestData) request.getRequestData();
         RequestPoints points  = req.getPoints();
         if (points.size() != 2)
