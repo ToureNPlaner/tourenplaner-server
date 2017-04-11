@@ -10,10 +10,10 @@
 	<name>tourenplaner-server</name>
 	<url>http://tourenplaner.github.com</url>
 
-	<repositories>  
-		<repository>            
-			<id>dropbox</id>                        
-			<url>https://dl.dropboxusercontent.com/u/30343875/mvntest/</url>                        
+	<repositories>
+		<repository>
+			<id>frickel.club</id>
+			<url>https://niklas.frickel.club/mvntest/</url>
 		</repository>           
 	</repositories>     
 
