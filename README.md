@@ -19,3 +19,14 @@ Alternatively just use the default file by downloading the Saarland graph:
 Finally run:
 
 `java -Xmx10g -jar target/tourenplaner-server-1.0-SNAPSHOT-jar-with-dependencies.jar -c tourenplaner.conf`
+
+# Updating
+
+View Dependencies with newer versions:
+`mvn versions:display-dependency-updates`
+
+Update to newer Dependencies:
+`mvn versions:use-latest-versions`
+
+View Plugins with Updates available:
+`mvn versions:display-plugin-updates`
