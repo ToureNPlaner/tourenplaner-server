@@ -107,6 +107,10 @@ public class MasterHandler  extends ChannelInboundHandlerAdapter {
         } else {
             // Unknown request, close connection
             log.warning("An unknown URL was requested: " + path);
+            //TODO setFormat is called by infoHandler.handleInfo(request) and algHandler.handleAlg(request, algName)
+            // in the cases above and is needed for responder methods: so to avoid NullPointerExceptions, maybe
+            // find a way to ensure format of responder is set before the message methods of responder are called.
+            responder.setFormat(Responder.ResultFormat.fromHeaders(request.headers()));
             responder.writeErrorMessage(ErrorMessage.EUNKNOWNURL, "unknown URL: " + path);
             request.release();
         }
