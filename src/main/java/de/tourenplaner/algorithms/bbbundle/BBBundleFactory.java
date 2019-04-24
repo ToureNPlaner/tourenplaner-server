@@ -16,6 +16,7 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -133,7 +134,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
         final ByteBuf content = request.content();
         if (content.readableBytes() > 0) {
 
-            final JsonParser jp = mapper.getFactory().createParser(new ByteBufInputStream(content));
+            final JsonParser jp = mapper.getFactory().createParser((InputStream) new ByteBufInputStream(content));
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {

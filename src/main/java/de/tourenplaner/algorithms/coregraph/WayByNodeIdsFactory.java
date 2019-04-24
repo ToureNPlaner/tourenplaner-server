@@ -17,6 +17,7 @@ import io.netty.buffer.ByteBufInputStream;
 import io.netty.handler.codec.http.FullHttpRequest;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,7 +97,7 @@ public class WayByNodeIdsFactory extends SharingAlgorithmFactory {
         IntArrayList nodeIds = null;
         if (content.readableBytes() > 0) {
             nodeIds = new IntArrayList();
-            final JsonParser jp = mapper.getFactory().createParser(new ByteBufInputStream(content));
+            final JsonParser jp = mapper.getFactory().createParser((InputStream) new ByteBufInputStream(content));
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {
