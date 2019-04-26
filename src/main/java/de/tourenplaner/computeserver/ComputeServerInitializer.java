@@ -25,10 +25,11 @@ import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
 import io.netty.handler.codec.http.cors.CorsConfig;
+import io.netty.handler.codec.http.cors.CorsConfigBuilder;
 import io.netty.handler.codec.http.cors.CorsHandler;
 
 import io.netty.handler.stream.ChunkedWriteHandler;
-import io.netty.handler.codec.http.HttpHeaders.Names;
+import io.netty.handler.codec.http.HttpHeaderNames;
 
 
 import java.util.Map;
@@ -51,12 +52,12 @@ public class ComputeServerInitializer extends ChannelInitializer<SocketChannel> 
 
 	@Override
 	public void initChannel(SocketChannel ch) {
-		CorsConfig corsConfig = CorsConfig
-				.withAnyOrigin()
+		CorsConfig corsConfig = CorsConfigBuilder
+				.forAnyOrigin()
 				.allowNullOrigin()
 				.allowedRequestMethods(HttpMethod.GET, HttpMethod.POST, HttpMethod.OPTIONS)
 				.allowedRequestHeaders("Content-Type")
-				.preflightResponseHeader(Names.CONTENT_TYPE, "application/json")
+				.preflightResponseHeader(HttpHeaderNames.CONTENT_TYPE, "application/json")
 				.build();
 		ChannelPipeline pipeline = ch.pipeline();
 		pipeline.addLast("encoder", new HttpResponseEncoder());

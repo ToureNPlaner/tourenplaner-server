@@ -138,7 +138,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {
-                throw new JsonParseException("Request contains no json object", jp.getCurrentLocation());
+                throw new JsonParseException(jp, "Request contains no json object", jp.getCurrentLocation());
             }
 
             String fieldname;
@@ -164,7 +164,7 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                     if ("bbox".equals(fieldname)) {
                         // Should be on START_ARRAY
                         if (token != JsonToken.START_OBJECT) {
-                            throw new JsonParseException("bbox is no object", jp.getCurrentLocation());
+                            throw new JsonParseException(jp, "bbox is no object", jp.getCurrentLocation());
                         }
 
                         while (jp.nextToken() != JsonToken.END_OBJECT) {
@@ -214,9 +214,9 @@ public class BBBundleFactory  extends GraphAlgorithmFactory {
                     finished = true;
                 } else if (token == null) {
                     //EOF
-                    throw new JsonParseException("Unexpected EOF in Request", jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected EOF in Request", jp.getCurrentLocation());
                 } else {
-                    throw new JsonParseException("Unexpected token " + token, jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected token " + token, jp.getCurrentLocation());
                 }
             }
 

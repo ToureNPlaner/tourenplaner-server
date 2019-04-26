@@ -51,7 +51,7 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {
-                throw new JsonParseException("Request contains no json object", jp.getCurrentLocation());
+                throw new JsonParseException(jp, "Request contains no json object", jp.getCurrentLocation());
             }
 
             String fieldname;
@@ -69,7 +69,7 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
                     if ("nodeCount".equals(fieldname)) {
 
                         if (token != JsonToken.VALUE_NUMBER_INT) {
-                            throw new JsonParseException("nodeCount is not an int", jp.getCurrentLocation());
+                            throw new JsonParseException(jp, "nodeCount is not an int", jp.getCurrentLocation());
                         }
                         nodeCount = jp.getIntValue();
                     } else if ("mode".equals(fieldname)) {
@@ -98,9 +98,9 @@ public class DrawCoreFactory extends GraphAlgorithmFactory {
                     finished = true;
                 } else if (token == null) {
                     //EOF
-                    throw new JsonParseException("Unexpected EOF in Request", jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected EOF in Request", jp.getCurrentLocation());
                 } else {
-                    throw new JsonParseException("Unexpected token " + token, jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected token " + token, jp.getCurrentLocation());
                 }
 
             }

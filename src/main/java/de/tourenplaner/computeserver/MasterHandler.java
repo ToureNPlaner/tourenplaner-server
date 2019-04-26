@@ -77,7 +77,7 @@ public class MasterHandler  extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 
         final FullHttpRequest request = (FullHttpRequest) msg;
-	    if (HttpHeaders.is100ContinueExpected(request)) {
+	    if (HttpUtil.is100ContinueExpected(request)) {
 		    ctx.write(new DefaultFullHttpResponse(HTTP_1_1, HttpResponseStatus.CONTINUE));
 		    request.release();
 		    return;
@@ -86,14 +86,14 @@ public class MasterHandler  extends ChannelInboundHandlerAdapter {
         final Channel channel = ctx.channel();
 
         // Get the Requeststring e.g. /info
-        final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.getUri());
+        final QueryStringDecoder queryStringDecoder = new QueryStringDecoder(request.uri());
 
 	    final String path = queryStringDecoder.path();
 
         log.finer("Request for: " + path);
         log.finer("Request: " + request.content().toString(CharsetUtil.UTF_8));
 
-        responder.setKeepAlive(HttpHeaders.isKeepAlive(request));
+        responder.setKeepAlive(HttpUtil.isKeepAlive(request));
 
         if ("/info".equals(path)) {
 

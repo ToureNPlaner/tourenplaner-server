@@ -30,7 +30,7 @@ import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpHeaders.Names;
+import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
 import java.io.IOException;
@@ -138,7 +138,7 @@ public class Responder {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(Names.CONTENT_TYPE, format.getContentType());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, format.getContentType());
         OutputStream resultStream = new ByteBufOutputStream(response.content());
 
         // let's hope that the mapper can actually transform our object to
@@ -157,7 +157,7 @@ public class Responder {
 
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(Names.CONTENT_LENGTH, response.content().readableBytes());
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         }
 
         // Write the response.
@@ -201,7 +201,7 @@ public class Responder {
 
         response.headers().set("Access-Control-Allow-Origin", "*");
 
-        response.headers().set(Names.CONTENT_TYPE, format.getContentType());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, format.getContentType());
 
         // Write the response.
         ChannelFuture future = replyChannel.writeAndFlush(response);
@@ -274,7 +274,7 @@ public class Responder {
         FullHttpResponse response = new DefaultFullHttpResponse(HTTP_1_1, status);
 
         response.headers().set("Access-Control-Allow-Origin", "*");
-        response.headers().set(Names.CONTENT_TYPE, format.getContentType());
+        response.headers().set(HttpHeaderNames.CONTENT_TYPE, format.getContentType());
 
         OutputStream resultStream = new ByteBufOutputStream(response.content());
 
@@ -283,7 +283,7 @@ public class Responder {
         
         if (keepAlive) {
             // Add 'Content-Length' header only for a keep-alive connection.
-            response.headers().set(Names.CONTENT_LENGTH, response.content().readableBytes());
+            response.headers().set(HttpHeaderNames.CONTENT_LENGTH, response.content().readableBytes());
         }
 
         // Write the response.

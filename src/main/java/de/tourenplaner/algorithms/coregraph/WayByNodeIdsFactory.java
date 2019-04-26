@@ -101,7 +101,7 @@ public class WayByNodeIdsFactory extends SharingAlgorithmFactory {
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {
-                throw new JsonParseException("Request contains no json object", jp.getCurrentLocation());
+                throw new JsonParseException(jp, "Request contains no json object", jp.getCurrentLocation());
             }
 
             String fieldname;
@@ -118,7 +118,7 @@ public class WayByNodeIdsFactory extends SharingAlgorithmFactory {
                     if ("nodes".equals(fieldname)) {
                         // Should be on START_ARRAY
                         if (token != JsonToken.START_ARRAY) {
-                            throw new JsonParseException("nodes is no array", jp.getCurrentLocation());
+                            throw new JsonParseException(jp, "nodes is no array", jp.getCurrentLocation());
                         }
                         // Read array elements
                         while (jp.nextToken() != JsonToken.END_ARRAY) {
@@ -136,9 +136,9 @@ public class WayByNodeIdsFactory extends SharingAlgorithmFactory {
                     finished = true;
                 } else if (token == null) {
                     //EOF
-                    throw new JsonParseException("Unexpected EOF in Request", jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected EOF in Request", jp.getCurrentLocation());
                 } else {
-                    throw new JsonParseException("Unexpected token " + token, jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected token " + token, jp.getCurrentLocation());
                 }
 
             }

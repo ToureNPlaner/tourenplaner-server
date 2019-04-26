@@ -74,7 +74,7 @@ public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
             jp.setCodec(mapper);
 
             if (jp.nextToken() != JsonToken.START_OBJECT) {
-                throw new JsonParseException("Request contains no json object", jp.getCurrentLocation());
+                throw new JsonParseException(jp, "Request contains no json object", jp.getCurrentLocation());
             }
 
             String fieldname;
@@ -92,7 +92,7 @@ public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
                     if ("points".equals(fieldname)) {
                         // Should be on START_ARRAY
                         if (token != JsonToken.START_ARRAY) {
-                            throw new JsonParseException("points is no array", jp.getCurrentLocation());
+                            throw new JsonParseException(jp, "points is no array", jp.getCurrentLocation());
                         }
                         // Read array elements
                         while (jp.nextToken() != JsonToken.END_ARRAY) {
@@ -115,7 +115,7 @@ public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
                     } else if ("constraints".equals(fieldname)) {
                         // Should be on START_OBJECT
                         if (token != JsonToken.START_OBJECT) {
-                            throw new JsonParseException("constraints is not an object", jp.getCurrentLocation());
+                            throw new JsonParseException(jp, "constraints is not an object", jp.getCurrentLocation());
                         }
                         constraints = jp.readValueAs(JSONOBJECT);
                     } else {
@@ -129,9 +129,9 @@ public abstract class GraphAlgorithmFactory extends AlgorithmFactory {
                     finished = true;
                 } else if (token == null) {
                     //EOF
-                    throw new JsonParseException("Unexpected EOF in Request", jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected EOF in Request", jp.getCurrentLocation());
                 } else {
-                    throw new JsonParseException("Unexpected token " + token, jp.getCurrentLocation());
+                    throw new JsonParseException(jp, "Unexpected token " + token, jp.getCurrentLocation());
                 }
 
             }

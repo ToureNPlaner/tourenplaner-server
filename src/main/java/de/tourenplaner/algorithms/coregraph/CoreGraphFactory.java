@@ -45,7 +45,7 @@ public class CoreGraphFactory extends GraphAlgorithmFactory {
 			jp.setCodec(mapper);
 
 			if (jp.nextToken() != JsonToken.START_OBJECT) {
-				throw new JsonParseException("Request contains no json object", jp.getCurrentLocation());
+				throw new JsonParseException(jp, "Request contains no json object", jp.getCurrentLocation());
 			}
 
 			String fieldname;
@@ -62,7 +62,7 @@ public class CoreGraphFactory extends GraphAlgorithmFactory {
 					if ("constraints".equals(fieldname)) {
 						// Should be on START_OBJECT
 						if (token != JsonToken.START_OBJECT) {
-							throw new JsonParseException("constraints is not an object", jp.getCurrentLocation());
+							throw new JsonParseException(jp, "constraints is not an object", jp.getCurrentLocation());
 						}
 						constraints = jp.readValueAs(JSONOBJECT);
 					} else {
@@ -76,9 +76,9 @@ public class CoreGraphFactory extends GraphAlgorithmFactory {
 					finished = true;
 				} else if (token == null) {
 					//EOF
-					throw new JsonParseException("Unexpected EOF in Request", jp.getCurrentLocation());
+					throw new JsonParseException(jp, "Unexpected EOF in Request", jp.getCurrentLocation());
 				} else {
-					throw new JsonParseException("Unexpected token " + token, jp.getCurrentLocation());
+					throw new JsonParseException(jp, "Unexpected token " + token, jp.getCurrentLocation());
 				}
 
 			}
