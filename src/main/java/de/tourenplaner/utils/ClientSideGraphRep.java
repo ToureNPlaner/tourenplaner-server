@@ -1,7 +1,7 @@
 package de.tourenplaner.utils;
 
 import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntObjectOpenHashMap;
+import com.carrotsearch.hppc.IntObjectHashMap;
 import com.carrotsearch.hppc.cursors.IntObjectCursor;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,10 +22,10 @@ public class ClientSideGraphRep {
         public IntArrayList dists;
     }
 
-    private IntObjectOpenHashMap<OutEdges> graph;
+    private IntObjectHashMap<OutEdges> graph;
 
     public ClientSideGraphRep(){
-        graph = new IntObjectOpenHashMap<OutEdges>();
+        graph = new IntObjectHashMap<OutEdges>();
     }
 
     public int getEdgeCount(){

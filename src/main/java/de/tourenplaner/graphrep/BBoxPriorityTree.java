@@ -5,7 +5,7 @@
 package de.tourenplaner.graphrep;
 
 import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.IntOpenHashSet;
+import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.IntSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import de.tourenplaner.algorithms.bbbundle.BoundingBox;
@@ -68,7 +68,7 @@ public final class BBoxPriorityTree implements NNSearcher {
                 //System.out.print(".");
             } else // new x-coordinate
             {
-                IntSet tmpSet = new IntOpenHashSet();
+                IntSet tmpSet = new IntHashSet();
                 tmpSet.add(i);
                 unixKeys.put(xKeys[i], tmpSet);
             }

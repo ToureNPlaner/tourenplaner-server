@@ -84,7 +84,16 @@ public class Heap {
 	public Heap(int initialCapacity, ArraySizingStrategy resizer) {
 		assert resizer != null;
 		this.resizer = resizer;
-		heaparr = new int[resizer.round(2*initialCapacity)];
+		// previously: "heaparr = new int[resizer.round(2*initialCapacity)];", but .round(..) exists no more,
+		// and BoundedProportionalArraySizingStrategy.round(..) did throw an exception if arg < 0, else did return arg
+		/* Description of round(..) from http://labs.carrotsearch.com/download/hppc/0.4.1/api/com/carrotsearch/hppc/ArraySizingStrategy.html#round(int)
+		 * Array sizing strategies may require that the initial size fulfills
+		 * certain constraints (is a prime or a power of two, for example). This
+		 * method must return the first size that fulfills these conditions
+		 * and is greater or equal to <code>expectedElements</code>.
+		 */
+		// TODO throw exception if initialCapacity < 0?
+		heaparr = (initialCapacity < 0) ? new int[0] : new int[2*initialCapacity];
 		heapentries = 0;
 	}
 

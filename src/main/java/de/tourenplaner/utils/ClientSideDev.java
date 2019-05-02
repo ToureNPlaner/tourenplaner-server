@@ -2,8 +2,8 @@ package de.tourenplaner.utils;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
-import com.carrotsearch.hppc.IntIntOpenHashMap;
-import com.carrotsearch.hppc.IntOpenHashSet;
+import com.carrotsearch.hppc.IntIntHashMap;
+import com.carrotsearch.hppc.IntHashSet;
 import com.carrotsearch.hppc.cursors.IntCursor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.smile.SmileFactory;
@@ -21,7 +21,7 @@ import java.io.FileOutputStream;
  */
 public class ClientSideDev {
 
-    protected static boolean ClientSideDijkstra(ClientSideGraphRep graph,IntIntOpenHashMap dists, IntIntOpenHashMap prevEdges, int srcId, int trgtId){
+    protected static boolean ClientSideDijkstra(ClientSideGraphRep graph,IntIntHashMap dists, IntIntHashMap prevEdges, int srcId, int trgtId){
 
         dists.put(srcId, 0);
         Heap heap = new Heap();
@@ -74,7 +74,7 @@ public class ClientSideDev {
         }
 
         protected final ClientSideGraphRep generateSubGraph(int srcId, int targetId) throws IllegalAccessException{
-            IntOpenHashSet edgeIds = new IntOpenHashSet();
+            IntHashSet edgeIds = new IntHashSet();
             ClientSideGraphRep result = new ClientSideGraphRep();
             this.bfsMarkUp(edgeIds, srcId);
             this.bfsMarkDown(edgeIds, targetId);
@@ -93,7 +93,7 @@ public class ClientSideDev {
          * @param targetId
          * @throws IllegalAccessException
          */
-        protected final void bfsMarkDown(IntOpenHashSet markedEdges, int targetId) throws IllegalAccessException {
+        protected final void bfsMarkDown(IntHashSet markedEdges, int targetId) throws IllegalAccessException {
             int edgeId;
             int currNode;
             int sourceNode;
@@ -140,7 +140,7 @@ public class ClientSideDev {
          * @param targetId
          * @throws IllegalAccessException
          */
-        protected final void bfsMarkUp(IntOpenHashSet markedEdges, int targetId) throws IllegalAccessException {
+        protected final void bfsMarkUp(IntHashSet markedEdges, int targetId) throws IllegalAccessException {
             int edgeId;
             int currNode;
             int targetNode;
@@ -195,8 +195,8 @@ public class ClientSideDev {
             GraphPacketBuilder pbuilder = new GraphPacketBuilder(graph);
             System.out.println("Build a hash map based client graph");
             ClientSideGraphRep cg = pbuilder.generateSubGraph(stgtId, hambId);
-            IntIntOpenHashMap dists = new IntIntOpenHashMap();
-            IntIntOpenHashMap prevEdges = new IntIntOpenHashMap();
+            IntIntHashMap dists = new IntIntHashMap();
+            IntIntHashMap prevEdges = new IntIntHashMap();
 
             boolean found = ClientSideDijkstra(cg, dists, prevEdges, stgtId, hambId);
             if (found){

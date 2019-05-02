@@ -18,7 +18,7 @@ package de.tourenplaner.algorithms.npcomplete;
 
 import com.carrotsearch.hppc.BitSet;
 import com.carrotsearch.hppc.IntArrayDeque;
-import com.carrotsearch.hppc.IntOpenHashSet;
+import com.carrotsearch.hppc.IntHashSet;
 import de.tourenplaner.algorithms.ClassicRequestData;
 import de.tourenplaner.algorithms.ComputeException;
 import de.tourenplaner.algorithms.DijkstraStructs;
@@ -211,7 +211,7 @@ public class TravelingSalesman extends GraphAlgorithm {
      */
     private final int[] nnHeuristic(int[][] distmat) {
         int[] tour = new int[distmat.length];
-        IntOpenHashSet visited = new IntOpenHashSet(tour.length);
+        IntHashSet visited = new IntHashSet(tour.length);
         int currIndex = 0;
         int minValue;
         int minIndex;

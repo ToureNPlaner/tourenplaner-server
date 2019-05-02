@@ -17,7 +17,7 @@
 package de.tourenplaner.graphrep;
 
 import com.carrotsearch.hppc.IntArrayList;
-import com.carrotsearch.hppc.LongObjectOpenHashMap;
+import com.carrotsearch.hppc.LongObjectHashMap;
 import com.carrotsearch.hppc.cursors.LongCursor;
 
 /**
@@ -31,14 +31,14 @@ public class HashNN implements NNSearcher {
 	private static final long serialVersionUID = 1L;
 
 	GraphRep graphRep;
-	LongObjectOpenHashMap<Object> hashMap;
+	LongObjectHashMap<Object> hashMap;
 	NNSearcher dumpNN;
 	private static final int maxHopLimit = 10;
 
 	public HashNN(GraphRep graphRep) {
 		this.graphRep = graphRep;
 		dumpNN = new DumbNN(graphRep);
-		hashMap = new LongObjectOpenHashMap<Object>();
+		hashMap = new LongObjectHashMap<Object>();
 		for (int i = 0; i < graphRep.getNodeCount(); i++) {
 			long tempLat = graphRep.getLat(i) / 1000;
 			long tempLon = graphRep.getLon(i) / 1000;
